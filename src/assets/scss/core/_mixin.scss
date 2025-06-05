@@ -1,0 +1,38 @@
+// Flex Center
+@mixin flex-center {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+// Absolute Center (부모 relative 필수)
+@mixin absolute-center {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+// Size 지정
+@mixin size($width, $height: $width) {
+	width: $width;
+	height: $height;
+}
+
+// 텍스트 한 줄 말줄임 처리
+@mixin ellipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// 버튼 스타일
+@mixin button($bg, $color: #fff) {
+	background-color: $bg;
+	color: $color;
+	padding: 1rem 2rem;
+	border-radius: 0.6rem;
+	border: none;
+	cursor: pointer;
+	font-weight: 500;
+}
