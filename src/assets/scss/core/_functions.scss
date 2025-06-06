@@ -10,11 +10,3 @@
 	}
 	@return math.div($partial, $total) * 100%;
 }
-
-@function darken-color($color, $amount: 10%) {
-	@return color.adjust($color, $lightness: -$amount);
-}
-
-@function lighten-color($color, $amount: 10%) {
-	@return color.adjust($color, $lightness: $amount);
-}

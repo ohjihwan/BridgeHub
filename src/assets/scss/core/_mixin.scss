@@ -30,8 +30,8 @@
 @mixin button($bg, $color: #fff) {
 	background-color: $bg;
 	color: $color;
-	padding: 1rem 2rem;
-	border-radius: 0.6rem;
+	padding: rem(10) rem(20);
+	border-radius: rem(6);
 	border: none;
 	cursor: pointer;
 	font-weight: 500;

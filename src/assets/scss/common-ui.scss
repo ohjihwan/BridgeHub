@@ -1,31 +1,35 @@
 /*  
-| 기능      | 핵심 예시                     |
+| 기능	  | 핵심 예시					 |
 | -------   | ------------------------- |
-| 변수      | `$color-main`, `$spacing` |
-| 중첩      | `.nav ul li a {}`         |
-| 믹스인     | `@mixin`, `@include`      |
-| 상속      | `%base-style`, `@extend`  |
-| 조건 / 반복 | `@if`, `@for`, `@each`    |
-| 분할관리    | `_mixin.scss`, `@import`  |
-| 함수      | `@function pxToRem()`     |
-| 데이터구조   | `$map`, `$list` 활용        |
+| 변수	  | `$color-main`, `$spacing` |
+| 중첩	  | `.nav ul li a {}`		 |
+| 믹스인	 | `@mixin`, `@include`	  |
+| 상속	  | `%base-style`, `@extend`  |
+| 조건 / 반복 | `@if`, `@for`, `@each`	|
+| 분할관리	| `_mixin.scss`, `@import`  |
+| 함수	  | `@function pxToRem()`	 |
+| 데이터구조   | `$map`, `$list` 활용		|
 */
-@forward 'core/_variables';
-@forward 'core/_mixin';
-@forward 'core/_functions';
-@forward 'core/_reset';
+@use 'sass:color';
+@forward 'sass:color';
+@forward 'core/functions';
+@forward 'core/variables';
+@forward 'core/mixin';
+@forward 'core/reset';
+
+@use 'core/functions' as *;
 
 body {
-    font-size:1.5rem;
-    line-height:1.5;
-    font-family:'Pretendard-Regular';
-    letter-spacing:-0.025em;
-    overflow-wrap:break-word;
-    -webkit-text-size-adjust:none;
-    background-color:var(--bg-root);
-    color:var(--font1);
+	font-size:rem(15);
+	line-height:1.5;
+	font-family:'Pretendard-Regular';
+	letter-spacing:-0.025em;
+	overflow-wrap:break-word;
+	-webkit-text-size-adjust:none;
+	background-color:var(--bg-root);
+	color:var(--font1);
 
-    &.lock {
+	&.lock {
 		overflow: hidden;
 	}
 }
@@ -45,5 +49,5 @@ body {
 
 legend,
 .hide {
-    @extend %visually-hidden;
+	@extend %visually-hidden;
 }
