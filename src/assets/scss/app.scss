@@ -1,0 +1,13 @@
+@use 'core/functions' as *;
+@use 'core/mixin' as *;
+
+.intro-area {
+    @include flex-center;
+    width:100vw;
+    height:100vh;
+}
+.big-logo {
+    width:rem(250);
+    height:rem(200);
+    background:url(../imgs/ico/big-logo.svg) no-repeat center center / contain;
+}

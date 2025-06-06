@@ -15,8 +15,6 @@
 @forward 'core/_functions';
 @forward 'core/_reset';
 
-@use 'core/functions' as *;
-
 body {
     font-size:1.5rem;
     line-height:1.5;
@@ -48,17 +46,4 @@ body {
 legend,
 .hide {
     @extend %visually-hidden;
-}
-
-.intro-area {
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    width:100vw;
-    height:100vh;
-    background-color:green;
-
-}
-.test {
-    font-size:rem(50);
 }
