@@ -5,7 +5,7 @@ import Auth from '@components/Auth'
 import Main from '@components/Main'
 
 function App() {
-	const [showIntro, setShowIntro] = useState(false);
+	const [showIntro, setShowIntro] = useState(true);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
