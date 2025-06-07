@@ -32,7 +32,7 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
 const verificationCodes = new Map();
 
 // 이메일 인증 코드 전송 엔드포인트
-app.post('/api/send-verification', async (req, res) => {
+app.post('/send-verification', async (req, res) => {
   try {
     const { email } = req.body;
     
@@ -47,7 +47,11 @@ app.post('/api/send-verification', async (req, res) => {
 
     // 이메일 전송
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: {
+        name: 'BridgeHub',
+        address: 'noreply@bridgehub.com'
+      },
+      replyTo: 'noreply@bridgehub.com',
       to: email,
       subject: 'BridgeHub 이메일 인증',
       html: `
@@ -59,6 +63,10 @@ app.post('/api/send-verification', async (req, res) => {
           </p>
           <p>이 인증 코드는 3분 동안 유효합니다.</p>
           <p>감사합니다.</p>
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+          <p style="color: #666; font-size: 12px;">
+            이 이메일은 BridgeHub에서 발송되었습니다.<br>
+          </p>
         </div>
       `
     });
@@ -71,7 +79,7 @@ app.post('/api/send-verification', async (req, res) => {
 });
 
 // 인증 코드 확인 엔드포인트
-app.post('/api/verify-email', (req, res) => {
+app.post('/verify-email', (req, res) => {
   const { email, code } = req.body;
   const storedData = verificationCodes.get(email);
 

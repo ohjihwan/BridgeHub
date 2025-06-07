@@ -50,7 +50,7 @@ function SignUp({ onSwitchToLogin }) {
 		}
 
 		try {
-			const response = await fetch('http://localhost:3001/api/send-verification', {
+			const response = await fetch('http://localhost:3001/send-verification', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ function SignUp({ onSwitchToLogin }) {
 		setError('');
 
 		try {
-			const response = await fetch('http://localhost:3001/api/verify-email', {
+			const response = await fetch('http://localhost:3001/verify-email', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
