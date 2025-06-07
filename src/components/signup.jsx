@@ -3,6 +3,10 @@ import '@scss/components/auth.scss';
 
 function SignUp({ onSwitchToLogin }) {
 	const [step, setStep] = useState(1);
+	const [isVerifying, setIsVerifying] = useState(false);
+	const [verificationCode, setVerificationCode] = useState('');
+	const [verificationToken, setVerificationToken] = useState('');
+	const [error, setError] = useState('');
 	const [formData, setFormData] = useState({
 		// 1depth - 필수값
 		name: '',
@@ -25,16 +29,124 @@ function SignUp({ onSwitchToLogin }) {
 		}));
 	};
 
+	const handleSendVerification = async (e) => {
+		e.preventDefault();
+		setError('');
+
+		// 이메일 유효성 검사
+		if (!formData.email) {
+			setError('이메일을 입력해주세요.');
+			return;
+		}
+
+		// 비밀번호 유효성 검사
+		if (formData.password.length < 8) {
+			setError('비밀번호는 8자 이상이어야 합니다.');
+			return;
+		}
+		if (formData.password !== formData.passwordConfirm) {
+			setError('비밀번호가 일치하지 않습니다.');
+			return;
+		}
+
+		try {
+			const response = await fetch('http://localhost:3001/api/send-verification', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email: formData.email }),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				setVerificationToken(data.token);
+				setIsVerifying(true);
+			} else {
+				setError(data.message || '인증 코드 전송에 실패했습니다.');
+			}
+		} catch (err) {
+			setError('서버 오류가 발생했습니다.');
+		}
+	};
+
+	const handleVerification = async (e) => {
+		e.preventDefault();
+		setError('');
+
+		try {
+			const response = await fetch('http://localhost:3001/api/verify-email', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					email: formData.email,
+					code: verificationCode,
+					token: verificationToken,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				setIsVerifying(false);
+				setStep(2);
+			} else {
+				setError(data.message || '인증에 실패했습니다.');
+			}
+		} catch (err) {
+			setError('서버 오류가 발생했습니다.');
+		}
+	};
+
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (step === 1) {
-			// 필수값 검증 후 다음 단계로
-			setStep(2);
+			handleSendVerification(e);
 		} else {
 			// 최종 제출
 			console.log('회원가입 데이터:', formData);
 		}
 	};
+
+	if (isVerifying) {
+		return (
+			<div className="signup">
+				<div className="signup__container">
+					<h2 className="signup__title">이메일 인증</h2>
+					<form className="signup__area" onSubmit={handleVerification}>
+						<div className="signup__forms">
+							<p className="signup__subtitle">
+								{formData.email}로 전송된 인증 코드를 입력해주세요.
+							</p>
+							<input
+								className="signup__input"
+								type="text"
+								value={verificationCode}
+								onChange={(e) => setVerificationCode(e.target.value)}
+								placeholder="인증 코드 6자리"
+								maxLength={6}
+								required
+							/>
+						</div>
+						{error && <p className="signup__error">{error}</p>}
+						<div className="signup__buttons">
+							<button type="submit" className="signup__button">인증하기</button>
+							<button
+								type="button"
+								className="signup__button signup__button--text"
+								onClick={() => setIsVerifying(false)}
+							>
+								이전으로
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="signup">
@@ -57,14 +169,12 @@ function SignUp({ onSwitchToLogin }) {
 									<option value="고졸">고졸</option>
 									<option value="대학교">대학교</option>
 									<option value="대학원">대학원</option>
-									{/* 더 많은 옵션 추가 가능 */}
 								</select>
 								<select className="signup__input" name="department" value={formData.department} onChange={handleChange}>
 									<option value="">학과/학부 선택</option>
 									<option value="컴퓨터공학과">컴퓨터공학과</option>
 									<option value="소프트웨어학과">소프트웨어학과</option>
 									<option value="정보통신공학과">정보통신공학과</option>
-									{/* 더 많은 옵션 추가 가능 */}
 								</select>
 							</div>
 							<div className="half-form">
@@ -88,11 +198,12 @@ function SignUp({ onSwitchToLogin }) {
 							</select>
 						</div>
 					)}
+					{error && <p className="signup__error">{error}</p>}
 					<div className="signup__buttons">
 						{step === 1 ? (
 							<>
-								<button type="submit" className="signup__button">다음 단계</button>
-								<button type="button"  className="signup__button signup__button--text" onClick={onSwitchToLogin}>로그인으로 돌아가기</button>
+								<button type="submit" className="signup__button">이메일 인증하기</button>
+								<button type="button" className="signup__button signup__button--text" onClick={onSwitchToLogin}>로그인으로 돌아가기</button>
 							</>
 						) : (
 							<>

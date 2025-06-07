@@ -5,27 +5,6 @@
 	margin: 0 auto;
 	padding: 20px;
 		
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 30px;
-		
-		.logo {
-			width:rem(100);
-			height:rem(30);
-			background:url('@ico/logo-text.png') no-repeat 50% / 100% auto;
-		}
-		
-		.logout-btn {
-			background: none;
-			border: none;
-			color: #000;
-			cursor: pointer;
-			font-size: 16px;
-		}
-	}
-		
 	.create-study-btn {
 		width: 100%;
 		padding: 20px;

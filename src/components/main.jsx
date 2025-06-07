@@ -3,16 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import '@scss/components/main.scss';
 import Detail from './detail';
 import CreateStudy from './create';
+import Header from './common/Header';
 
 const Main = () => {
 	const navigate = useNavigate();
 	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
-		
-	const handleLogout = () => {
-		// 로그아웃 처리
-		navigate('/login');
-	};
 
 	const handleItemClick = () => {
 		setShowDetail(true);
@@ -32,12 +28,7 @@ const Main = () => {
 
 	return (
 		<div className="main-container">
-			<header className="header">
-				<h1 className="logo">
-					<span className="hide">TeamHub</span>
-				</h1>
-				<button className="logout-btn" onClick={handleLogout}>LOGOUT</button>
-			</header>
+			<Header />
 			
 			<button className="create-study-btn" onClick={handleCreateStudyClick}>
 				스터디 개설하기
