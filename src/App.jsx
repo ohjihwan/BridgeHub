@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import '@scss/app.scss'
 import Auth from '@components/Auth'
 import Main from '@components/Main'
+import MyPage from '@components/MyPage'
 
 function App() {
 	const [showIntro, setShowIntro] = useState(true);
@@ -29,6 +30,7 @@ function App() {
 				<Routes>
 					<Route path="/login" element={<Auth />} />
 					<Route path="/main" element={<Main />} />
+					<Route path="/mypage" element={<MyPage />} />
 					<Route path="/" element={<Navigate to="/login" replace />} />
 				</Routes>
 			)}
