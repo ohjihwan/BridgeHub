@@ -93,6 +93,141 @@
         .tab-content.active {
             display: block;
         }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        
+        .chat-status {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        #messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+        
+        .message.sent {
+            margin-left: auto;
+        }
+        
+        .message.received {
+            margin-right: auto;
+        }
+        
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .message.sent .message-content {
+            background: #007bff;
+            color: white;
+            border-radius: 15px 15px 0 15px;
+        }
+        
+        .message.received .message-content {
+            background: #e9ecef;
+            color: #212529;
+            border-radius: 15px 15px 15px 0;
+        }
+        
+        .message.system .message-content {
+            background: #f8f9fa;
+            color: #666;
+            font-style: italic;
+            border-radius: 15px;
+            text-align: center;
+            margin: 10px auto;
+            max-width: 90%;
+        }
+        
+        .message-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .message.sent .message-info {
+            justify-content: flex-end;
+        }
+        
+        .message-time {
+            color: #666;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+        
+        .chat-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #ddd;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        #messageInput:focus {
+            border-color: #007bff;
+        }
+        
+        .chat-input-wrapper button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .chat-input-wrapper button:hover {
+            background: #0056b3;
+        }
+        
+        .chat-input-wrapper button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -155,16 +290,23 @@
 
     <div id="websocket" class="tab-content">
         <div class="test-section">
-            <h2>WebSocket 채팅 테스트</h2>
-            <div>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>스터디 채팅</h2>
+                    <div class="chat-status" id="chatStatus">연결되지 않음</div>
+                </div>
+                <div id="messages"></div>
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." />
+                        <button onclick="sendChatMessage()" id="sendButton" disabled>전송</button>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
                 <input type="text" id="studyId" placeholder="스터디 ID" />
                 <input type="text" id="userId" placeholder="사용자 ID" />
                 <button onclick="joinStudyChat()">참여하기</button>
-            </div>
-            <div id="messages"></div>
-            <div>
-                <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." />
-                <button onclick="sendChatMessage()">전송</button>
             </div>
         </div>
     </div>
@@ -296,6 +438,9 @@
                 socket.disconnect();
             }
 
+            document.getElementById('chatStatus').textContent = '연결 중...';
+            document.getElementById('sendButton').disabled = true;
+
             socket = io('http://localhost:3001', {
                 withCredentials: true,
                 transports: ['websocket', 'polling']
@@ -304,6 +449,8 @@
             // 이벤트 리스너 설정
             socket.on('connect', () => {
                 console.log('서버에 연결되었습니다.');
+                document.getElementById('chatStatus').textContent = '연결됨';
+                document.getElementById('sendButton').disabled = false;
                 addMessage('시스템', '서버에 연결되었습니다.', true);
                 
                 // 연결 후 바로 채팅방 참여
@@ -314,6 +461,8 @@
             });
 
             socket.on('disconnect', () => {
+                document.getElementById('chatStatus').textContent = '연결 끊김';
+                document.getElementById('sendButton').disabled = true;
                 addMessage('시스템', '서버와의 연결이 끊어졌습니다.', true);
             });
 
@@ -380,18 +529,23 @@
         function addMessage(userId, content, isSystem) {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isSystem ? 'system' : ''}`;
             
-            // 메시지 스타일 개선
+            if (isSystem) {
+                messageDiv.className = 'message system';
+            } else {
+                messageDiv.className = `message ${userId === currentUserId ? 'sent' : 'received'}`;
+            }
+            
             const time = new Date().toLocaleTimeString();
-            messageDiv.innerHTML = `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <strong>${userId}</strong>
-                    <span style="color: #666; font-size: 0.8em;">${time}</span>
+            const messageContent = `
+                <div class="message-info">
+                    ${!isSystem ? `<strong>${userId}</strong>` : ''}
+                    <span class="message-time">${time}</span>
                 </div>
-                <div>${content}</div>
+                <div class="message-content">${content}</div>
             `;
             
+            messageDiv.innerHTML = messageContent;
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
