@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '@scss/components/main.scss';
 import Detail from './detail';
 import CreateStudy from './create';
 import Header from './common/Header';

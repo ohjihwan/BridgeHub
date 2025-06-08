@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../assets/scss/components/mypage.scss';
 import Header from './common/Header';
 
 const MyPage = () => {

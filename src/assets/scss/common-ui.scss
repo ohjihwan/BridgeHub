@@ -1,26 +1,17 @@
-/*  
-| 기능	  | 핵심 예시					 |
-| -------   | ------------------------- |
-| 변수	  | `$color-main`, `$spacing` |
-| 중첩	  | `.nav ul li a {}`		 |
-| 믹스인	 | `@mixin`, `@include`	  |
-| 상속	  | `%base-style`, `@extend`  |
-| 조건 / 반복 | `@if`, `@for`, `@each`	|
-| 분할관리	| `_mixin.scss`, `@import`  |
-| 함수	  | `@function pxToRem()`	 |
-| 데이터구조   | `$map`, `$list` 활용		|
-*/
+// ─────────────────────────────
+// 🛠️ Core & Module
+// ─────────────────────────────
 @use 'sass:color';
-@forward 'sass:color';
-@forward 'core/functions';
-@forward 'core/variables';
-@forward 'core/mixin';
-@forward 'core/reset';
-
-@use 'core/functions' as *;
+@use './core/functions' as *;
+@use './core/mixin' as *;
+@use './core/variables' as *;
+@use './core/reset';
+// ─────────────────────────────
+// 🧱 Layouts / Common Elements
+// ─────────────────────────────
 
 body {
-	font-size:rem(15);
+	font-size:remx(15);
 	line-height:1.5;
 	font-family:'Pretendard-Regular';
 	letter-spacing:-0.025em;
@@ -52,27 +43,64 @@ legend,
 	@extend %visually-hidden;
 }
 
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+
+	&__left {
+		.logo {
+			width:remx(100);
+			height:remx(30);
+			background:url('@ico/logo-text.png') no-repeat 50% / 100% auto;
+		}
+	}
+
+	&__right {
+		display: flex;
+		gap: 15px;
+		align-items: center;
+
+		.my-page-btn {
+			background: none;
+			border: none;
+			font-size:remx(16);
+			color: #333;
+			cursor: pointer;
+		}
+
+		.logout-btn {
+			background: none;
+			border: none;
+			font-size:remx(16);
+			color: #333;
+			cursor: pointer;
+		}
+	}
+}
+
 .fixed {
 	display:flex;
-	gap: rem(16);
+	gap: remx(16);
 	justify-content: center;
 	align-items: center;
 	position: fixed;
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	padding: rem(16);
+	padding: remx(16);
 	color: white;
 	z-index: 1000;
 	
 	.button {
 		flex:1;
-		height:rem(58);
-		padding:0 rem(16);
-		border-radius:rem(8);
+		height:remx(58);
+		padding:0 remx(16);
+		border-radius:remx(8);
 		border: none;
 		cursor: pointer;
-		font-size: rem(18);
+		font-size: remx(18);
 		font-weight: 500;
 		text-align: center;
 		transition: transform 0.2s ease;
@@ -85,4 +113,762 @@ legend,
 		box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
 	}
 	
+}
+
+// ─────────────────────────────
+// 📄 Intro.jsx Components
+// ─────────────────────────────
+.intro {
+	@include flex-center;
+	width:100vw;
+	height:100vh;
+
+	&__container {
+		@include flex-center;
+		width:100%;
+		height:100%;
+		&::after {
+			content:'';
+			position:fixed;
+			top:50%;
+			left:50%;
+			transform:translateX(-50%);
+			z-index:-1;
+			width:300vw;
+			height:100vh;
+			border-radius:50%;
+			background:radial-gradient(circle, #8bbeee 0%, rgba(34, 111, 184, 0) 50%);
+		}
+	}
+
+	&__logo {
+		position:relative;
+		width:remx(65);
+		height:remx(70);
+		background:url('@ico/logo-text.png') no-repeat 0 100% / auto 100%;
+		animation: logoShow 0.5s 1s ease-in-out forwards;
+		@keyframes logoShow {
+			0% {
+				width:remx(65);
+			}
+			100% {
+				width:remx(303);
+			}
+		}
+	}
+
+	&__imgmotion {
+		width:remx(72);
+		height:remx(100);
+		position:absolute;
+		left:11%;
+		top:50%;
+		transform:translate(-50%, -50%);
+
+		.wave {
+			overflow:hidden;
+			position:absolute;
+			left:50%;
+			bottom:remx(19);
+			transform:translateX(-50%);
+			width:remx(55);
+			height:remx(19);
+			border-radius:remx(8);
+			clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 20% 100%);
+			opacity:0;
+			animation: logoAnime 1s 1.5s linear forwards;
+			@keyframes logoAnime {
+				0% {
+					opacity:1;
+					background-color:$bg-root;
+				}
+				100% {
+					opacity:1;
+					background-color:$bg-root;
+				}
+			}
+						
+			&::after {
+				content:'';
+				width:remx(200);
+				height:remx(97);
+				position:absolute;
+				left:-100%;
+				bottom:0;
+				background:url('@ico/logo-bottom.svg') repeat-x 50% 50%;
+				animation: logoWave 5s linear infinite;
+			}
+			@keyframes logoWave {
+				0% { left:-100%; }
+				100% { left:-10%; }
+			}
+		}
+	}
+}
+
+// ─────────────────────────────
+// 📄 Auth.jsx Components
+// ─────────────────────────────
+// 공통 믹스인
+@mixin input-base {
+	width: 100%;
+	padding: remx(12);
+	border: 1px solid #ddd;
+	border-radius: remx(6);
+	font-size: remx(16);
+	margin-bottom: remx(10);
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+
+	&:focus {
+		border-color: $color-primary;
+		outline: none;
+	}
+}
+
+@mixin button-base {
+	flex: 1;
+	padding: remx(12);
+	background: $color-primary;
+	color: #fff;
+	border: none;
+	border-radius: remx(6);
+	font-size: remx(16);
+	cursor: pointer;
+	transition: background-color 0.3s;
+
+	&:hover {
+		background: $color-secondary;
+	}
+}
+
+@mixin text-button {
+	background-color: transparent;
+	border: none;
+	text-decoration: underline;
+	padding: remx(8);
+	font-weight: normal;
+	font-size: remx(14);
+	color: $font1;
+		
+	&:hover {
+		background-color: transparent;
+	}
+}
+
+// 메인 레이아웃
+.auth {
+	@include flex-center;
+	min-height: 100vh;
+	background-color: $bg-root;
+	padding: remx(20);
+
+	&__container {
+		position: relative;
+		width: 100%;
+		max-width: remx(400);
+		overflow: hidden;
+	}
+
+	&__forms-wrapper {
+		display: flex;
+		width: 200%;
+		transition: transform 0.6s ease-in-out;
+	}
+}
+
+// 로그인 스타일
+.login {
+	@include flex-center;
+	width: 50%;
+	padding:remx(20);
+	transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+
+	&__container {
+		padding: remx(40) remx(20);
+		background: #fff;
+		border-radius: remx(10);
+		box-shadow: 0 0 remx(10) rgba(0,0,0,0.1);
+	}
+
+	&__title {
+		text-align: center;
+		font-size: remx(24);
+		margin-bottom: remx(30);
+		color: $font1;
+	}
+
+	&__area {
+		width: 100%;
+	}
+
+	&__forms {
+		margin-bottom: remx(20);
+
+		.login__input {
+			@include input-base;
+		}
+	}
+
+	&__buttons {
+		display: flex;
+		gap: remx(10);
+	}
+
+	&__button {
+		@include button-base;
+
+		&--signup {
+			background: #fff;
+			color: $color-primary;
+			border: 1px solid $color-primary;
+
+			&:hover {
+				background: color.adjust($color-primary, $alpha: -0.9);
+			}
+		}
+
+		&--text {
+			@include text-button;
+		}
+	}
+}
+
+// 회원가입 스타일
+.signup {
+	width: 50%;
+	padding: remx(20);
+	transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+
+	&__container {
+		padding: remx(40) remx(20);
+		background: #fff;
+		border-radius: remx(10);
+		box-shadow: 0 0 remx(10) rgba(0,0,0,0.1);
+	}
+
+	&__title {
+		text-align: center;
+		font-size: remx(24);
+		margin-bottom: remx(30);
+		color: $font1;
+	}
+
+	&__area {
+		width: 100%;
+	}
+
+	&__forms {
+		margin-bottom: remx(20);
+
+		.signup__input {
+			@include input-base;
+		}
+
+		.half-form {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: remx(16);
+			margin-bottom: remx(12);
+
+			.signup__input {
+				margin-bottom: 0;
+			}
+		}
+	}
+
+	&__buttons {
+		display: flex;
+		flex-direction:column;
+		gap: remx(10);
+	}
+
+	&__button {
+		@include button-base;
+
+		&--text {
+			@include text-button;
+		}
+	}
+}
+
+// 전환 애니메이션
+.auth__container {
+	&--login {
+		.auth__forms-wrapper {
+			transform: translateX(0);
+		}
+	}
+
+	&--signup {
+		.auth__forms-wrapper {
+			transform: translateX(-50%);
+		}
+	}
+} 
+// ─────────────────────────────
+// 📄 Create.jsx Components
+// ─────────────────────────────
+.create-study {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: remx(400);
+  background: white;
+  border-radius: remx(8);
+  box-shadow: 0 remx(4) remx(12) rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: remx(20);
+    border-bottom: 1px solid #ddd;
+  }
+
+  &__title {
+    font-size: remx(20);
+    font-weight: 600;
+  }
+
+  &__close {
+    padding: remx(8) remx(12);
+    border: 1px solid #ddd;
+    border-radius: remx(4);
+    background: none;
+    cursor: pointer;
+  }
+
+  &__content {
+    padding: remx(20);
+  }
+
+  &__field {
+    margin-bottom: remx(16);
+  }
+
+  &__input,
+  &__select,
+  &__textarea {
+    width: 100%;
+    padding: remx(12);
+    border: 1px solid #ddd;
+    border-radius: remx(4);
+    font-size: remx(16);
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+
+  &__location {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: remx(12);
+    margin-bottom: remx(16);
+  }
+
+  &__textarea {
+    resize: vertical;
+    min-height: remx(120);
+  }
+
+  &__submit {
+    width: 100%;
+    padding: remx(16);
+    background-color: $color-primary;
+    color: white;
+    border: none;
+    border-radius: remx(4);
+    font-size: remx(16);
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background-color: color.adjust($color-primary, $lightness: -5%);
+    }
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+} 
+// ─────────────────────────────
+// 📄 Detail.jsx Components
+// ─────────────────────────────
+.detail {
+	position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:100%;
+    height:100%;
+    padding:remx(20);
+    background-color:rgba(0,0,0,0.5);
+    z-index:1000;
+	background-color:$bg-root;
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: remx(20);
+        border-bottom: 1px solid #ddd;
+    }
+
+    &__title {
+        font-size: remx(24);
+        font-weight: 700;
+    }
+
+    &__close {
+        padding: remx(8) remx(16);
+        border: 1px solid #ddd;
+        border-radius: remx(4);
+        background: none;
+        cursor: pointer;
+    }
+
+    &__content {
+        padding: remx(20);
+    }
+
+    &__info {
+        margin-bottom: remx(32);
+    }
+
+    &__subtitle {
+        font-size: remx(18);
+        font-weight: 600;
+        margin-bottom: remx(16);
+    }
+
+    &__list {
+        display: grid;
+        grid-template-columns: remx(100) 1fr;
+        gap: remx(12);
+    }
+
+    &__term {
+        color: #666;
+        font-weight: 500;
+    }
+
+    &__desc {
+        margin: 0;
+    }
+
+    &__description {
+        margin-bottom: remx(32);
+    }
+
+    &__text {
+        line-height: 1.6;
+        color: #333;
+    }
+
+    &__members {
+        margin-bottom: remx(32);
+    }
+
+    &__member-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    &__member {
+        padding: remx(8) 0;
+        border-bottom: 1px solid #eee;
+
+        &:last-child {
+        border-bottom: none;
+        }
+    }
+
+    &__footer {
+        padding: remx(20);
+        border-top: 1px solid #ddd;
+        text-align: center;
+    }
+
+    &__join {
+        padding: remx(12) remx(32);
+        background-color: $color-primary;
+        color: white;
+        border: none;
+        border-radius: remx(4);
+        font-size: remx(16);
+        cursor: pointer;
+
+        &:hover {
+        background-color: color.adjust($color-primary, $lightness: -5%);
+        }
+    }
+} 
+// ─────────────────────────────
+// 📄 Main.jsx Components
+// ─────────────────────────────
+.main-container {
+	margin: 0 auto;
+	padding: 20px;
+		
+	.create-study-btn {
+		width: 100%;
+		padding: 20px;
+		background-color: $color-primary;
+		color: white;
+		border: none;
+		border-radius: 8px;
+		font-size: 18px;
+		cursor: pointer;
+		margin-bottom: 20px;
+		text-align: center;
+		
+		&:hover {
+			background-color: color.adjust($color-primary, $lightness: 10%);
+		}
+
+		&::before {
+			content:'+';
+			display: block;
+		}
+	}
+		
+	.search-box {
+		display: flex;
+		gap: remx(10);
+		justify-content: flex-end;
+		margin-bottom:remx(20);
+		
+		.filter-btn, .search-btn {
+			padding: remx(8) remx(16);
+			border: 1px solid #ddd;
+			border-radius: remx(20);
+			background: white;
+			cursor: pointer;
+			
+			&:hover {
+				background-color: #f5f5f5;
+			}
+
+			.hide {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				border: 0;
+			}
+		}
+	}
+
+	.study {
+		.study__item {
+			.study__info {
+				border: 1px solid #000;
+				border-radius: 8px;
+				padding: 15px;
+				margin-bottom: 15px;
+					
+				.study__title {
+					font-size: 18px;
+					margin-bottom: 5px;
+				}
+				
+				.study__details {
+					color: #666;
+					font-size: 14px;
+
+					.study__detail {
+						font-size:remx(13);
+					}
+				}
+			}
+		}
+	}
+} 
+// ─────────────────────────────
+// 📄 Mypage.jsx Components
+// ─────────────────────────────
+.mypage-container {
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 20px;
+
+  .profile-info {
+    .info-row {
+      display: flex;
+      padding: 15px 0;
+      border-bottom: 1px solid #e0e0e0;
+
+      .label {
+        flex: 1;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .value {
+        flex: 2;
+        color: #666;
+      }
+    }
+
+    .message-box {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+
+      p {
+        margin: 0;
+        color: #666;
+      }
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+
+      .post-btn {
+        flex: 1;
+        padding: 12px 0;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        color: white;
+        transition: background-color 0.2s;
+
+        &.personal {
+          background-color: #007bff;
+          &:hover {
+            background-color: color.adjust(#007bff, $lightness: -10%);
+          }
+        }
+
+        &.team {
+          background-color: #0056b3;
+          &:hover {
+            background-color: color.adjust(#0056b3, $lightness: -10%);
+          }
+        }
+      }
+    }
+  }
+}
+
+.edit-profile {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: remx(20);
+}
+
+.info-row {
+	display: flex;
+	align-items: center;
+	padding: remx(12) 0;
+	border-bottom: 1px solid #eee;
+
+	&--major,
+	&--location {
+		.info-row__select-group {
+		flex: 1;
+		display: flex;
+		flex-wrap:wrap;
+		gap: remx(8);
+		}
+	}
+
+	&--major {
+		.info-row__select-group {
+		.info-row__select {
+			flex: 0 0 remx(120);
+		}
+		.info-row__input {
+			flex: 1;
+		}
+		}
+	}
+
+	&--location {
+		.info-row__select-group {
+		.info-row__select {
+			flex: 1;
+		}
+		}
+	}
+
+	&__input {
+		flex: 1;
+		height: remx(36);
+		padding: 0 remx(12);
+		border: 1px solid #ddd;
+		border-radius: remx(4);
+		font-size: remx(14);
+
+		&:focus {
+		outline: none;
+		border-color: #007bff;
+		box-shadow: 0 0 0 remx(2) rgba(0, 123, 255, 0.1);
+		}
+
+		&--textarea {
+		height: remx(100);
+		padding: remx(12);
+		resize: vertical;
+		}
+	}
+
+	&__select {
+		cursor: pointer;
+		appearance: none;
+		background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+		background-repeat: no-repeat;
+		background-position: right remx(8) center;
+		background-size: remx(16);
+		padding-right: remx(32);
+	}
+
+	.label {
+		flex: 0 0 remx(100);
+		font-weight: 500;
+		color: #333;
+	}
+
+	.value {
+		flex: 1;
+	}
+	}
+
+	.message-box {
+	margin-top: remx(20);
+	padding: remx(16);
+	background-color: #f8f9fa;
+	border-radius: remx(8);
+
+	p {
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.info-row__input {
+		width: 100%;
+		background-color: #fff;
+	}
 }

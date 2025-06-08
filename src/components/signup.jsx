@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import '@scss/components/auth.scss';
 
 function SignUp({ onSwitchToLogin }) {
 	const [step, setStep] = useState(1);

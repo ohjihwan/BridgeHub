@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '@scss/components/auth.scss';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');

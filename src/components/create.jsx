@@ -1,5 +1,4 @@
 import React from 'react';
-import '@scss/components/create.scss';
 
 const CreateStudy = ({ onClose }) => {
 	return (

@@ -1,5 +1,4 @@
 import React from 'react';
-import '@scss/components/detail.scss';
 
 const Detail = ({ onClose }) => {
 	return (

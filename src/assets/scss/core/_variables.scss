@@ -1,5 +1,4 @@
 @use 'sass:color';
-@use 'functions' as *;
 
 $color-primary: #226fb8;
 $color-secondary: color.adjust($color-primary, $lightness: 10%);
@@ -15,5 +14,3 @@ $font2:#343434;
 $font3:#666;
 $font4:#999;
 $font5:#f1f1f1;
-
-$size-inner:rem(1500);

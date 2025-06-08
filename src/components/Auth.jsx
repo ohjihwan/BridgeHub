@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Login from './login';
 import SignUp from './signup';
-import '@scss/components/auth.scss';
 
 function Auth() {
 	const [isLoginView, setIsLoginView] = useState(true);
