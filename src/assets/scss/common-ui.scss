@@ -158,23 +158,18 @@ legend,
 	}
 
 	&__imgmotion {
-		width:remx(72);
-		height:remx(100);
-		position:absolute;
-		left:11%;
-		top:50%;
-		transform:translate(-50%, -50%);
-
+		overflow:hidden;
+		width:remx(65);
+		height:remx(70);
+		position:relative;
 		.wave {
-			overflow:hidden;
 			position:absolute;
 			left:50%;
-			bottom:remx(19);
+			bottom:remx(4);
 			transform:translateX(-50%);
-			width:remx(55);
+			width:remx(65);
 			height:remx(19);
-			border-radius:remx(8);
-			clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 20% 100%);
+			clip-path: polygon(10% 10%, 90% 10%, 80% 100%, 20% 100%);
 			opacity:0;
 			animation: logoAnime 1s 1.5s linear forwards;
 			@keyframes logoAnime {
@@ -195,7 +190,7 @@ legend,
 				position:absolute;
 				left:-100%;
 				bottom:0;
-				background:url('@ico/logo-bottom.svg') repeat-x 50% 50%;
+				background:url('@ico/logo-bottom.svg') repeat 50% 50%;
 				animation: logoWave 5s linear infinite;
 			}
 			@keyframes logoWave {

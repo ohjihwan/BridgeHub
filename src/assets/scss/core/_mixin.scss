@@ -36,3 +36,39 @@
 	cursor: pointer;
 	font-weight: 500;
 }
+
+// 인풋 스타일일
+@mixin input-base {
+	width: 100%;
+	padding: remx(12);
+	border: 1px solid #ddd;
+	border-radius: remx(6);
+	font-size: remx(16);
+	margin-bottom: remx(10);
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+
+	&:focus {
+		border-color: $color-primary;
+		outline: none;
+	}
+}
+
+// 로그인 버튼 스타일
+@mixin button-base {
+	flex: 1;
+	padding: remx(12);
+	background: $color-primary;
+	color: #fff;
+	border: none;
+	border-radius: remx(6);
+	font-size: remx(16);
+	cursor: pointer;
+	transition: background-color 0.3s;
+
+	&:hover {
+		background: $color-secondary;
+	}
+}
