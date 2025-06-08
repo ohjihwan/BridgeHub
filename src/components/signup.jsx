@@ -57,7 +57,7 @@ function SignUp({ onSwitchToLogin }) {
 		}
 
 		try {
-			const response = await fetch('http://localhost:3001/send-verification', {
+			const response = await fetch('http://localhost:3001/api/email/send-verification', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -80,12 +80,12 @@ function SignUp({ onSwitchToLogin }) {
 		}
 	};
 
-	const handleVerification = async (e) => {
+	const handleVerifyCode = async (e) => {
 		e.preventDefault();
 		setError('');
 
 		try {
-			const response = await fetch('http://localhost:3001/verify-email', {
+			const response = await fetch('http://localhost:3001/api/email/verify-email', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -95,17 +95,17 @@ function SignUp({ onSwitchToLogin }) {
 				body: JSON.stringify({
 					email: formData.email,
 					code: verificationCode,
-					token: verificationToken,
+					token: verificationToken
 				}),
 			});
 
 			const data = await response.json();
 
 			if (response.ok) {
-				setIsVerifying(false);
-				setStep(2);
+				// 인증 성공 후 회원가입 처리
+				handleSignup(e);
 			} else {
-				setError(data.message || '인증에 실패했습니다.');
+				setError(data.message || '인증 코드 확인에 실패했습니다.');
 			}
 		} catch (err) {
 			setError('서버 오류가 발생했습니다.');
@@ -127,7 +127,7 @@ function SignUp({ onSwitchToLogin }) {
 			<div className="signup">
 				<div className="signup__container">
 					<h2 className="signup__title">이메일 인증</h2>
-					<form className="signup__area" onSubmit={handleVerification}>
+					<form className="signup__area" onSubmit={handleVerifyCode}>
 						<div className="signup__forms">
 							<p className="signup__subtitle">
 								{formData.email}로 전송된 인증 코드를 입력해주세요.
