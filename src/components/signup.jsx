@@ -1,3 +1,10 @@
+/**
+ * 회원가입 컴포넌트
+ * 사용자 회원가입을 처리하는 컴포넌트입니다.
+ * 2단계 회원가입 프로세스를 구현했습니다.
+ * 
+ * @param {function} onSwitchToLogin - 로그인 화면으로 전환하는 콜백 함수
+ */
 import { useState } from 'react';
 import '@scss/components/auth.scss';
 
@@ -55,6 +62,8 @@ function SignUp({ onSwitchToLogin }) {
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				credentials: 'include',
+				mode: 'cors',
 				body: JSON.stringify({ email: formData.email }),
 			});
 
@@ -81,6 +90,8 @@ function SignUp({ onSwitchToLogin }) {
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				credentials: 'include',
+				mode: 'cors',
 				body: JSON.stringify({
 					email: formData.email,
 					code: verificationCode,

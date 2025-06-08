@@ -1,3 +1,9 @@
+/**
+ * 로그인 컴포넌트
+ * 사용자 로그인을 처리하는 컴포넌트입니다.
+ * 
+ * @param {function} onSwitchToSignUp - 회원가입 화면으로 전환하는 콜백 함수
+ */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '@scss/components/auth.scss';
