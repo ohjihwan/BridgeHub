@@ -7,7 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# node modules
 node_modules
+package-lock.json
+yarn.lock
 dist
 dist-ssr
 *.local
@@ -22,3 +25,43 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env (예: Firebase, API 키 등)
+.env
+.env.*
+coturn-key.pem
+
+# Metro & cache
+.expo/
+.expo-shared/
+.expo-cache/
+.babelrc
+.cache/
+tmp/
+temp/
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/.idea/
+android/local.properties
+
+# iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace
+ios/Runner.xcworkspace
+
+# CodeGen & tools
+*.iml
+*.log
+*.swp
+*.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# 테스트/시뮬레이터 로그
+*.coverage
+*.xcuserstate
