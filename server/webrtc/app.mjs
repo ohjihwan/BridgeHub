@@ -7,14 +7,12 @@ import matchRoutes from './routes/match.mjs';
 import rtcRoutes from './routes/rtc.mjs';
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(corsMiddleware);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, '../public')));
-
 
 app.use('/api/match', matchRoutes);
 app.use('/api/rtc', rtcRoutes);
