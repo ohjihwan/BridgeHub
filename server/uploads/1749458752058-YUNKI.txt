@@ -1,0 +1,20 @@
+2일차 HTML
+
+인터넷 상에서 내가 만든 웹페이지,응용프로그램 등을 배포하는 방법
+
+서버를 구축하여 서비스, 대형회사에서 지원하는 클라우드 서비스를 통해 배포 등등 (비용)
+
+서버 구축시에 여러가지 문제 발생 (장소, 장비, 부대비용(IP,domain name)등)
+
+클라우드 서비스 이용시 이용요금
+
+ip 구조 0000.0000.0000.0000:port num
+
+port num : 80,8080 web page
+              
+실제 hosting 경험???????????
+
+vs ftp setting
+
+setting -> f1 key -> ftp-simple config config 수정 ftp-simple-remote
+

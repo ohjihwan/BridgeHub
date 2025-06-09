@@ -228,6 +228,93 @@
             background: #ccc;
             cursor: not-allowed;
         }
+
+        /* 파일 업로드 관련 스타일 */
+        .file-upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-btn {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-upload-btn:hover {
+            background: #218838;
+        }
+
+        .file-name {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        .file-message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .file-icon {
+            font-size: 1.5em;
+            color: #007bff;
+        }
+
+        .file-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #212529;
+        }
+
+        .file-size {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .file-download-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-download-btn:hover {
+            background: #218838;
+        }
+
+        .file-download-btn:before {
+            content: "⬇️";
+        }
     </style>
 </head>
 <body>
@@ -301,6 +388,16 @@
                         <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." />
                         <button onclick="sendChatMessage()" id="sendButton" disabled>전송</button>
                     </div>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="fileInput" onchange="handleFileSelect(event)" />
+                        <button class="file-upload-btn" onclick="document.getElementById('fileInput').click()">
+                            파일 첨부
+                        </button>
+                        <span id="fileName" class="file-name"></span>
+                        <button class="file-upload-btn" onclick="sendFile()" id="sendFileButton" style="display: none;">
+                            파일 전송
+                        </button>
+                    </div>
                 </div>
             </div>
             <div style="margin-top: 15px;">
@@ -316,6 +413,7 @@
         let socket;
         let currentStudyId;
         let currentUserId;
+        let selectedFile = null;
 
         // 탭 전환
         function showTab(tabId) {
@@ -442,8 +540,12 @@
             document.getElementById('sendButton').disabled = true;
 
             socket = io('http://localhost:3001', {
-                withCredentials: true,
-                transports: ['websocket', 'polling']
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000,
+                timeout: 20000,
+                forceNew: true
             });
 
             // 이벤트 리스너 설정
@@ -460,7 +562,14 @@
                 });
             });
 
-            socket.on('disconnect', () => {
+            socket.on('connect_error', (error) => {
+                console.error('연결 에러:', error);
+                document.getElementById('chatStatus').textContent = '연결 실패';
+                addMessage('시스템', '서버 연결에 실패했습니다.', true);
+            });
+
+            socket.on('disconnect', (reason) => {
+                console.log('연결 끊김:', reason);
                 document.getElementById('chatStatus').textContent = '연결 끊김';
                 document.getElementById('sendButton').disabled = true;
                 addMessage('시스템', '서버와의 연결이 끊어졌습니다.', true);
@@ -475,9 +584,13 @@
 
             socket.on('new-message', (message) => {
                 console.log('새 메시지 수신:', message);
-                // 자신이 보낸 메시지는 이미 표시되어 있으므로 다시 표시하지 않음
                 if (message.userId !== currentUserId) {
-                    addMessage(message.userId, message.content, message.userId === '시스템');
+                    addMessage(
+                        message.userId, 
+                        message.content, 
+                        message.userId === '시스템',
+                        message.fileInfo
+                    );
                 }
             });
 
@@ -526,7 +639,103 @@
             messageInput.value = '';
         }
 
-        function addMessage(userId, content, isSystem) {
+        // 파일 선택 처리
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('sendFileButton').style.display = 'inline-block';
+            }
+        }
+
+        // 파일 전송
+        async function sendFile() {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('studyId', currentStudyId);
+            formData.append('userId', currentUserId);
+
+            try {
+                console.log('파일 업로드 시작:', selectedFile.name);
+                const response = await fetch(`${API_BASE_URL}/${currentStudyId}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('파일 업로드 응답:', data);
+
+                if (data.success) {
+                    // 파일 메시지 전송
+                    socket.emit('send-message', {
+                        studyId: currentStudyId,
+                        userId: currentUserId,
+                        message: `파일을 업로드했습니다: ${selectedFile.name}`,
+                        fileInfo: {
+                            fileName: data.fileName,
+                            fileUrl: data.fileUrl,
+                            fileSize: data.fileSize
+                        }
+                    });
+
+                    // 파일 선택 초기화
+                    selectedFile = null;
+                    document.getElementById('fileName').textContent = '';
+                    document.getElementById('fileInput').value = '';
+                    document.getElementById('sendFileButton').style.display = 'none';
+                } else {
+                    throw new Error(data.message || '파일 업로드 실패');
+                }
+            } catch (error) {
+                console.error('파일 업로드 실패:', error);
+                addMessage('시스템', `파일 업로드에 실패했습니다: ${error.message}`, true);
+            }
+        }
+
+        // 파일 다운로드
+        async function downloadFile(fileUrl, fileName) {
+            try {
+                console.log('파일 다운로드 시작:', fileName);
+                // 파일명 추출
+                const filename = fileUrl.split('/').pop();
+                const downloadUrl = `http://localhost:3001/download/${filename}`;
+                console.log('다운로드 URL:', downloadUrl);
+
+                // fetch를 사용하여 파일 다운로드
+                const response = await fetch(downloadUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Blob으로 변환
+                const blob = await response.blob();
+                
+                // 다운로드 링크 생성
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                
+                // 정리
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('파일 다운로드 실패:', error);
+                addMessage('시스템', `파일 다운로드에 실패했습니다: ${error.message}`, true);
+            }
+        }
+
+        // 메시지 표시 함수 수정
+        function addMessage(userId, content, isSystem, fileInfo = null) {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             
@@ -537,23 +746,53 @@
             }
             
             const time = new Date().toLocaleTimeString();
-            const messageContent = `
+            let messageContent = `
                 <div class="message-info">
                     ${!isSystem ? `<strong>${userId}</strong>` : ''}
                     <span class="message-time">${time}</span>
                 </div>
                 <div class="message-content">${content}</div>
             `;
+
+            if (fileInfo) {
+                const fileSize = formatFileSize(fileInfo.fileSize);
+                const filename = fileInfo.fileUrl.split('/').pop();
+                messageContent += `
+                    <div class="file-message">
+                        <span class="file-icon">📎</span>
+                        <div class="file-info">
+                            <span class="file-name">${fileInfo.fileName}</span>
+                            <span class="file-size">${fileSize}</span>
+                        </div>
+                        <button class="file-download-btn" onclick="downloadFile('${fileInfo.fileUrl}', '${fileInfo.fileName}')">
+                            다운로드
+                        </button>
+                    </div>
+                `;
+            }
             
             messageDiv.innerHTML = messageContent;
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
+        // 파일 크기 포맷팅 함수
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
         // Enter 키로 메시지 전송
         document.getElementById('messageInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                sendChatMessage();
+                if (selectedFile) {
+                    sendFile();
+                } else {
+                    sendChatMessage();
+                }
             }
         });
     </script>

@@ -104,6 +104,39 @@ class StudyController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    // 파일 업로드
+    async uploadFile(req, res) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ success: false, message: '파일이 없습니다.' });
+            }
+
+            const { studyId } = req.params;
+            const fileInfo = {
+                fileName: req.file.originalname,
+                fileUrl: `/uploads/${req.file.filename}`,
+                fileSize: req.file.size,
+                studyId: studyId,
+                uploadTime: new Date()
+            };
+
+            // 파일 정보를 데이터베이스에 저장하는 로직 추가 필요
+            // await studyService.saveFileInfo(fileInfo);
+
+            console.log('파일 업로드 성공:', fileInfo);
+            
+            res.json({
+                success: true,
+                fileUrl: fileInfo.fileUrl,
+                fileName: fileInfo.fileName,
+                fileSize: fileInfo.fileSize
+            });
+        } catch (error) {
+            console.error('파일 업로드 에러:', error);
+            res.status(500).json({ success: false, message: '파일 업로드에 실패했습니다.' });
+        }
+    }
 }
 
 module.exports = new StudyController(); 

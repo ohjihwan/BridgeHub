@@ -8,6 +8,7 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const fs = require('fs');
 
 const studyRoutes = require('./src/routes/studyRoutes');
 const emailRoutes = require('./src/routes/emailRoutes');
@@ -16,22 +17,31 @@ const ChatHandler = require('./src/socket/chatHandler');
 const app = express();
 const server = http.createServer(app);
 
+// uploads 디렉토리 생성
+if (!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads');
+}
+
 // Socket.IO 서버 설정
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173", "http://localhost:3001"],
+        origin: "*",  // 모든 origin 허용
         methods: ["GET", "POST"],
-        credentials: true,
-        allowedHeaders: ["my-custom-header"]
+        credentials: true
     },
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,  // Engine.IO 3 프로토콜 허용
+    pingTimeout: 60000,  // ping 타임아웃 설정
+    pingInterval: 25000  // ping 간격 설정
 });
 
 const port = process.env.PORT || 3001;
 
 // 미들웨어 설정
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:3001"],
+    origin: "*",  // 모든 origin 허용
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
 
@@ -39,6 +49,24 @@ app.use(express.json());
 
 // 정적 파일 제공 설정
 app.use('/test', express.static(path.join(__dirname, 'test')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    setHeaders: (res, path) => {
+        res.set('Content-Disposition', 'attachment');
+    }
+}));
+
+// 파일 다운로드 라우트 추가
+app.get('/download/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, 'uploads', filename);
+    
+    res.download(filePath, filename, (err) => {
+        if (err) {
+            console.error('파일 다운로드 에러:', err);
+            res.status(404).send('파일을 찾을 수 없습니다.');
+        }
+    });
+});
 
 // API 라우터 설정
 app.use('/api/study', studyRoutes);
