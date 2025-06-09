@@ -17,12 +17,20 @@ function Login({ onSwitchToSignUp }) {
 	return (
 		<div className="login">
 			<div className="login__container">
-				<h2 className="login__title">로그인</h2>
+
+				<h2 className="login__title"></h2>
+
 				<form className="login__area" onSubmit={handleSubmit}>
 					<div className="login__forms">
-						<input className="login__input" type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="아이디를 입력하세요"/>
-						<input className="login__input" type="password" value={userPw} onChange={(e) => setUserPw(e.target.value)} placeholder="비밀번호를 입력하세요"/>
+						<div className="field">
+							<input className="text" type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="이메일를 입력하세요"/>
+						</div>
+						<div className="field">
+							<input className="text" type="password" value={userPw} onChange={(e) => setUserPw(e.target.value)} placeholder="비밀번호를 입력하세요"/>
+						</div>
 					</div>
+
+
 					<div className="login__checkbox">
 						<input type="checkbox" id="remember" />
 						<label htmlFor="remember">아이디 기억하기</label>

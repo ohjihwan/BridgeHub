@@ -1,3 +1,6 @@
+@use 'variables' as *;
+@use "sass:list";
+
 // Flex Center
 @mixin flex-center {
 	display: flex;
@@ -30,9 +33,42 @@
 @mixin button($bg, $color: #fff) {
 	background-color: $bg;
 	color: $color;
-	padding: rem(10) rem(20);
-	border-radius: rem(6);
+	padding: 1rem 2rem;
+	border-radius: 0.6rem;
 	border: none;
 	cursor: pointer;
 	font-weight: 500;
+}
+
+// 인풋 스타일
+
+@mixin button-base {
+	flex: 1;
+	padding: 1.2rem;
+	background: $color-primary;
+	color: $bg-root;
+	border: none;
+	border-radius: 0.6rem;
+	font-size: 1.6rem1;
+	cursor: pointer;
+	transition: background-color 0.3s;
+
+	&:hover {
+		background: $color-secondary;
+	}
+}
+
+// 텍스트 버튼
+@mixin text-button {
+	background-color: transparent;
+	border: none;
+	text-decoration: underline;
+	padding: 0.8rem;
+	font-weight: normal;
+	font-size: 1.4rem;;
+	color: $font1;
+		
+	&:hover {
+		background-color: transparent;
+	}
 }
