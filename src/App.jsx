@@ -10,7 +10,7 @@ function App() {
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setShowIntro(false);
-		}, 3000);
+		}, 5000);
 
 		return () => clearTimeout(timer);
 	}, []);
@@ -20,11 +20,13 @@ function App() {
 			{showIntro ? (
 				<div className="intro">
 					<div className="intro__container">
-						<h1 className='intro__logo'>
-							<div className="intro__imgmotion">
-								<div className="wave"></div>
+						<h1 className='animation-logo --showAnimation' aria-label="Bridge Hub">
+							<div className="animation-logo__imgmotion">
+								<div className="animation-logo__wave">
+									<i className="animation-logo__wave1"></i>
+									<i className="animation-logo__wave2"></i>
+								</div>
 							</div>
-							<div className="hide">브릿지허브에 오신걸 환영합니다</div>
 						</h1>
 					</div>
 				</div>

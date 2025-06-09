@@ -16,12 +16,6 @@
 	transform: translate(-50%, -50%);
 }
 
-// Size 지정
-@mixin size($width, $height: $width) {
-	width: $width;
-	height: $height;
-}
-
 // 텍스트 한 줄 말줄임 처리
 @mixin ellipsis {
 	overflow: hidden;
@@ -29,46 +23,35 @@
 	white-space: nowrap;
 }
 
-// 버튼 스타일
-@mixin button($bg, $color: #fff) {
-	background-color: $bg;
-	color: $color;
-	padding: 1rem 2rem;
-	border-radius: 0.6rem;
-	border: none;
-	cursor: pointer;
-	font-weight: 500;
-}
-
-// 인풋 스타일
-
+// 메인 버튼 스타일
 @mixin button-base {
 	flex: 1;
-	padding: 1.2rem;
-	background: $color-primary;
-	color: $bg-root;
+	height:5.2rem;
+	padding:0 1.2rem;
 	border: none;
 	border-radius: 0.6rem;
-	font-size: 1.6rem1;
+	background: $color-primary;
+	color: $bg-root;
+	font-weight:bold;
+	font-size: 1.8rem;
 	cursor: pointer;
-	transition: background-color 0.3s;
 
-	&:hover {
+	&:active {
 		background: $color-secondary;
 	}
 }
 
 // 텍스트 버튼
 @mixin text-button {
-	background-color: transparent;
-	border: none;
-	text-decoration: underline;
 	padding: 0.8rem;
+	border: none;
+	background-color: transparent;
+	color: $font1;
 	font-weight: normal;
 	font-size: 1.4rem;;
-	color: $font1;
+	text-decoration: underline;
 		
-	&:hover {
+	&:active {
 		background-color: transparent;
 	}
 }
