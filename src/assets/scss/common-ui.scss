@@ -316,14 +316,15 @@ legend,
 // 메인 레이아웃
 .auth {
 	@include flex-center;
-	min-height: 100vh;
 	background-color: $bg-root;
-	padding:0 $padding-x;
 
 	&__container {
-		position: relative;
+		position:fixed;
+		left:0;
+		top:0;
 		width: 100%;
-		max-width: remx(400);
+		height: 100vh;
+		padding:0 $padding-x;
 		overflow: hidden;
 
 		&--login {
