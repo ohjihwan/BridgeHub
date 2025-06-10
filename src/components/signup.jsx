@@ -47,7 +47,7 @@ function SignUp({ onSwitchToLogin }) {
 							</div>
 							<div className="field">
 								<input className="text" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
-								<button className='middle-button'>이메일인증</button>
+								<button type="button" className="middle-button" disabled>이메일인증</button>
 							</div>
 							<div className="field">
 								<input className="text" type="password" name="password" value={formData.password} onChange={handleChange} placeholder="비밀번호를 입력하세요" required/>

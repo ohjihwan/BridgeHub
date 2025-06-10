@@ -40,6 +40,11 @@
 	&:active {
 		background: $color-secondary;
 	}
+
+	&:disabled {
+		background-color:$disabled;
+		cursor:no-drop;
+	}
 }
 
 // 텍스트 버튼

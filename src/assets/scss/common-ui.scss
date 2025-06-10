@@ -178,7 +178,7 @@ legend,
 		}
 	}
 
-	&.--field__error:has(.text:focus) {
+	&.--field__error:has(.text) {
 		background-color:$red;
 		&::before,
 		&::after {
@@ -197,6 +197,11 @@ legend,
 		border-radius:remx(8);
 		background-color:$color-primary;
 		color:#fff;
+
+		:disabled {
+			background-color:$disabled;
+			cursor:no-drop;
+		}
 	}
 }
 
