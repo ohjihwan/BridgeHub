@@ -29,7 +29,7 @@ function Login({ onSwitchToSignUp }) {
 
 				<form className="login__area" onSubmit={handleSubmit}>
 					<div className="login__forms">
-						<div className="field">
+						<div className="field --field__error">
 							<input className="text" type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="이메일를 입력하세요"/>
 						</div>
 						<div className="field">

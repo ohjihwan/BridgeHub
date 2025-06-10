@@ -180,10 +180,20 @@ legend,
 
 	&.--field__error:has(.text) {
 		background-color:$red;
+		animation:errorEm 1s forwards;
+		@keyframes errorEm {
+			0% {transform:rotate(0);}
+			20% {transform:rotate(2deg);}
+			40% {transform:rotate(-2deg);}
+			60% {transform:rotate(2deg);}
+			80% {transform:rotate(-2deg);}
+			100% {transform:rotate(0);}
+		}
 		&::before,
 		&::after {
-			display:none;	
+			display:none;
 		}
+		
 	}
 
 	.middle-button {
@@ -336,6 +346,28 @@ legend,
 		&--signup {
 			.auth__forms-wrapper {
 				transform: translateY(-50%);
+			}
+			.signup__forms {
+				.field {
+					transform:translateY(remx(-10));
+					opacity:0;
+					animation:inputDownShow 0.5s 0.5s forwards;
+					@for $i from 1 through 10 {
+						&:nth-child(#{$i}) {
+							animation-delay: 0.4s + ($i * 0.1s);
+						}
+					}
+				}
+			}
+			@keyframes inputDownShow {
+				0% {
+					transform:translateY(remx(-10));
+					opacity:0;
+				}
+				100% {
+					transform:translateY(remx(0));
+					opacity:1;
+				}
 			}
 		}
 	}
