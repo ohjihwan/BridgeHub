@@ -1,18 +1,14 @@
-import app from './app.mjs';
-import http from 'http';
+import express from 'express';
+import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { handleSocketConnection } from './controllers/match.mjs';
+import handleSfuSocket from './controllers/sfuSocket.mjs';
 
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: '*' }
-});
+const app = express();
+const server = createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 
-io.on('connection', socket => {
-  handleSocketConnection(socket, io);
-});
+handleSfuSocket(io);
 
-const PORT = process.env.PORT || 7600;
-server.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+server.listen(7600, () => {
+  console.log('Server running on http://localhost:7600');
 });

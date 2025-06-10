@@ -1,5 +1,3 @@
-// import wrtc from 'wrtc';
-
 // const pc = new wrtc.RTCPeerConnection(...);
 
 export const processOffer = async (offer, userId) => {

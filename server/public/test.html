@@ -2,116 +2,38 @@
 <html>
   <head>
     <title>WebRTC 테스트 페이지</title>
+    <style>
+      #videoContainer video,
+      #videoContainer img {
+        max-width: 400px;
+        display: block;
+        margin-bottom: 10px;
+      }
+    </style>
   </head>
   <body>
     <h1>WebRTC 테스트 페이지</h1>
 
-    <video id="localVideo" autoplay muted playsinline width="400" height="300"></video>
-    <video id="remoteVideo" autoplay playsinline width="400" height="300"></video>
+    <div id="videoContainer">
+      <img id="defaultProfile" src="/basic_profile.png" alt="기본 이미지" />
+    </div>
 
-    <br />
     <button id="startCamera">카메라 시작</button>
     <button id="startScreen">화면 공유 시작</button>
-    <button id="stopSharing">공유 중지</button>
+    <button id="stopShare">공유 중지</button>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- socket.io CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/socket.io/client-dist/socket.io.min.js"></script>
+
+    <!-- mediasoup-client UMD (브라우저용 버전) -->
+    <script src="https://cdn.jsdelivr.net/gh/mkhahani/mediasoup-client-umd/mediasoup.min.js"></script>
+
+    <!-- window에 할당해줘야 client.js에서 접근 가능 -->
     <script>
-      const localVideo = document.getElementById('localVideo');
-      const remoteVideo = document.getElementById('remoteVideo');
-      const cameraBtn = document.getElementById('startCamera');
-      const screenBtn = document.getElementById('startScreen');
-      const stopBtn = document.getElementById('stopSharing');
-
-      const socket = io();
-      let pc;
-      let otherId;
-      let localStream = null;
-
-      cameraBtn.onclick = async () => {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
-        if (pc) {
-          localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-        }
-      };
-
-      screenBtn.onclick = async () => {
-        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        localVideo.srcObject = localStream;
-        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-        if (isOfferer) {
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
-          socket.emit('signal', {
-            to: otherId,
-            data: pc.localDescription
-          });
-        }
-      };
-
-    
-      stopBtn.onclick = () => {
-        if (localStream) {
-          localStream.getTracks().forEach(track => track.stop());
-          localVideo.srcObject = null;
-          socket.emit('stop-sharing');
-        }
-      };
-
-      socket.emit('join-match');
-
-      socket.on('matched', ({ users }) => {
-        const me = socket.id;
-        otherId = users.find(id => id !== me);
-        isOfferer = users[0] === me;
-        startConnection();
-      });
-
-      socket.on('signal', async ({ from, data }) => {
-        if (data.type === 'offer') {
-          await pc.setRemoteDescription(data);
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          socket.emit('signal', { to: from, data: pc.localDescription });
-        } else if (data.type === 'answer') {
-          await pc.setRemoteDescription(data);
-        } else if (data.candidate) {
-          await pc.addIceCandidate(data.candidate);
-        }
-      });
-
-      // 상대방이 중단했을 때
-      socket.on('user-stopped', () => {
-        remoteVideo.srcObject = null;
-      });
-
-      let isOfferer = false;
-
-      async function startConnection() {
-        const res = await fetch('/api/rtc/turn-credentials');
-        const turn = await res.json();
-
-        const iceServers = [
-          { urls: 'stun:stun.l.google.com:19302' }
-        ];
-        if (turn && turn.urls) iceServers.push(turn);
-
-        pc = new RTCPeerConnection({ iceServers });
-
-        pc.onicecandidate = e => {
-          if (e.candidate && otherId) {
-            socket.emit('signal', {
-              to: otherId,
-              data: { candidate: e.candidate }
-            });
-          }
-        };
-
-        pc.ontrack = e => {
-          remoteVideo.srcObject = e.streams[0];
-        };
-      }
+      window.mediasoupClient = window.mediasoupClient || mediasoupClient;
     </script>
+
+    <!-- 메인 WebRTC 로직 -->
+    <script src="/client.js"></script>
   </body>
 </html>
