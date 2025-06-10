@@ -10,11 +10,6 @@ function Login({ onSwitchToSignUp }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		console.log('로그인 시도:', userId, userPw);
-		// 여기에 실제 로그인 로직을 추가하세요
-		// 임시로 바로 메인 페이지로 이동하도록 설정
-
-		await customAlert(`님, 환영합니다!`);
-
 		navigate('/main');
 	};
 
@@ -43,7 +38,7 @@ function Login({ onSwitchToSignUp }) {
 					
 					<div className="login__options">
 						<div className="find-account">
-							<button type="button" className='fund-button'>아이디 찾기</button>
+							<button type="button" className='fund-button' onClick={() => customAlert('테스트 알림!')}>아이디 찾기</button>
 							<i className='slash'>/</i>
 							<button type="button" className='fund-button'>비밀번호 찾기</button>
 						</div>

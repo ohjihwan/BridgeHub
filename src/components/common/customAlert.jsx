@@ -10,9 +10,16 @@ export default function customAlert({ message, onClose }) {
 
 	return ReactDOM.createPortal(
 		<div className="alert-wrapper">
-			<div className="alert-box">
-				<p className="alert-message">{message}</p>
-				<button className="alert-button" onClick={onClose}>확인</button>
+			<div className="alert-container">
+				<div className="alert-header">
+					<h1 className='title'>안내</h1>
+				</div>
+				<div className="alert-box">
+					<p className="alert-message">{message}</p>
+				</div>
+				<div className="alert-buttons">
+					<button className="alert-button" onClick={onClose}>확인</button>
+				</div>
 			</div>
 		</div>,
 		document.getElementById('alert-root')
