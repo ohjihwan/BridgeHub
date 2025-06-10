@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import customAlert from '@js/common-ui.js';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
 	const [userPw, setUserPw] = useState('');
 	const navigate = useNavigate();
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 		console.log('로그인 시도:', userId, userPw);
 		// 여기에 실제 로그인 로직을 추가하세요
 		// 임시로 바로 메인 페이지로 이동하도록 설정
+
+		await customAlert(`님, 환영합니다!`);
+
 		navigate('/main');
 	};
 
@@ -29,7 +33,7 @@ function Login({ onSwitchToSignUp }) {
 
 				<form className="login__area" onSubmit={handleSubmit}>
 					<div className="login__forms">
-						<div className="field --field__error">
+						<div className="field">
 							<input className="text" type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="이메일를 입력하세요"/>
 						</div>
 						<div className="field">
