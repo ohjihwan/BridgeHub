@@ -194,10 +194,12 @@ legend,
 		height:100%;
 	}
 	
-	&:has(.text:focus)::before {
+	&:has(.text:focus)::before,
+	&:has(.select:focus)::before {
 		animation:focusActiveBefore 0.25s forwards linear;
 	}
-	&:has(.text:focus)::after {
+	&:has(.text:focus)::after,
+	&:has(.select:focus)::after {
 		animation:focusActiveAfter 0.25s 0.25s forwards linear;
 	}
 	@keyframes focusActiveBefore {
@@ -226,7 +228,8 @@ legend,
 		}
 	}
 
-	&.--field__error:has(.text) {
+	&.--field__error:has(.text),
+	&.--field__error:has(.select) {
 		background-color:$red;
 		animation:errorEm 1s forwards;
 		@keyframes errorEm {
@@ -250,7 +253,7 @@ legend,
 		top: 50%;
 		z-index:10;
 		transform:translateY(-50%);
-		height:remx(30);
+		height:remx(36);
 		padding:0 remx(8);
 		border-radius:remx(8);
 		background-color:$color-primary;
@@ -266,8 +269,8 @@ legend,
 .half-field {
 	display: flex;
 	justify-content:space-between;
-	gap: remx(12);
-	margin-bottom: remx(12);
+	gap: remx(10);
+	margin-bottom: remx(10);
 
 	.field {
 		margin-bottom: 0;
@@ -370,8 +373,6 @@ legend,
 // ─────────────────────────────
 // 📄 Auth.jsx Components
 // ─────────────────────────────
-
-// 메인 레이아웃
 .auth {
 	@include flex-center;
 	background-color: $bg-root;
@@ -396,25 +397,25 @@ legend,
 				transform: translateY(-50%);
 			}
 			.signup__forms {
-				.field {
+				& > .field,
+				& > .half-field {
 					transform:translateY(remx(-10));
 					opacity:0;
-					animation:inputDownShow 0.5s 0.5s forwards;
-					@for $i from 1 through 10 {
-						&:nth-child(#{$i}) {
-							animation-delay: 0.4s + ($i * 0.1s);
+
+					&.showAni {
+						animation:inputDownShow 0.5s forwards;
+					}
+
+					@keyframes inputDownShow {
+						0% {
+							transform:translateY(remx(-10));
+							opacity:0;
+						}
+						100% {
+							transform:translateY(remx(0));
+							opacity:1;
 						}
 					}
-				}
-			}
-			@keyframes inputDownShow {
-				0% {
-					transform:translateY(remx(-10));
-					opacity:0;
-				}
-				100% {
-					transform:translateY(remx(0));
-					opacity:1;
 				}
 			}
 		}
@@ -424,7 +425,7 @@ legend,
 		display: flex;
 		flex-direction:column;
 		width: 100%;
-		transition: transform 0.6s ease-in-out;
+		transition: transform 0.25s ease-in-out;
 	}
 }
 
@@ -433,16 +434,14 @@ legend,
 	@include flex-center;
 	width: 100%;
 	height: 100vh;
-	transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
 
 	&__container {
-		display:flex;
+		@include flex-center;
 		flex-direction:column;
-		align-items:center;
 		width:100%;
-		background:$bg-root;
 		border-radius: remx(10);
-		
+		background:$bg-root;
+
 		.animation-logo {
 			margin-bottom:remx(30);
 		}
@@ -452,15 +451,11 @@ legend,
 		width: 100%;
 	}
 
-	&__forms {
-		margin-bottom: remx(20);
-	}
-
 	&__options{
 		display:flex;
 		justify-content:space-between;
 		align-items:center;
-		margin-bottom:remx(20);
+		margin-bottom:remx(10);
 
 		.find-account {
 
@@ -477,28 +472,11 @@ legend,
 	}
 
 	&__checkbox {
-		display:flex;
-		justify-content:flex-end;
-		align-items:center;
+		@include flex-center;
 
-		input {
-			
-			&:checked + label::after {
-				content:'';
-				position:absolute;
-				left:remx(7);
-				top:remx(3);
-				transform:rotate(45deg);
-				width:remx(6);
-				height:remx(10);
-				border-width:0 1px 1px 0;
-				border-style:solid;
-				border-color: $color-primary;
-			}
-		}
 		label {
 			position:relative;
-			padding-left:2.4rem;
+			padding-left:remx(24);
 			font-size:remx(13);
 
 			&::before {
@@ -509,8 +487,33 @@ legend,
 				transform:translateY(-50%);
 				width:remx(20);
 				height:remx(20);
-				border:1px solid $line2;
+				border:1px solid $line0;
 				border-radius:remx(4);
+			}
+		}
+
+		input {
+			& + label::after {
+				content:'';
+				position:absolute;
+				left:remx(7);
+				top:remx(3);
+				transform:rotate(45deg);
+				width:remx(6);
+				height:remx(10);
+				border-width:0 1px 1px 0;
+				border-style:solid;
+				border-color: $line0;
+			}
+			
+			&:checked + label::before {
+				border-color:$color-primary;
+				background-color:$color-primary;
+			}
+
+			&:checked + label::after {
+				border-width:0 2px 2px 0;
+				border-color:$bg-root;
 			}
 		}
 	}
@@ -528,13 +531,9 @@ legend,
 			color: $color-primary;
 			border: 1px solid $color-primary;
 
-			&:hover {
+			&:active {
 				background: color.adjust($color-primary, $alpha: -0.9);
 			}
-		}
-
-		&--text {
-			@include text-button;
 		}
 	}
 }
@@ -544,27 +543,19 @@ legend,
 	@include flex-center;
 	width: 100%;
 	height:100vh;
-	transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
 
 	&__container {
 		width:100%;
-		background: #fff;
 		border-radius: remx(10);
-	}
-
-	&__title {
-		text-align: center;
-		font-size: remx(24);
-		margin-bottom: remx(30);
-		color: $font1;
+		background: #fff;
+		
+		.animation-logo {
+			margin-bottom:remx(30);
+		}
 	}
 
 	&__area {
 		width: 100%;
-	}
-
-	&__forms {
-		margin-bottom: remx(20);
 	}
 
 	&__button {

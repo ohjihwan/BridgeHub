@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import customAlert from '@js/common-ui.js';
+import customAlert from '@js/common-ui';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');

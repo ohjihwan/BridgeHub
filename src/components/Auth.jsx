@@ -10,7 +10,10 @@ function Auth() {
 			<div className={`auth__container ${isLoginView ? 'auth__container--login' : 'auth__container--signup'}`}>
 				<div className="auth__forms-wrapper">
 					<Login onSwitchToSignUp={() => setIsLoginView(false)} />
-					{<SignUp onSwitchToLogin={() => setIsLoginView(true)} />}
+					{<SignUp
+						onSwitchToLogin={() => setIsLoginView(true)}
+						isActive={!isLoginView}
+					/>}
 				</div>
 			</div>
 		</div>
