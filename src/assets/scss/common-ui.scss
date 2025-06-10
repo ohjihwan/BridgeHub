@@ -198,7 +198,7 @@ legend,
 		background-color:$color-primary;
 		color:#fff;
 
-		:disabled {
+		&:disabled {
 			background-color:$disabled;
 			cursor:no-drop;
 		}
