@@ -30,6 +30,8 @@ dist-ssr
 .env
 .env.*
 coturn-key.pem
+coturn-cert.pem
+bridgehub-key.pem
 
 # Metro & cache
 .expo/
@@ -46,13 +48,6 @@ android/app/build/
 android/build/
 android/.idea/
 android/local.properties
-
-# iOS
-ios/Pods/
-ios/build/
-ios/DerivedData/
-ios/*.xcworkspace
-ios/Runner.xcworkspace
 
 # CodeGen & tools
 *.iml

@@ -1,14 +1,30 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
+import dotenv from "dotenv";
+dotenv.config();
+import https from "https";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import app from "./app.mjs";
+import { Server } from "socket.io";
 import handleSfuSocket from './controllers/sfuSocket.mjs';
 
-const app = express();
-const server = createServer(app);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const sslOptions = {
+  key: fs.readFileSync(process.env.SSL_KEY_PATH),
+  cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+};
+
+const PORT = process.env.RTC_PORT;
+
+const server = https.createServer(sslOptions, app);
+
 const io = new Server(server, { cors: { origin: '*' } });
 
+// SFU 시그널링 핸들러 등록
 handleSfuSocket(io);
 
-server.listen(7600, () => {
-  console.log('Server running on http://localhost:7600');
+server.listen(PORT, () => {
+  console.log(`[RTC] HTTPS 서버가 https://thebridgehub.org:${PORT} 에서 실행 중!`);
 });

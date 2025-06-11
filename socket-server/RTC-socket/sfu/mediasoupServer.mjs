@@ -1,4 +1,8 @@
 import { getWorker } from "./workerInstance.mjs";
+import { generateTurnCredentials } from "../utils/ice.mjs";
+import { logger } from "../utils/logger.mjs";
+import dotenv from "dotenv";
+dotenv.config();
 
 const rooms = new Map();
 
@@ -8,53 +12,48 @@ export async function initRouter(roomId) {
   const worker = await getWorker();
 
   const mediaCodecs = [
-    {
-      kind: "audio",
-      mimeType: "audio/opus",
-      clockRate: 48000,
-      channels: 2,
-    },
-    {
-      kind: "video",
-      mimeType: "video/VP8",
-      clockRate: 90000,
-    },
+    { kind: "audio", mimeType: "audio/opus", clockRate: 48000, channels: 2 },
+    { kind: "video", mimeType: "video/VP8", clockRate: 90000 }
   ];
 
   const router = await worker.createRouter({ mediaCodecs });
-
   const room = { router };
   rooms.set(roomId, room);
 
+  logger.info(`[Router] 방 생성: ${roomId}`);
   return room;
 }
 
 export function getRouter(roomId) {
-  const room = rooms.get(roomId);
-  return room?.router ?? null;
+  return rooms.get(roomId)?.router ?? null;
 }
 
 export async function createWebRtcTransport(peerId, direction) {
   const worker = await getWorker();
+  const { urls, username, credential } = generateTurnCredentials();
 
-  const transport = await worker.createWebRtcTransport({
-    listenIps: [{ ip: '0.0.0.0', announcedIp: null }],
-    enableUdp: true,
-    enableTcp: true,
-    preferUdp: true,
-    enableSctp: false,
-    iceServers: [
-      {
-        urls: [
-          'stun:54.252.32.250:3478',
-          'turn:54.252.32.250:3478?transport=udp',
-          'turn:54.252.32.250:3478?transport=tcp'
-        ],
-        username: 'your-username',
-        credential: 'your-password'
-      }
-    ]
-  });
+  const listenIps = [
+    {
+      ip: process.env.MEDIASOUP_LISTEN_IP || "0.0.0.0",
+      announcedIp: process.env.ANNOUNCED_IP || process.env.TURN_URL.replace(/^turn:/, ""),
+    }
+  ];
+
+  let transport;
+  try {
+    transport = await worker.createWebRtcTransport({
+      listenIps,
+      enableUdp: true,
+      enableTcp: true,
+      preferUdp: true,
+      enableSctp: false,
+      iceServers: [{ urls, username, credential }],
+    });
+    logger.info(`[Transport] Peer:${peerId}, 방향:${direction}, ID:${transport.id}`);
+  } catch (err) {
+    logger.error(`[Transport 생성 실패]`, err);
+    throw err;
+  }
 
   transport.appData = { peerId, direction };
 
