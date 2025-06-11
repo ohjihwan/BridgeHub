@@ -50,6 +50,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		return `${base} ${visibleIndexes.includes(index) ? 'showAni' : ''}`;
 	};
 
+	function onConfirmss() {
+		customAlert('인증되었습니다')
+	}
+
 	return (
 		<div className="signup">
 			<div className="signup__container">
@@ -70,7 +74,19 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							</div>
 							<div className={getClassName('field', 1)}>
 								<input className="text" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
-								<button type="button" className="middle-button" disabled>이메일인증</button>
+								<button type="button" className="middle-button" 
+									onClick={
+										async () => {
+											const name = await customAlert(
+												'이름을 입력해주세요',
+												value => console.log('입력된 값:', value),
+												{ showInput: true, placeholder: '홍길동' }
+											);
+											console.log('최종 반환값:', name);
+										}
+									}
+									
+								>이메일인증</button>
 							</div>
 							<div className={getClassName('field', 2)}>
 								<input className="text" type="password" name="password" value={formData.password} onChange={handleChange} placeholder="비밀번호를 입력하세요" required/>

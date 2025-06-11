@@ -162,6 +162,8 @@ legend,
 		}
 			
 		.alert-buttons {
+			display:flex;
+			gap:remx(6);
 			width:100%;
 			padding:remx(10) $padding-x remx(20);
 
@@ -175,7 +177,14 @@ legend,
 				font-size:remx(16);
 				line-height:1.2;
 				background-color:$bg-root;
+
+				&.--confirm {
+					background-color:$color-primary;
+					color:#fff;
+				}
 			}
+
+
 		}
 	}
 }
@@ -489,7 +498,7 @@ legend,
 		align-items:center;
 		margin-bottom:remx(10);
 
-		.find-account {
+		.find-buttons {
 
 			.fund-button {
 				background-color:transparent;
@@ -577,6 +586,9 @@ legend,
 	height:100vh;
 
 	&__container {
+		display:flex;
+		flex-direction: column;
+		align-items:center;
 		width:100%;
 		border-radius: remx(10);
 		background: #fff;

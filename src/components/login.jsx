@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import customAlert from '@js/common-ui';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
@@ -12,6 +11,10 @@ function Login({ onSwitchToSignUp }) {
 		console.log('로그인 시도:', userId, userPw);
 		navigate('/main');
 	};
+
+	function texttext() {
+		console.log('네엡!');
+	}
 
 	return (
 		<div className="login">
@@ -37,10 +40,10 @@ function Login({ onSwitchToSignUp }) {
 					</div>
 					
 					<div className="login__options">
-						<div className="find-account">
+						<div className="find-buttons">
 							<button type="button" className='fund-button' onClick={() => customAlert('테스트 알림!')}>아이디 찾기</button>
 							<i className='slash'>/</i>
-							<button type="button" className='fund-button'>비밀번호 찾기</button>
+							<button type="button" className='fund-button'onClick={() => customAlert('정말 비밀번호를 찾으시겠습니까?', texttext)}>비밀번호 찾기</button>
 						</div>
 						<div className="login__checkbox">
 							<input type="checkbox" id="remember" className='hide'/>
