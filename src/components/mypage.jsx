@@ -150,16 +150,6 @@ const MyPage = () => {
 							<option value="야간">야간</option>
 						</select>
 					</div>
-					<div className="info-row">
-						<span className="label">관심사</span>
-						<input 
-							className="info-row__input" 
-							type="text" 
-							name="interests"
-							value={editData.interests}
-							onChange={handleInputChange}
-						/>
-					</div>
 					<div className="message-box">
 						<textarea 
 							className="info-row__input info-row__input--textarea" 
