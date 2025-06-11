@@ -9,8 +9,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		password: '',
 		passwordConfirm: '',
 		nickname: '',
-		department: '',
-		education: '지역무관',
+		department1: '',
+		department2: '',
+		education1: '지역무관',
+		education2: '지역무관',
 		timeZone: '',
 	});
 
@@ -31,7 +33,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 	};
 
 	const triggerStepAnimation = (step) => {
-		const fieldCounts = { 1: 5, 2: 5 };
+		const fieldCounts = { 1: 6, 2: 5 };
 		const count = fieldCounts[step];
 		const delayBase = 75;
 		const delayOffset = 300;
@@ -50,10 +52,6 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		return `${base} ${visibleIndexes.includes(index) ? 'showAni' : ''}`;
 	};
 
-	function onConfirmss() {
-		customAlert('인증되었습니다')
-	}
-
 	return (
 		<div className="signup">
 			<div className="signup__container">
@@ -70,10 +68,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 					{step === 1 ? (
 						<div className="signup__forms">
 							<div className={getClassName('field', 0)}>
-								<input className="text" type="text" name="name" value={formData.name} onChange={handleChange} placeholder="이름을 입력하세요" required/>
+								<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요" required/>
 							</div>
 							<div className={getClassName('field', 1)}>
-								<input className="text" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
+								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
 								<button type="button" className="middle-button" 
 									onClick={async () => {
 										const value = await customPrompt('인증코드를 입력해주세요', 'XXXXXX');
@@ -84,20 +82,23 @@ function SignUp({ onSwitchToLogin, isActive }) {
 								>이메일인증</button>
 							</div>
 							<div className={getClassName('field', 2)}>
-								<input className="text" type="password" name="password" value={formData.password} onChange={handleChange} placeholder="비밀번호를 입력하세요" required/>
+								<input type="password" className="text" name="password" value={formData.password || ''} onChange={handleChange} placeholder="비밀번호를 입력하세요" required/>
 							</div>
 							<div className={getClassName('field', 3)}>
-								<input className="text" type="password" name="passwordConfirm" value={formData.passwordConfirm} onChange={handleChange} placeholder="비밀번호를 다시 입력하세요" required/>
+								<input type="password" className="text" name="passwordConfirm" value={formData.passwordConfirm || ''} onChange={handleChange} placeholder="비밀번호를 다시 입력하세요" required/>
 							</div>
 							<div className={getClassName('field', 4)}>
-								<input className="text" type="text" name="nickname" value={formData.nickname} onChange={handleChange} placeholder="닉네임을 입력하세요" required/>
+								<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="닉네임을 입력하세요" required/>
+							</div>
+							<div className={getClassName('field', 5)}>
+								<input type="tel" className="text" name="hp" value={formData.hp || ''} onChange={handleChange} placeholder="휴대폰번호를 입력하세요" required/>
 							</div>
 						</div>
 					) : (
 						<div className="signup__forms">
 							<div className={getClassName('half-field', 0)}>
 								<div className="field">
-									<select className="select" name="department" value={formData.department} onChange={handleChange}>
+									<select className="select" name="department1" value={formData.department1} onChange={handleChange}>
 										<option value="">학력</option>
 										<option value="고졸">고졸</option>
 										<option value="대학교">대학교</option>
@@ -105,7 +106,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 									</select>
 								</div>
 								<div className="field">
-									<select className="select" name="department" value={formData.department} onChange={handleChange}>
+									<select className="select" name="department2" value={formData.department2} onChange={handleChange}>
 										<option value="">학과/학부 선택</option>
 										<option value="컴퓨터공학과">컴퓨터공학과</option>
 										<option value="소프트웨어학과">소프트웨어학과</option>
@@ -115,15 +116,15 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							</div>
 							<div className={getClassName('half-field', 1)}>
 								<div className="field">
-									<select className="select" name="education" value={formData.education} onChange={handleChange}>
+									<select className="select" name="education1" value={formData.education1} onChange={handleChange}>
 										<option value="지역무관">지역무관</option>
 										<option value="서울">서울</option>
 										<option value="대구">대구</option>
 										<option value="부산">부산</option>
 									</select>
 								</div>
-								<div className="field" style={{ display: formData.education === '지역무관' ? 'none' : 'block' }}>
-									<select className="select" name="education" value={formData.education} onChange={handleChange}>
+								<div className="field" style={{ display: formData.education1 === '지역무관' ? 'none' : 'block' }}>
+									<select className="select" name="education2" value={formData.education2} onChange={handleChange}>
 										<option value="강남구">강남구</option>
 										<option value="서초구">서초구</option>
 										<option value="종로구">종로구</option>
