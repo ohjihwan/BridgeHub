@@ -1,9 +1,8 @@
-import { generateTurnCredentials } from '../utils/ice.mjs';
+import { getTurnCredentials } from '../utils/ice.mjs';
 
-export function getTurnCredentials(req, res) {
+export function generateTurnCredentials(req, res) {
   try {
-    const creds = generateTurnCredentials();
-
+    const creds = getTurnCredentials();
     res.json({
       urls: creds.urls,
       username: creds.username,

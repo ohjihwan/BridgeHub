@@ -1,5 +1,5 @@
 import { getWorker } from "./workerInstance.mjs";
-import { generateTurnCredentials } from "../utils/ice.mjs";
+import { getTurnCredentials } from "../utils/ice.mjs";
 import { logger } from "../utils/logger.mjs";
 import dotenv from "dotenv";
 dotenv.config();
@@ -30,7 +30,7 @@ export function getRouter(roomId) {
 
 export async function createWebRtcTransport(peerId, direction) {
   const worker = await getWorker();
-  const { urls, username, credential } = generateTurnCredentials();
+  const { urls, username, credential } = getTurnCredentials();
 
   const listenIps = [
     {
