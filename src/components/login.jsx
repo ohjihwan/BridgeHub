@@ -12,8 +12,8 @@ function Login({ onSwitchToSignUp }) {
 		navigate('/main');
 	};
 
-	function texttext() {
-		console.log('네엡!');
+	function texttext(e) {
+		console.log("이렇게 실행");
 	}
 
 	return (
@@ -41,9 +41,9 @@ function Login({ onSwitchToSignUp }) {
 					
 					<div className="login__options">
 						<div className="find-buttons">
-							<button type="button" className='fund-button' onClick={() => customAlert('테스트 알림!')}>아이디 찾기</button>
+							<button type="button" className='fund-button' onClick={() => customAlert('안녕하세요! 여긴 안내창입니다.')}>아이디 찾기</button>
 							<i className='slash'>/</i>
-							<button type="button" className='fund-button'onClick={() => customAlert('정말 비밀번호를 찾으시겠습니까?', texttext)}>비밀번호 찾기</button>
+							<button type="button" className='fund-button' onClick={() => customConfirm('정말 비밀번호를 찾으시겠습니까?', texttext)}>비밀번호 찾기</button>
 						</div>
 						<div className="login__checkbox">
 							<input type="checkbox" id="remember" className='hide'/>

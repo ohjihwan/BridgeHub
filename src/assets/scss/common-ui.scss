@@ -159,6 +159,16 @@ legend,
 			.alert-message {
 				padding: 0 remx(30) remx(20);
 			}
+
+			.field {
+				width:calc(100% - $padding-x * 2);
+				margin:0 $padding-x;
+
+				.text {
+					text-align:center;
+					text-transform:uppercase;
+				}
+			}
 		}
 			
 		.alert-buttons {
@@ -178,7 +188,7 @@ legend,
 				line-height:1.2;
 				background-color:$bg-root;
 
-				&.--confirm {
+				&.--cancel + .alert-button {
 					background-color:$color-primary;
 					color:#fff;
 				}

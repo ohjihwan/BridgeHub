@@ -75,17 +75,12 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							<div className={getClassName('field', 1)}>
 								<input className="text" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
 								<button type="button" className="middle-button" 
-									onClick={
-										async () => {
-											const name = await customAlert(
-												'이름을 입력해주세요',
-												value => console.log('입력된 값:', value),
-												{ showInput: true, placeholder: '홍길동' }
-											);
-											console.log('최종 반환값:', name);
+									onClick={async () => {
+										const value = await customPrompt('인증코드를 입력해주세요', 'XXXXXX');
+										if (value !== null) {
+											console.log('사용자가 입력한 값:', value);
 										}
-									}
-									
+									}}
 								>이메일인증</button>
 							</div>
 							<div className={getClassName('field', 2)}>
