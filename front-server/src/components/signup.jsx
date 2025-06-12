@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 function SignUp({ onSwitchToLogin, isActive }) {
 	const [step, setStep] = useState(1);
 	const [visibleIndexes, setVisibleIndexes] = useState([]);
+	const [gender, setGender] = useState('man');
 	const [formData, setFormData] = useState({
 		name: '',
 		email: '',
@@ -67,9 +68,15 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				<form className="signup__area" onSubmit={handleSubmit}>
 					{step === 1 ? (
 						<div className="signup__forms">
-							<div className={getClassName('field', 0)}>
-								<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요" required/>
+							<div className={getClassName('half-field', 0)}>
+								<div className="field">
+									<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요" required/>
+								</div>
+								<div className="field">
+									<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요" required/>
+								</div>
 							</div>
+							
 							<div className={getClassName('field', 1)}>
 								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
 								<button type="button" className="middle-button" 
@@ -87,8 +94,16 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							<div className={getClassName('field', 3)}>
 								<input type="password" className="text" name="passwordConfirm" value={formData.passwordConfirm || ''} onChange={handleChange} placeholder="비밀번호를 다시 입력하세요" required/>
 							</div>
-							<div className={getClassName('field', 4)}>
-								<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="닉네임을 입력하세요" required/>
+							<div className={getClassName('radios', 4)}>
+								<div className="radio">
+									<label htmlFor="man">남자</label>
+									<input type="radio" name="gender" id="man" checked={gender === 'man'} onChange={() => setGender('man')}/>
+								</div>
+								<div className="radio">
+									<label htmlFor="woman">여자</label>
+									<input type="radio" name="gender" id="woman" checked={gender === 'woman'} onChange={() => setGender('woman')}/>
+								</div>
+								<span className={`switcher ${gender}`}></span>
 							</div>
 							<div className={getClassName('field', 5)}>
 								<input type="tel" className="text" name="hp" value={formData.hp || ''} onChange={handleChange} placeholder="휴대폰번호를 입력하세요" required/>

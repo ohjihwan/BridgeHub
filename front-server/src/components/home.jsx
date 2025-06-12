@@ -4,7 +4,9 @@ import Detail from './detail';
 import CreateStudy from './create';
 import Header from './common/Header';
 
-const Main = () => {
+const Home = () => {
+	console.log("✅ home.jsx loaded");
+
 	const navigate = useNavigate();
 	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
@@ -32,7 +34,7 @@ const Main = () => {
 			<div className='create-studyroom'>
 				<button className="create-studyroom__button" onClick={handleCreateStudyClick}>
 					스터디 개설하기
-					<span class="sub-txt">나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!</span>
+					<span className="sub-txt">나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!</span>
 				</button>
 			</div>
 			
@@ -79,4 +81,4 @@ const Main = () => {
 	);
 };
 
-export default Main; 
+export default Home; 

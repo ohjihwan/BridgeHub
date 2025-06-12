@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import '@scss/common-ui.scss';
 import '@js/common-ui.jsx';
 import alertUtils from '@js/common-ui';
-import App from './App.jsx';
+import App from '@/App.jsx';
 
 // 전역으로 등록
 window.customAlert = alertUtils.customAlert;

@@ -9,7 +9,7 @@ function Login({ onSwitchToSignUp }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		console.log('로그인 시도:', userId, userPw);
-		navigate('/main');
+		navigate('/home');
 	};
 
 	function texttext(e) {

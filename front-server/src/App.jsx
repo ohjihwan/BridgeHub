@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Auth from '@components/Auth'
-import Main from '@components/Main'
+import Home from '@components/home'
 import MyPage from '@components/MyPage'
 
 function App() {
@@ -32,10 +32,11 @@ function App() {
 				</div>
 			) : (
 				<Routes>
-					<Route path="/login" element={<Auth />} />
-					<Route path="/main" element={<Main />} />
-					<Route path="/mypage" element={<MyPage />} />
 					<Route path="/" element={<Navigate to="/login" replace />} />
+					<Route path="/login" element={<Auth />} />
+					<Route path="/home" element={<Home />} />
+					<Route path="/mypage" element={<MyPage />} />
+					<Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
 				</Routes>
 			)}
 		</Router>

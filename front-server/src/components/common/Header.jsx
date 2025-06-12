@@ -6,6 +6,10 @@ const Header = () => {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef(null);
 
+	const handleHomeClick = () => {
+		navigate('/home');
+	};
+
 	const handleLogout = () => {
 		customConfirm('로그아웃 하시겠습니까?', () => {
 			setMenuOpen(false);
@@ -17,10 +21,6 @@ const Header = () => {
 	const handleMyPageClick = () => {
 		setMenuOpen(false);
 		navigate('/mypage');
-	};
-
-	const handleMainClick = () => {
-		navigate('/main');
 	};
 
 	const handleLogoutSet = () => {
@@ -46,7 +46,9 @@ const Header = () => {
 		<header className="header">
 			<div className="header__left">
 				<h1 className="logo">
-					<a href="javascript:void(0)" onClick={handleMainClick}><span className="hide">BridgeHub</span></a>
+					<a href="/home" onClick={(e) => { e.preventDefault(); handleHomeClick(); }}>
+						<span className="hide">BridgeHub</span>
+					</a>
 				</h1>
 			</div>
 			<div className="header__right" ref={menuRef}>
@@ -58,8 +60,8 @@ const Header = () => {
 				</button>
 				<div className={`user-menu${menuOpen ? ' --on' : ''}`}>
 					<ul>
-						<li className='user-menu__item'><a href="javascript:void(0)" onClick={handleMyPageClick}>마이페이지</a></li>
-						<li className='user-menu__item'><a href="javascript:void(0)" onClick={handleLogout}>로그아웃</a></li>
+						<li className='user-menu__item'><a href="/mypage" onClick={(e) => { e.preventDefault(); handleMyPageClick(); }}>마이페이지</a></li>
+						<li className='user-menu__item'><a href="/logout" onClick={(e) => { e.preventDefault(); handleLogout(); }}>로그아웃</a></li>
 					</ul>
 				</div>
 			</div>
