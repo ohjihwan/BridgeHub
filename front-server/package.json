@@ -1,9 +1,15 @@
 {
   "name": "bridgehub",
+  "version": "1.0.0",
+  "description": "BridgeHub - 스터디 매칭 플랫폼",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "workspaces": [
+    "api-server",
+    "socket-server",
+    "front-server"
+  ],
   "scripts": {
+<<<<<<<< HEAD:front-server/package.json
     "clean": "rimraf node_modules/.vite",
     "dev": "vite",
     "build": "vite build",
@@ -14,8 +20,40 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2"
+========
+    "start": "concurrently \"npm run start:api\" \"npm run start:socket\" \"npm run start:front\"",
+    "start:api": "cd api-server && npm start",
+    "start:socket": "cd socket-server && npm start",
+    "start:front": "cd front-server && npm run dev",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:socket\" \"npm run dev:front\"",
+    "dev:api": "cd api-server && npm run dev",
+    "dev:socket": "cd socket-server && npm run dev",
+    "dev:front": "cd front-server && npm run dev",
+    "install:all": "npm install && npm run install:api && npm run install:socket && npm run install:front",
+    "install:api": "cd api-server && npm install",
+    "install:socket": "cd socket-server && npm install",
+    "install:front": "cd front-server && npm install",
+    "build": "cd front-server && npm run build",
+    "test": "concurrently \"npm run test:api\" \"npm run test:socket\" \"npm run test:front\"",
+    "test:api": "cd api-server && npm test",
+    "test:socket": "cd socket-server && npm test",
+    "test:front": "cd front-server && npm test",
+    "lint": "concurrently \"npm run lint:api\" \"npm run lint:socket\" \"npm run lint:front\"",
+    "lint:api": "cd api-server && npm run lint",
+    "lint:socket": "cd socket-server && npm run lint",
+    "lint:front": "cd front-server && npm run lint"
+>>>>>>>> 030fb8eb9f782bce797beefa90be48ad94cb685f:package.json
   },
+  "keywords": [
+    "study",
+    "matching",
+    "platform",
+    "bridgehub"
+  ],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
+<<<<<<<< HEAD:front-server/package.json
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
@@ -27,5 +65,11 @@
     "rimraf": "^6.0.1",
     "sass": "^1.89.1",
     "vite": "^6.3.5"
+========
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+>>>>>>>> 030fb8eb9f782bce797beefa90be48ad94cb685f:package.json
   }
-}
+} 
