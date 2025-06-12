@@ -1,140 +1,48 @@
-const studyService = require('../services/studyService');
+const axios = require('axios');
+const API_BASE_URL = 'http://localhost:7100/api';
 
 class StudyController {
-    // 스터디 생성
-    async createStudy(req, res) {
+    // 스터디 참여자 목록 조회
+    async getStudyParticipants(studyId) {
         try {
-            const studyData = req.body;
-            const study = await studyService.createStudy(studyData);
-            res.status(201).json(study);
+            const response = await axios.get(`${API_BASE_URL}/study/${studyId}/participants`);
+            return response.data;
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error('스터디 참여자 조회 실패:', error);
+            throw new Error('스터디 참여자 조회에 실패했습니다.');
         }
     }
 
-    // 스터디 목록 조회
-    async getStudyList(req, res) {
+    // 스터디 참여자 수 업데이트
+    async updateStudyParticipants(studyId, count) {
         try {
-            const studies = await studyService.getStudyList();
-            res.json(studies);
+            const response = await axios.put(`${API_BASE_URL}/study/${studyId}/participants`, { count });
+            return response.data;
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error('참여자 수 업데이트 실패:', error);
+            throw new Error('참여자 수 업데이트에 실패했습니다.');
         }
     }
 
-    // 스터디 상세 조회
-    async getStudyDetail(req, res) {
+    // 스터디 상태 업데이트
+    async updateStudyStatus(studyId, status) {
         try {
-            const { studyId } = req.params;
-            const study = await studyService.getStudyDetail(studyId);
-            if (!study) {
-                return res.status(404).json({ message: '스터디를 찾을 수 없습니다.' });
-            }
-            res.json(study);
+            const response = await axios.put(`${API_BASE_URL}/study/${studyId}/status`, { status });
+            return response.data;
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error('스터디 상태 업데이트 실패:', error);
+            throw new Error('스터디 상태 업데이트에 실패했습니다.');
         }
     }
 
-    // 스터디 참여
-    async joinStudy(req, res) {
+    // 실시간 스터디 알림 전송
+    async sendStudyNotification(studyId, notification) {
         try {
-            const { studyId } = req.params;
-            const { userId } = req.body;
-            const result = await studyService.joinStudy(studyId, userId);
-            res.json(result);
+            const response = await axios.post(`${API_BASE_URL}/study/${studyId}/notifications`, notification);
+            return response.data;
         } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    // 스터디 퇴장
-    async leaveStudy(req, res) {
-        try {
-            const { studyId } = req.params;
-            const { userId } = req.body;
-            const result = await studyService.leaveStudy(studyId, userId);
-            res.json(result);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    // 채팅방 생성
-    async createChatRoom(req, res) {
-        try {
-            const { studyId } = req.params;
-            const { name, creatorId } = req.body;
-            const chatRoom = await studyService.createChatRoom(studyId, { name, creatorId });
-            res.status(201).json(chatRoom);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    // 채팅방 목록 조회
-    async getChatRooms(req, res) {
-        try {
-            const { studyId } = req.params;
-            const chatRooms = await studyService.getChatRooms(studyId);
-            res.json(chatRooms);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    // 스터디 메시지 조회
-    async getStudyMessages(req, res) {
-        try {
-            const { studyId } = req.params;
-            const messages = await studyService.getStudyMessages(studyId);
-            res.json(messages);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    // 스터디 파일 조회
-    async getStudyFiles(req, res) {
-        try {
-            const { studyId } = req.params;
-            const files = await studyService.getStudyFiles(studyId);
-            res.json(files);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    }
-
-    // 파일 업로드
-    async uploadFile(req, res) {
-        try {
-            if (!req.file) {
-                return res.status(400).json({ success: false, message: '파일이 없습니다.' });
-            }
-
-            const { studyId } = req.params;
-            const fileInfo = {
-                fileName: req.file.originalname,
-                fileUrl: `/uploads/${req.file.filename}`,
-                fileSize: req.file.size,
-                studyId: studyId,
-                uploadTime: new Date()
-            };
-
-            // 파일 정보를 데이터베이스에 저장하는 로직 추가 필요
-            // await studyService.saveFileInfo(fileInfo);
-
-            console.log('파일 업로드 성공:', fileInfo);
-            
-            res.json({
-                success: true,
-                fileUrl: fileInfo.fileUrl,
-                fileName: fileInfo.fileName,
-                fileSize: fileInfo.fileSize
-            });
-        } catch (error) {
-            console.error('파일 업로드 에러:', error);
-            res.status(500).json({ success: false, message: '파일 업로드에 실패했습니다.' });
+            console.error('알림 전송 실패:', error);
+            throw new Error('알림 전송에 실패했습니다.');
         }
     }
 }
