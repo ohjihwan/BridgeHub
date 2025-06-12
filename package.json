@@ -29,7 +29,9 @@
     "lint": "concurrently \"npm run lint:api\" \"npm run lint:socket\" \"npm run lint:front\"",
     "lint:api": "cd api-server && npm run lint",
     "lint:socket": "cd socket-server && npm run lint",
-    "lint:front": "cd front-server && npm run lint"
+    "lint:front": "cd front-server && npm run lint",
+    "clean": "rimraf node_modules **/node_modules",
+    "clean:install": "npm run clean && npm run install:all"
   },
   "keywords": [
     "study",
@@ -40,9 +42,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5",
+    "cross-env": "^7.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 } 
