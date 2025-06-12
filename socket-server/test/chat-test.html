@@ -211,6 +211,159 @@
         .file-item button:hover {
             background-color: #1976D2;
         }
+        .file-button {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .file-button:hover {
+            background: #e9ecef;
+        }
+        
+        .message-content img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+        
+        .message-content .file-attachment {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+        
+        .file-attachment i {
+            color: #666;
+        }
+        
+        .file-attachment a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .file-attachment a:hover {
+            text-decoration: underline;
+        }
+        
+        .image-preview {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .image-preview img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .drag-over {
+            border: 2px dashed #4CAF50 !important;
+            background-color: rgba(76, 175, 80, 0.1) !important;
+        }
+
+        .image-attachment {
+            margin-top: 10px;
+            max-width: 300px;
+        }
+
+        .image-attachment img {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .image-attachment img:hover {
+            transform: scale(1.05);
+        }
+
+        .file-attachment {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-attachment i {
+            font-size: 24px;
+            color: #666;
+        }
+
+        .file-attachment a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .file-attachment a:hover {
+            text-decoration: underline;
+        }
+
+        .file-name {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .image-preview-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .image-preview-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .image-preview-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .image-preview-content button {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            padding: 8px 16px;
+            background-color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .image-preview-content button:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -240,6 +393,10 @@
                 <div class="chat-input-container">
                     <div class="chat-input-wrapper">
                         <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." />
+                        <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt">
+                        <button onclick="document.getElementById('fileInput').click()" class="file-button">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
                         <button onclick="sendMessage()" id="sendButton" disabled>전송</button>
                     </div>
                 </div>
@@ -251,6 +408,10 @@
                 <div id="file-list" class="file-list"></div>
             </div>
         </div>
+    </div>
+
+    <div class="image-preview" id="imagePreview" onclick="closeImagePreview()">
+        <img id="previewImage" src="" alt="Preview">
     </div>
 
     <script>
@@ -279,12 +440,11 @@
             document.getElementById('connectionStatus').textContent = '연결 상태: 연결 중...';
 
             socket = io('http://localhost:7500', {
-                transports: ['websocket', 'polling'],
+                transports: ['websocket'],
                 reconnection: true,
                 reconnectionAttempts: 5,
                 reconnectionDelay: 1000,
-                timeout: 20000,
-                forceNew: true
+                timeout: 20000
             });
 
             // 이벤트 리스너 설정
@@ -296,75 +456,59 @@
                 document.getElementById('connectionStatus').textContent = '연결 상태: 연결됨';
                 addMessage('시스템', '서버에 연결되었습니다.', true);
                 
-                // 연결 후 바로 채팅방 참여
-                socket.emit('join-chat', {
+                // 스터디룸 참가
+                socket.emit('join-study', {
                     studyId: currentStudyId,
                     userId: currentUserId
                 });
-
-                // 파일 목록 로드
-                getFileList();
             });
 
-            socket.on('connect_error', (error) => {
-                console.error('연결 에러:', error);
-                document.getElementById('chatStatus').textContent = '연결 실패';
-                document.getElementById('connectionStatus').className = 'status disconnected';
-                document.getElementById('connectionStatus').textContent = '연결 상태: 연결 실패';
-                addMessage('시스템', '서버 연결에 실패했습니다.', true);
+            // 메시지 수신 이벤트
+            socket.on('receive-message', (data) => {
+                console.log('메시지 수신:', data);
+                if (data.userId !== currentUserId) {
+                    addMessage(data.userId, data.message, false, data.fileType, data.fileUrl, data.fileName);
+                }
             });
 
-            socket.on('disconnect', (reason) => {
-                console.log('연결 끊김:', reason);
+            // 파일 업로드 완료 이벤트
+            socket.on('file-upload-complete', (data) => {
+                console.log('파일 업로드 완료 수신:', data);
+                if (data.userId !== currentUserId) {
+                    const { userId, fileInfo } = data;
+                    const baseUrl = 'http://localhost:7100';
+                    const fileUrl = `${baseUrl}${fileInfo.fileUrl}`;
+                    
+                    addMessage(userId, '파일을 공유했습니다.', false, fileInfo.fileType, fileUrl, fileInfo.fileName);
+                }
+            });
+
+            // 에러 처리
+            socket.on('error', (error) => {
+                console.error('소켓 에러:', error);
+                addMessage('시스템', `에러: ${error.message || '알 수 없는 에러가 발생했습니다.'}`, true);
+            });
+
+            // 연결 해제
+            socket.on('disconnect', () => {
+                console.log('연결이 끊어졌습니다.');
                 document.getElementById('chatStatus').textContent = '연결 끊김';
                 document.getElementById('sendButton').disabled = true;
                 document.getElementById('connectionStatus').className = 'status disconnected';
                 document.getElementById('connectionStatus').textContent = '연결 상태: 연결 끊김';
                 addMessage('시스템', '서버와의 연결이 끊어졌습니다.', true);
             });
-
-            socket.on('chat-history', (messages) => {
-                console.log('채팅 기록 수신:', messages);
-                messages.forEach(msg => {
-                    addMessage(msg.userId, msg.content, msg.userId === '시스템');
-                });
-            });
-
-            socket.on('new-message', (message) => {
-                console.log('새 메시지 수신:', message);
-                if (message.userId !== currentUserId) {
-                    addMessage(
-                        message.userId, 
-                        message.content, 
-                        message.userId === '시스템'
-                    );
-                }
-            });
-
-            socket.on('member-count', (count) => {
-                console.log('참여자 수 업데이트:', count);
-                addMessage('시스템', `현재 참여자: ${count.count}/${count.capacity}명`, true);
-            });
-
-            socket.on('error', (error) => {
-                console.error('WebSocket 에러:', error);
-                addMessage('시스템', `에러: ${error.message}`, true);
-            });
         }
 
+        // 메시지 전송 함수
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
-
+            
             if (!message) return;
-
+            
             if (!socket || !socket.connected) {
                 alert('서버에 연결되어 있지 않습니다.');
-                return;
-            }
-
-            if (!currentStudyId || !currentUserId) {
-                alert('스터디 ID와 사용자 ID를 입력해주세요.');
                 return;
             }
 
@@ -374,9 +518,10 @@
                 message: message
             });
 
-            // 메시지 즉시 표시
+            // 자신의 메시지 즉시 표시
             addMessage(currentUserId, message, false);
 
+            // 서버로 메시지 전송
             socket.emit('send-message', {
                 studyId: currentStudyId,
                 userId: currentUserId,
@@ -387,8 +532,9 @@
         }
 
         // 메시지 표시 함수
-        function addMessage(userId, content, isSystem) {
-            const messagesDiv = document.getElementById('messageList');
+        function addMessage(userId, content, isSystem, fileType, fileUrl, fileName) {
+            console.log('메시지 추가:', { userId, content, isSystem, fileType, fileUrl, fileName });
+            
             const messageDiv = document.createElement('div');
             
             if (isSystem) {
@@ -398,17 +544,38 @@
             }
             
             const time = new Date().toLocaleTimeString();
-            const messageContent = `
+            let messageContent = `
                 <div class="message-info">
                     ${!isSystem ? `<strong>${userId}</strong>` : ''}
                     <span class="message-time">${time}</span>
                 </div>
-                <div class="message-content">${content}</div>
-            `;
+                <div class="message-content">${content}`;
             
+            // 파일 첨부 처리
+            if (fileType === 'image') {
+                console.log('이미지 첨부:', fileUrl);
+                messageContent += `
+                    <div class="image-attachment">
+                        <img src="${fileUrl}" alt="${fileName}" 
+                             onclick="showImagePreview('${fileUrl}')" 
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=이미지+로드+실패';">
+                        <span class="file-name">${fileName}</span>
+                    </div>
+                `;
+            } else if (fileType === 'file') {
+                console.log('파일 첨부:', fileUrl);
+                messageContent += `
+                    <div class="file-attachment">
+                        <i class="fas fa-file"></i>
+                        <a href="${fileUrl}/download" download="${fileName}">${fileName}</a>
+                    </div>
+                `;
+            }
+            
+            messageContent += `</div>`;
             messageDiv.innerHTML = messageContent;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            messageList.appendChild(messageDiv);
+            messageList.scrollTop = messageList.scrollHeight;
         }
 
         // Enter 키로 메시지 전송
@@ -501,6 +668,192 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
+
+        // 이미지 미리보기 함수
+        function showImagePreview(imageUrl) {
+            console.log('이미지 미리보기:', imageUrl);
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'image-preview-overlay';
+            previewDiv.innerHTML = `
+                <div class="image-preview-content">
+                    <img src="${imageUrl}" alt="미리보기" 
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=이미지+로드+실패';">
+                    <button onclick="this.parentElement.parentElement.remove()">닫기</button>
+                </div>
+            `;
+            document.body.appendChild(previewDiv);
+        }
+        
+        function closeImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'none';
+        }
+
+        // Font Awesome 추가
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+
+        // 드래그 앤 드롭 이벤트 처리
+        const chatInput = document.getElementById('messageInput');
+        const messageList = document.getElementById('messageList');
+
+        chatInput.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = 'copy';
+            chatInput.classList.add('drag-over');
+        });
+
+        chatInput.addEventListener('dragleave', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            chatInput.classList.remove('drag-over');
+        });
+
+        chatInput.addEventListener('drop', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            chatInput.classList.remove('drag-over');
+
+            const files = event.dataTransfer.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                try {
+                    // 파일 크기 체크 (10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        throw new Error('파일 크기는 10MB를 초과할 수 없습니다.');
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('userId', currentUserId);
+                    
+                    console.log('파일 업로드 시작:', file.name, file.type);
+                    
+                    const response = await fetch(`http://localhost:7100/api/study/${currentStudyId}/files`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || '파일 업로드에 실패했습니다.');
+                    }
+                    
+                    const data = await response.json();
+                    console.log('파일 업로드 응답:', data);
+                    
+                    if (data.success) {
+                        const baseUrl = 'http://localhost:7100';
+                        const fileUrl = `${baseUrl}${data.data.url}`;
+                        const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+                        
+                        // 파일 업로드 완료 이벤트 발생
+                        socket.emit('file-upload-complete', {
+                            studyId: currentStudyId,
+                            userId: currentUserId,
+                            fileInfo: {
+                                fileName: file.name,
+                                fileUrl: data.data.url,
+                                fileType: fileType,
+                                fileSize: file.size
+                            }
+                        });
+
+                        // 메시지 전송
+                        socket.emit('send-message', {
+                            studyId: currentStudyId,
+                            userId: currentUserId,
+                            message: `파일을 공유했습니다.`,
+                            fileType: fileType,
+                            fileUrl: fileUrl,
+                            fileName: file.name
+                        });
+
+                        // 자신의 메시지도 표시
+                        addMessage(currentUserId, '파일을 공유했습니다.', false, fileType, fileUrl, file.name);
+                    } else {
+                        throw new Error(data.error || '파일 업로드에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('파일 업로드 실패:', error);
+                    addMessage('시스템', `파일 업로드 실패: ${error.message}`, true);
+                }
+            }
+        });
+
+        // 파일 업로드 처리
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            try {
+                // 파일 크기 체크 (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    throw new Error('파일 크기는 10MB를 초과할 수 없습니다.');
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('userId', currentUserId);
+                
+                console.log('파일 업로드 시작:', file.name, file.type);
+                
+                const response = await fetch(`http://localhost:7100/api/study/${currentStudyId}/files`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || '파일 업로드에 실패했습니다.');
+                }
+                
+                const data = await response.json();
+                console.log('파일 업로드 응답:', data);
+                
+                if (data.success) {
+                    const baseUrl = 'http://localhost:7100';
+                    const fileUrl = `${baseUrl}${data.data.url}`;
+                    const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+                    
+                    // 파일 업로드 완료 이벤트 발생
+                    socket.emit('file-upload-complete', {
+                        studyId: currentStudyId,
+                        userId: currentUserId,
+                        fileInfo: {
+                            fileName: file.name,
+                            fileUrl: data.data.url,
+                            fileType: fileType,
+                            fileSize: file.size
+                        }
+                    });
+
+                    // 메시지 전송
+                    socket.emit('send-message', {
+                        studyId: currentStudyId,
+                        userId: currentUserId,
+                        message: `파일을 공유했습니다.`,
+                        fileType: fileType,
+                        fileUrl: fileUrl,
+                        fileName: file.name
+                    });
+
+                    // 자신의 메시지도 표시
+                    addMessage(currentUserId, '파일을 공유했습니다.', false, fileType, fileUrl, file.name);
+                } else {
+                    throw new Error(data.error || '파일 업로드에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('파일 업로드 실패:', error);
+                addMessage('시스템', `파일 업로드 실패: ${error.message}`, true);
+            }
+            
+            // 파일 입력 초기화
+            e.target.value = '';
+        });
     </script>
 </body>
 </html> 
