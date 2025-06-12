@@ -4,8 +4,17 @@ BridgeHub - 스터디 매칭 플랫폼
 프로젝트 구조
 -----------
 - api-server: REST API 서버 (포트: 7100)
+  * 스터디 관리
+  * 파일 업로드/다운로드
+  * 이메일 인증
 - socket-server: 실시간 채팅 서버 (포트: 7500)
+  * 실시간 메시지 전송
+  * 파일 공유
+  * 참여자 관리
 - front-server: React 프론트엔드 (포트: 5173)
+  * 사용자 인터페이스
+  * 실시간 채팅
+  * 파일 관리
 
 설치 및 실행
 ----------
@@ -102,24 +111,30 @@ npm run build
    - JWT_SECRET: JWT 토큰 비밀키
    - EMAIL_USER: 이메일 발신자 주소
    - EMAIL_PASS: 이메일 발신자 비밀번호
+   - UPLOAD_DIR: 파일 업로드 디렉토리 (기본값: uploads)
 
 2. 소켓 서버 (.env)
    - PORT: 서버 포트 (기본값: 7500)
    - API_URL: API 서버 URL (기본값: http://localhost:7100)
+   - CORS_ORIGIN: CORS 허용 도메인 (기본값: http://localhost:5173)
 
 주의사항
 -------
 1. 파일 업로드
    - 업로드된 파일은 api-server/uploads/{studyId}/ 디렉토리에 저장
    - 파일 크기 제한: 10MB
+   - 지원 파일 형식: 이미지(jpg, png, gif), 문서(pdf, doc, docx), 기타 파일
 
 2. 채팅
    - 실시간 메시지는 소켓 서버를 통해 전송
    - 메시지 히스토리는 API 서버에 저장
+   - 파일 공유 시 자동 다운로드 링크 생성
 
 3. 보안
    - .env 파일은 절대 git에 커밋하지 않음
    - JWT_SECRET은 반드시 안전한 값으로 설정
+   - 파일 업로드 시 MIME 타입 검증
+   - CORS 설정으로 허용된 도메인만 접근 가능
 
 문제 해결
 --------
@@ -132,11 +147,13 @@ npm run build
    - uploads 디렉토리 권한 확인
    - 파일 크기 제한 확인
    - 디스크 공간 확인
+   - MIME 타입 확인
 
 3. 채팅 연결 실패
    - 소켓 서버 실행 상태 확인
    - API 서버 연결 상태 확인
    - 브라우저 콘솔 로그 확인
+   - CORS 설정 확인
 
 문의 및 지원
 ----------

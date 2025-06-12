@@ -466,23 +466,27 @@
             // 메시지 수신 이벤트
             socket.on('receive-message', (data) => {
                 console.log('메시지 수신:', data);
-                addMessage(data.userId, data.message, false, data.fileType, data.fileUrl, data.fileName);
+                if (data.userId !== currentUserId) {
+                    addMessage(data.userId, data.message, false, data.fileType, data.fileUrl, data.fileName);
+                }
             });
 
             // 파일 업로드 완료 이벤트
             socket.on('file-upload-complete', (data) => {
                 console.log('파일 업로드 완료 수신:', data);
-                const { userId, fileInfo } = data;
-                const baseUrl = 'http://localhost:7100';
-                const fileUrl = `${baseUrl}${fileInfo.fileUrl}`;
-                
-                addMessage(userId, '파일을 공유했습니다.', false, fileInfo.fileType, fileUrl, fileInfo.fileName);
+                if (data.userId !== currentUserId) {
+                    const { userId, fileInfo } = data;
+                    const baseUrl = 'http://localhost:7100';
+                    const fileUrl = `${baseUrl}${fileInfo.fileUrl}`;
+                    
+                    addMessage(userId, '파일을 공유했습니다.', false, fileInfo.fileType, fileUrl, fileInfo.fileName);
+                }
             });
 
             // 에러 처리
             socket.on('error', (error) => {
                 console.error('소켓 에러:', error);
-                addMessage('시스템', `에러: ${error.message}`, true);
+                addMessage('시스템', `에러: ${error.message || '알 수 없는 에러가 발생했습니다.'}`, true);
             });
 
             // 연결 해제
@@ -514,14 +518,16 @@
                 message: message
             });
 
+            // 자신의 메시지 즉시 표시
+            addMessage(currentUserId, message, false);
+
+            // 서버로 메시지 전송
             socket.emit('send-message', {
                 studyId: currentStudyId,
                 userId: currentUserId,
                 message: message
             });
 
-            // 자신의 메시지도 표시
-            addMessage(currentUserId, message, false);
             messageInput.value = '';
         }
 
