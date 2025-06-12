@@ -115,7 +115,7 @@ legend,
 
 .fixed {
 	display:flex;
-	gap: remx(16);
+	gap: remx(12);
 	justify-content: center;
 	align-items: center;
 	position: fixed;
@@ -141,9 +141,8 @@ legend,
 	}
 
 	.button-primary {
-		background-color: #007bff;
+		background-color: $color-primary;
 		color: white;
-		box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
 	}
 	
 }
@@ -1008,165 +1007,131 @@ legend,
 .mypage-container {
 	padding:remx(50) remx(24) remx(100);
 
-	.info-row {
+	.edit-profile {
 		display: flex;
-		padding: 15px 0;
-		border-bottom: 1px solid #e0e0e0;
+		justify-content: flex-end;
+		margin:remx(20) 0;
 
-		.label {
-			flex: 1;
-			font-weight: bold;
-			color: #333;
+		&__edit {
+			padding-right:remx(18);
+			font-size:remx(14);
+			line-height:1;
+			background:$bg-root url('@ico/ico-edit.png') no-repeat right center / remx(14) auto;
+		}
+	}
+
+	.profile-img {
+		display:block;
+		overflow:hidden;
+		width:remx(200);
+		height:remx(200);
+		margin:0 auto;
+
+		&__button {
+			display:block;
+			width:100%;
+			height:100%;
+			border-radius:remx(70);
+			background-color:$color-primary;
+			cursor:pointer;
 		}
 
-		.value {
-			flex: 2;
-			color: #666;
+		&__img {
+			display:block;
+			width:100%;
+			height:100%;
+			object-fit:cover;
+		}
+	}
+	
+	.info-row-area {
+		margin-top:3rem;
+
+		.info-row {
+			display: flex;
+			align-items: center;
+			padding: remx(12) 0;
+			border-bottom: 1px solid $line2;
+
+			&--major,
+			&--location {
+				.info-row__select-group {
+					flex: 1;
+					display: flex;
+					flex-wrap:wrap;
+					gap: remx(8);
+				}
+			}
+
+			&--major {
+				.info-row__select-group {
+				.info-row__select {
+					flex: 0 0 remx(120);
+				}
+				.info-row__input {
+					flex: 1;
+				}
+				}
+			}
+
+			&--location {
+				.info-row__select-group {
+					.info-row__select {
+						flex: 1;
+					}
+				}
+			}
+
+			&__input {
+				flex: 1;
+				height: remx(36);
+				padding: 0 remx(12);
+				border: 1px solid #ddd;
+				border-radius: remx(4);
+				font-size: remx(14);
+
+				&:focus {
+					outline: none;
+					border-color: #007bff;
+					box-shadow: 0 0 0 remx(2) rgba(0, 123, 255, 0.1);
+				}
+
+				&--textarea {
+					height: remx(100);
+					padding: remx(12);
+					resize: vertical;
+				}
+			}
+
+			&__select {
+				cursor: pointer;
+				appearance: none;
+				background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+				background-repeat: no-repeat;
+				background-position: right remx(8) center;
+				background-size: remx(16);
+				padding-right: remx(32);
+			}
+
+			.label {
+				flex: 0 0 remx(100);
+				font-weight: 500;
+				color: #333;
+			}
+
+			.value {
+				flex: 1;
+			}
 		}
 	}
 
 	.message-box {
-		margin: 20px 0;
-		padding: 15px;
-		border: 1px solid #e0e0e0;
-		border-radius: 8px;
-		background-color: #f9f9f9;
+		margin-top: remx(20);
+		padding: remx(16);
 
 		p {
 			margin: 0;
 			color: #666;
 		}
-	}
-
-	.button-group {
-		display: flex;
-		gap: 10px;
-		margin-top: 20px;
-
-		.post-btn {
-			flex: 1;
-			padding: 12px 0;
-			border: none;
-			border-radius: 8px;
-			font-size: 1rem;
-			cursor: pointer;
-			color: white;
-			transition: background-color 0.2s;
-
-			&.personal {
-			background-color: #007bff;
-			&:hover {
-				background-color: color.adjust(#007bff, $lightness: -10%);
-			}
-			}
-
-			&.team {
-				background-color: #0056b3;
-				
-				&:hover {
-					background-color: color.adjust(#0056b3, $lightness: -10%);
-				}
-			}
-		}
-	}
-}
-
-.edit-profile {
-	display: flex;
-	justify-content: flex-end;
-	margin:remx(20) 0;
-}
-
-.info-row {
-	display: flex;
-	align-items: center;
-	padding: remx(12) 0;
-	border-bottom: 1px solid #eee;
-
-	&--major,
-	&--location {
-		.info-row__select-group {
-		flex: 1;
-		display: flex;
-		flex-wrap:wrap;
-		gap: remx(8);
-		}
-	}
-
-	&--major {
-		.info-row__select-group {
-		.info-row__select {
-			flex: 0 0 remx(120);
-		}
-		.info-row__input {
-			flex: 1;
-		}
-		}
-	}
-
-	&--location {
-		.info-row__select-group {
-		.info-row__select {
-			flex: 1;
-		}
-		}
-	}
-
-	&__input {
-		flex: 1;
-		height: remx(36);
-		padding: 0 remx(12);
-		border: 1px solid #ddd;
-		border-radius: remx(4);
-		font-size: remx(14);
-
-		&:focus {
-		outline: none;
-		border-color: #007bff;
-		box-shadow: 0 0 0 remx(2) rgba(0, 123, 255, 0.1);
-		}
-
-		&--textarea {
-		height: remx(100);
-		padding: remx(12);
-		resize: vertical;
-		}
-	}
-
-	&__select {
-		cursor: pointer;
-		appearance: none;
-		background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-		background-repeat: no-repeat;
-		background-position: right remx(8) center;
-		background-size: remx(16);
-		padding-right: remx(32);
-	}
-
-	.label {
-		flex: 0 0 remx(100);
-		font-weight: 500;
-		color: #333;
-	}
-
-	.value {
-		flex: 1;
-	}
-	}
-
-	.message-box {
-	margin-top: remx(20);
-	padding: remx(16);
-	background-color: #f8f9fa;
-	border-radius: remx(8);
-
-	p {
-		margin: 0;
-		line-height: 1.5;
-	}
-
-	.info-row__input {
-		width: 100%;
-		background-color: #fff;
 	}
 }
