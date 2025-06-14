@@ -5,7 +5,7 @@ import { config } from "../config.mjs";
 
 // 회원가입 처리
 export const register = async (req, res) => {
-  const { name, userid, password, phone, nickname } = req.body;
+  const { name, userid, password, gender,phone, education,nickname } = req.body;
   if (!name || !userid || !password) {
     return res.status(400).json({ msg: "필수값을 입력해주세요." });
   }
@@ -13,7 +13,7 @@ export const register = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const [rows] = await pool.query(
-      `INSERT INTO members (userid, name, password, phone, nickname)
+      `INSERT INTO members (userid, name, password, gender, phone, education,nickname)
        VALUES (?, ?, ?, ?, ?)`,
       [userid, name, hashedPassword, phone, nickname]
     );
