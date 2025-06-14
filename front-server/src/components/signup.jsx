@@ -76,7 +76,6 @@ function SignUp({ onSwitchToLogin, isActive }) {
 									<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요" required/>
 								</div>
 							</div>
-							
 							<div className={getClassName('field', 1)}>
 								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
 								<button type="button" className="middle-button" 

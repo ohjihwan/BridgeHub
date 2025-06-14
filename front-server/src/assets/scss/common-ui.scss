@@ -28,8 +28,8 @@ body {
 %visually-hidden {
 	overflow: hidden !important;
 	position: absolute !important;
-	width: 1px !important;
-	height: 1px !important;
+	width: 0 !important;
+	height: 0 !important;
 	margin: 0 !important;
 	padding: 0 !important;
 	border: 0 !important;
@@ -390,18 +390,18 @@ legend,
 		position:absolute;
 		top:0;
 		z-index:5;
-		width:calc(50% - 4px);
-		height:calc(100% - 4px);
-		margin:2px;
+		width:50%;
+		height:100%;
+		border:remx(2) solid $line3;
 		border-radius:$form-radius;
 		background-color:$bg-root;
-		transition:0.3s cubic-bezier(0.25, 0, 0, 1);
+		transition:0.3s ease-in-out;
 
-		&.man  {
+		&.man {
 			left:0;
 		}
 
-		&.woman  {
+		&.woman {
 			left:50%;
 		}
 	}
@@ -532,6 +532,10 @@ legend,
 				& > .radios {
 					transform:translateY(remx(-10));
 					opacity:0;
+
+					input[type="email"] {
+						padding-right:remx(85);
+					}
 
 					&.showAni {
 						animation:inputDownShow 0.5s forwards;
