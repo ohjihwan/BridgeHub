@@ -5,6 +5,8 @@ create table members (
   name varchar(50) not null,
   password varchar(255) not null,            -- 암호화된 비밀번호
   phone varchar(20),
+  gender ENUM('남자', '여자'),
+  education ENUM('고졸','대학교','대학원'),
   nickname varchar(50),
   created_at timestamp default current_timestamp,
   updated_at timestamp default current_timestamp on update current_timestamp
