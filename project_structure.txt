@@ -174,6 +174,6 @@ BridgeHub/
 - 스터디 검색 기능
 - 알림 시스템
 - 파일 공유 기능 개선
-- UI/UX 개선
+- UI/UX 개선 
 - API Gateway 도입 검토
 - WebRTC 통합 검토 

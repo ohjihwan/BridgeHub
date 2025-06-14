@@ -14,7 +14,7 @@ class ChatHandler {
             // 채팅방 참가
             socket.on('join-chat', async (data) => {
                 try {
-                    const { studyId, userId } = data;
+                const { studyId, userId } = data;
                     console.log(`사용자 ${userId}가 채팅방 ${studyId}에 참가 시도`);
 
                     // 스터디 정보 조회
@@ -31,48 +31,48 @@ class ChatHandler {
                     if (currentParticipants >= study.capacity) {
                         throw new Error('채팅방 정원이 초과되었습니다.');
                     }
-
-                    // 이전 방에서 나가기
-                    if (socket.currentRoom) {
-                        socket.leave(socket.currentRoom);
-                    }
-                    
-                    // 새 방 참가
-                    socket.join(studyId);
-                    socket.currentRoom = studyId;
+                
+                // 이전 방에서 나가기
+                if (socket.currentRoom) {
+                    socket.leave(socket.currentRoom);
+                }
+                
+                // 새 방 참가
+                socket.join(studyId);
+                socket.currentRoom = studyId;
                     socket.userId = userId;
-                    
-                    // 채팅방 정보 초기화
-                    if (!this.rooms.has(studyId)) {
-                        this.rooms.set(studyId, {
-                            messages: [],
+                
+                // 채팅방 정보 초기화
+                if (!this.rooms.has(studyId)) {
+                    this.rooms.set(studyId, {
+                        messages: [],
                             participants: new Map(),
                             capacity: study.capacity
-                        });
-                    }
-                    
-                    // 참가자 정보 저장
-                    this.rooms.get(studyId).participants.set(socket.id, {
-                        userId: userId,
-                        socketId: socket.id
                     });
+                }
+                
+                // 참가자 정보 저장
+                this.rooms.get(studyId).participants.set(socket.id, {
+                    userId: userId,
+                    socketId: socket.id
+                });
 
-                    // 채팅 기록 전송
+                // 채팅 기록 전송
                     const currentRoom = this.rooms.get(studyId);
                     socket.emit('chat-history', currentRoom.messages);
 
-                    // 참여자 수 업데이트
-                    this.io.to(studyId).emit('member-count', {
+                // 참여자 수 업데이트
+                this.io.to(studyId).emit('member-count', {
                         count: currentRoom.participants.size,
                         capacity: study.capacity
-                    });
+                });
 
-                    // 입장 메시지 전송
-                    this.io.to(studyId).emit('new-message', {
-                        userId: '시스템',
-                        content: `${userId}님이 입장하셨습니다.`,
-                        timestamp: new Date().toISOString()
-                    });
+                // 입장 메시지 전송
+                this.io.to(studyId).emit('new-message', {
+                    userId: '시스템',
+                    content: `${userId}님이 입장하셨습니다.`,
+                    timestamp: new Date().toISOString()
+                });
 
                 } catch (error) {
                     console.error('채팅방 참가 실패:', error);

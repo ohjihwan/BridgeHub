@@ -6,14 +6,13 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const fs = require('fs');
 
-const emailRoutes = require('./src/routes/emailRoutes');
 const studyRoutes = require('./src/routes/studyRoutes');
 const fileRoutes = require('./src/routes/fileRoutes');
+const authRoutes = require('./src/routes/authRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,19 +35,26 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // 정적 파일 제공 설정
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/test', express.static(path.join(__dirname, 'test')));
 
 // 라우트 등록
-app.use('/api/email', emailRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/file', fileRoutes);
 app.use('/api/study', studyRoutes);
-app.use('/api/study', fileRoutes);
 
 // 기본 라우트
 app.get('/', (req, res) => {
     res.json({ message: 'BridgeHub API 서버가 실행 중입니다.' });
+});
+
+// 에러 핸들링 미들웨어
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: '서버 에러가 발생했습니다.' });
 });
 
 // 서버 시작

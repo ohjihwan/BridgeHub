@@ -1,22 +1,40 @@
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
-const verifyToken = (socket, next) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const API_URL = process.env.API_URL || 'http://localhost:7100';
+
+const verifyToken = async (token) => {
     try {
-        const token = socket.handshake.auth.token;
+        // JWT 토큰 검증
+        const decoded = jwt.verify(token, JWT_SECRET);
         
-        if (!token) {
-            return next(new Error('인증 토큰이 필요합니다.'));
-        }
+        // API 서버에서 사용자 정보 확인
+        const response = await axios.get(`${API_URL}/api/auth/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.user = decoded;
-        next();
+        return response.data.user;
     } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            return next(new Error('토큰이 만료되었습니다.'));
-        }
-        return next(new Error('유효하지 않은 토큰입니다.'));
+        throw new Error('인증에 실패했습니다.');
     }
 };
 
-module.exports = { verifyToken }; 
+module.exports = (socket, next) => {
+    const token = socket.handshake.auth.token;
+    
+    if (!token) {
+        return next(new Error('인증 토큰이 필요합니다.'));
+    }
+
+    verifyToken(token)
+        .then(user => {
+            socket.user = user;
+            next();
+        })
+        .catch(error => {
+            next(error);
+        });
+}; 

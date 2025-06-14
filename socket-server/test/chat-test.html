@@ -19,10 +19,14 @@
             gap: 20px;
         }
         .section {
+            display: none;  /* 기본적으로 모든 섹션 숨김 */
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section.active {
+            display: block;  /* 활성화된 섹션만 표시 */
         }
         .form-group {
             margin-bottom: 15px;
@@ -33,7 +37,7 @@
             color: #333;
             font-weight: bold;
         }
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -171,21 +175,13 @@
             margin: 10px 0;
             border-radius: 4px;
         }
-        .status.connected {
+        .status.success {
             background-color: #d4edda;
             color: #155724;
         }
-        .status.disconnected {
+        .status.error {
             background-color: #f8d7da;
             color: #721c24;
-        }
-        .error {
-            color: #dc3545;
-            margin-top: 5px;
-        }
-        .success {
-            color: #28a745;
-            margin-top: 5px;
         }
         .file-upload {
             margin-top: 10px;
@@ -364,26 +360,181 @@
         .image-preview-content button:hover {
             background-color: #f0f0f0;
         }
+        .study-list {
+            margin-top: 20px;
+        }
+        .study-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .study-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .study-item h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .study-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .study-item button {
+            margin-top: 10px;
+        }
+        .study-create-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .study-list-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .study-list-container h3 {
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .refresh-btn {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
     <h1>BridgeHub 채팅 테스트</h1>
     
     <div class="container">
-        <div class="section">
-            <h2>채팅 테스트</h2>
+        <!-- 로그인 섹션 -->
+        <div class="section active" id="loginSection">
+            <h2>로그인</h2>
             <div class="form-group">
-                <label for="study-id">스터디 ID:</label>
-                <input type="text" id="study-id" required>
+                <label for="loginUserid">아이디:</label>
+                <input type="text" id="loginUserid" required>
             </div>
             <div class="form-group">
-                <label for="user-id">사용자 ID:</label>
-                <input type="text" id="user-id" required>
+                <label for="loginPassword">비밀번호:</label>
+                <input type="password" id="loginPassword" required>
             </div>
-            <button onclick="joinChat()">채팅 참여</button>
-            <div id="connectionStatus" class="status disconnected">
-                연결 상태: 연결되지 않음
+            <button onclick="login()">로그인</button>
+            <button onclick="showSignupSection()">회원가입</button>
+            <div id="loginStatus" class="status"></div>
+        </div>
+
+        <!-- 회원가입 섹션 -->
+        <div class="section" id="signupSection">
+            <h2>회원가입</h2>
+            <div class="form-group">
+                <label for="email">이메일:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" id="email" placeholder="이메일 입력" style="flex: 1;">
+                    <button onclick="sendVerificationCode()" id="sendCodeBtn">인증번호 전송</button>
+                </div>
+                <div id="emailStatus" class="verification-status unverified">이메일 인증이 필요합니다.</div>
             </div>
+            <div class="form-group" id="verificationCodeGroup" style="display: none;">
+                <label for="verificationCode">인증번호:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="verificationCode" placeholder="인증번호 입력" style="flex: 1;">
+                    <button onclick="verifyCode()" id="verifyCodeBtn">인증하기</button>
+                </div>
+                <div id="verificationStatus" class="verification-status pending">인증번호를 입력해주세요.</div>
+            </div>
+            <div class="form-group">
+                <label for="userid">아이디:</label>
+                <input type="text" id="userid" required>
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호:</label>
+                <input type="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <label for="name">이름:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">전화번호:</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">성별:</label>
+                <select id="gender">
+                    <option value="">선택하세요</option>
+                    <option value="M">남자</option>
+                    <option value="F">여자</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="education">학력:</label>
+                <select id="education">
+                    <option value="">선택하세요</option>
+                    <option value="고졸">고졸</option>
+                    <option value="대학교">대학교</option>
+                    <option value="대학원">대학원</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nickname">닉네임:</label>
+                <input type="text" id="nickname" required>
+            </div>
+            <button onclick="signup()" id="signupBtn" disabled>회원가입</button>
+            <button onclick="showLoginSection()">로그인으로 돌아가기</button>
+            <div id="signupStatus" class="status"></div>
+        </div>
+
+        <!-- 스터디 관리 섹션 -->
+        <div class="section" id="studySection">
+            <h2>스터디 관리</h2>
+            
+            <!-- 스터디 생성 폼 -->
+            <div class="study-create-form">
+                <h3>새 스터디 만들기</h3>
+                <div class="form-group">
+                    <label>스터디 이름</label>
+                    <input type="text" id="studyName" placeholder="스터디 이름 입력">
+                </div>
+                <div class="form-group">
+                    <label>과목</label>
+                    <input type="text" id="studySubject" placeholder="과목 입력">
+                </div>
+                <div class="form-group">
+                    <label>장소</label>
+                    <input type="text" id="studyLocation" placeholder="장소 입력">
+                </div>
+                <div class="form-group">
+                    <label>세부 장소</label>
+                    <input type="text" id="studyDetailLocation" placeholder="세부 장소 입력">
+                </div>
+                <div class="form-group">
+                    <label>최대 인원</label>
+                    <input type="number" id="studyMaxMembers" placeholder="최대 인원 입력" min="2" max="10">
+                </div>
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea id="studyDescription" placeholder="스터디 설명 입력"></textarea>
+                </div>
+                <button onclick="createStudy()">스터디 생성</button>
+            </div>
+
+            <!-- 스터디 목록 -->
+            <div class="study-list-container">
+                <h3>내 스터디 목록</h3>
+                <button onclick="loadStudies()" class="refresh-btn">새로고침</button>
+                <div class="study-list" id="studyList"></div>
+            </div>
+        </div>
+
+        <!-- 채팅 섹션 -->
+        <div class="section" id="chatSection">
+            <h2>채팅</h2>
             <div class="chat-container">
                 <div class="chat-header">
                     <h2>스터디 채팅</h2>
@@ -416,125 +567,228 @@
 
     <script>
         let socket;
-        let currentStudyId;
+        let token;
         let currentUserId;
+        let currentStudyId;
+        const API_URL = 'http://localhost:7100';
+        const SOCKET_URL = 'http://localhost:7500';
+        let isEmailVerified = false;
 
-        // WebSocket 테스트 함수들
-        function joinChat() {
-            currentStudyId = document.getElementById('study-id').value;
-            currentUserId = document.getElementById('user-id').value;
+        // 섹션 전환 함수
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
 
-            if (!currentStudyId || !currentUserId) {
-                alert('스터디 ID와 사용자 ID를 입력해주세요.');
+        function showLoginSection() {
+            showSection('loginSection');
+        }
+
+        function showSignupSection() {
+            showSection('signupSection');
+        }
+
+        function showStudySection() {
+            showSection('studySection');
+            loadStudies();
+        }
+
+        function showChatSection(studyId) {
+            currentStudyId = studyId;
+            showSection('chatSection');
+            joinStudy(studyId);
+        }
+
+        // 로그인
+        async function login() {
+            const userid = document.getElementById('loginUserid').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!userid || !password) {
+                showStatus('loginStatus', '아이디와 비밀번호를 입력해주세요.', 'error');
                 return;
             }
 
-            // WebSocket 연결
-            if (socket) {
-                socket.disconnect();
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userid,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showStatus('loginStatus', data.message, 'success');
+                    token = data.data.token;
+                    currentUserId = getUserIdFromToken(token);
+                    initializeSocket();
+                    showStudySection();
+                } else {
+                    showStatus('loginStatus', data.error || '로그인에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('로그인 에러:', error);
+                showStatus('loginStatus', '서버 에러가 발생했습니다.', 'error');
+            }
+        }
+
+        // 스터디 생성
+        async function createStudy() {
+            const name = document.getElementById('studyName').value;
+            const subject = document.getElementById('studySubject').value;
+            const location = document.getElementById('studyLocation').value;
+            const detailLocation = document.getElementById('studyDetailLocation').value;
+            const maxMembers = document.getElementById('studyMaxMembers').value;
+            const description = document.getElementById('studyDescription').value;
+
+            if (!name || !subject || !location || !maxMembers) {
+                showStatus('loginStatus', '필수 항목을 모두 입력해주세요.', 'error');
+                return;
             }
 
-            document.getElementById('chatStatus').textContent = '연결 중...';
-            document.getElementById('sendButton').disabled = true;
-            document.getElementById('connectionStatus').className = 'status disconnected';
-            document.getElementById('connectionStatus').textContent = '연결 상태: 연결 중...';
+            try {
+                const response = await fetch(`${API_URL}/api/study`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: name,
+                        subject,
+                        location,
+                        detailLocation,
+                        maxMembers: parseInt(maxMembers),
+                        description
+                    })
+                });
 
-            socket = io('http://localhost:7500', {
-                transports: ['websocket'],
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000,
-                timeout: 20000
-            });
+                const data = await response.json();
+                if (data.success) {
+                    showStatus('loginStatus', '스터디가 생성되었습니다.', 'success');
+                    loadStudies();
+                    // 입력 필드 초기화
+                    document.getElementById('studyName').value = '';
+                    document.getElementById('studySubject').value = '';
+                    document.getElementById('studyLocation').value = '';
+                    document.getElementById('studyDetailLocation').value = '';
+                    document.getElementById('studyMaxMembers').value = '';
+                    document.getElementById('studyDescription').value = '';
+                } else {
+                    showStatus('loginStatus', data.error || '스터디 생성에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('스터디 생성 에러:', error);
+                showStatus('loginStatus', '서버 에러가 발생했습니다.', 'error');
+            }
+        }
 
-            // 이벤트 리스너 설정
-            socket.on('connect', () => {
-                console.log('서버에 연결되었습니다.');
-                document.getElementById('chatStatus').textContent = '연결됨';
-                document.getElementById('sendButton').disabled = false;
-                document.getElementById('connectionStatus').className = 'status connected';
-                document.getElementById('connectionStatus').textContent = '연결 상태: 연결됨';
-                addMessage('시스템', '서버에 연결되었습니다.', true);
-                
-                // 스터디룸 참가
+        // 스터디 목록 로드
+        async function loadStudies() {
+            try {
+                const response = await fetch(`${API_URL}/api/study`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    const studyList = document.getElementById('studyList');
+                    studyList.innerHTML = data.data.map(study => `
+                        <div class="study-item">
+                            <h3>${study.title}</h3>
+                            <p>과목: ${study.subject}</p>
+                            <p>장소: ${study.location}</p>
+                            <p>인원: ${study.currentMembers}/${study.maxMembers}</p>
+                            <p>ID: ${study.id}</p>
+                            <button onclick="showChatSection('${study.id}')">채팅 참여</button>
+                        </div>
+                    `).join('');
+                } else {
+                    showStatus('loginStatus', data.error, 'error');
+                }
+            } catch (error) {
+                console.error('스터디 목록 로드 에러:', error);
+                showStatus('loginStatus', '스터디 목록 로드 실패', 'error');
+            }
+        }
+
+        // 스터디 참여
+        function joinStudy(studyId) {
+            if (socket) {
                 socket.emit('join-study', {
-                    studyId: currentStudyId,
+                    studyId,
                     userId: currentUserId
                 });
+            }
+        }
+
+        // 소켓 초기화
+        function initializeSocket() {
+            socket = io(SOCKET_URL, {
+                auth: { token }
             });
 
-            // 메시지 수신 이벤트
+            socket.on('connect', () => {
+                console.log('소켓 연결 성공');
+                document.getElementById('chatStatus').textContent = '연결됨';
+                document.getElementById('sendButton').disabled = false;
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('소켓 연결 에러:', error);
+                document.getElementById('chatStatus').textContent = '연결 실패';
+                document.getElementById('sendButton').disabled = true;
+            });
+
             socket.on('receive-message', (data) => {
-                console.log('메시지 수신:', data);
                 if (data.userId !== currentUserId) {
                     addMessage(data.userId, data.message, false, data.fileType, data.fileUrl, data.fileName);
                 }
             });
 
-            // 파일 업로드 완료 이벤트
             socket.on('file-upload-complete', (data) => {
-                console.log('파일 업로드 완료 수신:', data);
                 if (data.userId !== currentUserId) {
                     const { userId, fileInfo } = data;
-                    const baseUrl = 'http://localhost:7100';
+                    const baseUrl = API_URL;
                     const fileUrl = `${baseUrl}${fileInfo.fileUrl}`;
-                    
                     addMessage(userId, '파일을 공유했습니다.', false, fileInfo.fileType, fileUrl, fileInfo.fileName);
                 }
             });
-
-            // 에러 처리
-            socket.on('error', (error) => {
-                console.error('소켓 에러:', error);
-                addMessage('시스템', `에러: ${error.message || '알 수 없는 에러가 발생했습니다.'}`, true);
-            });
-
-            // 연결 해제
-            socket.on('disconnect', () => {
-                console.log('연결이 끊어졌습니다.');
-                document.getElementById('chatStatus').textContent = '연결 끊김';
-                document.getElementById('sendButton').disabled = true;
-                document.getElementById('connectionStatus').className = 'status disconnected';
-                document.getElementById('connectionStatus').textContent = '연결 상태: 연결 끊김';
-                addMessage('시스템', '서버와의 연결이 끊어졌습니다.', true);
-            });
         }
 
-        // 메시지 전송 함수
+        // 메시지 전송
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
-            
+
             if (!message) return;
-            
+
             if (!socket || !socket.connected) {
                 alert('서버에 연결되어 있지 않습니다.');
                 return;
             }
 
-            console.log('메시지 전송:', {
-                studyId: currentStudyId,
-                userId: currentUserId,
-                message: message
-            });
-
-            // 자신의 메시지 즉시 표시
-            addMessage(currentUserId, message, false);
-
-            // 서버로 메시지 전송
             socket.emit('send-message', {
                 studyId: currentStudyId,
                 userId: currentUserId,
                 message: message
             });
 
+            addMessage(currentUserId, message, false);
             messageInput.value = '';
         }
 
-        // 메시지 표시 함수
+        // 메시지 표시
         function addMessage(userId, content, isSystem, fileType, fileUrl, fileName) {
-            console.log('메시지 추가:', { userId, content, isSystem, fileType, fileUrl, fileName });
-            
             const messageDiv = document.createElement('div');
             
             if (isSystem) {
@@ -551,9 +805,7 @@
                 </div>
                 <div class="message-content">${content}`;
             
-            // 파일 첨부 처리
             if (fileType === 'image') {
-                console.log('이미지 첨부:', fileUrl);
                 messageContent += `
                     <div class="image-attachment">
                         <img src="${fileUrl}" alt="${fileName}" 
@@ -563,7 +815,6 @@
                     </div>
                 `;
             } else if (fileType === 'file') {
-                console.log('파일 첨부:', fileUrl);
                 messageContent += `
                     <div class="file-attachment">
                         <i class="fas fa-file"></i>
@@ -578,122 +829,74 @@
             messageList.scrollTop = messageList.scrollHeight;
         }
 
-        // Enter 키로 메시지 전송
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        async function uploadFile() {
+        // 파일 업로드 공통 함수
+        async function handleFileUpload(file) {
             try {
-                const studyId = document.getElementById('study-id').value;
-                const userId = document.getElementById('user-id').value;
-                const fileInput = document.getElementById('file-input');
-                const file = fileInput.files[0];
-
-                if (!file) {
-                    alert('파일을 선택해주세요.');
-                    return;
+                if (file.size > 10 * 1024 * 1024) {
+                    throw new Error('파일 크기는 10MB를 초과할 수 없습니다.');
                 }
 
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('userId', userId);
-
-                const response = await fetch(`http://localhost:7100/api/study/${studyId}/files`, {
+                formData.append('userId', currentUserId);
+                
+                const response = await fetch(`${API_URL}/api/study/${currentStudyId}/files`, {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: formData
                 });
-
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || '파일 업로드에 실패했습니다.');
+                }
+                
                 const data = await response.json();
+                
                 if (data.success) {
-                    alert('파일 업로드 성공');
-                    getFileList();
+                    const baseUrl = API_URL;
+                    const fileUrl = `${baseUrl}${data.data.url}`;
+                    const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+                    
+                    socket.emit('file-upload-complete', {
+                        studyId: currentStudyId,
+                        userId: currentUserId,
+                        fileInfo: {
+                            fileName: file.name,
+                            fileUrl: data.data.url,
+                            fileType: fileType,
+                            fileSize: file.size
+                        }
+                    });
+
+                    socket.emit('send-message', {
+                        studyId: currentStudyId,
+                        userId: currentUserId,
+                        message: `파일을 공유했습니다.`,
+                        fileType: fileType,
+                        fileUrl: fileUrl,
+                        fileName: file.name
+                    });
+
+                    addMessage(currentUserId, '파일을 공유했습니다.', false, fileType, fileUrl, file.name);
                 } else {
-                    alert('파일 업로드 실패: ' + data.error);
+                    throw new Error(data.error || '파일 업로드에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('파일 업로드 실패:', error);
-                alert('파일 업로드에 실패했습니다.');
+                addMessage('시스템', `파일 업로드 실패: ${error.message}`, true);
             }
         }
 
-        async function getFileList() {
-            try {
-                const studyId = document.getElementById('study-id').value;
-                const response = await fetch(`http://localhost:7100/api/study/${studyId}/files`);
-                const data = await response.json();
-
-                const fileList = document.getElementById('file-list');
-                fileList.innerHTML = '';
-                if (data.success && data.data.length > 0) {
-                    data.data.forEach(file => {
-                        const fileItem = document.createElement('div');
-                        fileItem.className = 'file-item';
-                        fileItem.innerHTML = `
-                            <span>${file.originalName} (${formatFileSize(file.size)})</span>
-                            <button onclick="downloadFile('${studyId}', '${file.filename}', '${file.originalName}')">다운로드</button>
-                        `;
-                        fileList.appendChild(fileItem);
-                    });
-                }
-            } catch (error) {
-                console.error('파일 목록 조회 실패:', error);
-            }
-        }
-
-        async function downloadFile(studyId, filename, originalName) {
-            try {
-                const response = await fetch(`http://localhost:7100/api/study/${studyId}/files/${filename}`);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = originalName;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            } catch (error) {
-                console.error('파일 다운로드 실패:', error);
-                alert('파일 다운로드에 실패했습니다.');
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // 이미지 미리보기 함수
-        function showImagePreview(imageUrl) {
-            console.log('이미지 미리보기:', imageUrl);
-            const previewDiv = document.createElement('div');
-            previewDiv.className = 'image-preview-overlay';
-            previewDiv.innerHTML = `
-                <div class="image-preview-content">
-                    <img src="${imageUrl}" alt="미리보기" 
-                         onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=이미지+로드+실패';">
-                    <button onclick="this.parentElement.parentElement.remove()">닫기</button>
-                </div>
-            `;
-            document.body.appendChild(previewDiv);
-        }
-        
-        function closeImagePreview() {
-            const preview = document.getElementById('imagePreview');
-            preview.style.display = 'none';
-        }
-
-        // Font Awesome 추가
-        const fontAwesome = document.createElement('link');
-        fontAwesome.rel = 'stylesheet';
-        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
-        document.head.appendChild(fontAwesome);
+        // 파일 업로드 처리
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            await handleFileUpload(file);
+            e.target.value = '';
+        });
 
         // 드래그 앤 드롭 이벤트 처리
         const chatInput = document.getElementById('messageInput');
@@ -719,141 +922,169 @@
 
             const files = event.dataTransfer.files;
             for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                try {
-                    // 파일 크기 체크 (10MB)
-                    if (file.size > 10 * 1024 * 1024) {
-                        throw new Error('파일 크기는 10MB를 초과할 수 없습니다.');
-                    }
-
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('userId', currentUserId);
-                    
-                    console.log('파일 업로드 시작:', file.name, file.type);
-                    
-                    const response = await fetch(`http://localhost:7100/api/study/${currentStudyId}/files`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || '파일 업로드에 실패했습니다.');
-                    }
-                    
-                    const data = await response.json();
-                    console.log('파일 업로드 응답:', data);
-                    
-                    if (data.success) {
-                        const baseUrl = 'http://localhost:7100';
-                        const fileUrl = `${baseUrl}${data.data.url}`;
-                        const fileType = file.type.startsWith('image/') ? 'image' : 'file';
-                        
-                        // 파일 업로드 완료 이벤트 발생
-                        socket.emit('file-upload-complete', {
-                            studyId: currentStudyId,
-                            userId: currentUserId,
-                            fileInfo: {
-                                fileName: file.name,
-                                fileUrl: data.data.url,
-                                fileType: fileType,
-                                fileSize: file.size
-                            }
-                        });
-
-                        // 메시지 전송
-                        socket.emit('send-message', {
-                            studyId: currentStudyId,
-                            userId: currentUserId,
-                            message: `파일을 공유했습니다.`,
-                            fileType: fileType,
-                            fileUrl: fileUrl,
-                            fileName: file.name
-                        });
-
-                        // 자신의 메시지도 표시
-                        addMessage(currentUserId, '파일을 공유했습니다.', false, fileType, fileUrl, file.name);
-                    } else {
-                        throw new Error(data.error || '파일 업로드에 실패했습니다.');
-                    }
-                } catch (error) {
-                    console.error('파일 업로드 실패:', error);
-                    addMessage('시스템', `파일 업로드 실패: ${error.message}`, true);
-                }
+                await handleFileUpload(files[i]);
             }
         });
 
-        // 파일 업로드 처리
-        document.getElementById('fileInput').addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
+        // 이미지 미리보기 함수
+        function showImagePreview(imageUrl) {
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'image-preview-overlay';
+            previewDiv.innerHTML = `
+                <div class="image-preview-content">
+                    <img src="${imageUrl}" alt="미리보기" 
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=이미지+로드+실패';">
+                    <button onclick="this.parentElement.parentElement.remove()">닫기</button>
+                </div>
+            `;
+            document.body.appendChild(previewDiv);
+        }
+
+        // Font Awesome 추가
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+
+        // Enter 키로 메시지 전송
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 상태 표시 함수
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        // 토큰에서 사용자 ID 추출
+        function getUserIdFromToken(token) {
             try {
-                // 파일 크기 체크 (10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    throw new Error('파일 크기는 10MB를 초과할 수 없습니다.');
-                }
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.userid;
+            } catch (error) {
+                console.error('토큰 파싱 에러:', error);
+                return null;
+            }
+        }
 
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('userId', currentUserId);
-                
-                console.log('파일 업로드 시작:', file.name, file.type);
-                
-                const response = await fetch(`http://localhost:7100/api/study/${currentStudyId}/files`, {
+        // 회원가입 관련 함수들
+        async function sendVerificationCode() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showStatus('emailStatus', '이메일을 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/send-verification`, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
                 });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || '파일 업로드에 실패했습니다.');
-                }
-                
+
                 const data = await response.json();
-                console.log('파일 업로드 응답:', data);
-                
                 if (data.success) {
-                    const baseUrl = 'http://localhost:7100';
-                    const fileUrl = `${baseUrl}${data.data.url}`;
-                    const fileType = file.type.startsWith('image/') ? 'image' : 'file';
-                    
-                    // 파일 업로드 완료 이벤트 발생
-                    socket.emit('file-upload-complete', {
-                        studyId: currentStudyId,
-                        userId: currentUserId,
-                        fileInfo: {
-                            fileName: file.name,
-                            fileUrl: data.data.url,
-                            fileType: fileType,
-                            fileSize: file.size
-                        }
-                    });
-
-                    // 메시지 전송
-                    socket.emit('send-message', {
-                        studyId: currentStudyId,
-                        userId: currentUserId,
-                        message: `파일을 공유했습니다.`,
-                        fileType: fileType,
-                        fileUrl: fileUrl,
-                        fileName: file.name
-                    });
-
-                    // 자신의 메시지도 표시
-                    addMessage(currentUserId, '파일을 공유했습니다.', false, fileType, fileUrl, file.name);
+                    showStatus('emailStatus', '인증번호가 전송되었습니다.', 'success');
+                    document.getElementById('verificationCodeGroup').style.display = 'block';
                 } else {
-                    throw new Error(data.error || '파일 업로드에 실패했습니다.');
+                    showStatus('emailStatus', data.error || '인증번호 전송에 실패했습니다.', 'error');
                 }
             } catch (error) {
-                console.error('파일 업로드 실패:', error);
-                addMessage('시스템', `파일 업로드 실패: ${error.message}`, true);
+                console.error('인증번호 전송 에러:', error);
+                showStatus('emailStatus', '서버 에러가 발생했습니다.', 'error');
             }
-            
-            // 파일 입력 초기화
-            e.target.value = '';
-        });
+        }
+
+        async function verifyCode() {
+            const email = document.getElementById('email').value;
+            const code = document.getElementById('verificationCode').value;
+
+            if (!email || !code) {
+                showStatus('verificationStatus', '이메일과 인증번호를 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/verify-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, code })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showStatus('verificationStatus', '이메일이 인증되었습니다.', 'success');
+                    isEmailVerified = true;
+                    document.getElementById('signupBtn').disabled = false;
+                } else {
+                    showStatus('verificationStatus', data.error || '인증에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('인증 에러:', error);
+                showStatus('verificationStatus', '서버 에러가 발생했습니다.', 'error');
+            }
+        }
+
+        async function signup() {
+            if (!isEmailVerified) {
+                showStatus('signupStatus', '이메일 인증이 필요합니다.', 'error');
+                return;
+            }
+
+            const email = document.getElementById('email').value;
+            const userid = document.getElementById('userid').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const gender = document.getElementById('gender').value;
+            const education = document.getElementById('education').value;
+            const nickname = document.getElementById('nickname').value;
+
+            if (!email || !userid || !password || !name || !phone || !gender || !education || !nickname) {
+                showStatus('signupStatus', '모든 필수 항목을 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        userid,
+                        password,
+                        name,
+                        phone,
+                        gender,
+                        education,
+                        nickname
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showStatus('signupStatus', '회원가입이 완료되었습니다.', 'success');
+                    setTimeout(() => {
+                        showLoginSection();
+                    }, 2000);
+                } else {
+                    showStatus('signupStatus', data.error || '회원가입에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                console.error('회원가입 에러:', error);
+                showStatus('signupStatus', '서버 에러가 발생했습니다.', 'error');
+            }
+        }
     </script>
 </body>
 </html> 
