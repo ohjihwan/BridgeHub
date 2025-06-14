@@ -1027,16 +1027,20 @@ legend,
 	.profile-img {
 		display:block;
 		overflow:hidden;
+		position:relative;
 		width:remx(200);
 		height:remx(200);
 		margin:0 auto;
+		border-radius:remx(40);
 
 		&__button {
 			display:block;
+			position:absolute;
+			left:0;
+			top:0;
 			width:100%;
 			height:100%;
-			border-radius:remx(70);
-			background-color:$color-primary;
+			background-color:transparent;
 			cursor:pointer;
 		}
 

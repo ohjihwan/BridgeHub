@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './common/Header';
+import profileDefault from '@img/default-profile.png';
 
 const MyPage = () => {
 	const navigate = useNavigate();
 	const [isEditing, setIsEditing] = useState(false);
 	const [profileData, setProfileData] = useState({
+		profileImg: '',
 		nickname: '',
 		education: '',
 		major: '',
@@ -59,29 +61,41 @@ const MyPage = () => {
 				</button>
 			</div>
 
-			<div className="profile-img">
-				{isEditing ? (
-					<button type="button" className='profile-img__button'>
+			{isEditing ? (
+				<div className="profile-img">
+					<button type="button" className='profile-img__button' onClick={() => document.getElementById('profileImgInput').click()}>
 						<span className='hide'>프로필 변경하기</span>
-					</button>,
-					<img src={editData.nickname} alt="나의 프로필 이미지" className='profile-img__img'/>
-				) : (
-					<img src={profileData.nickname} alt="나의 프로필 이미지" className='profile-img__img'/>
-				)}
-			</div>
+					</button>
+					<input type="file" id="profileImgInput" accept="image/*" style={{ display: 'none' }}
+						onChange={(e) => {
+							const file = e.target.files[0];
+							if (file) {
+								const reader = new FileReader();
+								reader.onloadend = () => {
+									setEditData(prev => ({
+										...prev,
+										profileImg: reader.result
+									}));
+								};
+								reader.readAsDataURL(file);
+							}
+						}}
+					/>
+					<img src={editData.profileImg || profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
+				</div>
+			) : (
+				<div className="profile-img">
+					<img src={profileData.profileImg ? profileData.profileImg : profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
+				</div>
+			)}
+			
 
 			<div className="info-row-area">
 				{isEditing ? (
 					<>
 						<div className="info-row">
 							<span className="label">닉네임</span>
-							<input 
-								className="info-row__input" 
-								type="text" 
-								name="nickname"
-								value={editData.nickname}
-								onChange={handleInputChange}
-							/>
+							<input type="text" name="nickname" value={editData.nickname} className="info-row__input" onChange={handleInputChange}/>
 						</div>
 						<div className="info-row info-row--major">
 							<span className="label">전공</span>
