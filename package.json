@@ -30,7 +30,7 @@
     "lint:api": "cd api-server && npm run lint",
     "lint:socket": "cd socket-server && npm run lint",
     "lint:front": "cd front-server && npm run lint",
-    "clean": "npx rimraf node_modules && npx rimraf api-server/node_modules && npx rimraf socket-server/node_modules && npx rimraf front-server/node_modules",
+    "clean": "if exist node_modules rmdir /s /q node_modules && if exist api-server\\node_modules rmdir /s /q api-server\\node_modules && if exist socket-server\\node_modules rmdir /s /q socket-server\\node_modules && if exist front-server\\node_modules rmdir /s /q front-server\\node_modules",
     "clean:install": "npm run clean && npm run install:all"
   },
   "keywords": [
@@ -47,7 +47,7 @@
     "cross-env": "^7.0.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.1"
+    "dotenv": "^16.4.5"
   },
   "engines": {
     "node": ">=18.0.0",
