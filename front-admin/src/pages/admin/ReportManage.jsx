@@ -1,8 +1,8 @@
 import React from 'react';
 
 const dummyReports = [
-  { id: 1, reporter: '홍길동', target: '김영희', reason: '욕설' },
-  { id: 2, reporter: '이철수', target: '박민수', reason: '스팸' },
+  { id: 1, reporter: '이민우', target: '오지환', reason: '욕설' },
+  { id: 2, reporter: '노현지', target: '이민우', reason: '스팸' },
 ];
 
 function ReportManage() {
