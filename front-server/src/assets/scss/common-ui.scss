@@ -56,9 +56,15 @@ legend,
 	padding:0 $padding-x;
 	background-color:$bg-root;
 
+	&__left,
+	&__right {
+		display: flex;
+		gap:remx(16);
+		align-items: center;
+	}
+
 	&__left {
 		.logo {
-
 			a {
 				display:block;
 				width:remx(125);
@@ -66,25 +72,22 @@ legend,
 				background:url('@ico/logo-text.png') no-repeat 50% / 100% auto;
 			}
 		}
+
+		.header__left__back {
+			@include header-button-style;
+			background:url('@ico/ico-arrow-back.svg') no-repeat 50% / auto 1.8rem;
+		}
 	}
 
 	&__right {
-		display: flex;
-		gap:remx(16);
-		align-items: center;
-
 		.header__right__search {
-			width:remx(24);
-			height:remx(24);
+			@include header-button-style;
 			background:url('@ico/ico-func-search.svg') no-repeat 50% / 1.8rem auto;
-			cursor: pointer;
 		}
 
 		.header__right__menu {
-			width:remx(24);
-			height:remx(24);
+			@include header-button-style;
 			background:url('@ico/ico-func-menu.svg') no-repeat 50% / 1.8rem auto;
-			cursor: pointer;
 		}
 	}
 
@@ -144,7 +147,11 @@ legend,
 		background-color: $color-primary;
 		color: white;
 	}
-	
+
+	.button-secondary {
+		background-color: $color-secondary;
+		color: white;
+	}
 }
 
 .alert-wrapper {
@@ -760,14 +767,13 @@ legend,
 			inset: -2px;
 			z-index: -1;
 			border-radius: 8px;
-			background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red);
-			background-size: 400% 400%;
-			animation: hueSpin 3.5s linear infinite;
-			filter: hue-rotate(0deg);
+			background: linear-gradient(270deg, #ff6b6b, #feca57, #48dbfb);
+			background-size: 200% 200%;
+			animation: rainbowFlow 6s linear infinite;
 		}
-		@keyframes hueSpin {
-			0%   { filter: hue-rotate(0deg); }
-			100% { filter: hue-rotate(360deg); }
+		@keyframes rainbowFlow {
+			0%   { background-position: 0% 50%; }
+			100% { background-position: 100% 50%; }
 		}
 	}
 
@@ -1030,7 +1036,7 @@ legend,
 		position:relative;
 		width:remx(200);
 		height:remx(200);
-		margin:0 auto;
+		margin:remx(50) auto 0;
 		border-radius:remx(40);
 
 		&__button {
@@ -1053,93 +1059,33 @@ legend,
 	}
 	
 	.info-row-area {
-		margin-top:3rem;
+		margin-top:remx(30);
 
 		.info-row {
-			display: flex;
-			align-items: center;
-			padding: remx(12) 0;
-			border-bottom: 1px solid $line2;
-
-			&--major,
-			&--location {
-				.info-row__select-group {
-					flex: 1;
-					display: flex;
-					flex-wrap:wrap;
-					gap: remx(8);
-				}
-			}
-
-			&--major {
-				.info-row__select-group {
-				.info-row__select {
-					flex: 0 0 remx(120);
-				}
-				.info-row__input {
-					flex: 1;
-				}
-				}
-			}
-
-			&--location {
-				.info-row__select-group {
-					.info-row__select {
-						flex: 1;
-					}
-				}
-			}
-
-			&__input {
-				flex: 1;
-				height: remx(36);
-				padding: 0 remx(12);
-				border: 1px solid #ddd;
-				border-radius: remx(4);
-				font-size: remx(14);
-
-				&:focus {
-					outline: none;
-					border-color: #007bff;
-					box-shadow: 0 0 0 remx(2) rgba(0, 123, 255, 0.1);
-				}
-
-				&--textarea {
-					height: remx(100);
-					padding: remx(12);
-					resize: vertical;
-				}
-			}
-
-			&__select {
-				cursor: pointer;
-				appearance: none;
-				background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-				background-repeat: no-repeat;
-				background-position: right remx(8) center;
-				background-size: remx(16);
-				padding-right: remx(32);
+			margin-top:remx(20);
+			
+			&:first-child {
+				margin-top:0;
 			}
 
 			.label {
-				flex: 0 0 remx(100);
-				font-weight: 500;
-				color: #333;
+				display:block;
+				margin-bottom:remx(6);
+				color: $font2;
+				font-weight:normal;
 			}
 
-			.value {
-				flex: 1;
+			&.profile-data {
+				display:flex;
+				justify-content:space-between;
+				align-items:center;
+				padding-bottom:remx(18);
+				border-bottom:1px solid $line2;
+				
+				.label {
+					margin-bottom:0;
+				}
 			}
-		}
-	}
-
-	.message-box {
-		margin-top: remx(20);
-		padding: remx(16);
-
-		p {
-			margin: 0;
-			color: #666;
 		}
 	}
 }

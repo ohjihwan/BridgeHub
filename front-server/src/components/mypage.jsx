@@ -9,12 +9,14 @@ const MyPage = () => {
 	const [profileData, setProfileData] = useState({
 		profileImg: '',
 		nickname: '',
+		password: '',
+		passwordConfirm: '',
+		hp:'',
 		education: '',
 		major: '',
 		location: '',
 		subLocation: '',
 		timeZone: '',
-		message: ''
 	});
 	
 	const [editData, setEditData] = useState({...profileData});
@@ -53,13 +55,11 @@ const MyPage = () => {
 
 	return (
 		<div className="mypage-container">
-			<Header />
-			
-			<div className="edit-profile">
-				<button type="button" className="edit-profile__edit"onClick={handleEditProfile}>
-					{isEditing ? '수정 완료' : '프로필 수정'}
-				</button>
-			</div>
+			{isEditing ? (
+				<Header isEditing={true} />
+			) : (
+				<Header/>
+			)}
 
 			{isEditing ? (
 				<div className="profile-img">
@@ -94,93 +94,93 @@ const MyPage = () => {
 				{isEditing ? (
 					<>
 						<div className="info-row">
-							<span className="label">닉네임</span>
-							<input type="text" name="nickname" value={editData.nickname} className="info-row__input" onChange={handleInputChange}/>
+							<label htmlFor='nickname' className="label">닉네임</label>
+							<div className="field">
+								<input type="text" name="nickname" id="nickname" value={editData.nickname} className="text" placeholder="별명을 입력하세요" onChange={handleInputChange}/>
+							</div>
+						</div>
+						<div className="info-row">
+							<label htmlFor='password' className="label">비밀번호</label>
+							<div className="field">
+								<input type="password" name="password" id="password" value={editData.password} className="text" placeholder="비밀번호를 입력하세요" onChange={handleInputChange}/>
+							</div>
+							<div className="field">
+								<input type="password" name="passwordConfirm" value={editData.passwordConfirm} className="text" placeholder="비밀번호를 다시 입력하세요" onChange={handleInputChange}/>
+							</div>
+						</div>
+						<div className="info-row">
+							<label htmlFor='hp' className="label">휴대폰번호</label>
+							<div className="field">
+								<input type="tel" name="hp" id="hp" value={editData.hp} className="text" placeholder="휴대폰번호를 입력하세요" onChange={handleInputChange}/>
+							</div>
 						</div>
 						<div className="info-row info-row--major">
-							<span className="label">전공</span>
-							<div className="info-row__select-group">
-								<select 
-									className="info-row__input info-row__select" 
-									name="education"
-									value={editData.education}
-									onChange={handleInputChange}
-								>
-									<option value="">선택하세요</option>
-									<option value="고졸">고졸</option>
-									<option value="대학교">대학교</option>
-									<option value="대학원">대학원</option>
-								</select>
-								<input 
-									className="info-row__input" 
-									type="text" 
-									name="major"
-									placeholder="전공을 입력하세요"
-									value={editData.major}
-									onChange={handleInputChange}
-								/>
+							<h4 htmlFor="nickname" className="label">전공</h4>
+							<div className="half-field">
+								<div className="field">
+									<select className="select" name="education" value={editData.education} onChange={handleInputChange}>
+										<option value="">학력</option>
+										<option value="고졸">고졸</option>
+										<option value="대학교">대학교</option>
+										<option value="대학원">대학원</option>
+									</select>
+								</div>
+								<div className="field">
+									<select className="select" name="major" value={editData.major} onChange={handleInputChange}>
+										<option value="">학과/학부 선택</option>
+										<option value="컴퓨터공학과">컴퓨터공학과</option>
+										<option value="소프트웨어학과">소프트웨어학과</option>
+										<option value="정보통신공학과">정보통신공학과</option>
+									</select>
+								</div>
 							</div>
 						</div>
 						<div className="info-row info-row--location">
-							<span className="label">지역</span>
-							<div className="info-row__select-group">
-								<select 
-									className="info-row__input info-row__select" 
-									name="location"
-									value={editData.location}
-									onChange={handleInputChange}
-								>
-									<option value="">선택하세요</option>
-									<option value="지역무관">지역무관</option>
-									<option value="서울">서울</option>
-									<option value="부산">부산</option>
-									<option value="대구">대구</option>
-								</select>
-								{editData.location && editData.location !== '지역무관' && (
-									<select 
-										className="info-row__input info-row__select" 
-										name="subLocation"
-										value={editData.subLocation}
-										onChange={handleInputChange}
-									>
-										<option value="">선택하세요</option>
-										{locationOptions[editData.location]?.map(sub => (
-											<option key={sub} value={sub}>{sub}</option>
-										))}
+							<h4 className="label">지역</h4>
+							<div className="half-field">
+								<div className="field">
+									<select className="select" name="location" value={editData.location} onChange={handleInputChange}>
+										<option value="지역무관">지역무관</option>
+										<option value="서울">서울</option>
+										<option value="대구">대구</option>
+										<option value="부산">부산</option>
 									</select>
+								</div>
+								{editData.location && editData.location !== '지역무관' && (
+									<div className="field">
+										<select className="select" name="subLocation" value={editData.subLocation} onChange={handleInputChange}>
+											<option value="">세부 지역 선택</option>
+											{locationOptions[editData.location]?.map(sub => (
+												<option key={sub} value={sub}>{sub}</option>
+											))}
+										</select>
+									</div>
 								)}
 							</div>
 						</div>
 						<div className="info-row">
 							<span className="label">시간대</span>
-							<select 
-								className="info-row__input info-row__select" 
-								name="timeZone"
-								value={editData.timeZone}
-								onChange={handleInputChange}
-							>
-								<option value="">선택하세요</option>
-								<option value="오전">오전</option>
-								<option value="오후">오후</option>
-								<option value="야간">야간</option>
-							</select>
-						</div>
-						<div className="message-box">
-							<textarea 
-								className="info-row__input info-row__input--textarea" 
-								name="message"
-								value={editData.message}
-								onChange={handleInputChange}
-							/>
+							<div className="field">
+								<select className="select" name="timeZone" value={editData.timeZone} onChange={handleInputChange}>
+									<option value="">선호 시간대 선택</option>
+									<option value="오전">오전 (06:00-12:00)</option>
+									<option value="오후">오후 (12:00-18:00)</option>
+									<option value="야간">저녁 (18:00-24:00)</option>
+								</select>
+							</div>
 						</div>
 					</>
 				) : (
 					<>
-						<div className="info-row">
+						<div className="info-row profile-data">
 							<span className="label">닉네임</span>
 							<span className="value">{profileData.nickname}</span>
 						</div>
-						<div className="info-row">
+						<div className="info-row profile-data">
+							<span className="label">휴대폰번호</span>
+							<span className="value">{profileData.hp}</span>
+						</div>
+						<div className="info-row profile-data">
 							<span className="label">전공</span>
 							<span className="value">
 								{profileData.education && profileData.major 
@@ -188,7 +188,7 @@ const MyPage = () => {
 									: profileData.education || profileData.major}
 							</span>
 						</div>
-						<div className="info-row">
+						<div className="info-row profile-data">
 							<span className="label">지역</span>
 							<span className="value">
 								{profileData.location === '지역무관' 
@@ -196,12 +196,9 @@ const MyPage = () => {
 									: `${profileData.location} ${profileData.subLocation}`}
 							</span>
 						</div>
-						<div className="info-row">
+						<div className="info-row profile-data">
 							<span className="label">시간대</span>
 							<span className="value">{profileData.timeZone}</span>
-						</div>
-						<div className="message-box">
-							<p>{profileData.message}</p>
 						</div>
 					</>
 				)}
@@ -209,7 +206,9 @@ const MyPage = () => {
 			
 			<div className="fixed">
 				<button type="button" className="button button-primary">개설 목록</button>
-				<button type="button" className="button button-primary">신청 목록</button>
+				<button type="button" className="button button-secondary" onClick={handleEditProfile}>
+					{isEditing ? '수정 완료' : '프로필 수정'}
+				</button>
 			</div>
 		</div>
 	);
