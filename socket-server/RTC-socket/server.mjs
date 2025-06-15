@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import app from "./app.mjs";
 import { Server } from "socket.io";
-import handleSfuSocket from './controllers/sfuSocket.mjs';
+import handleSfuSocket from './controllers/sfuSocketController.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,7 +17,6 @@ const sslOptions = {
 };
 
 const PORT = process.env.RTC_PORT;
-
 const server = https.createServer(sslOptions, app);
 
 const io = new Server(server, { cors: { origin: '*' } });

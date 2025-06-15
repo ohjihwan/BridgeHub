@@ -34,7 +34,7 @@ export async function createWebRtcTransport(peerId, direction) {
 
   const listenIps = [
     {
-      ip: process.env.MEDIASOUP_LISTEN_IP || "0.0.0.0",
+      ip: process.env.MEDIASOUP_LISTEN_IP,
       announcedIp: process.env.ANNOUNCED_IP || process.env.TURN_URL.replace(/^turn:/, ""),
     }
   ];

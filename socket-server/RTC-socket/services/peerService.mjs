@@ -1,6 +1,9 @@
-import { getWorker } from "./workerInstance.mjs";
-import { getTurnCredentials } from "../utils/ice.mjs"; // 동적 ICE 정보 분리
-import { logger } from "../utils/logger.mjs"; // 선택: 실무용 로거
+import { getWorker } from "./rtc.mjs";
+import { getTurnCredentials } from "../utils/ice.mjs";
+import { logger } from "../utils/logger.mjs";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 const rooms = new Map();
 
@@ -12,7 +15,6 @@ export async function initRouter(roomId) {
 
   const worker = await getWorker();
 
-  // 실무에선 mediaCodecs 환경변수로 뺄 수도 있음
   const mediaCodecs = [
     {
       kind: "audio",
@@ -51,12 +53,12 @@ export async function createWebRtcTransport(peerId, direction) {
   const worker = await getWorker();
 
   // 동적으로 coturn ICE 정보 받아오기
-  const { urls, username, credential } = await getTurnCredentials();
+  const { urls, username, credential } = getTurnCredentials();
 
   const listenIps = [
     {
-      ip: process.env.LISTEN_IP || "0.0.0.0",
-      announcedIp: process.env.ANNOUNCED_IP || "실제 퍼블릭IP", // EC2 환경에서 세팅
+      ip: process.env.LISTEN_IP,
+      announcedIp: process.env.ANNOUNCED_IP,
     },
   ];
 

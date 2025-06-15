@@ -14,9 +14,7 @@ export function getTurnCredentials() {
   hmac.update(username);
   const credential = hmac.digest("base64");
 
-  // STUN 주소는 TURN 주소에서 'turn:' → 'stun:'으로 변환
   const stunUrl = process.env.TURN_URL.replace(/^turn:/, "stun:");
-
   const urls = [
     stunUrl,
     `${process.env.TURN_URL}?transport=udp`,

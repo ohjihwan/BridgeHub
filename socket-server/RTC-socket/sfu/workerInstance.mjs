@@ -1,4 +1,6 @@
 import { createWorker } from "mediasoup";
+import dotenv from "dotenv";
+dotenv.config();
 
 let worker;
 
@@ -9,10 +11,10 @@ let worker;
 export async function getWorker() {
   if (!worker) {
     worker = await createWorker({
-      logLevel: process.env.MEDIASOUP_LOG_LEVEL || "warn",
+      logLevel: process.env.MEDIASOUP_LOG_LEVEL,
       logTags: ["info", "ice", "dtls", "rtp", "srtp", "rtcp"],
-      rtcMinPort: Number(process.env.MEDIASOUP_MIN_PORT) || 40000,
-      rtcMaxPort: Number(process.env.MEDIASOUP_MAX_PORT) || 49999,
+      rtcMinPort: Number(process.env.MEDIASOUP_MIN_PORT),
+      rtcMaxPort: Number(process.env.MEDIASOUP_MAX_PORT),
     });
 
     worker.on("died", () => {

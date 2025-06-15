@@ -4,11 +4,9 @@
  */
 
 export async function processOffer(offer, userId) {
-  // 실무에선 이곳에서 로그만 남기거나, 추후 분석용 저장만
+  // 로그만 남기거나, 추후 분석용 저장만
   console.log(`[RTC] Offer from user ${userId}:`, offer);
-  // 실전 SFU 환경에선 직접 PeerConnection 생성 안함
-  // 대신 SFU 컨트롤러에서 트랜스포트/생산자/소비자 생성
-  return null; // 직접 Answer 반환X, SFU가 answer 생성
+  return null;
 }
 
 export async function processAnswer(answer, userId) {
