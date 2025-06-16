@@ -1,0 +1,1145 @@
+// ─────────────────────────────
+// 🛠️ Core & Module
+// ─────────────────────────────
+@use 'sass:color';
+@use './core/functions' as *;
+@use './core/mixin' as *;
+@use './core/variables' as *;
+@use './core/reset';
+// ─────────────────────────────
+// 🧱 Layouts / Common Elements
+// ─────────────────────────────
+
+body {
+	font-size:remx(15);
+	line-height:1.5;
+	font-family:'Pretendard-Regular';
+	letter-spacing:-0.025em;
+	overflow-wrap:break-word;
+	-webkit-text-size-adjust:none;
+	background-color:var(--bg-root);
+	color:var(--font1);
+
+	&.lock {
+		overflow: hidden;
+	}
+}
+
+%visually-hidden {
+	overflow: hidden !important;
+	position: absolute !important;
+	width: 0 !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	white-space: nowrap !important;
+	clip: rect(1px, 1px, 1px, 1px) !important;
+	clip-path: inset(50%) !important;
+}
+
+legend,
+.hide {
+	@extend %visually-hidden;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	position:fixed;
+	left:0;
+	top:0;
+	z-index:100;
+	width: 100%;
+	height:remx(50);
+	padding:0 $padding-x;
+	background-color:$bg-root;
+
+	&__left {
+		.logo {
+
+			a {
+				display:block;
+				width:remx(125);
+				height:remx(30);
+				background:url('@ico/logo-text.png') no-repeat 50% / 100% auto;
+			}
+		}
+	}
+
+	&__right {
+		display: flex;
+		gap:remx(16);
+		align-items: center;
+
+		.header__right__search {
+			width:remx(24);
+			height:remx(24);
+			background:url('@ico/ico-func-search.svg') no-repeat 50% / 1.8rem auto;
+			cursor: pointer;
+		}
+
+		.header__right__menu {
+			width:remx(24);
+			height:remx(24);
+			background:url('@ico/ico-func-menu.svg') no-repeat 50% / 1.8rem auto;
+			cursor: pointer;
+		}
+	}
+
+	.user-menu {
+		display:none;
+		position:fixed;
+		top:remx(50);
+		right:$padding-x;
+		padding:remx(12);
+		border-radius:remx(6);
+		background-color:$bg-root;
+		box-shadow:remx(3) remx(3) remx(10) rgba(17, 17, 17, 0.5);
+
+		&.--on {
+			display:block;
+		}
+
+		.user-menu__item {
+
+			a {
+				display:block;
+				padding:remx(8);
+				text-align:center;
+			}
+		}
+	}
+}
+
+.fixed {
+	display:flex;
+	gap: remx(12);
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	padding: remx(16);
+	color: white;
+	z-index: 1000;
+	
+	.button {
+		flex:1;
+		height:remx(58);
+		padding:0 remx(16);
+		border-radius:remx(8);
+		border: none;
+		cursor: pointer;
+		font-size: remx(18);
+		font-weight: 500;
+		text-align: center;
+		transition: transform 0.2s ease;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.button-primary {
+		background-color: $color-primary;
+		color: white;
+	}
+	
+}
+
+.alert-wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 500;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.5);
+
+	.alert-container {
+		width:calc(100% - ($padding-x * 2));
+		border-radius: remx(12);
+		background:$bg-root;
+		text-align: center;
+		box-shadow: 0 remx(8) remx(20) rgba(0, 0, 0, 0.25);
+		animation: fadeInScale 0.3s ease-out;
+		
+		.alert-header {
+			display:flex;
+			align-items:center;
+			height:remx(60);
+			padding:0 $padding-x;
+
+			.title {
+				color:$font1;
+				font-weight:bold;
+				font-size:1.7rem;
+			}
+		}
+
+		.alert-box {
+			display:flex;
+			flex-direction:column;
+			justify-content:space-between;
+			overflow-x:hidden;
+			overflow-y:auto;
+			max-height:70vh;
+
+			.alert-message {
+				padding: 0 remx(30) remx(20);
+			}
+
+			.field {
+				width:calc(100% - $padding-x * 2);
+				margin:0 $padding-x;
+
+				.text {
+					text-align:center;
+					text-transform:uppercase;
+				}
+			}
+		}
+			
+		.alert-buttons {
+			display:flex;
+			gap:$form-gap;
+			width:100%;
+			padding:remx(10) $padding-x remx(20);
+
+			.alert-button {
+				@include flex-center;
+				width:100%;
+				min-height:remx(48);
+				padding:0 remx(13);
+				border:1px solid $color-primary;
+				border-radius:remx(12);
+				font-size:remx(16);
+				line-height:1.2;
+				background-color:$bg-root;
+
+				&.--cancel + .alert-button {
+					background-color:$color-primary;
+					color:#fff;
+				}
+			}
+
+
+		}
+	}
+}
+
+@keyframes fadeInScale {
+	0% {
+		transform:translateY(remx(-20));
+		opacity: 0;
+	}
+	100% {
+		transform:translateY(remx(0));
+		opacity: 1;
+	}
+}
+
+.field {
+	overflow:hidden;
+	position:relative;
+	left:0;
+	width:100%;
+	margin-bottom:$form-gap;
+	padding:1px;
+	border-radius:$form-radius;
+	background-color:$line2;
+
+	&::before,
+	&::after {
+		content:'';
+		position:absolute;
+		z-index:5;
+		background-color:$color-primary;
+	}
+
+	&::before {
+		left:-1px;
+		bottom:remx(10);
+		width:0;
+		height:0;
+	}
+	&::after {
+		right:calc(-100% + 1px);
+		top:-100%;
+		width:100%;
+		height:100%;
+	}
+	
+	&:has(.text:focus)::before,
+	&:has(.select:focus)::before {
+		animation:focusActiveBefore 0.25s forwards linear;
+	}
+	&:has(.text:focus)::after,
+	&:has(.select:focus)::after {
+		animation:focusActiveAfter 0.25s 0.25s forwards linear;
+	}
+	@keyframes focusActiveBefore {
+		0% {width:2px; height:0;}
+		50%{width:2px; height:100%;}
+		100%{width:100%; height:100%;}
+	} 
+	@keyframes focusActiveAfter {
+		0% {top:-100%; right:calc(-100% + 1px)}
+		50%{top:0; right:calc(-100% + 1px)}
+		100%{top:0; right:0}
+	} 
+
+	.select,
+	.text {
+		position:relative;
+		z-index:10;
+		width: 100%;
+		height:$form-height;
+		padding:0 1.2rem;
+		border-radius:$form-radius;
+		background-color: $bg-root;
+		font-size:1.6rem;
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&.--field__error:has(.text),
+	&.--field__error:has(.select) {
+		background-color:$red;
+		animation:errorEm 1s forwards;
+		@keyframes errorEm {
+			0% {transform:rotate(0);}
+			20% {transform:rotate(2deg);}
+			40% {transform:rotate(-2deg);}
+			60% {transform:rotate(2deg);}
+			80% {transform:rotate(-2deg);}
+			100% {transform:rotate(0);}
+		}
+		&::before,
+		&::after {
+			display:none;
+		}
+	}
+
+	.select {
+		appearance:none;
+		background:$bg-root url('@ico/ico-arrow-select.svg') no-repeat right remx(12) center / remx(8) auto;
+		font-family:'Pretendard-Regular';
+	}
+
+	.middle-button {
+		position:absolute;
+		right:remx(6);
+		top: 50%;
+		z-index:10;
+		transform:translateY(-50%);
+		height:remx(36);
+		padding:0 remx(8);
+		border-radius:remx(8);
+		background-color:$color-primary;
+		color:#fff;
+
+		&:disabled {
+			background-color:$disabled;
+			cursor:no-drop;
+		}
+	}
+}
+
+.half-field {
+	display: flex;
+	justify-content:space-between;
+	gap: $form-gap;
+	margin-bottom: $form-gap;
+
+	.field {
+		margin-bottom: 0;
+	}
+}
+
+.radios {
+	display:flex;
+	overflow:hidden;
+	position:relative;
+	margin-bottom:$form-gap;
+	border-radius:$form-radius;
+	background-color:#f0f0f0;
+
+	.radio {
+		flex:1;
+		position:relative;
+		z-index:10;
+
+		label {
+			@include flex-center;
+			width:100%;
+			height:$form-height;
+			font-size:remx(16);
+		}
+
+		input {
+			@extend %visually-hidden;
+		}
+	}
+
+	.switcher {
+		position:absolute;
+		top:0;
+		z-index:5;
+		width:50%;
+		height:100%;
+		border:remx(2) solid $line3;
+		border-radius:$form-radius;
+		background-color:$bg-root;
+		transition:0.3s ease-in-out;
+
+		&.man {
+			left:0;
+		}
+
+		&.woman {
+			left:50%;
+		}
+	}
+}
+
+// ─────────────────────────────
+// 📄 Intro.jsx Components
+// ─────────────────────────────
+.intro {
+	@include flex-center;
+	width:100vw;
+	height:100vh;
+
+	&__container {
+		@include flex-center;
+		width:100%;
+		height:100%;
+		&::after {
+			content:'';
+			position:fixed;
+			top:50%;
+			left:50%;
+			transform:translateX(-50%);
+			z-index:-1;
+			width:300vw;
+			height:100vh;
+			border-radius:50%;
+			background:radial-gradient(circle, #8bbeee 0%, rgba(34, 111, 184, 0) 50%);
+		}
+	}
+}
+
+.animation-logo {
+	width:remx(230);
+	height:remx(70);
+	margin-left:remx(70);
+	background:url('@ico/logo-text.png') no-repeat remx(-75) 50% / auto 100%;
+	
+	&.--showAnimation {
+		width:remx(0);
+		animation: logoShow 1s 1s forwards;
+		@keyframes logoShow {
+			0% {width:remx(0)}
+			100% {width:remx(230)}
+		}
+	}
+	
+	&__imgmotion {
+		position:relative;
+		width:remx(65);
+		height:remx(70);
+		background:url('@ico/logo-top.svg') no-repeat 50% 50% / auto 100%;
+		transform:translateX(remx(-70));
+	}
+	
+	&__wave {
+		position:absolute;
+		left:0;
+		bottom:0;
+		width:remx(65);
+		height:remx(30);
+
+		&1,
+		&2 {
+			overflow:hidden;
+			position:absolute;
+			left:50%;
+			transform:translateX(-50%);
+
+			&::after {
+				content:'';
+				position:absolute;
+				left:0;
+				top:0;
+				width:300%;
+				height:100%;
+				background:url('@ico/logo-bottom.svg') repeat-x 50% / auto remx(8);
+				animation: wave 5s infinite linear alternate;
+				@keyframes wave {
+					0% {left:-200%}
+					100% {left:0}
+				}
+			}
+		}
+
+		&1 {
+			bottom:remx(13);
+			width:remx(50);
+			height:remx(10);
+		}
+		
+		&2 {
+			bottom:remx(5);
+			width:remx(40);
+			height:remx(8);
+		}
+	}
+}
+// ─────────────────────────────
+// 📄 Auth.jsx Components
+// ─────────────────────────────
+.auth {
+	@include flex-center;
+	background-color: $bg-root;
+
+	&__container {
+		position:fixed;
+		left:0;
+		top:0;
+		width: 100%;
+		height: 100vh;
+		padding:0 $padding-x;
+		overflow: hidden;
+
+		&--login {
+			.auth__forms-wrapper {
+				transform: translateY(0);
+			}
+		}
+
+		&--signup {
+			.auth__forms-wrapper {
+				transform: translateY(-50%);
+			}
+			.signup__forms {
+				& > .field,
+				& > .half-field,
+				& > .radios {
+					transform:translateY(remx(-10));
+					opacity:0;
+
+					input[type="email"] {
+						padding-right:remx(85);
+					}
+
+					&.showAni {
+						animation:inputDownShow 0.5s forwards;
+					}
+
+					@keyframes inputDownShow {
+						0% {
+							transform:translateY(remx(-10));
+							opacity:0;
+						}
+						100% {
+							transform:translateY(remx(0));
+							opacity:1;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	&__forms-wrapper {
+		display: flex;
+		flex-direction:column;
+		width: 100%;
+		transition: transform 0.25s ease-in-out;
+	}
+}
+
+// 로그인 스타일
+.login {
+	@include flex-center;
+	width: 100%;
+	height: 100vh;
+	overflow:hidden;
+
+	&__container {
+		@include flex-center;
+		flex-direction:column;
+		width:100%;
+		border-radius: remx(10);
+		background:$bg-root;
+
+		.animation-logo {
+			margin-bottom:remx(30);
+		}
+	}
+
+	&__area {
+		width: 100%;
+	}
+
+	&__options{
+		display:flex;
+		justify-content:space-between;
+		align-items:center;
+		margin-bottom:remx(10);
+
+		.find-buttons {
+
+			.fund-button {
+				background-color:transparent;
+				font-size:remx(13)
+			}
+
+			.slash {
+				padding:0 remx(3);
+				font-style:normal;
+			}
+		}
+	}
+
+	&__checkbox {
+		@include flex-center;
+
+		label {
+			position:relative;
+			padding-left:remx(24);
+			font-size:remx(13);
+
+			&::before {
+				content:'';
+				position:absolute;
+				left:0;
+				top: 50%;
+				transform:translateY(-50%);
+				width:remx(20);
+				height:remx(20);
+				border:1px solid $line0;
+				border-radius:remx(4);
+			}
+		}
+
+		input {
+			& + label::after {
+				content:'';
+				position:absolute;
+				left:remx(7);
+				top:remx(3);
+				transform:rotate(45deg);
+				width:remx(6);
+				height:remx(10);
+				border-width:0 1px 1px 0;
+				border-style:solid;
+				border-color: $line0;
+			}
+			
+			&:checked + label::before {
+				border-color:$color-primary;
+				background-color:$color-primary;
+			}
+
+			&:checked + label::after {
+				border-width:0 2px 2px 0;
+				border-color:$bg-root;
+			}
+		}
+	}
+
+	&__buttons {
+		display: flex;
+		gap: $form-gap;
+	}
+
+	&__button {
+		@include button-base;
+
+		&--signup {
+			background: $bg-root;
+			color: $color-primary;
+			border: 1px solid $color-primary;
+
+			&:active {
+				background: color.adjust($color-primary, $alpha: -0.9);
+			}
+		}
+	}
+}
+
+// 회원가입 스타일
+.signup {
+	@include flex-center;
+	overflow:hidden;
+	width: 100%;
+	height:100vh;
+
+	&__container {
+		display:flex;
+		flex-direction: column;
+		align-items:center;
+		width:100%;
+		border-radius: $form-radius;
+		background: $bg-root;
+		
+		.animation-logo {
+			margin-bottom:remx(30);
+		}
+	}
+
+	&__area {
+		width: 100%;
+	}
+
+	&__button {
+		@include button-base;
+
+		&--text {
+			@include text-button;
+		}
+	}
+}
+
+// ─────────────────────────────
+// 📄 Home.jsx Components
+// ─────────────────────────────
+.main-container {
+	margin: 0 auto;
+	padding:remx(50) $padding-x;
+
+	.create-studyroom {
+		overflow:hidden;
+		position:relative;
+		margin-bottom: remx(20);
+		padding:remx(2);
+		border-radius: remx(8);
+
+		.create-studyroom__button {
+			display:flex;
+			justify-content:flex-start;
+			align-items:flex-start;
+			flex-direction:column;
+			width: 100%;
+			height:remx(188);
+			padding:remx(20);
+			border-radius: remx(8);
+			background-color:$bg-root;
+			font-weight:bold;
+			font-size: remx(28);
+			cursor: pointer;
+
+			&::before {
+				content:'';
+				position:absolute;
+				right:0;
+				bottom:remx(-20);
+				width:remx(200);
+				height:100%;
+				background:url('@img/img-createstudy-button.png') no-repeat 100% 100% / 100% auto;
+			}
+
+			.sub-txt {
+				display:block;
+				margin-top:remx(6);
+				font-weight:normal;
+				font-size:remx(16);
+				text-align:left;
+			}
+		}
+
+		&::after {
+			content: '';
+			position: absolute;
+			inset: -2px;
+			z-index: -1;
+			border-radius: 8px;
+			background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red);
+			background-size: 400% 400%;
+			animation: hueSpin 3.5s linear infinite;
+			filter: hue-rotate(0deg);
+		}
+		@keyframes hueSpin {
+			0%   { filter: hue-rotate(0deg); }
+			100% { filter: hue-rotate(360deg); }
+		}
+	}
+
+	.studyroom {
+		.studyroom__item {
+			.studyroom__info {
+				border: 1px solid #000;
+				border-radius: 8px;
+				padding: 15px;
+				margin-bottom: 15px;
+					
+				.studyroom__title {
+					font-size: 18px;
+					margin-bottom: 5px;
+				}
+				
+				.studyroom__details {
+					color: #666;
+					font-size: 14px;
+
+					.studyroom__detail {
+						font-size:remx(13);
+					}
+				}
+			}
+		}
+	}
+} 
+// ─────────────────────────────
+// 📄 Create.jsx Components
+// ─────────────────────────────
+.create-study {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: remx(400);
+  background: white;
+  border-radius: remx(8);
+  box-shadow: 0 remx(4) remx(12) rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: remx(20);
+    border-bottom: 1px solid #ddd;
+  }
+
+  &__title {
+    font-size: remx(20);
+    font-weight: 600;
+  }
+
+  &__close {
+    padding: remx(8) remx(12);
+    border: 1px solid #ddd;
+    border-radius: remx(4);
+    background: none;
+    cursor: pointer;
+  }
+
+  &__content {
+    padding: remx(20);
+  }
+
+  &__field {
+    margin-bottom: remx(16);
+  }
+
+  &__input,
+  &__select,
+  &__textarea {
+    width: 100%;
+    padding: remx(12);
+    border: 1px solid #ddd;
+    border-radius: remx(4);
+    font-size: remx(16);
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+
+  &__location {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: remx(12);
+    margin-bottom: remx(16);
+  }
+
+  &__textarea {
+    resize: vertical;
+    min-height: remx(120);
+  }
+
+  &__submit {
+    width: 100%;
+    padding: remx(16);
+    background-color: $color-primary;
+    color: white;
+    border: none;
+    border-radius: remx(4);
+    font-size: remx(16);
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background-color: color.adjust($color-primary, $lightness: -5%);
+    }
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+} 
+// ─────────────────────────────
+// 📄 Detail.jsx Components
+// ─────────────────────────────
+.detail {
+	position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    width:100%;
+    height:100%;
+    padding:remx(20);
+    background-color:rgba(0,0,0,0.5);
+    z-index:1000;
+	background-color:$bg-root;
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: remx(20);
+        border-bottom: 1px solid #ddd;
+    }
+
+    &__title {
+        font-size: remx(24);
+        font-weight: 700;
+    }
+
+    &__close {
+        padding: remx(8) remx(16);
+        border: 1px solid #ddd;
+        border-radius: remx(4);
+        background: none;
+        cursor: pointer;
+    }
+
+    &__content {
+        padding: remx(20);
+    }
+
+    &__info {
+        margin-bottom: remx(32);
+    }
+
+    &__subtitle {
+        font-size: remx(18);
+        font-weight: 600;
+        margin-bottom: remx(16);
+    }
+
+    &__list {
+        display: grid;
+        grid-template-columns: remx(100) 1fr;
+        gap: remx(12);
+    }
+
+    &__term {
+        color: #666;
+        font-weight: 500;
+    }
+
+    &__desc {
+        margin: 0;
+    }
+
+    &__description {
+        margin-bottom: remx(32);
+    }
+
+    &__text {
+        line-height: 1.6;
+        color: #333;
+    }
+
+    &__members {
+        margin-bottom: remx(32);
+    }
+
+    &__member-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    &__member {
+        padding: remx(8) 0;
+        border-bottom: 1px solid #eee;
+
+        &:last-child {
+        border-bottom: none;
+        }
+    }
+
+    &__footer {
+        padding: remx(20);
+        border-top: 1px solid #ddd;
+        text-align: center;
+    }
+
+    &__join {
+        padding: remx(12) remx(32);
+        background-color: $color-primary;
+        color: white;
+        border: none;
+        border-radius: remx(4);
+        font-size: remx(16);
+        cursor: pointer;
+
+        &:hover {
+        background-color: color.adjust($color-primary, $lightness: -5%);
+        }
+    }
+} 
+// ─────────────────────────────
+// 📄 Mypage.jsx Components
+// ─────────────────────────────
+.mypage-container {
+	padding:remx(50) remx(24) remx(100);
+
+	.edit-profile {
+		display: flex;
+		justify-content: flex-end;
+		margin:remx(20) 0;
+
+		&__edit {
+			padding-right:remx(18);
+			font-size:remx(14);
+			line-height:1;
+			background:$bg-root url('@ico/ico-edit.png') no-repeat right center / remx(14) auto;
+		}
+	}
+
+	.profile-img {
+		display:block;
+		overflow:hidden;
+		position:relative;
+		width:remx(200);
+		height:remx(200);
+		margin:0 auto;
+		border-radius:remx(40);
+
+		&__button {
+			display:block;
+			position:absolute;
+			left:0;
+			top:0;
+			width:100%;
+			height:100%;
+			background-color:transparent;
+			cursor:pointer;
+		}
+
+		&__img {
+			display:block;
+			width:100%;
+			height:100%;
+			object-fit:cover;
+		}
+	}
+	
+	.info-row-area {
+		margin-top:3rem;
+
+		.info-row {
+			display: flex;
+			align-items: center;
+			padding: remx(12) 0;
+			border-bottom: 1px solid $line2;
+
+			&--major,
+			&--location {
+				.info-row__select-group {
+					flex: 1;
+					display: flex;
+					flex-wrap:wrap;
+					gap: remx(8);
+				}
+			}
+
+			&--major {
+				.info-row__select-group {
+				.info-row__select {
+					flex: 0 0 remx(120);
+				}
+				.info-row__input {
+					flex: 1;
+				}
+				}
+			}
+
+			&--location {
+				.info-row__select-group {
+					.info-row__select {
+						flex: 1;
+					}
+				}
+			}
+
+			&__input {
+				flex: 1;
+				height: remx(36);
+				padding: 0 remx(12);
+				border: 1px solid #ddd;
+				border-radius: remx(4);
+				font-size: remx(14);
+
+				&:focus {
+					outline: none;
+					border-color: #007bff;
+					box-shadow: 0 0 0 remx(2) rgba(0, 123, 255, 0.1);
+				}
+
+				&--textarea {
+					height: remx(100);
+					padding: remx(12);
+					resize: vertical;
+				}
+			}
+
+			&__select {
+				cursor: pointer;
+				appearance: none;
+				background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+				background-repeat: no-repeat;
+				background-position: right remx(8) center;
+				background-size: remx(16);
+				padding-right: remx(32);
+			}
+
+			.label {
+				flex: 0 0 remx(100);
+				font-weight: 500;
+				color: #333;
+			}
+
+			.value {
+				flex: 1;
+			}
+		}
+	}
+
+	.message-box {
+		margin-top: remx(20);
+		padding: remx(16);
+
+		p {
+			margin: 0;
+			color: #666;
+		}
+	}
+}
