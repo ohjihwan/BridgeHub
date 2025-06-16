@@ -13,25 +13,35 @@ body {
   background: #222;
   color: #fff;
   padding: 20px;
+  height: 100vh; // 전체 높이 확보
+  display: flex;
+  flex-direction: column;
 
   h2 {
     margin-bottom: 20px;
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
+  .menu {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
 
-    li {
-      margin-bottom: 10px;
+    ul {
+      list-style: none;
+      padding: 0;
 
-      a {
-        color: #fff;
-        text-decoration: none;
+      li {
+        margin-bottom: 20px;
 
-        &.active {
-          font-weight: bold;
-          color: #00aced;
+        a {
+          color: #fff;
+          text-decoration: none;
+
+          &.active {
+            font-weight: bold;
+            color: #00aced;
+          }
         }
       }
     }

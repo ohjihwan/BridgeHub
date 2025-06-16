@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 const dummyMembers = [
   { id: 1, name: '이민우', email: 'example@example.com', status: '활성' },
-  { id: 2, name: '오지환', email: 'example@example.com', status: '정지' },
-  { id: 3, name: '노현지', email: 'example@example.com', status: '활성' },
+  { id: 2, name: '오지환', email: 'exam@example.com', status: '정지' },
+  { id: 3, name: '노현지', email: 'ex@example.com', status: '활성' },
 ];
 
 function MemberManage() {
