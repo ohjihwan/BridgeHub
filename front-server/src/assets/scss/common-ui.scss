@@ -415,7 +415,7 @@ legend,
 }
 
 // ─────────────────────────────
-// 📄 Intro.jsx Components
+// 📄 Intro.jsx page
 // ─────────────────────────────
 .intro {
 	@include flex-center;
@@ -508,7 +508,7 @@ legend,
 	}
 }
 // ─────────────────────────────
-// 📄 Auth.jsx Components
+// 📄 Auth.jsx page
 // ─────────────────────────────
 .auth {
 	@include flex-center;
@@ -715,11 +715,16 @@ legend,
 }
 
 // ─────────────────────────────
-// 📄 Home.jsx Components
+// 📄 Home.jsx page
 // ─────────────────────────────
 .main-container {
 	margin: 0 auto;
 	padding:remx(50) $padding-x;
+	transition: transform 0.4s ease;
+
+	&.detail-open {
+		transform: translateX(-20%);
+	}
 
 	.create-studyroom {
 		overflow:hidden;
@@ -777,6 +782,27 @@ legend,
 		}
 	}
 
+	.more-box {
+		display:flex;
+		justify-content:space-between;
+		align-items:center;
+		margin-bottom:remx(13);
+
+		&__title {
+			color:#f6339a;
+			font-weight:bold;
+			font-size:remx(16);
+		}
+
+		&__link {
+			font-size:remx(14);
+
+			&::after {
+				content:'>';
+			}
+		}
+	}
+
 	.hot-room-box {
 		margin:remx(60) (-$padding-x) remx(20);
 		padding:0 $padding-x;
@@ -785,12 +811,13 @@ legend,
 
 			.swiper-slide {
 				height:remx(152);
-				border:1px solid $line1;
+				border:1px solid $line2;
 				border-radius:remx(20);
 
 				.room-in-button {
 					display:flex;
 					align-items:center;
+					width:100%;
 					padding:remx(16);
 					background-color:transparent;
 
@@ -810,16 +837,22 @@ legend,
 					}
 
 					.txts {
+						padding:remx(13) 0 remx(13) remx(13);
 						text-align:left;
 
 						.main-txt {
 							display:block;
+							color:$font1;
 							font-weight:bold;
 							font-size:remx(16);
+							overflow: hidden;
+							white-space: nowrap;
+							text-overflow: ellipsis;
 						}
 
 						.sub-txt {
-							margin-top:remx(5);
+							margin:remx(11) 0;
+							color:$font3;
 							font-size:remx(11);
 							display: -webkit-box;
 							-webkit-line-clamp: 3;
@@ -832,22 +865,31 @@ legend,
 							display:flex;
 							margin-top:remx(10);
 							font-size:remx(11);
+							color:$navy;
 							text-wrap:nowrap;
 
 							li {
 								position:relative;
-								padding-left:remx(6);
+								padding-left:remx(8);
 
 								&::before {
 									content:'';
 									position:absolute;
-									left:0;
+									left:remx(2);
 									top:50%;
 									transform:translateY(-50%);
 									width:remx(4);
 									height:remx(4);
 									border-radius:50%;
 									background-color:$line1;
+								}
+
+								&:first-child {
+									padding-left:0;
+
+									&::before {
+										display:none;
+									}
 								}
 							}
 						}
@@ -857,25 +899,74 @@ legend,
 		}
 	}
 
-	.studyroom {
-		.studyroom__item {
-			.studyroom__info {
-				border: 1px solid #000;
-				border-radius: 8px;
-				padding: 15px;
-				margin-bottom: 15px;
-					
-				.studyroom__title {
-					font-size: 18px;
-					margin-bottom: 5px;
-				}
-				
-				.studyroom__details {
-					color: #666;
-					font-size: 14px;
+	.studyroom-area {
+		margin-top:remx(32);
 
-					.studyroom__detail {
-						font-size:remx(13);
+		.studyroom {
+			.studyroom__item {
+				.studyroom__info {
+					display:block;
+					width:100%;
+					border: 1px solid $line2;
+					border-radius:remx(8);
+					padding: remx(15);
+					margin-bottom: remx(16);
+					text-align:left;
+					background-color:transparent;
+						
+					.studyroom__title {
+						color:$font1;
+						font-size: remx(18);
+						margin-bottom: remx(5);
+					}
+
+					.studyroom__txt {
+						color: $font3;
+						font-size: remx(11);
+						display: -webkit-box;
+						-webkit-line-clamp: 3;
+						-webkit-box-orient: vertical;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+					
+					.studyroom__details {
+						color: $font3;
+						font-size: remx(11);
+
+					}
+
+					.studyroom__details {
+						display:flex;
+						margin-top:remx(10);
+						font-size:remx(11);
+						text-wrap:nowrap;
+
+						.studyroom__detail {
+							position:relative;
+							padding-left:remx(8);
+							color:$navy;
+
+							&::before {
+								content:'';
+								position:absolute;
+								left:remx(2);
+								top:50%;
+								transform:translateY(-50%);
+								width:remx(4);
+								height:remx(4);
+								border-radius:50%;
+								background-color:$line1;
+							}
+
+							&:first-child {
+								padding-left:0;
+
+								&::before {
+									display:none;
+								}
+							}
+						}
 					}
 				}
 			}
@@ -883,7 +974,7 @@ legend,
 	}
 } 
 // ─────────────────────────────
-// 📄 Create.jsx Components
+// 📄 Create.jsx page
 // ─────────────────────────────
 .create-study {
 	position: fixed;
@@ -980,7 +1071,7 @@ legend,
 	z-index: 999;
 } 
 // ─────────────────────────────
-// 📄 Detail.jsx Components
+// 📄 Detail.jsx page
 // ─────────────────────────────
 .detail {
 	position: fixed;
@@ -1101,7 +1192,7 @@ legend,
     }
 } 
 // ─────────────────────────────
-// 📄 Mypage.jsx Components
+// 📄 Mypage.jsx page
 // ─────────────────────────────
 .mypage-container {
 	padding:remx(50) remx(24) remx(100);

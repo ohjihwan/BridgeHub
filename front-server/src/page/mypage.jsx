@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './common/Header';
-import profileDefault from '@img/default-profile.png';
+import profileDefault from '/uploads/profile/default-profile1.png';
 
 const MyPage = () => {
 	const navigate = useNavigate();

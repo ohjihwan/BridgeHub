@@ -2,19 +2,41 @@
 	{
 		"id": "room001",
 		"title": "리액트 중급 스터디",
+		"description": "컴포넌트 구조 설계부터 상태 관리까지 함께 공부해요.",
 		"region": "서울",
 		"time": "오후",
 		"capacity": 6,
 		"currentMembers": 4,
-		"thumbnail": "./assets/imgs/img/thumbnail-room1.jpg"
+		"thumbnail": "thumbnail-room1.jpg"
 	},
 	{
 		"id": "room002",
 		"title": "Node.js 실전 프로젝트",
+		"description": "실무에서 바로 쓰는 백엔드 실습 위주의 스터디입니다.",
 		"region": "부산",
 		"time": "저녁",
 		"capacity": 5,
 		"currentMembers": 2,
-		"thumbnail": "./assets/imgs/img/thumbnail-room2.jpg"
+		"thumbnail": "thumbnail-room2.jpg"
+	},
+	{
+		"id": "room003",
+		"title": "프론트엔드 면접 대비반",
+		"description": "자주 나오는 면접 질문을 함께 분석하고 모의 면접도 해봐요.",
+		"region": "대구",
+		"time": "오전",
+		"capacity": 4,
+		"currentMembers": 4,
+		"thumbnail": "thumbnail-room3.jpg"
+	},
+	{
+		"id": "room004",
+		"title": "웹 퍼블리싱 실습반",
+		"description": "HTML, CSS, SCSS를 활용한 실제 UI 퍼블리싱 실습!",
+		"region": "인천",
+		"time": "오후",
+		"capacity": 6,
+		"currentMembers": 5,
+		"thumbnail": "thumbnail-room4.jpg"
 	}
 ]
