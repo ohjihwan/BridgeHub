@@ -777,6 +777,83 @@ legend,
 		}
 	}
 
+	.hot-room-swiper {
+		margin:remx(60) (-$padding-x) remx(20);
+		padding:0 $padding-x;
+
+		.swiper-slide {
+			height:remx(152);
+			border:1px solid $line1;
+			border-radius:remx(20);
+
+			.room-in-button {
+				display:flex;
+				align-items:center;
+				padding:remx(16);
+				background-color:transparent;
+
+				.img-box {
+					overflow:hidden;
+					flex:0 0 remx(120);
+					height:remx(120);
+					border:1px solid #e6e6e6;
+					border-radius:remx(12);
+
+					img {
+						width:100%;
+						height:100%;
+						object-fit:cover;
+						object-position:50% 50%;
+					}
+				}
+
+				.txts {
+					text-align:left;
+
+					.main-txt {
+						display:block;
+						font-weight:bold;
+						font-size:remx(16);
+					}
+
+					.sub-txt {
+						margin-top:remx(5);
+						font-size:remx(11);
+						display: -webkit-box;
+						-webkit-line-clamp: 3;
+						-webkit-box-orient: vertical;
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+
+					.room-info {
+						display:flex;
+						margin-top:remx(10);
+						font-size:remx(11);
+						text-wrap:nowrap;
+
+						li {
+							position:relative;
+							padding-left:remx(6);
+
+							&::before {
+								content:'';
+								position:absolute;
+								left:0;
+								top:50%;
+								transform:translateY(-50%);
+								width:remx(4);
+								height:remx(4);
+								border-radius:50%;
+								background-color:$line1;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	.studyroom {
 		.studyroom__item {
 			.studyroom__info {
@@ -1046,7 +1123,7 @@ legend,
 			top:0;
 			width:100%;
 			height:100%;
-			background-color:transparent;
+			background:rgba(0, 0, 0, 0.5);
 			cursor:pointer;
 		}
 

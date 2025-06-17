@@ -205,7 +205,7 @@ const MyPage = () => {
 			</div>
 			
 			<div className="fixed">
-				<button type="button" className="button button-primary">개설 목록</button>
+				<button type="button" className="button button-primary">참여 방 보기</button>
 				<button type="button" className="button button-secondary" onClick={handleEditProfile}>
 					{isEditing ? '수정 완료' : '프로필 수정'}
 				</button>
