@@ -806,98 +806,98 @@ legend,
 // 📄 Create.jsx Components
 // ─────────────────────────────
 .create-study {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  max-width: remx(400);
-  background: white;
-  border-radius: remx(8);
-  box-shadow: 0 remx(4) remx(12) rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 100%;
+	max-width: remx(400);
+	background: white;
+	border-radius: remx(8);
+	box-shadow: 0 remx(4) remx(12) rgba(0, 0, 0, 0.15);
+	z-index: 1000;
 
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: remx(20);
-    border-bottom: 1px solid #ddd;
-  }
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: remx(20);
+		border-bottom: 1px solid #ddd;
+	}
 
-  &__title {
-    font-size: remx(20);
-    font-weight: 600;
-  }
+	&__title {
+		font-size: remx(20);
+		font-weight: 600;
+	}
 
-  &__close {
-    padding: remx(8) remx(12);
-    border: 1px solid #ddd;
-    border-radius: remx(4);
-    background: none;
-    cursor: pointer;
-  }
+	&__close {
+		padding: remx(8) remx(12);
+		border: 1px solid #ddd;
+		border-radius: remx(4);
+		background: none;
+		cursor: pointer;
+	}
 
-  &__content {
-    padding: remx(20);
-  }
+	&__content {
+		padding: remx(20);
+	}
 
-  &__field {
-    margin-bottom: remx(16);
-  }
+	&__field {
+		margin-bottom: remx(16);
+	}
 
-  &__input,
-  &__select,
-  &__textarea {
-    width: 100%;
-    padding: remx(12);
-    border: 1px solid #ddd;
-    border-radius: remx(4);
-    font-size: remx(16);
+	&__input,
+	&__select,
+	&__textarea {
+		width: 100%;
+		padding: remx(12);
+		border: 1px solid #ddd;
+		border-radius: remx(4);
+		font-size: remx(16);
 
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-    }
-  }
+		&:focus {
+		outline: none;
+		border-color: $color-primary;
+		}
+	}
 
-  &__location {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: remx(12);
-    margin-bottom: remx(16);
-  }
+	&__location {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: remx(12);
+		margin-bottom: remx(16);
+	}
 
-  &__textarea {
-    resize: vertical;
-    min-height: remx(120);
-  }
+	&__textarea {
+		resize: vertical;
+		min-height: remx(120);
+	}
 
-  &__submit {
-    width: 100%;
-    padding: remx(16);
-    background-color: $color-primary;
-    color: white;
-    border: none;
-    border-radius: remx(4);
-    font-size: remx(16);
-    font-weight: 500;
-    cursor: pointer;
+	&__submit {
+		width: 100%;
+		padding: remx(16);
+		background-color: $color-primary;
+		color: white;
+		border: none;
+		border-radius: remx(4);
+		font-size: remx(16);
+		font-weight: 500;
+		cursor: pointer;
 
-    &:hover {
-      background-color: color.adjust($color-primary, $lightness: -5%);
-    }
-  }
+		&:hover {
+		background-color: color.adjust($color-primary, $lightness: -5%);
+		}
+	}
 }
 
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 999;
 } 
 // ─────────────────────────────
 // 📄 Detail.jsx Components
