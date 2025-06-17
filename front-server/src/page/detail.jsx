@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const Detail = ({ onClose }) => {
+const Detail = ({ isClosing, onClose }) => {
+	const [isActive, setIsActive] = useState(false);
+
+	useEffect(() => {
+		if (!isClosing) {
+			const timer = setTimeout(() => {
+				setIsActive(true);
+			}, 0);
+			return () => clearTimeout(timer);
+		}
+	}, [isClosing]);
+
+	const classNames = ['detail'];
+	if (isActive) classNames.push('detail--active');
+	if (isClosing) classNames.push('detail--closing');
+
 	return (
-		<div className="detail">
+		<div className={classNames.join(' ')}>
 			<div className="detail__header">
 				<h2 className="detail__title">스터디 상세</h2>
 				<button className="detail__close" onClick={onClose}>닫기</button>

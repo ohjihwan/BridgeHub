@@ -1,0 +1,20 @@
+[
+	{
+		"id": "room001",
+		"title": "리액트 중급 스터디",
+		"region": "서울",
+		"time": "오후",
+		"capacity": 6,
+		"currentMembers": 4,
+		"thumbnail": "./assets/imgs/img/thumbnail-room1.jpg"
+	},
+	{
+		"id": "room002",
+		"title": "Node.js 실전 프로젝트",
+		"region": "부산",
+		"time": "저녁",
+		"capacity": 5,
+		"currentMembers": 2,
+		"thumbnail": "./assets/imgs/img/thumbnail-room2.jpg"
+	}
+]
