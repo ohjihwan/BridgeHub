@@ -5,7 +5,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 7001
+    port: 7700
   },
   resolve: {
     alias: {
@@ -17,4 +17,4 @@ export default defineConfig({
 // cd front-user
 // npm install
 // npm run dev
-// # → http://localhost:7000
+// # → http://localhost:7007
