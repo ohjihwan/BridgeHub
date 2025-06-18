@@ -1,9 +1,39 @@
 import React, { useState } from 'react';
 
 const dummyMembers = [
-  { id: 1, name: '이민우', email: 'example@example.com', status: '활성' },
-  { id: 2, name: '오지환', email: 'exam@example.com', status: '정지' },
-  { id: 3, name: '노현지', email: 'ex@example.com', status: '활성' },
+  {
+    id: 1,
+    email: 'example@example.com',
+    name: '이민우',
+    nickname: '민우',
+    region: '서울특별시',
+    education: '고졸',
+    major: '컴퓨터공학',
+    timezone: '12:00-18:00',
+    signupDate: '2024-02-10'
+  },
+  {
+    id: 2,
+    email: 'exam@example.com',
+    name: '오지환',
+    nickname: '지환',
+    region: '부산광역시',
+    education: '대학교',
+    major: '금융공학',
+    timezone: '18:00-24:00',
+    signupDate: '2024-06-05'
+  },
+  {
+    id: 3,
+    email: 'ex@example.com',
+    name: '노현지',
+    nickname: '현지',
+    region: '대구광역시',
+    education: '대학원',
+    major: '통계학',
+    timezone: '06:00-12:00',
+    signupDate: '2025-01-20'
+  }
 ];
 
 function MemberManage() {
@@ -27,18 +57,28 @@ function MemberManage() {
         <thead>
           <tr>
             <th>회원ID</th>
-            <th>이름</th>
             <th>이메일</th>
-            <th>상태</th>
+            <th>이름</th>
+            <th>닉네임</th>
+            <th>지역</th>
+            <th>학력</th>
+            <th>전공</th>
+            <th>선호 시간대</th>
+            <th>가입일</th>
           </tr>
         </thead>
         <tbody>
           {filteredMembers.map(member => (
             <tr key={member.id}>
               <td>{member.id}</td>
-              <td>{member.name}</td>
               <td>{member.email}</td>
-              <td>{member.status}</td>
+              <td>{member.name}</td>
+              <td>{member.nickname}</td>
+              <td>{member.region}</td>
+              <td>{member.education}</td>
+              <td>{member.major}</td>
+              <td>{member.timezone}</td>
+              <td>{member.signupDate}</td>
             </tr>
           ))}
         </tbody>
