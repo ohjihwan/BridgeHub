@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import CustomAlert from '@components/common/customAlert';
+import CustomAlert from '@page/common/customAlert';
 
 export function customAlert(message) {
 	return new Promise((resolve) => {

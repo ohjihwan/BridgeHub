@@ -1,6 +1,13 @@
 @use 'variables' as *;
 @use "sass:list";
 
+// Header Button
+@mixin header-button-style {
+	width:2.4rem;
+	height:2.4rem;
+	cursor:pointer;
+}
+
 // Flex Center
 @mixin flex-center {
 	display: flex;
