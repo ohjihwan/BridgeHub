@@ -13,29 +13,43 @@ const Detail = ({ isClosing, onClose }) => {
 	}, [isClosing]);
 
 	const classNames = ['detail'];
-	if (isActive) classNames.push('detail--active');
-	if (isClosing) classNames.push('detail--closing');
+	if (isActive) {
+		classNames.push('detail--active');
+		document.body.style.overflow = 'hidden';
+	}
+	if (isClosing) {
+		classNames.push('detail--closing');
+		document.body.style.overflow = '';
+	}
 
 	return (
 		<div className={classNames.join(' ')}>
 			<div className="detail__header">
-				<h2 className="detail__title">스터디 상세</h2>
-				<button className="detail__close" onClick={onClose}>닫기</button>
+				<button className="detail__close" onClick={onClose} aria-label="팝업 닫기"></button>
 			</div>
 			
 			<div className="detail__content">
-				<div className="detail__info">
-					<h3 className="detail__subtitle">스터디 정보</h3>
-					<dl className="detail__list">
-						<dt className="detail__term">스터디명</dt>
-						<dd className="detail__desc">리액트 스터디</dd>
-						
-						<dt className="detail__term">기간</dt>
-						<dd className="detail__desc">2024.03.15 - 2024.06.15</dd>
-						
-						<dt className="detail__term">인원</dt>
-						<dd className="detail__desc">4/6명</dd>
-					</dl>
+				
+				<div className="detail__infos">
+					<img src={`/uploads/thumbnail/thumbnail-room1.jpg`} alt="" className="img-thumbnail"/>
+					<div class="detail__info">
+						<h3 className="title">스터디룸</h3>
+						<ul class="room-info">
+							<li>서울</li>
+							<li>오전</li>
+							<li>5/6명</li>
+						</ul>
+					</div>
+				</div>
+
+				<div className="detail__members">
+					<h3 className="detail__subtitle">참여 멤버</h3>
+					<ul className="detail__member-list">
+						<li className="detail__leader">홍길동</li>
+						<li className="detail__member">김철수</li>
+						<li className="detail__member">이영희</li>
+						<li className="detail__member">박지성</li>
+					</ul>
 				</div>
 				
 				<div className="detail__description">
@@ -44,16 +58,6 @@ const Detail = ({ isClosing, onClose }) => {
 						리액트를 함께 공부하는 스터디입니다.
 						기초부터 실전 프로젝트까지 진행할 예정입니다.
 					</p>
-				</div>
-
-				<div className="detail__members">
-					<h3 className="detail__subtitle">참여 멤버</h3>
-					<ul className="detail__member-list">
-						<li className="detail__member">홍길동 (리더)</li>
-						<li className="detail__member">김철수</li>
-						<li className="detail__member">이영희</li>
-						<li className="detail__member">박지성</li>
-					</ul>
 				</div>
 			</div>
 
