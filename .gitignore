@@ -8,13 +8,6 @@ dist/
 build/
 out/
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 # Logs
 logs/
 *.log
@@ -42,8 +35,6 @@ dist-ssr
 *.sw?
 
 # Env (예: Firebase, API 키 등)
-.env
-.env.*
 coturn-key.pem
 coturn-cert.pem
 bridgehub-key.pem
@@ -57,13 +48,6 @@ bridgehub-key.pem
 tmp/
 temp/
 
-# Android
-android/.gradle/
-android/app/build/
-android/build/
-android/.idea/
-android/local.properties
-
 # CodeGen & tools
 *.iml
 *.log
@@ -75,3 +59,6 @@ android/local.properties
 # 테스트/시뮬레이터 로그
 *.coverage
 *.xcuserstate
+
+# 서버 설정
+nginx_default.conf
