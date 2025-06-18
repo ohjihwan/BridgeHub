@@ -1,15 +1,10 @@
 import React from 'react';
+import '../assets/scss/Header.scss';
 
 const Header = () => {
-  const logout = () => {
-    localStorage.removeItem('adminToken');
-    window.location.href = '#/login';
-  };
-
   return (
     <div className="header">
-      <h2>관리자 페이지</h2>
-      <button onClick={logout}>로그아웃</button>
+      <h2>BridgeHub 관리자 페이지</h2>
     </div>
   );
 };

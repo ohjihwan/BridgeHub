@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../../assets/scss/MemberManage.scss';
 
 const dummyMembers = [
   {
@@ -44,45 +45,54 @@ function MemberManage() {
   );
 
   return (
-    <div>
-      <h2>회원정보관리</h2>
-      <input
-        type="text"
-        placeholder="검색"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: '10px', padding: '5px' }}
-      />
-      <table border="1" width="100%" cellPadding="5">
-        <thead>
-          <tr>
-            <th>회원ID</th>
-            <th>이메일</th>
-            <th>이름</th>
-            <th>닉네임</th>
-            <th>지역</th>
-            <th>학력</th>
-            <th>전공</th>
-            <th>선호 시간대</th>
-            <th>가입일</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredMembers.map(member => (
-            <tr key={member.id}>
-              <td>{member.id}</td>
-              <td>{member.email}</td>
-              <td>{member.name}</td>
-              <td>{member.nickname}</td>
-              <td>{member.region}</td>
-              <td>{member.education}</td>
-              <td>{member.major}</td>
-              <td>{member.timezone}</td>
-              <td>{member.signupDate}</td>
+    <div className="member-manage">
+      <div className="member-header">
+        <h2>회원정보관리</h2>
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="이름, 이메일로 검색"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="search-input"
+          />
+        </div>
+      </div>
+      <div className="member-table-container">
+        <table className="member-table">
+          <thead>
+            <tr>
+              <th>회원ID</th>
+              <th>이메일</th>
+              <th>이름</th>
+              <th>닉네임</th>
+              <th>지역</th>
+              <th>학력</th>
+              <th>전공</th>
+              <th>선호 시간대</th>
+              <th>가입일</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredMembers.map(member => (
+              <tr key={member.id}>
+                <td>#{member.id}</td>
+                <td>{member.email}</td>
+                <td>{member.name}</td>
+                <td>{member.nickname}</td>
+                <td>{member.region}</td>
+                <td>{member.education}</td>
+                <td>{member.major}</td>
+                <td>{member.timezone}</td>
+                <td>{member.signupDate}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredMembers.length === 0 && (
+          <div className="no-data">검색 결과가 없습니다.</div>
+        )}
+      </div>
     </div>
   );
 }
