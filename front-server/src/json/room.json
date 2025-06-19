@@ -38,5 +38,15 @@
 		"capacity": 6,
 		"currentMembers": 5,
 		"thumbnail": "thumbnail-room4.jpg"
+	},
+	{
+		"id": "room005",
+		"title": "Node.js 실전 프로젝트",
+		"description": "실무에서 바로 쓰는 백엔드 실습 위주의 스터디입니다.",
+		"region": "부산",
+		"time": "저녁",
+		"capacity": 5,
+		"currentMembers": 2,
+		"thumbnail": "thumbnail-chr1.jpg"
 	}
 ]

@@ -357,6 +357,25 @@ legend,
 	}
 }
 
+.field__textarea {
+
+	.textarea {
+		z-index:10;
+		width: 100%;
+		height:remx(120);
+		padding:remx(12);
+		border:1px solid $line2;
+		border-radius:$form-radius;
+		background-color: $bg-root;
+		font-size:1.6rem;
+		resize:none;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}
+
 .half-field {
 	display: flex;
 	justify-content:space-between;
@@ -795,10 +814,17 @@ legend,
 		}
 
 		&__link {
+			display:flex;
+			align-items:center;
 			font-size:remx(14);
 
 			&::after {
-				content:'>';
+				content:'';
+				display:inline-block;
+				width:remx(10);
+				height:remx(11);
+				margin-left:remx(1);
+				background:url('@ico/ico-arrow-link.svg') no-repeat right center / auto 100%;
 			}
 		}
 	}
@@ -808,6 +834,8 @@ legend,
 		padding:0 $padding-x;
 
 		.hot-room-swiper {
+			margin:0 (-$padding-x);
+			padding:0 $padding-x;
 
 			.swiper-slide {
 				height:remx(152);
@@ -818,13 +846,14 @@ legend,
 					display:flex;
 					align-items:center;
 					width:100%;
+					height:100%;
 					padding:remx(16);
 					background-color:transparent;
 
 					.img-box {
 						overflow:hidden;
-						flex:0 0 remx(120);
-						height:remx(120);
+						flex:0 0 remx(80);
+						height:remx(80);
 						border:1px solid #e6e6e6;
 						border-radius:remx(12);
 
@@ -837,21 +866,26 @@ legend,
 					}
 
 					.txts {
-						padding:remx(13) 0 remx(13) remx(13);
+						flex:1;
+						overflow:hidden;
+						padding:0 remx(13);
 						text-align:left;
 
 						.main-txt {
 							display:block;
+							width:100%;
 							color:$font1;
 							font-weight:bold;
 							font-size:remx(16);
+							display: -webkit-box;
+							-webkit-line-clamp: 2;
+							-webkit-box-orient: vertical;
 							overflow: hidden;
-							white-space: nowrap;
 							text-overflow: ellipsis;
 						}
 
 						.sub-txt {
-							margin:remx(11) 0;
+							margin:remx(5) 0;
 							color:$font3;
 							font-size:remx(11);
 							display: -webkit-box;
@@ -863,7 +897,6 @@ legend,
 
 						.room-info {
 							display:flex;
-							margin-top:remx(10);
 							font-size:remx(11);
 							color:$navy;
 							text-wrap:nowrap;
@@ -903,70 +936,81 @@ legend,
 		margin-top:remx(32);
 
 		.studyroom {
-			.studyroom__item {
-				.studyroom__info {
-					display:block;
-					width:100%;
-					border: 1px solid $line2;
-					border-radius:remx(8);
-					padding: remx(15);
-					margin-bottom: remx(16);
-					text-align:left;
-					background-color:transparent;
-						
-					.studyroom__title {
-						color:$font1;
-						font-size: remx(18);
-						margin-bottom: remx(5);
-					}
+			&__item {
+				overflow:hidden;
+				position:relative;
+				height:remx(130);
+				margin-top:remx(16);
+				border-radius:remx(20);
 
-					.studyroom__txt {
-						color: $font3;
-						font-size: remx(11);
-						display: -webkit-box;
-						-webkit-line-clamp: 3;
-						-webkit-box-orient: vertical;
-						overflow: hidden;
-						text-overflow: ellipsis;
-					}
-					
-					.studyroom__details {
-						color: $font3;
-						font-size: remx(11);
+				&:first-child {
+					margin-top:0;
+				}
+			}
 
-					}
+			&__img {
+				position:absolute;
+				left:0;
+				top:0;
+				z-index:-1;
+				width:100%;
+				height:100%;
+				object-fit:cover;
+				object-position:50% 50%;
+				filter:blur(remx(2));
+			}
 
-					.studyroom__details {
-						display:flex;
-						margin-top:remx(10);
-						font-size:remx(11);
-						text-wrap:nowrap;
+			&__info {
+				display:block;
+				width:100%;
+				height:100%;
+				border: 1px solid $line2;
+				padding: remx(15);
+				margin-bottom: remx(16);
+				text-align:left;
+				background-color:transparent;
+			}
 
-						.studyroom__detail {
-							position:relative;
-							padding-left:remx(8);
-							color:$navy;
+			&__title {
+				color:$font1;
+				font-size: remx(18);
+				margin-bottom: remx(5);
+				color:#fff;
+				text-align:center;
+				text-shadow:0 0 remx(12) #000;
+			}
 
-							&::before {
-								content:'';
-								position:absolute;
-								left:remx(2);
-								top:50%;
-								transform:translateY(-50%);
-								width:remx(4);
-								height:remx(4);
-								border-radius:50%;
-								background-color:$line1;
-							}
+			&__details {
+				display:flex;
+				justify-content:center;
+				margin-top:remx(10);
+				font-size:remx(11);
+				text-wrap:nowrap;
+				text-shadow:0 0 remx(12) #000;
+			}
 
-							&:first-child {
-								padding-left:0;
+			&__detail {
+				position:relative;
+				padding-left:remx(8);
+				color: #fff;
 
-								&::before {
-									display:none;
-								}
-							}
-						}
+				&::before {
+					content:'';
+					position:absolute;
+					left:remx(2);
+					top:50%;
+					transform:translateY(-50%);
+					width:remx(4);
+					height:remx(4);
+					border-radius:50%;
+					background-color:#fff;
+				}
+
+				&:first-child {
+					padding-left:0;
+
+					&::before {
+						display:none;
 					}
 				}
 			}
@@ -981,55 +1025,39 @@ legend,
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 100%;
+	width:calc(100% - ($padding-x * 2));
 	max-width: remx(400);
-	background: white;
-	border-radius: remx(8);
-	box-shadow: 0 remx(4) remx(12) rgba(0, 0, 0, 0.15);
+	background:$bg-root;
+	border-radius: remx(12);
 	z-index: 1000;
 
 	&__header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: remx(20);
-		border-bottom: 1px solid #ddd;
+		position:relative;
+		height:remx(60);
+		padding:0 $padding-x;
 	}
 
 	&__title {
-		font-size: remx(20);
-		font-weight: 600;
+		font-size: remx(17);
+		font-weight:bold;
 	}
 
 	&__close {
-		padding: remx(8) remx(12);
-		border: 1px solid #ddd;
-		border-radius: remx(4);
-		background: none;
+		position:absolute;
+		right:$padding-x;
+		top:50%;
+		transform:translateY(-50%);
+		width:remx(24);
+		height:remx(24);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 100% auto;
 		cursor: pointer;
 	}
 
 	&__content {
-		padding: remx(20);
-	}
-
-	&__field {
-		margin-bottom: remx(16);
-	}
-
-	&__input,
-	&__select,
-	&__textarea {
-		width: 100%;
-		padding: remx(12);
-		border: 1px solid #ddd;
-		border-radius: remx(4);
-		font-size: remx(16);
-
-		&:focus {
-		outline: none;
-		border-color: $color-primary;
-		}
+		padding:0 $padding-x remx(78);
 	}
 
 	&__location {
@@ -1044,15 +1072,22 @@ legend,
 		min-height: remx(120);
 	}
 
+	&__buttons {
+		position:absolute;
+		left:0;
+		bottom:0;
+		width:100%;
+		padding:remx(10) $padding-x remx(20);
+	}
+
 	&__submit {
 		width: 100%;
-		padding: remx(16);
+		height:remx(48);
+		border: 1px solid $color-primary;
+		border-radius: remx(12);
 		background-color: $color-primary;
-		color: white;
-		border: none;
-		border-radius: remx(4);
+		color: #fff;
 		font-size: remx(16);
-		font-weight: 500;
 		cursor: pointer;
 
 		&:hover {
@@ -1160,7 +1195,7 @@ legend,
 
 				li {
 					position:relative;
-					padding-left:remx(8);
+					padding-left:remx(10);
 					color:#fff;
 					font-size:remx(12);
 					text-shadow:remx(2) remx(2) remx(5) #000;
@@ -1168,7 +1203,7 @@ legend,
 					&::before {
 						content:'';
 						position:absolute;
-						left:remx(2);
+						left:remx(3);
 						top:50%;
 						transform:translateY(-50%);
 						width:remx(4);
@@ -1218,14 +1253,33 @@ legend,
 	}
 
 	&__member-list {
-		list-style: none;
-		padding: 0;
 		margin: 0;
+		padding: 0;
+
+	}
+
+	&__leader {
+		display:flex;
+		align-items:flex-start;
+		padding:remx(8) 0;
+
+		&::after {
+			content:'';
+			display:inline-block;
+			width:remx(20);
+			height:remx(20);
+			margin-left:remx(5);
+			background:url('@ico/ico-crown.png') no-repeat right center / remx(20) auto;
+		}
 	}
 
 	&__member {
-		padding: remx(8) 0;
-		border-bottom: 1px solid #eee;
+
+		display:inline-block;
+		margin-right:remx(4);
+		padding: remx(3) remx(10);
+		border-radius:remx(20);
+		background-color:$neutral;
 
 		&:last-child {
 		border-bottom: none;
@@ -1256,7 +1310,7 @@ legend,
 // 📄 Mypage.jsx page
 // ─────────────────────────────
 .mypage-container {
-	padding:remx(50) remx(24) remx(100);
+	padding:remx(50) $padding-x remx(100);
 
 	.edit-profile {
 		display: flex;
@@ -1353,7 +1407,7 @@ legend,
 	width:remx(250);
 	height:remx(250);
 	border-radius:remx(70);
-	background-color: #e6dcdc;
+	background-color: $neutral;
 
 	&::before {
 		content: '';

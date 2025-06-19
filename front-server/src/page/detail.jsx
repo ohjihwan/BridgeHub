@@ -34,7 +34,7 @@ const Detail = ({ isClosing, onClose }) => {
 					<img src={`/uploads/thumbnail/thumbnail-room1.jpg`} alt="" className="img-thumbnail"/>
 					<div class="detail__info">
 						<h3 className="title">스터디룸</h3>
-						<ul class="room-info">
+						<ul className="room-info">
 							<li>서울</li>
 							<li>오전</li>
 							<li>5/6명</li>
