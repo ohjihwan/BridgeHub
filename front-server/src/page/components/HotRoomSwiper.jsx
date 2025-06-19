@@ -13,7 +13,7 @@ function HotRoomSwiper({ onItemClick }) {
 	return (
 		<div className="hot-room-box">
 			<div className="more-box">
-				<h2 className="more-box__title">HOT</h2>
+				<h2 className="more-box__title">TRENDING</h2>
 				<a href="#none" className="more-box__link">더보기</a>
 			</div>
 			<Swiper spaceBetween={12} slidesPerView={1} centeredSlides={true} className="hot-room-swiper">
