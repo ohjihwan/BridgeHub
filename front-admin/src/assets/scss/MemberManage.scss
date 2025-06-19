@@ -45,6 +45,12 @@
     box-shadow: 0 2px 8px rgba(160, 132, 232, 0.08);
     padding: 24px;
     overflow-x: auto;
+    min-width: 900px;
+    .MuiDataGrid-root {
+      background: #fff;
+      border-radius: 12px;
+      font-size: 15px;
+    }
 
     .member-table {
       width: 100%;
