@@ -1,4 +1,6 @@
 package com.koreait.restadmin.repository;
 
-public class UserRepository {
-}
+import com.koreait.restadmin.domain.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> { }
