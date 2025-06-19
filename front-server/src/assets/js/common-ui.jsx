@@ -81,3 +81,16 @@ export function customPrompt(message, placeholder = '', defaultValue = '', onSub
 }
 
 export default {customAlert, customConfirm, customPrompt};
+
+export function showLoading() {
+	const loading = document.getElementById('global-loading');
+	if (loading) loading.style.display = 'flex';
+}
+
+export function hideLoading() {
+	const loading = document.getElementById('global-loading');
+	if (loading) loading.style.display = 'none';
+}
+
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;

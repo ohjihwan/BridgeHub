@@ -40,6 +40,13 @@ const Home = () => {
 		setShowCreateStudy((prev) => !prev);
 	};
 
+	useEffect(() => {
+		window.showLoading();
+		setTimeout(() => {
+			window.hideLoading();
+		}, 1500);
+	}, []);
+
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>

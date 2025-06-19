@@ -18,6 +18,7 @@ export default defineConfig({
 			'@js': path.resolve(__dirname, 'src/assets/js'),
 			'@page': path.resolve(__dirname, 'src/page'),
 			'@components': path.resolve(__dirname, 'src/page/components'),
+			'@common': path.resolve(__dirname, 'src/page/common'),
 			'@json': path.resolve(__dirname, 'src/json'),
 		},
 	}
