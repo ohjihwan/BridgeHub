@@ -1334,8 +1334,7 @@ legend,
 // 📄 Loading.jsx page
 // ─────────────────────────────
 .loading {
-	display: flex;
-	flex: 1;
+	display:none;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
@@ -1344,14 +1343,16 @@ legend,
 	top:0;
 	right:0;
 	bottom:0;
-	background-color: #e6dcdc;
+	z-index:9999;
+	background-color:rgba(0, 0, 0, 0.5);
 }
 
 .cats {
-	position: relative;
-	width: 100%;
-	max-width: 20em;
 	overflow: hidden;
+	position: relative;
+	width:remx(250);
+	height:remx(250);
+	border-radius:remx(70);
 	background-color: #e6dcdc;
 
 	&::before {
