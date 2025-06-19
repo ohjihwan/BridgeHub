@@ -1,10 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const Header = () => {
+const Header = ({ isEditing = false }) => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuRef = useRef(null);
+
+	const isHome = location.pathname === '/home';
+
+	const handleBackClick = () => {
+		if (isEditing) {
+			customConfirm('작성 중인 내용이 있습니다. 정말 뒤로 가시겠습니까?', () => navigate(-1));
+		} else {
+			navigate(-1);
+		}
+	};
 
 	const handleHomeClick = () => {
 		navigate('/home');
@@ -13,7 +25,7 @@ const Header = () => {
 	const handleLogout = () => {
 		customConfirm('로그아웃 하시겠습니까?', () => {
 			setMenuOpen(false);
-			handleLogoutSet();
+			customAlert('로그아웃 되었습니다');
 			navigate('/login');
 		});
 	};
@@ -21,10 +33,6 @@ const Header = () => {
 	const handleMyPageClick = () => {
 		setMenuOpen(false);
 		navigate('/mypage');
-	};
-
-	const handleLogoutSet = () => {
-		customAlert('로그아웃 되었습니다');
 	};
 
 	const toggleMenu = () => {
@@ -45,11 +53,17 @@ const Header = () => {
 	return (
 		<header className="header">
 			<div className="header__left">
-				<h1 className="logo">
-					<a href="/home" onClick={(e) => { e.preventDefault(); handleHomeClick(); }}>
-						<span className="hide">BridgeHub</span>
-					</a>
-				</h1>
+				{isHome ? (
+					<h1 className="logo">
+						<a href="/home" onClick={(e) => { e.preventDefault(); handleHomeClick(); }}>
+							<span className="hide">BridgeHub</span>
+						</a>
+					</h1>
+				) : (
+					<button type="button" className="header__left__back" onClick={handleBackClick}>
+						<span className="hide">뒤로가기</span>
+					</button>
+				)}
 			</div>
 			<div className="header__right" ref={menuRef}>
 				<button type="button" className="header__right__search">
