@@ -5,13 +5,19 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 7700
+    port: 7700,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8800',
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
-    }
-  }
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
 });
 
 // cd front-user
