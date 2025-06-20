@@ -1,6 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const CreateStudy = ({ onClose }) => {
+
+	const [showThumbnailSelection, setShowThumbnailSelection] = useState(false);
+	const [slideUp, setSlideUp] = useState(false);
+
+	useEffect(() => {
+		if (showThumbnailSelection) {
+			// mount 후 클래스 부여 → transition 작동
+			const timer = setTimeout(() => setSlideUp(true), 10);
+			return () => clearTimeout(timer);
+		} else {
+			setSlideUp(false); // 숨길 땐 제거
+		}
+	}, [showThumbnailSelection]);
+	
 	return (
 		<div className="create-study">
 			<div className="create-study__header">
@@ -8,7 +22,7 @@ const CreateStudy = ({ onClose }) => {
 				<button className="create-study__close" onClick={onClose} aria-label="닫기"></button>
 			</div>
 			
-			<form className="create-study__form">
+			<form className="create-study__form" onSubmit={(e) => {e.preventDefault(); setShowThumbnailSelection(true);}} >
 				<div className="create-study__content">
 					<div className="field">
 						<input type="text" className="text" placeholder="스터디 제목을 입력하세요"/>
@@ -100,7 +114,7 @@ const CreateStudy = ({ onClose }) => {
 					</div>
 
 					<div className="field__imgselect">
-						<button type="button" className="field__imgselect__button">
+						<button type="button" className="field__imgselect__button" onClick={() => setShowThumbnailSelection(true)} >
 							<span className="hide">방의 썸네일이 될 이미지를 골라보세요</span>
 						</button>
 					</div>
@@ -109,6 +123,17 @@ const CreateStudy = ({ onClose }) => {
 					<button type="submit" className="create-study__submit">개설하기</button>
 				</div>
 			</form>
+			{showThumbnailSelection && (
+				<div className={`thumbnail-selection ${slideUp ? 'slide-up' : ''}`}>
+					<div className="thumbnail-selection__content">
+						<p>썸네일을 선택하세요</p>
+						{/* 썸네일 리스트를 여기에 추가 */}
+					</div>
+					<div className="thumbnail-selection__buttons">
+						<button type="button" className="thumbnail-selection__submit" onClick={() => setShowThumbnailSelection(false)} >뒤로가기</button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
