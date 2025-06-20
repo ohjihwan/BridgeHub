@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import CustomAlert from '@components/common/customAlert';
+import CustomAlert from '@page/common/customAlert';
 
 export function customAlert(message) {
 	return new Promise((resolve) => {
@@ -81,3 +81,16 @@ export function customPrompt(message, placeholder = '', defaultValue = '', onSub
 }
 
 export default {customAlert, customConfirm, customPrompt};
+
+export function showLoading() {
+	const loading = document.getElementById('global-loading');
+	if (loading) loading.style.display = 'flex';
+}
+
+export function hideLoading() {
+	const loading = document.getElementById('global-loading');
+	if (loading) loading.style.display = 'none';
+}
+
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;

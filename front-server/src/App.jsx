@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import Auth from '@components/Auth'
-import Home from '@components/home'
-import MyPage from '@components/MyPage'
+import Auth from '@page/Auth'
+import Home from '@page/home'
+import MyPage from '@page/MyPage'
 
 function App() {
 	const [showIntro, setShowIntro] = useState(false);

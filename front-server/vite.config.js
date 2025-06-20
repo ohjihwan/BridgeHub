@@ -16,7 +16,10 @@ export default defineConfig({
 			'@ico': path.resolve(__dirname, 'src/assets/imgs/ico'),
 			'@scss': path.resolve(__dirname, 'src/assets/scss'),
 			'@js': path.resolve(__dirname, 'src/assets/js'),
-			'@components': path.resolve(__dirname, 'src/components'),
+			'@page': path.resolve(__dirname, 'src/page'),
+			'@components': path.resolve(__dirname, 'src/page/components'),
+			'@common': path.resolve(__dirname, 'src/page/common'),
+			'@json': path.resolve(__dirname, 'src/json'),
 		},
 	}
 })
