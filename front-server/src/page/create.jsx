@@ -98,6 +98,12 @@ const CreateStudy = ({ onClose }) => {
 					<div className="field__textarea">
 						<textarea className="textarea" placeholder="스터디에 대해서 자세히 소개해주세요" resize="no"></textarea>
 					</div>
+
+					<div className="field__imgselect">
+						<button type="button" className="field__imgselect__button">
+							<span className="hide">방의 썸네일이 될 이미지를 골라보세요</span>
+						</button>
+					</div>
 				</div>
 				<div className="create-study__buttons">
 					<button type="submit" className="create-study__submit">개설하기</button>

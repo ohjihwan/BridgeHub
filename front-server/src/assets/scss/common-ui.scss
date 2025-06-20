@@ -376,6 +376,36 @@ legend,
 	}
 }
 
+.field__imgselect {
+	overflow:hidden;
+	position:relative;
+	height:remx(120);
+	border:1px solid $line2;
+	border-radius:$form-radius;
+	
+	
+	.field__imgselect__button {
+		position:absolute;
+		left:0;
+		top:0;
+		width:100%; 
+		height:100%;
+		background-color:rgba(0,0,0,0.3);
+
+		&::after {
+			content:'';
+			position:absolute;
+			left:50%;
+			top:50%;
+			transform:translate(-50%, -50%);
+			width:remx(35);
+			height:remx(35);
+			border-radius:50%;
+			background:$black url('@ico/ico-plus-w.svg') no-repeat 50% / 2.4rem auto;
+		}
+	}
+}
+
 .half-field {
 	display: flex;
 	justify-content:space-between;
