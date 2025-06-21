@@ -161,7 +161,7 @@ legend,
 	position: fixed;
 	top: 0;
 	left: 0;
-	z-index: 500;
+	z-index: 2000;
 	width: 100vw;
 	height: 100vh;
 	background: rgba(0, 0, 0, 0.5);
@@ -298,7 +298,7 @@ legend,
 	} 
 
 	.select,
-	.text {
+	.text{
 		position:relative;
 		z-index:10;
 		width: 100%;
@@ -309,24 +309,6 @@ legend,
 		font-size:1.6rem;
 		&:last-child {
 			margin-bottom: 0;
-		}
-	}
-
-	&.--field__error:has(.text),
-	&.--field__error:has(.select) {
-		background-color:$red;
-		animation:errorEm 1s forwards;
-		@keyframes errorEm {
-			0% {transform:rotate(0);}
-			20% {transform:rotate(2deg);}
-			40% {transform:rotate(-2deg);}
-			60% {transform:rotate(2deg);}
-			80% {transform:rotate(-2deg);}
-			100% {transform:rotate(0);}
-		}
-		&::before,
-		&::after {
-			display:none;
 		}
 	}
 
@@ -353,28 +335,59 @@ legend,
 			cursor:no-drop;
 		}
 	}
-}
 
-.field__textarea {
-
+	&.__textarea {
+		height:remx(122)
+	}
 	.textarea {
+		position:relative;
 		z-index:10;
 		width: 100%;
 		height:remx(120);
 		padding:remx(12);
-		border:1px solid $line2;
 		border-radius:$form-radius;
 		background-color: $bg-root;
 		font-size:1.6rem;
 		resize:none;
+	}
+	&:has(.textarea:focus)::before {
+		animation:textareaFocusActiveBefore 0.25s forwards linear;
+	}
+	&:has(.textarea:focus)::after {
+		animation:textareaFocusActiveAfter 0.25s 0.25s forwards linear;
+	}
+	@keyframes textareaFocusActiveBefore {
+		0% {width:2px; height:0;}
+		50%{width:2px; height:100%;}
+		100%{width:100%; height:100%;}
+	} 
+	@keyframes textareaFocusActiveAfter {
+		0% {top:-100%; right:calc(-100% + 1px)}
+		50%{top:0; right:calc(-100% + 1px)}
+		100%{top:0; right:0}
+	} 
 
-		&:last-child {
-			margin-bottom: 0;
+	&.--field__error:has(.text),
+	&.--field__error:has(.select),
+	&.--field__error:has(.textarea) {
+		background-color:$red;
+		animation:errorEm 1s forwards;
+		@keyframes errorEm {
+			0% {transform:rotate(0);}
+			20% {transform:rotate(2deg);}
+			40% {transform:rotate(-2deg);}
+			60% {transform:rotate(2deg);}
+			80% {transform:rotate(-2deg);}
+			100% {transform:rotate(0);}
+		}
+		&::before,
+		&::after {
+			display:none !important;
 		}
 	}
 }
 
-.field__imgselect {
+.field.__imgselect {
 	overflow:hidden;
 	position:relative;
 	height:remx(120);
@@ -1472,6 +1485,18 @@ legend,
 			height:100%;
 			background:rgba(0, 0, 0, 0.5);
 			cursor:pointer;
+			
+			&::after {
+				content:'';
+				position:absolute;
+				left:50%;
+				top:50%;
+				transform:translate(-50%, -50%);
+				width:remx(35);
+				height:remx(35);
+				border-radius:50%;
+				background:$black url('@ico/ico-reset-w.png') no-repeat 50% / 2.4rem auto;
+			}
 		}
 
 		&__img {
