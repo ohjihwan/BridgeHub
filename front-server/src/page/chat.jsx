@@ -1,56 +1,49 @@
-/* import { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import Header from './common/Header';
 
 function Chat() {
-	
+	const location = useLocation();
+	const studyInfo = location.state;
+	const [message, setMessage] = useState('');
+	const textareaRef = useRef(null);
+	const handleChange = (e) => {
+		const value = e.target.value;
+		setMessage(value);
+		const textarea = textareaRef.current;
+		if (textarea) {
+			textarea.style.height = 'auto';
+			textarea.style.height = textarea.scrollHeight + 'px';
+		}
+	};
+
 
 	return (
-		<div className="ai-msg-area">
-			<h4 className="hide">단축 메뉴 버튼 리스트</h4>
-			<ul className="top-action-area">
-				<li>
-					<button type="button" className="button-quick">퀵메뉴</button>
-				</li>
-				<li>
-					<button type="button" className="button-question">자주하는질문</button>
-				</li>
-			</ul>
-			<div className="auto-search-area" style="display:none;">
-				<ul className="list">
+		<>
+			<Header showSearch={false} title={studyInfo?.title || '채팅방'} />
+			<div className={"chatroom-history"}>
+				
+			</div>
+
+			<div className="msg-writing">
+				<ul class="msg-writing__actions">
 					<li>
-						<button type="button">
-							<span>계좌</span> 개설하기
-						</button>
+						<button type="button" class="msg-writing__action">퀵메뉴</button>
 					</li>
 					<li>
-						<button type="button">
-							<span>계좌</span> 조회하기
-						</button>
-					</li>
-					<li>
-						<button type="button">
-							<span>계좌</span> 이체하기
-						</button>
+						<button type="button" class="msg-writing__action">자주하는질문</button>
 					</li>
 				</ul>
-			</div>
-			<div className="input-chat-box">
-				<div className="inp-chat">
-					<label for="chat1" className="hide">텍스트 입력창</label>
-					<input type="text" id="chat1" className="form-input" placeholder="궁금한 내용을 입력해주세요!">
-					<button type="button" className="clear">
-						<span className="hide">초기화</span>
-					</button>
+				<div className="msg-writing__inputs">
+					<div className="msg-writing__field">
+						<textarea className="msg-writing__input" placeholder="메세지 입력!" value={message} onChange={handleChange} ref={textareaRef} rows={1} />
+					</div>
+					<button type="button" className="msg-writing__send" aria-label="입력 전송"/>
 				</div>
-				<button type="button" className="submit-button send-button">
-					<span className="hide">입력 전송</span>
-				</button>
-				<button type="button" className="submit-button voice-button">
-					<span className="hide">음성 입력</span>
-				</button>
 			</div>
-		</div>
+		</>
 	);
 }
 
 export default Chat;
- */

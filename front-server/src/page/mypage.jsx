@@ -56,9 +56,9 @@ const MyPage = () => {
 	return (
 		<div className="mypage-container">
 			{isEditing ? (
-				<Header isEditing={true} />
+				<Header isEditing={true} showSearch={false} />
 			) : (
-				<Header/>
+				<Header showSearch={false} />
 			)}
 
 			{isEditing ? (

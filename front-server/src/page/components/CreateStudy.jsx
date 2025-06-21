@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import thumbnailList from '@json/Thumbnail';
 import { customAlert } from '@/assets/js/common-ui';
 
 const CreateStudy = ({ onClose }) => {
+	const navigate = useNavigate();
 	const [isVisible, setIsVisible] = useState(false);
 	const [isMounted, setIsMounted] = useState(true);
 	const [showThumbnailSelection, setShowThumbnailSelection] = useState(false);
@@ -52,31 +54,40 @@ const CreateStudy = ({ onClose }) => {
 	const [capacity, setCapacity] = useState('');
 	const [time, setTime] = useState('');
 	const [description, setDescription] = useState('');
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		const newErrors = {
-			title: !title.trim(),
-			department: !department,
-			major: !major,
-			city: !city,
-			district: !district,
-			capacity: !capacity,
-			time: !time,
-			description: !description.trim(),
-			thumbnail: !selectedThumbnail
-		};
 
-		setErrors(newErrors);
+		const isInvalid = !title.trim() || !department || !major || !city || !district || !capacity || !time || !description.trim() || !selectedThumbnail;
 
-		if (Object.values(newErrors).some(Boolean)) {
-			customAlert('빈 값을 입력해주세요');
+		if (isInvalid) {
+			await customAlert('빈 값을 입력해주세요');
+
+			// 여기서 에러 값을 새로 계산
+			const newErrors = {
+				title: !title.trim(),
+				department: !department,
+				major: !major,
+				city: !city,
+				district: !district,
+				capacity: !capacity,
+				time: !time,
+				description: !description.trim(),
+				thumbnail: !selectedThumbnail
+			};
+
+			setErrors(newErrors);
 			return;
 		}
 
-		console.log({
+		const studyInfo = {
 			title, department, major, city, district,
 			capacity, time, description, selectedThumbnail
-		});
+		};
+
+		// 정상 콘솔 출력
+		console.log(studyInfo);
+
+		navigate('/chat', { state: studyInfo });
 	};
 	/* // 콘솔 */
 

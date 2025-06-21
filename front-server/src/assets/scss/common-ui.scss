@@ -79,6 +79,22 @@ legend,
 		}
 	}
 
+	.header__title {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		max-width: calc(100% - 18rem);
+		color: var(--font1);
+		font-weight: bold;
+		font-size: 1.7rem;
+		line-height: 1.2;
+		text-align: left;
+		transform: translate(-50%, -50%);
+	}
+
 	&__right {
 		.header__right__search {
 			@include header-button-style;
@@ -1112,7 +1128,11 @@ legend,
 	}
 
 	&__content {
-		padding:0 $padding-x remx(78);
+		overflow-x:hidden;
+		overflow-y:auto;
+		height:100%;
+		max-height:calc(100vh - 11rem);
+		padding:remx(10) $padding-x remx(78);
 	}
 
 	&__location {
@@ -1131,6 +1151,7 @@ legend,
 		position:absolute;
 		left:0;
 		bottom:0;
+		z-index:100;
 		width:100%;
 		padding:remx(10) $padding-x remx(20);
 	}
@@ -1645,5 +1666,99 @@ legend,
 	}
 	to {
 		transform: none;
+	}
+}
+// ─────────────────────────────
+// 📄 Chat.jsx page
+// ─────────────────────────────
+.chatroom-history {
+	height:calc(100vh - (remx(50) + remx(75)));
+	margin-top:remx(50);
+	padding:remx(30) $padding-x remx(50);
+	background-color:#f1f1f1;
+}
+
+.msg-writing {
+	position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+    padding: 0 remx(20) remx(15);
+    border-radius: remx(20) remx(20) 0 0;
+    background-color: #fff;
+    box-shadow: 0 -0.3rem 0.5rem 0 rgba(0,0,0,.1);
+
+	&__actions {
+		display:flex;
+		justify-content:flex-end;
+		align-items:center;
+		height:remx(46);
+
+		li {
+			display:flex;
+			align-items:center;
+			position:relative;
+			height:remx(46);
+			padding:remx(15);
+
+			&::after {
+				content:'';
+				position:absolute;
+				right:0;
+				top:50%;
+				transform:translateY(-50%);
+				width:1px;
+				height:remx(13);
+				background-color:$line1;
+			}
+
+			&:last-child {
+				padding-right:0;
+
+				&::after {
+					display:none;
+				}
+			}
+		}
+	}
+
+	&__action {
+		display:flex;
+		align-items:center;
+		background-color:$bg-root;
+		color:$font3
+	}
+
+	&__inputs {
+		display: flex;
+		align-items: flex-end;
+		overflow: hidden;
+		width:100%;
+		border: 1px solid $line1;
+		border-radius:remx(20);
+	}
+
+	&__field {
+		width:calc(100% - remx(45));
+	}
+
+	&__input {
+		display:block;
+		overflow-x:hidden;
+		overflow-y:auto;
+		width:100%;
+		min-height:remx(40);
+		max-height:remx(120);
+		padding:remx(11) 0 remx(11) remx(20);
+		font-size:remx(15);
+		resize:none;
+		transition: height 0.2s ease;
+	}
+
+	&__send {
+		width:remx(26);
+		height:remx(40);
+		background:url('@ico/ico-send-button.svg') no-repeat 50%;
 	}
 }
