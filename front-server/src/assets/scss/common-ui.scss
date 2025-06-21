@@ -1574,6 +1574,36 @@ legend,
 	bottom:0;
 	z-index:9999;
 	background-color:rgba(0, 0, 0, 0.5);
+
+	&__text {
+		position:absolute;
+		left:50%;
+		top:50%;
+		transform:translate(-50%, -50%);
+		font-size:remx(15);
+
+		span {
+			display:inline-block;
+			animation: bounce 1s infinite ease-in-out;
+
+			&:last-child {
+				margin-left:remx(5)
+			}
+		}
+	}
+	@for $i from 1 through 10 {
+		.loading__text span:nth-child(#{$i}) {
+			animation-delay: 0.1s * ($i - 1);
+		}
+	}
+	@keyframes bounce {
+		0%, 40%, 100% {
+			transform: translateY(0);
+		}
+		20% {
+			transform: translateY(-10px);
+		}
+	}
 }
 
 .cats {
