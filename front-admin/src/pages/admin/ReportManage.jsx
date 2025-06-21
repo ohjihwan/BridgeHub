@@ -161,12 +161,18 @@ function ReportManage() {
   };
 
   const handleDelete = (reportId) => {
-    setReports(reports.filter(report => report.id !== reportId));
+    if (window.confirm('정말로 삭제하시겠습니까?')) {
+      setReports(reports.filter(report => report.id !== reportId));
+    }
   };
 
   const handleDeleteSelected = () => {
-    setReports(reports.filter(report => !selectedReports.includes(report.id)));
-    setSelectedReports([]);
+    if (selectedReports.length === 0) return;
+    
+    if (window.confirm(`선택된 ${selectedReports.length}개의 신고를 정말로 삭제하시겠습니까?`)) {
+      setReports(reports.filter(report => !selectedReports.includes(report.id)));
+      setSelectedReports([]);
+    }
   };
 
   const filteredReports = reports.filter(report => {
@@ -256,7 +262,7 @@ function ReportManage() {
           >
             <option value="all">전체 유형</option>
             <option value="채팅방">채팅방</option>
-            <option value="게시글">게시글</option>
+            <option value="채팅">채팅</option>
           </select>
         </div>
       </div>

@@ -61,7 +61,9 @@ function MemberManage() {
   );
 
   const handleDelete = (id) => {
-    setRows(prev => prev.filter(row => row.id !== id));
+    if (window.confirm('정말로 삭제하시겠습니까?')) {
+      setRows(prev => prev.filter(row => row.id !== id));
+    }
   };
 
   // minWidth 없이 flex만 남겨서, 화면이 줄어들 때 flex 비율대로 계속 줄어듦
