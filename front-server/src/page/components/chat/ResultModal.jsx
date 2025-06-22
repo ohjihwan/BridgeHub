@@ -6,6 +6,12 @@ const ResultModal = ({ spinning, winner, onClose }) => {
 	return ReactDOM.createPortal(
 		<>
 			<div className="roulette-result__modal"></div>
+			{!spinning && winner && (
+				<div className="roulette-result__pyro">
+					<div className="roulette-result__pyro__before"></div>
+					<div className="roulette-result__pyro__after"></div>
+				</div>
+			)}
 			<div className="roulette-result">
 				{spinning ? (
 					<p className="roulette-result__text"><span className="emoji">🎲</span>룰렛을 돌리는 중...</p>

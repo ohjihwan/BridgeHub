@@ -4,6 +4,7 @@ import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
 import ResultModal from '@components/chat/ResultModal';
+import TodoList from '@components/chat/TodoListDeployment';
 
 function Chat() {
 	const location = useLocation();
@@ -19,6 +20,14 @@ function Chat() {
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
 	const [spinning, setSpinning] = useState(false); // 룰렛 돌리는 중 여부
 	const [winner, setWinner] = useState(null); // 당첨자
+	// --------
+	// 임무 분담
+	const [showTodo, setShowTodo] = useState(false);
+	const dummyTodos = [
+		{ title: '할 일1', users: ['유저1', '유저2'] },
+		{ title: '할 일2', users: ['유저1', '유저2'] },
+		{ title: '할 일3', users: ['유저1', '유저2'] },
+	];
 	// --------
 
 	// 시간 포맷 도우미
@@ -70,6 +79,31 @@ function Chat() {
 			textarea.style.height = 'auto';
 			textarea.style.height = (textarea.scrollHeight / 10) + 'rem';
 		}
+	};
+
+	// [할 일 공유 버튼 클릭 시 실행되는 함수]
+	// 더미 데이터 생성 후 메시지 추가 함수 호출
+	const handleTodoShare = () => {
+		const dummy = [
+			{ title: '기획서 작성', users: ['김사과', '오렌지'] },
+			{ title: '디자인 시안', users: ['반하나'] }
+		];
+
+		const { ampm, timeStr } = getFormattedTime();
+		setMessages(prev => [
+			...prev,
+			{ type: 'todo', todos: dummy, time: timeStr, ampm }
+		]);
+	};
+
+	// [채팅 메시지에 '할 일 목록' 추가 함수]
+	// todos 배열을 기반으로 메시지 배열에 새로운 'todo' 메시지를 추가
+	const addTodoMessage = (todos) => {
+		const { ampm, timeStr } = getFormattedTime();
+		setMessages(prev => [
+			...prev,
+			{ type: 'todo', todos, time: timeStr, ampm }
+		]);
 	};
 
 	// 첫 입장 메시지
@@ -138,6 +172,28 @@ function Chat() {
 						);
 					}
 
+					if (msg.type === 'todo') {
+						return (
+							<div key={i} className="todo-select">
+								{msg.todos.map((todo, idx) => (
+									<div key={idx} className="todo-select__unit">
+										<div className="todo-select__info">
+											<h4 className="todo-select__name">{todo.title}</h4>
+											<ul className="todo-select__users">
+												{todo.users.map((user, idx2) => (
+													<li key={idx2} className="todo-select__user">{user}</li>
+												))}
+											</ul>
+										</div>
+										<div className="todo-select__buttons">
+											<button type="button" className="todo-select__button">할일 수락</button>
+										</div>
+									</div>
+								))}
+							</div>
+						);
+					}
+
 					return null;
 				})}
 
@@ -162,7 +218,7 @@ function Chat() {
 							랜덤게임
 						</button>
 					</li>
-					<li><button type="button" className="msg-writing__action">텍스트2</button></li>
+					<li><button type="button" className="msg-writing__action" onClick={() => handleTodoShare()}>할 일 공유</button></li>
 				</ul>
 				<div className="msg-writing__inputs">
 					<div className="msg-writing__field">

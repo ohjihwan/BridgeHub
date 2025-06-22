@@ -48,9 +48,7 @@ const Roulette = ({ users, isOwner, onSpinStart, onWinnerSelected }) => {
 			</ul>
 			{isOwner && (
 				<div className="roulette__bottom">
-					<button className="roulette__spin" onClick={handleSpin} disabled={spinning}>
-						돌리기
-					</button>
+					<button className="roulette__spin" onClick={handleSpin} disabled={spinning}>돌리기</button>
 				</div>
 			)}
 		</div>
