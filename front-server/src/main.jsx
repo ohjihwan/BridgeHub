@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@scss/common-ui.scss';
 import '@js/common-ui.jsx';
@@ -12,8 +11,8 @@ window.customConfirm = alertUtils.customConfirm;
 window.customPrompt = alertUtils.customPrompt;
 
 createRoot(document.getElementById('root')).render(
-	<StrictMode>
+	<>
 		<App />
 		<Loading />
-	</StrictMode>,
+	</>
 )

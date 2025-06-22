@@ -4,6 +4,7 @@ import CreateStudy from './components/CreateStudy';
 import Header from './common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import roomData from '@json/Room.json';
+import Layer from './common/Layer';
 
 const Home = () => {
 	const [selectedRoom, setSelectedRoom] = useState(null);
