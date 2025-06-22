@@ -217,7 +217,7 @@ legend,
 		overflow-y:auto;
 		height:100%;
 		max-height:calc(100vh - 11rem);
-		padding:remx(10) $padding-x;
+		padding:remx(10) $padding-x 0;
 	}
 	
 	&__buttons {
@@ -1977,7 +1977,178 @@ legend,
 	}
 }
 
+.roulette {
 
+	&__list {
+		display:flex;
+		flex-wrap:wrap;
+		justify-content:center;
+		align-items:center;
+		padding-bottom:remx(10);
+		gap:remx(10) remx(20);
+	}
+
+	&__label {
+		display:flex;
+		justify-content:center;
+		align-items:center;
+		width:100%;
+		height:remx(36);
+		border:1px solid $line2;
+		border-radius:remx(16);
+		background-color:$bg-root;
+		color:$font3;
+	}
+
+	&__item {
+		flex:0 0 calc(50% - remx(10));
+
+		input {
+			@extend %visually-hidden;
+		}
+		
+		input:checked + .roulette__label {
+			border:1px solid $color-primary;
+			background-color:$bg-root;
+			color:$font1;
+			font-weight:bold;
+		}
+	}
+
+	&__bottom {
+		width:100%;
+		padding:remx(10) 0 remx(20)
+	}
+
+	&__spin {
+		width:100%;
+		height:remx(48);
+		border:1px solid $color-primary;
+		border-radius:remx(12);
+		background-color:$color-primary;
+		color:#fff;
+		font-size:remx(16);
+		cursor:pointer;
+	}
+}
+
+.roulette-result__modal {
+	position:fixed;
+	inset:0 0 0 0;
+	z-index:1000;
+	background-color:rgba(0, 0, 0, 0.5);
+}
+
+.roulette-result {
+	position:absolute;
+	left:50%;
+	top:50%;
+	transform:translate(-50%, -50%);
+	z-index:1001;
+	width:calc(100% - 4.8rem);
+	border-radius:remx(16);
+	background-color:$bg-root;
+
+	&__effects {
+		height:remx(190);
+		perspective:remx(1000);
+		transform-style:preserve-3d;
+		place-items:center;
+	}
+
+	&__effect {
+		width:remx(200);
+		height:remx(150);
+		transform:translateY(remx(30));
+		border:1px solid #ddd;
+		border-radius:remx(20);
+		background-color:#ddd;
+		box-shadow:inset 1rem 1rem 1rem #999, inset -1rem -1rem 1rem #fff;
+		aspect-ratio:1;
+		animation:rouletteResult1 1s forwards;
+		@keyframes rouletteResult1 {
+			0%{
+				border:1px solid #ddd;
+				background-color:#ddd;
+				box-shadow:
+					inset 1rem 1rem 1rem #999, 
+					inset -1rem -1rem 1rem #fff;
+			}
+			100%{
+				border:1px solid $line1;
+				background-color:#fff;
+				transform:translateY(remx(60)) translateZ(remx(100)) rotateX(75deg);
+				box-shadow:
+					remx(10) remx(10) remx(10) #999, 
+					-1rem -1rem 1rem #fff;
+			}
+		}
+	}
+
+	&__text {
+		padding:remx(30) $padding-x;
+		text-align:center;
+		font-size:remx(22);
+
+		.emoji {
+			display:block;
+			font-size:remx(50);
+			animation:shakeEmoji 0.5s linear infinite;
+			@keyframes shakeEmoji {
+				0% {transform:translateX(-0.5rem) rotate(-15deg);}
+				10% {transform:translateX(0) rotate(15deg);}
+				20% {transform:translateX(0.5rem) rotate(15deg);}
+				30% {transform:translateX(0) rotate(-15deg);}
+				40% {transform:translateX(-0.5rem);}
+				50%, 100% {transform:translateX(0);}
+			}
+		}
+	}
+
+	&__winner {
+		padding:0 $padding-x;
+		position:absolute;
+		left:50%;
+		top:50%;
+		width:100%;
+		transform:translate(-50%, -50%);
+		transition:transform 1s;
+		text-align:center;
+		animation:rouletteResult2 1s forwards;
+		@keyframes rouletteResult2 {
+			0%{
+				transform:translate(-50%, -50%);
+			}
+			100%{
+				transform:translate(-50%, -70%) translateZ(remx(250));
+			}
+		}
+
+		strong {
+			display:block;
+			color:$color-primary;
+			font-size:remx(19);
+		}
+	}
+
+	&__close {
+		@include flex-center;
+		width:calc(100% - $padding-x * 2);
+		min-height:remx(48);
+		margin:1rem 2.4rem 2rem;
+		padding:0 remx(13);
+		border:1px solid $color-primary;
+		border-radius:remx(12);
+		font-size:remx(16);
+		line-height:1.2;
+		background-color:$bg-root;
+
+		&.--cancel + .alert-button {
+			background-color:$color-primary;
+			color:#fff;
+		}
+	}
+}
 
 
 

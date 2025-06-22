@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
+import ResultModal from '@components/chat/ResultModal';
 
 function Chat() {
 	const location = useLocation();
@@ -12,8 +13,13 @@ function Chat() {
 	const [messages, setMessages] = useState([]);
 	const [isTyping, setIsTyping] = useState(false);
 	const textareaRef = useRef(null);
-
 	const [showRoulette, setShowRoulette] = useState(false);
+	// 랜덤 기능
+	const isOwner = true; // 추후 socket or props로 실제 값 연결
+	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
+	const [spinning, setSpinning] = useState(false); // 룰렛 돌리는 중 여부
+	const [winner, setWinner] = useState(null); // 당첨자
+	// --------
 
 	// 시간 포맷 도우미
 	const getFormattedTime = () => {
@@ -153,7 +159,7 @@ function Chat() {
 				<ul className="msg-writing__actions">
 					<li>
 						<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
-							텍스트1
+							랜덤게임
 						</button>
 					</li>
 					<li><button type="button" className="msg-writing__action">텍스트2</button></li>
@@ -166,13 +172,32 @@ function Chat() {
 				</div>
 			</div>
 
-			<Layer
-				isOpen={showRoulette}
-				onClose={() => setShowRoulette(false)}
-				header="랜덤 뽑기"
-			>
-				<Roulette users={testUsers} />
+			<Layer isOpen={showRoulette} onClose={() => setShowRoulette(false)} header="랜덤 뽑기">
+				<Roulette 
+					users={testUsers} 
+					isOwner={isOwner}
+					onSpinStart={() => {
+						setSpinning(true); // 모달 띄우고
+						setShowResult(true); // "룰렛 돌리는 중..." 보여주기
+					}}
+					onWinnerSelected={(user) => {
+						setSpinning(false); // 돌리기 종료
+						setWinner(user); // 결과 저장
+					}}
+				/>
 			</Layer>
+			
+			{showResult && (
+				<ResultModal
+					spinning={spinning}
+					winner={winner}
+					onClose={() => {
+						setShowResult(false);
+						setWinner(null);
+						setSpinning(false);
+					}}
+				/>
+			)}
 		</>
 	);
 }
