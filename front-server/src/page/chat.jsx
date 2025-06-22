@@ -183,6 +183,8 @@ function Chat() {
 					onWinnerSelected={(user) => {
 						setSpinning(false); // 돌리기 종료
 						setWinner(user); // 결과 저장
+
+						addSystemMessage(`"${user}"님이 당첨되셨습니다!`, { user });
 					}}
 				/>
 			</Layer>
