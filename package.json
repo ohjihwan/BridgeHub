@@ -87,8 +87,7 @@
   },
   "homepage": "https://github.com/ohjihwan/BridgeHub#readme",
     "dotenv": "^16.4.1",
-    "swiper": {"^11.2.8"
-  },
+    "swiper": "^11.2.8",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
