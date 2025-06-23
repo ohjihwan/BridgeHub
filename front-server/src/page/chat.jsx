@@ -189,8 +189,17 @@ function Chat() {
 						return <TodoList key={i} todos={msg.todos} />;
 					}
 
+					{showTodo && (
+						<TodoList todos={dummyTodos} />
+					)}
+
 					return null;
 				})}
+
+				{/* 할 일 공유 토글 영역 - map 바깥에 별도로! */}
+				{showTodo && (
+					<TodoList todos={dummyTodos} />
+				)}
 
 				{/* 입력 중 표시 */}
 				{isTyping && (
@@ -216,7 +225,7 @@ function Chat() {
 							랜덤게임
 						</button>
 					</li>
-					<li><button type="button" className="msg-writing__action" onClick={() => handleTodoShare()}>할 일 공유</button></li>
+					<li><button type="button" className="msg-writing__action" onClick={() => setShowTodo(prev => !prev)}>{showTodo ? '공유 취소' : '할 일 공유'}</button></li>
 				</ul>
 				<div className="msg-writing__inputs">
 					<div className="msg-writing__field">

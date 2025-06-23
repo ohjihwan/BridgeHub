@@ -12,7 +12,7 @@ const TodoList = ({ todos, onClose }) => {
 						</ul>
 					</div>
 					<div className="todolist__buttons">
-						<button type="button" className="todolist__button">할일 수락</button>
+						<button type="button" className="todolist__button">임무 가져오기</button>
 					</div>
 				</div>
 			))}
