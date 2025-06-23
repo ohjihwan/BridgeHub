@@ -1536,17 +1536,17 @@ legend,
 	padding:remx(50) $padding-x remx(100);
 
 	.edit-profile {
-		display: flex;
-		justify-content: flex-end;
-		margin:remx(20) 0;
+      display: flex;
+      justify-content: flex-end;
+      margin:remx(20) 0;
 
-		&__edit {
-			padding-right:remx(18);
-			font-size:remx(14);
-			line-height:1;
-			background:$bg-root url('@ico/ico-edit.png') no-repeat right center / remx(14) auto;
-		}
-	}
+      &__edit {
+         padding-right:remx(18);
+         font-size:remx(14);
+         line-height:1;
+         // background:$bg-root url('@ico/ico-edit.png') no-repeat right center / remx(14) auto;
+      }
+   }
 
 	.profile-img {
 		display:block;

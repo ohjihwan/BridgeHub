@@ -18,7 +18,7 @@ export function getTurnCredentials() {
   const urls = [
     stunUrl,
     `${process.env.TURN_URL}?transport=udp`,
-    `${process.env.TURN_URL}?transport=tcp`
+    `${process.env.TURN_URL}?transport=tcp`,
   ];
 
   return {

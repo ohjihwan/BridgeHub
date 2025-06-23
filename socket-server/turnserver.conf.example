@@ -1,0 +1,29 @@
+# ============ 네트워크 설정 =============
+listening-ip=0.0.0.0
+listening-port=3478
+tls-listening-port=5349
+
+# ============ 인증 & 보안 =============
+lt-cred-mech
+use-auth-secret
+static-auth-secret=bridgehub_secret_123
+realm=thebridgehub.org
+fingerprint
+
+# ============ 퍼포먼스 & 제약 ==========
+total-quota=100
+bps-capacity=0
+
+# ============ 보안 옵션 ================
+stale-nonce
+no-multicast-peers
+no-cli
+no-loopback-peers
+no-ipv6
+
+# ============ TLS 관련 (운영 인증서 경로) ====
+cert=/home/ubuntu/BridgeHub/coturn-cert.pem
+pkey=/home/ubuntu/BridgeHub/coturn-key.pem
+
+# ============ 디버그/로그 ===============
+# verbose   # 운영시 주석 처리

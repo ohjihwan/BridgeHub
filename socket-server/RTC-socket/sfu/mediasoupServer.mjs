@@ -13,7 +13,7 @@ export async function initRouter(roomId) {
 
   const mediaCodecs = [
     { kind: "audio", mimeType: "audio/opus", clockRate: 48000, channels: 2 },
-    { kind: "video", mimeType: "video/VP8", clockRate: 90000 }
+    { kind: "video", mimeType: "video/VP8", clockRate: 90000 },
   ];
 
   const router = await worker.createRouter({ mediaCodecs });
@@ -35,8 +35,9 @@ export async function createWebRtcTransport(peerId, direction) {
   const listenIps = [
     {
       ip: process.env.MEDIASOUP_LISTEN_IP,
-      announcedIp: process.env.ANNOUNCED_IP || process.env.TURN_URL.replace(/^turn:/, ""),
-    }
+      announcedIp:
+        process.env.ANNOUNCED_IP || process.env.TURN_URL.replace(/^turn:/, ""),
+    },
   ];
 
   let transport;
@@ -49,7 +50,9 @@ export async function createWebRtcTransport(peerId, direction) {
       enableSctp: false,
       iceServers: [{ urls, username, credential }],
     });
-    logger.info(`[Transport] Peer:${peerId}, 방향:${direction}, ID:${transport.id}`);
+    logger.info(
+      `[Transport] Peer:${peerId}, 방향:${direction}, ID:${transport.id}`
+    );
   } catch (err) {
     logger.error(`[Transport 생성 실패]`, err);
     throw err;

@@ -14,22 +14,22 @@
     "start:socket": "cd socket-server && npm start",
     "start:front": "cd front-server && npm run dev",
     "start:admin-front": "cd front-admin && npm run dev",
-
     "dev": "npx concurrently -n api,socket,rtc,front,admin -c blue,magenta,cyan,yellow,green \"npm run dev:api\" \"npm run dev:socket\" \"npm run dev:rtc\" \"npm run dev:front\" \"npm run dev:admin-front\"",
     "dev:api": "gradlew.bat bootRun",
     "dev:socket": "cd socket-server && npm run dev",
     "dev:rtc": "cd socket-server/rtc-socket && npm run dev",
     "dev:front": "cd front-server && npx cross-env PORT=7000 npm run dev",
     "dev:admin-front": "cd front-admin && npx cross-env PORT=7700 npm run dev",
-
     "install:all": "npm install && npm run install:socket && npm run install:rtc && npm run install:front && npm run install:admin-front",
     "install:socket": "cd socket-server && npm install",
     "install:rtc": "cd socket-server/rtc-socket && npm install",
     "install:front": "cd front-server && npm install",
     "install:admin-front": "cd front-admin && npm install",
-
     "clean": "npx rimraf node_modules socket-server/node_modules socket-server/rtc-socket/node_modules front-server/node_modules front-admin/node_modules",
-    "clean:install": "npm run clean && npm run install:all"
+    "clean:install": "npm run clean && npm run install:all",
+    "build": "npm run build:front && npm run build:admin-front",
+    "build:front": "cd front-server && npm run build",
+    "build:admin-front": "cd front-admin && npm run build"
   },
   "keywords": [],
   "author": "",
