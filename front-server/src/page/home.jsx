@@ -60,7 +60,12 @@ const Home = () => {
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
-				<Header />
+				<Header
+					showSearch={true}
+					onSearch={() => {
+						customAlert('메인 검색기능 미구현')
+					}}
+				/>
 
 				<div className="create-studyroom">
 					<button className="create-studyroom__button" onClick={openCreateStudy}>

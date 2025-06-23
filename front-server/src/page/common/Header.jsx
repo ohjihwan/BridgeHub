@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
+const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = () => {} }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -80,7 +80,7 @@ const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
 			
 			<div className="header__right" ref={menuRef}>
 				{showSearch && (
-					<button type="button" className="header__right__search">
+					<button type="button" className="header__right__search" onClick={onSearch}>
 						<span className="hide">검색</span>
 					</button>
 				)}

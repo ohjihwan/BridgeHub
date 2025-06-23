@@ -1770,6 +1770,22 @@ legend,
 	padding:remx(30) 0 remx(50);
 }
 
+.program-msg {
+	display:flex;
+	justify-content:center;
+	margin:0 auto;
+	padding:.6rem 1.5rem;
+	margin:remx(10) 0;
+	border-radius:1.5rem;
+	background-color:var(--bg1);
+	color:var(--font3);
+	font-size:1.3rem;
+
+	& + [class$="say"] {
+		margin-top:2rem;
+	}
+}
+
 .i-say {
 	display:flex;
 	align-items:flex-end;
@@ -1790,6 +1806,16 @@ legend,
 		font-size:remx(15);
 		text-align:right;
 		word-break:break-all;
+
+		.highlight {
+			background:#ff6600;
+			color:$font1;
+			font-weight: bold;
+		}
+
+		&.highlight-impact {
+			animation:chatHighlightImpact 0.5s forwards;
+		}
 	}
 
 	&__time {
@@ -1801,20 +1827,10 @@ legend,
 	}
 }
 
-.program-msg {
-	display:flex;
-	justify-content:center;
-	margin:0 auto;
-	padding:.6rem 1.5rem;
-	margin:remx(10) 0;
-	border-radius:1.5rem;
-	background-color:var(--bg1);
-	color:var(--font3);
-	font-size:1.3rem;
-
-	& + [class$="say"] {
-		margin-top:2rem;
-	}
+@keyframes chatHighlightImpact {
+	0%,40%,80% {transform:translateX(-1rem);}
+	20%,60% {transform:translateX(1rem);}
+	100% {transform:translateX(0);}
 }
 
 .user-say {
@@ -1835,6 +1851,15 @@ legend,
 		font-size:remx(15);
 		text-align:left;
 		word-break:break-all;
+
+		.highlight {
+			background: yellow;
+			font-weight: bold;
+		}
+
+		&.highlight-impact {
+			animation:chatHighlightImpact 0.5s forwards;
+		}
 	}
 
 	&__time {
@@ -2479,7 +2504,42 @@ legend,
 	}
 }
 
+.search-navigator {
+	display:flex;
+	justify-content:flex-end;
+	position:absolute;
+	right:remx(20);
+	top:remx(50);
+	z-index:300;
+	padding:remx(10) remx(12);
+	border:1px solid $line1;
+	border-radius:remx(12);
+	background-color:$bg-root;
 
+	&::before {
+		content:'';
+		position:absolute;
+		left:50%;
+		top:-0.6rem;
+		width:remx(12);
+		height:remx(12);
+		transform:translateX(-50%) rotate(45deg);
+		border-top:1px solid $line1;
+		border-left:1px solid $line1;
+		background-color:$bg-root;
+	}
+
+	&::after {
+		content:'';
+		position:absolute;
+		left:50%;
+		top:0rem;
+		width:remx(24);
+		height:remx(6);
+		transform:translateX(-50%);
+		background-color:$bg-root;
+	}
+}
 
 
 

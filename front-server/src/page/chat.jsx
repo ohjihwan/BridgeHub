@@ -27,6 +27,9 @@ function Chat() {
 	const [showTodoSetting, setShowTodoSetting] = useState(false);
 	const [todoSettingInputs, setTodoSettingInputs] = useState(['', '']);
 	const [selectedIndex, setSelectedIndex] = useState(null);
+	const [searchResults, setSearchResults] = useState([]); // 검색된 요소 배열
+	const [currentIndex, setCurrentIndex] = useState(0); // 현재 몇 번째 결과인지
+	const [showNavigator, setShowNavigator] = useState(false); // 말풍선 표시 여부
 	const handleTodoSettingAddInput = () => {
 		if (todoSettingInputs.length < 10) {
 			setTodoSettingInputs([...todoSettingInputs, '']);
@@ -93,6 +96,93 @@ function Chat() {
 				// 실제 신고 로직
 				customAlert('신고가 접수되었습니다.');
 				setShowReportLayer(false);
+			}
+		});
+	};
+	// --------
+	
+	// 검색기능
+	const removeHighlight = () => {
+		document.querySelectorAll('.highlight').forEach(el => {
+			const parent = el.parentNode;
+			parent.innerHTML = parent.textContent;
+		});
+		document.querySelectorAll('.highlight-impact').forEach(el => {
+			el.classList.remove('highlight-impact');
+		});
+	};
+	const handleChatSearch = async () => {
+		const keyword = await customPrompt('검색할 내용을 입력하세요', '');
+
+		if (keyword !== null && keyword.trim() !== '') {
+			removeHighlight();
+
+			const results = [];
+			const chatList = document.querySelectorAll('.user-say, .i-say');
+
+			chatList.forEach(el => {
+				const textEl = el.querySelector('.user-say__text, .i-say__text');
+				if (textEl && textEl.textContent.includes(keyword)) {
+					const regex = new RegExp(`(${keyword})`, 'gi');
+					textEl.innerHTML = textEl.textContent.replace(regex, '<span class="highlight">$1</span>');
+					results.push(el);
+				}
+			});
+
+			if (results.length === 0) {
+				customAlert('검색 결과가 없습니다.');
+				setShowNavigator(false);
+			} else if (results.length === 1) {
+				setShowNavigator(false);
+				setSearchResults(results);
+				setCurrentIndex(0);
+				results[0].scrollIntoView({ behavior: 'smooth' });
+				const textEl = results[0].querySelector('.user-say__text, .i-say__text');
+				if (textEl) {
+					textEl.classList.add('highlight-impact');
+				}
+				setTimeout(() => {
+					removeHighlight();
+					setSearchResults([]);
+					setCurrentIndex(0);
+				}, 2000);
+			} else {
+				setShowNavigator(true);
+				setSearchResults(results);
+				setCurrentIndex(0);
+				results[0].scrollIntoView({ behavior: 'smooth' });
+			}
+		}
+	};
+	const goToNextNavigator = () => {
+		if (searchResults.length === 0) return;
+		const nextIndex = (currentIndex + 1) % searchResults.length;
+		setCurrentIndex(nextIndex);
+		applyActiveClass(nextIndex);
+		searchResults[nextIndex].scrollIntoView({ behavior: 'smooth' });
+	};
+	const goToPrevNavigator = () => {
+		if (searchResults.length === 0) return;
+		const prevIndex = (currentIndex - 1 + searchResults.length) % searchResults.length;
+		setCurrentIndex(prevIndex);
+		applyActiveClass(prevIndex);
+		searchResults[prevIndex].scrollIntoView({ behavior: 'smooth' });
+	};
+	const closeNavigator = () => {
+		removeHighlight();
+		setShowNavigator(false);
+		setSearchResults([]);
+		setCurrentIndex(0);
+	};
+	const applyActiveClass = (activeIndex) => {
+		searchResults.forEach((el, idx) => {
+			const textEl = el.querySelector('.user-say__text, .i-say__text');
+			if (!textEl) return;
+
+			if (idx === activeIndex) {
+				textEl.classList.add('highlight-impact');
+			} else {
+				textEl.classList.remove('highlight-impact');
 			}
 		});
 	};
@@ -175,13 +265,12 @@ function Chat() {
 		}
 	}, [messages]);
 
+	// 신고하기 버튼 활성화
 	useEffect(() => {
 		const handleClickOutside = () => {
 			setShowReportButtonIndex(null);
 		};
-
 		document.addEventListener('click', handleClickOutside);
-
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
 		};
@@ -192,7 +281,14 @@ function Chat() {
 
 	return (
 		<>
-			<Header showSearch={false} title={studyInfo?.title || '채팅방'} />
+			<Header
+				title={studyInfo?.title || '채팅방'}
+				showSearch={true}
+				onSearch={(e) => {
+					e.stopPropagation();
+					handleChatSearch()
+				}}
+			/>
 			<div className={"chatroom-history"}>
 
 				{/* 테스트 목적 용도 */}
@@ -208,14 +304,14 @@ function Chat() {
 						}
 					]);
 				}}>상대 메시지 테스트</button>
-				<button type="button" className="testButton" onClick={() => {
+				{/* <button type="button" className="testButton" onClick={() => {
 						setIsTyping(true); // 입력 중 상태 on
 						// 3초 후 타이핑 종료
 						setTimeout(() => {
 							setIsTyping(false);
 						}, 3000);
 					}}
-				>타이핑 테스트</button>
+				>타이핑 테스트</button> */}
 				{/* // 테스트 목적 용도 */}
 
 				{/* 메시지 출력 영역 */}
@@ -361,6 +457,15 @@ function Chat() {
 						</div>
 					</div>
 				</Layer>
+			)}
+
+			{showNavigator && (
+				<div className="search-navigator">
+					<span>{currentIndex + 1} / {searchResults.length}</span>
+					<button type="button" onClick={goToPrevNavigator}>▲</button>
+					<button type="button" onClick={goToNextNavigator}>▼</button>
+					<button type="button" onClick={closeNavigator}>닫기</button>
+				</div>
 			)}
 			
 			{showResult && (
