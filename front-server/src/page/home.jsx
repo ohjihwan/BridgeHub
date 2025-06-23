@@ -5,9 +5,12 @@ import Header from './common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import roomData from '@json/Room.json';
 import Layer from './common/Layer';
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+	const navigate = useNavigate();
 	const [selectedRoom, setSelectedRoom] = useState(null);
+	const hasStudyRoom = true;
 	const [studyRooms, setStudyRooms] = useState([]);
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
@@ -25,6 +28,10 @@ const Home = () => {
 	};
 	const closeCreateStudy = () => {
 		setShowCreateStudy(false);
+	};
+	const goToMyStudyRoom = () => {
+		// 내 스터디룸으로 이동 로직
+		navigate("/chat"); // 실제 경로로 수정
 	};
 
 	useEffect(() => {
@@ -54,13 +61,47 @@ const Home = () => {
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
 				<Header />
-				
+
 				<div className="create-studyroom">
-					<button className="create-studyroom__button" onClick={openCreateStudy}>
-						스터디 개설하기
-						<span className="sub-txt">나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!</span>
-					</button>
-				</div>
+						<button className="create-studyroom__button" onClick={openCreateStudy}>
+							스터디 개설하기
+							<span className="sub-txt">
+								나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!
+							</span>
+						</button>
+					</div>
+				
+				<div className="studyroom-actions">
+				{/* 소속된 방이 없는 경우 */}
+				{!hasStudyRoom && (
+					<div className="create-studyroom">
+						<button className="create-studyroom__button" onClick={openCreateStudy}>
+							스터디 개설하기
+							<span className="sub-txt">
+								나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!
+							</span>
+						</button>
+					</div>
+				)}
+
+				{/* 소속된 방이 있는 경우 */}
+				{hasStudyRoom && (
+					<div className="reenter-studyroom">
+						<button className="reenter-studyroom__button" onClick={goToMyStudyRoom}>
+							내 스터디룸 바로가기
+							<span className="sub-txt">
+								이미 개설한 스터디로 돌아갑니다.
+							</span>
+						</button>
+					</div>
+				)}
+
+				{/* ⚡ 앞으로 추가될 케이스 공간 확보 */}
+				{/* 예: 추후 여러 스터디 선택 화면 */}
+				{/* <div className="multi-studyroom"> 
+					...여러 방 선택 영역
+				</div> */}
+			</div>
 
 				{/* 재사용성과 복잡도 때문에 분리 */}
 				<HotRoomSwiper onItemClick={handleItemClick} />
