@@ -205,6 +205,7 @@ const MyPage = () => {
 			</div>
 			
 			<div className="fixed">
+				{/* 목표가 확정되면 버튼 추가 "목표 보기" */}
 				<button type="button" className="button button-primary" onClick={handleEditProfile}>
 					{isEditing ? '수정 완료' : '프로필 수정'}
 				</button>

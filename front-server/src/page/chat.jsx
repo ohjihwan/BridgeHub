@@ -21,14 +21,68 @@ function Chat() {
 	const [spinning, setSpinning] = useState(false); // 룰렛 돌리는 중 여부
 	const [winner, setWinner] = useState(null); // 당첨자
 	// --------
-	// 임무 분담
+	// 목표 분담
 	const [showTodo, setShowTodo] = useState(false);
-	const dummyTodos = [
-		{ title: '할 일1', users: ['유저1', '유저2'] },
-		{ title: '할 일2', users: ['유저1', '유저2'] },
-		{ title: '할 일3', users: ['유저1', '유저2'] },
-	];
+	const [todoList, setTodoList] = useState([]);
+	const [showTodoSetting, setShowTodoSetting] = useState(false);
+	const [todoSettingInputs, setTodoSettingInputs] = useState(['', '']);
+	const [selectedIndex, setSelectedIndex] = useState(null);
+	const handleTodoSettingAddInput = () => {
+		if (todoSettingInputs.length < 10) {
+			setTodoSettingInputs([...todoSettingInputs, '']);
+		}
+	};
+	const handleInputChange = (e, idx) => {
+		const newInputs = [...todoSettingInputs];
+		newInputs[idx] = e.target.value;
+		setTodoSettingInputs(newInputs);
+	};
+	const handleTodoConfirm = () => {
+		const newTodos = todoSettingInputs
+			.filter(title => title.trim() !== '')
+			.map(title => ({
+				title,
+				users: []
+			}));
+
+		if (newTodos.length < 2) {
+			customAlert('최소 2가지 업무가 필요합니다.');
+			return;
+		}
+
+		setTodoList(newTodos);
+		setShowTodo(true);
+		setShowTodoSetting(false);
+	};
+	const handleTodoSettingDelete = (idx) => {
+		const newInputs = [...todoSettingInputs];
+		newInputs.splice(idx, 1);
+		setTodoSettingInputs(newInputs);
+	};
+	const handleAssignUser = (index) => {
+		const userName = '김사과';
+		const newTodos = [...todoList];
+
+		if (selectedIndex === index) {
+			// 선택 해제
+			newTodos[index].users = newTodos[index].users.filter(user => user !== userName);
+			setSelectedIndex(null);
+			console.log("목표 선택이 취소되었습니다.");
+		} else {
+			// 다른 목표 내 이름 제거
+			newTodos.forEach(todo => {
+				todo.users = todo.users.filter(user => user !== userName);
+			});
+			// 새로 선택한 목표에 내 이름 추가
+			newTodos[index].users.push(userName);
+			setSelectedIndex(index);
+			console.log(`목표 ${index}번이 선택되었습니다.`);
+		}
+
+		setTodoList(newTodos);
+	};
 	// --------
+
 	const chatEndRef = useRef(null);
 
 	// 시간 포맷 도우미
@@ -71,6 +125,15 @@ function Chat() {
 		}
 	};
 
+	const handleRemoveTodoList = () => {
+		customConfirm('정말 제거하시겠습니까?').then((confirmDelete) => {
+			if (confirmDelete) {
+				setTodoList([]);
+				setShowTodo(false);
+			}
+		});
+	};
+
 	// 체팅 입력창 높이값
 	const handleChange = (e) => {
 		const value = e.target.value;
@@ -80,31 +143,6 @@ function Chat() {
 			textarea.style.height = 'auto';
 			textarea.style.height = (textarea.scrollHeight / 10) + 'rem';
 		}
-	};
-
-	// [할 일 공유 버튼 클릭 시 실행되는 함수]
-	// 더미 데이터 생성 후 메시지 추가 함수 호출
-	const handleTodoShare = () => {
-		const dummy = [
-			{ title: '기획서 작성', users: ['김사과', '오렌지'] },
-			{ title: '디자인 시안', users: ['반하나'] }
-		];
-
-		const { ampm, timeStr } = getFormattedTime();
-		setMessages(prev => [
-			...prev,
-			{ type: 'todo', todos: dummy, time: timeStr, ampm }
-		]);
-	};
-
-	// [채팅 메시지에 '할 일 목록' 추가 함수]
-	// todos 배열을 기반으로 메시지 배열에 새로운 'todo' 메시지를 추가
-	const addTodoMessage = (todos) => {
-		const { ampm, timeStr } = getFormattedTime();
-		setMessages(prev => [
-			...prev,
-			{ type: 'todo', todos, time: timeStr, ampm }
-		]);
 	};
 
 	// 첫 입장 메시지
@@ -189,16 +227,12 @@ function Chat() {
 						return <TodoList key={i} todos={msg.todos} />;
 					}
 
-					{showTodo && (
-						<TodoList todos={dummyTodos} />
-					)}
-
 					return null;
 				})}
 
 				{/* 할 일 공유 토글 영역 - map 바깥에 별도로! */}
 				{showTodo && (
-					<TodoList todos={dummyTodos} />
+					<TodoList todos={todoList} selectedIndex={selectedIndex} onAssignUser={handleAssignUser} />
 				)}
 
 				{/* 입력 중 표시 */}
@@ -225,7 +259,18 @@ function Chat() {
 							랜덤게임
 						</button>
 					</li>
-					<li><button type="button" className="msg-writing__action" onClick={() => setShowTodo(prev => !prev)}>{showTodo ? '공유 취소' : '할 일 공유'}</button></li>
+					<li>
+						<button type="button" className="msg-writing__action" onClick={() => {
+							if (showTodo) {
+									handleRemoveTodoList();
+								} else {
+									setShowTodoSetting(true);
+								}
+							}}
+						>
+						{showTodo ? '목표 취소' : '목표 생성'}
+						</button>
+					</li>
 				</ul>
 				<div className="msg-writing__inputs">
 					<div className="msg-writing__field">
@@ -250,6 +295,25 @@ function Chat() {
 						addSystemMessage(`"${user}"님이 당첨되셨습니다!`, { user });
 					}}
 				/>
+			</Layer>
+
+			<Layer isOpen={showTodoSetting} onClose={() => setShowTodoSetting(false)} header="목표 설정">
+				<div className="todo-setting">
+					{todoSettingInputs.map((input, idx) => (
+						<div key={idx} className="todo-setting__unit">
+							<div className="field">
+								<input className="text" type="text" value={input} onChange={(e) => handleInputChange(e, idx)} placeholder={`업무 ${idx + 1}`}/>
+							</div>
+							<button type="button" className="todo-setting__delete" aria-label="삭제하기" onClick={() => handleTodoSettingDelete(idx)}></button>
+						</div>
+					))}
+					{todoSettingInputs.length < 10 && (
+						<button type="button" className="todo-setting__add" onClick={handleTodoSettingAddInput} aria-label="목표 추가"></button>
+					)}
+				</div>
+				<div className="todo-setting__submits">
+					<button type="button" className="todo-setting__submit" onClick={handleTodoConfirm}>목표 전달</button>
+				</div>
 			</Layer>
 			
 			{showResult && (

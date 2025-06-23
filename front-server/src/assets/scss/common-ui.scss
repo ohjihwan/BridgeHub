@@ -50,7 +50,7 @@ legend,
 	position:fixed;
 	left:0;
 	top:0;
-	z-index:100;
+	z-index:250;
 	width:100%;
 	height:remx(50);
 	padding:0 $padding-x;
@@ -112,6 +112,7 @@ legend,
 		position:fixed;
 		top:remx(50);
 		right:$padding-x;
+		z-index:220;
 		padding:remx(12);
 		border-radius:remx(6);
 		background-color:$bg-root;
@@ -1983,7 +1984,7 @@ legend,
     overflow-x:scroll;
 	position:sticky;
 	left:0;
-	bottom:-3rem;
+	bottom:0;
 	z-index:200;
     width:100vw;
     padding:1rem 0 1.5rem;
@@ -2046,7 +2047,10 @@ legend,
 	}
 
 	&__user {
-
+		line-height:remx(24);
+		border:1px solid $line1;
+		padding:remx(2) remx(12);
+		border-radius:remx(24);
 	}
 
 	&__buttons {
@@ -2060,6 +2064,11 @@ legend,
 		border-radius:remx(8);
 		color:$color-primary;
 		background-color:$bg-root;
+		
+		&--active {
+			background-color:$color-primary;
+			color:#fff;
+		}
 	}
 }
 
@@ -2416,6 +2425,46 @@ legend,
 		margin-left:80%; } }
 }
 
+.todo-setting {
+
+	&__unit {
+		display:flex;
+		align-items:center;
+		margin-bottom:1rem;
+
+		.field {
+			flex:1;
+			margin-bottom:0;
+		}
+	}
+
+	&__delete {
+		flex:0 0 remx(40);
+		height:remx(40);
+		background:#fff url('@ico/ico-delete.png') no-repeat 50% / 2rem auto;
+	}
+
+	&__add {
+		width:100%;
+		height:remx(48);
+		background: url('@ico/ico-plus.svg') no-repeat 50% / 2.4rem auto;
+	}
+
+	&__submits {
+		padding:1rem 0 2rem;
+	}
+
+	&__submit {
+		width:100%;
+		height:remx(48);
+		border:1px solid $color-primary;
+		border-radius:remx(12);
+		background-color:$color-primary;
+		color:#fff;
+		font-size:remx(16);
+		cursor:pointer;
+	}
+}
 
 
 
