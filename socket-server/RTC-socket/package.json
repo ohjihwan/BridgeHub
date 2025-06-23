@@ -5,15 +5,18 @@
   "main": "server.mjs",
   "type": "module",
   "scripts": {
-    "dev": "nodemon server.mjs",
+    "dev": "npx cross-env NODE_ENV=development nodemon server.mjs",
     "start": "node server.mjs"
   },
   "dependencies": {
-    "mediasoup": "^3.11.0",         
-    "ws": "^8.13.0",              
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "mediasoup": "^3.16.0",
+    "ws": "^8.13.0",
+    "express": "^4.18.2",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "cross-env": "^7.0.3"
   }
 }

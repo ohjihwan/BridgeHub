@@ -1,5 +1,0 @@
-{
-  "watch": ["src"],
-  "ext": "mjs,json",
-  "exec": "node webrtc/server.mjs"
-}
