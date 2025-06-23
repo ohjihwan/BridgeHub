@@ -56,9 +56,9 @@ const MyPage = () => {
 	return (
 		<div className="mypage-container">
 			{isEditing ? (
-				<Header isEditing={true} />
+				<Header isEditing={true} showSearch={false} />
 			) : (
-				<Header/>
+				<Header showSearch={false} />
 			)}
 
 			{isEditing ? (
@@ -205,8 +205,7 @@ const MyPage = () => {
 			</div>
 			
 			<div className="fixed">
-				<button type="button" className="button button-primary">참여 방 보기</button>
-				<button type="button" className="button button-secondary" onClick={handleEditProfile}>
+				<button type="button" className="button button-primary" onClick={handleEditProfile}>
 					{isEditing ? '수정 완료' : '프로필 수정'}
 				</button>
 			</div>

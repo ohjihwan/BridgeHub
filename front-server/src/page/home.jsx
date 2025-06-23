@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import Detail from './detail';
-import CreateStudy from './create';
+import { useState, useEffect } from 'react';
+import Detail from './components/Detail';
+import CreateStudy from './components/CreateStudy';
 import Header from './common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import roomData from '@json/Room.json';
+import Layer from './common/Layer';
 
 const Home = () => {
 	const [selectedRoom, setSelectedRoom] = useState(null);
@@ -11,7 +12,6 @@ const Home = () => {
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
-
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
 		setShowDetail(true);
@@ -20,8 +20,11 @@ const Home = () => {
 	const handleDetailClose = () => {
 		setIsClosing(true);
 	};
-	const toggleCreateStudy = () => {
-		setShowCreateStudy((prev) => !prev);
+	const openCreateStudy = () => {
+		setShowCreateStudy(true);
+	};
+	const closeCreateStudy = () => {
+		setShowCreateStudy(false);
 	};
 
 	useEffect(() => {
@@ -53,7 +56,7 @@ const Home = () => {
 				<Header />
 				
 				<div className="create-studyroom">
-					<button className="create-studyroom__button" onClick={() => toggleCreateStudy(true)}>
+					<button className="create-studyroom__button" onClick={openCreateStudy}>
 						스터디 개설하기
 						<span className="sub-txt">나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!</span>
 					</button>
@@ -89,13 +92,11 @@ const Home = () => {
 						))}
 					</ul>
 				</div>
-				{showCreateStudy && (
-					<>
-						<div className="overlay" onClick={() => toggleCreateStudy(false)}></div>
-						<CreateStudy onClose={() => toggleCreateStudy(false)} />
-					</>
-				)}
 			</div>
+		
+			{showCreateStudy && (
+				<CreateStudy onClose={closeCreateStudy} />
+			)}
 			
 			{showDetail && selectedRoom && (
 				<Detail
