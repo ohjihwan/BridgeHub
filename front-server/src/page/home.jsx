@@ -63,13 +63,13 @@ const Home = () => {
 				<Header />
 
 				<div className="create-studyroom">
-						<button className="create-studyroom__button" onClick={openCreateStudy}>
-							스터디 개설하기
-							<span className="sub-txt">
-								나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!
-							</span>
-						</button>
-					</div>
+					<button className="create-studyroom__button" onClick={openCreateStudy}>
+						스터디 개설하기
+						<span className="sub-txt">
+							나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!
+						</span>
+					</button>
+				</div>
 				
 				<div className="studyroom-actions">
 				{/* 소속된 방이 없는 경우 */}

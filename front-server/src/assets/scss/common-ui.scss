@@ -1876,6 +1876,19 @@ legend,
 			}
 		}
 	}
+
+	&__etc {
+		position:relative;
+	}
+
+	&__report {
+		position:absolute;
+		right:remx(35);
+		bottom:remx(22);
+		width:remx(18);
+		height:remx(18);
+		background:url('@ico/ico-srien.png') no-repeat 50% / 100% auto;
+	}
 }
 
 @keyframes entry-bouns{

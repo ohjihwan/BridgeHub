@@ -83,6 +83,21 @@ function Chat() {
 	};
 	// --------
 
+	// 신고하기 기능 추가
+	const [showReportLayer, setShowReportLayer] = useState(false);
+	const [reportTarget, setReportTarget] = useState(null);
+	const [showReportButtonIndex, setShowReportButtonIndex] = useState(null);
+	const handleReportSubmit = () => {
+		customConfirm('신고하시겠습니까?').then((confirm) => {
+			if (confirm) {
+				// 실제 신고 로직
+				customAlert('신고가 접수되었습니다.');
+				setShowReportLayer(false);
+			}
+		});
+	};
+	// --------
+
 	const chatEndRef = useRef(null);
 
 	// 시간 포맷 도우미
@@ -160,6 +175,17 @@ function Chat() {
 		}
 	}, [messages]);
 
+	useEffect(() => {
+		const handleClickOutside = () => {
+			setShowReportButtonIndex(null);
+		};
+
+		document.addEventListener('click', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	}, []);
 
 	/* 소캣테스트용 */
 	const testUsers = ['김사과', '반하나', '오렌지', '이메론', '채애리'];
@@ -211,14 +237,17 @@ function Chat() {
 
 					if (msg.type === 'user') {
 						return (
-							<div key={i} className="user-say">
+							<div key={i} className="user-say" onClick={(e) => { e.stopPropagation(); setShowReportButtonIndex(i);}} >
 								<div className="user-say__profile"></div>
-								<div className="user-say__text">
-									{msg.text}
+								<div className="user-say__text">{msg.text}</div>
+								<div className="user-say__etc">
+									<time dateTime={msg.time} className="user-say__time">
+										{msg.ampm} <span>{msg.time}</span>
+									</time>
+									{showReportButtonIndex === i && (
+										<button type="button" aria-label="신고하기" className="user-say__report" onClick={(e) => { e.stopPropagation(); setReportTarget(msg); setShowReportLayer(true); }} ></button>
+									)}
 								</div>
-								<time dateTime={msg.time} className="user-say__time">
-									{msg.ampm} <span>{msg.time}</span>
-								</time>
 							</div>
 						);
 					}
@@ -237,7 +266,7 @@ function Chat() {
 
 				{/* 입력 중 표시 */}
 				{isTyping && (
-					<div className="user-say">
+					<div className="user-say" onClick={() => setShowReportLayer(true)}>
 						<div className="user-say__profile"></div>
 						<div className="user-say__text">
 							<div className="user-say__writing">
@@ -297,7 +326,7 @@ function Chat() {
 				/>
 			</Layer>
 
-			<Layer isOpen={showTodoSetting} onClose={() => setShowTodoSetting(false)} header="목표 설정">
+			<Layer isOpen={showTodoSetting} onClose={() => setShowTodoSetting(false)} header="목표 설정" footer={ <button type="button" className="todo-setting__submit" onClick={handleTodoConfirm}>목표 전달</button> }>
 				<div className="todo-setting">
 					{todoSettingInputs.map((input, idx) => (
 						<div key={idx} className="todo-setting__unit">
@@ -311,10 +340,28 @@ function Chat() {
 						<button type="button" className="todo-setting__add" onClick={handleTodoSettingAddInput} aria-label="목표 추가"></button>
 					)}
 				</div>
-				<div className="todo-setting__submits">
-					<button type="button" className="todo-setting__submit" onClick={handleTodoConfirm}>목표 전달</button>
-				</div>
 			</Layer>
+
+			{showReportLayer && (
+				<Layer isOpen={showReportLayer} onClose={() => setShowReportLayer(false)} header="신고하기" footer={
+					<button className="layer__submit" onClick={handleReportSubmit} >신고하기</button>
+				}>
+					<div className="report-layer">
+						<div className="field">
+							<select className="select" name="report-type">
+								<option value="신고1">신고1</option>
+								<option value="신고2">신고2</option>
+								<option value="신고3">신고3</option>
+								<option value="신고4">신고4</option>
+							</select>
+						</div>
+
+						<div className="field __textarea">
+							<textarea className="textarea" placeholder="신고 내용을 적어주세요." name="description" />
+						</div>
+					</div>
+				</Layer>
+			)}
 			
 			{showResult && (
 				<ResultModal
