@@ -4,49 +4,31 @@
   "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
   "private": true,
   "workspaces": [
-    "api-server",
     "socket-server",
     "front-server",
-    "admin-server",
     "front-admin"
   ],
   "scripts": {
-    "start": "npx concurrently \"npm run start:api\" \"npm run start:socket\" \"npm run start:front\" \"npm run start:admin\" \"npm run start:admin-front\"",
-  "start:api": "cd api-server && npm start",
-  "start:socket": "cd socket-server && npm start",
-  "start:front": "cd front-server && npm run dev",
-  "start:admin": "gradlew.bat -p admin-server bootRun",
-  "start:admin-front": "cd front-admin && npm run dev",
+    "start": "npx concurrently \"npm run start:api\" \"npm run start:socket\" \"npm run start:front\" \"npm run start:admin-front\"",
+    "start:api": "gradlew.bat bootRun",
+    "start:socket": "cd socket-server && npm start",
+    "start:front": "cd front-server && npm run dev",
+    "start:admin-front": "cd front-admin && npm run dev",
 
-  "dev": "npx concurrently \"npm run dev:api\" \"npm run dev:socket\" \"npm run dev:front\" \"npm run dev:admin\" \"npm run dev:admin-front\"",
-  "dev:api": "cd api-server && npm run dev",
-  "dev:socket": "cd socket-server && npm run dev",
-  "dev:front": "cd front-server && npm run dev",
-  "dev:admin": "gradlew.bat -p admin-server bootRun",
-  "dev:admin-front": "cd front-admin && npm run dev",
+    "dev": "npx concurrently -n api,socket,rtc,front,admin -c blue,magenta,cyan,yellow,green \"npm run dev:api\" \"npm run dev:socket\" \"npm run dev:rtc\" \"npm run dev:front\" \"npm run dev:admin-front\"",
+    "dev:api": "gradlew.bat bootRun",
+    "dev:socket": "cd socket-server && npm run dev",
+    "dev:rtc": "cd socket-server/rtc-socket && npm run dev",
+    "dev:front": "cd front-server && npx cross-env PORT=7000 npm run dev",
+    "dev:admin-front": "cd front-admin && npx cross-env PORT=7700 npm run dev",
 
-    "install:all": "npm install && npm run install:api && npm run install:socket && npm run install:front && npm run install:admin && npm run install:admin-front",
-    "install:api": "cd api-server && npm install",
+    "install:all": "npm install && npm run install:socket && npm run install:rtc && npm run install:front && npm run install:admin-front",
     "install:socket": "cd socket-server && npm install",
+    "install:rtc": "cd socket-server/rtc-socket && npm install",
     "install:front": "cd front-server && npm install",
-    "install:admin": "cd admin-server && npm install",
     "install:admin-front": "cd front-admin && npm install",
 
-    "build": "cd front-server && npm run build",
-    "test": "npx concurrently \"npm run test:api\" \"npm run test:socket\" \"npm run test:front\" \"npm run test:admin\" \"npm run test:admin-front\"",
-    "test:api": "cd api-server && npm test",
-    "test:socket": "cd socket-server && npm test",
-    "test:front": "cd front-server && npm test",
-    "test:admin": "cd admin-server && npm test",
-    "test:admin-front": "cd front-admin && npm test",
-
-    "lint": "npx concurrently \"npm run lint:api\" \"npm run lint:socket\" \"npm run lint:front\" \"npm run lint:admin-front\"",
-    "lint:api": "cd api-server && npm run lint",
-    "lint:socket": "cd socket-server && npm run lint",
-    "lint:front": "cd front-server && npm run lint",
-    "lint:admin-front": "cd front-admin && npm run lint",
-
-    "clean": "npx rimraf node_modules api-server/node_modules socket-server/node_modules front-server/node_modules admin-server/node_modules front-admin/node_modules",
+    "clean": "npx rimraf node_modules socket-server/node_modules socket-server/rtc-socket/node_modules front-server/node_modules front-admin/node_modules",
     "clean:install": "npm run clean && npm run install:all"
   },
   "keywords": [],
@@ -63,7 +45,10 @@
     "globals": "^16.0.0",
     "is-binary-path": "^3.0.0",
     "sass": "^1.89.1",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "cross-env": "^7.0.3",
+    "rimraf": "^6.0.1",
+    "concurrently": "^9.2.0"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -78,7 +63,8 @@
     "react-dom": "^19.1.0",
     "react-native-webrtc": "^124.0.5",
     "react-router-dom": "^7.6.2",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "swiper": "^11.2.8"
   },
   "main": "eslint.config.js",
   "repository": {
@@ -90,7 +76,6 @@
   },
   "homepage": "https://github.com/ohjihwan/BridgeHub#readme",
   "dotenv": "^16.4.1",
-  "swiper": "^11.2.8",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
