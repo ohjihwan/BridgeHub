@@ -17,15 +17,16 @@ const Home = () => {
 		setShowDetail(true);
 		setIsClosing(false);
 	};
-
 	const handleDetailClose = () => {
 		setIsClosing(true);
+	};
+	const toggleCreateStudy = () => {
+		setShowCreateStudy((prev) => !prev);
 	};
 
 	useEffect(() => {
 		setStudyRooms(roomData);
 	}, []);
-
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {
@@ -35,10 +36,16 @@ const Home = () => {
 			return () => clearTimeout(timer);
 		}
 	}, [isClosing]);
-
-	const toggleCreateStudy = () => {
-		setShowCreateStudy((prev) => !prev);
-	};
+	useEffect(() => {
+		if (showCreateStudy) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+		return () => {
+			document.body.style.overflow = '';
+		};
+	}, [showCreateStudy]);
 
 	return (
 		<>
@@ -63,15 +70,15 @@ const Home = () => {
 				*/}
 				<div className="studyroom-area">
 					<div className="more-box">
-						<h2 className="more-box__title">NEW</h2>
+						<h2 className="more-box__title">JUST ADDED</h2>
 						<a href="#none" className="more-box__link">더보기</a>
 					</div>
 					<ul className="studyroom">
 						{studyRooms.map((room) => (
 							<li className="studyroom__item" onClick={() => handleItemClick(room)} key={room.id}>
 								<button type="button" className="studyroom__info">
+									<img src={`/uploads/thumbnail/${room.thumbnail}`} className="studyroom__img"/>
 									<h3 className="studyroom__title">{room.title}</h3>
-									<p  className="studyroom__txt">{room.description}</p>
 									<div className="studyroom__details">
 										<span className="studyroom__detail">{room.region}</span>
 										<span className="studyroom__detail">{room.time}</span>
