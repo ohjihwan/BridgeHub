@@ -4,34 +4,6 @@ import 'chart.js/auto'
 
 // --- Main Components ---
 
-const FilterHeader = () => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-    <div style={{ display: 'flex', gap: '5px' }}>
-      {['월 분석', '일 분석', '쿠폰', '미션', '대회', '업적'].map((tab, i) => (
-        <button key={tab} style={{
-          padding: '8px 16px',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          background: i === 0 ? '#3182ce' : '#fff',
-          color: i === 0 ? '#fff' : '#333',
-          cursor: 'pointer'
-        }}>{tab}</button>
-      ))}
-    </div>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <input type="text" readOnly value="2025년 06월" style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px' }}/>
-      <button style={{
-        padding: '8px 16px',
-        border: 'none',
-        borderRadius: '4px',
-        background: '#3182ce',
-        color: '#fff',
-        cursor: 'pointer'
-      }}>월 분석하기</button>
-    </div>
-  </div>
-);
-
 const SummaryCard = ({ data }) => (
   <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
     <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#555' }}>{data.title}</h3>
@@ -127,7 +99,7 @@ const chartDataList = [
     title: '성별',
     data: {
       labels: ['남성', '여성'],
-      datasets: [{ data: [50, 15], backgroundColor: ['#6a6cff', '#e573b7'] }]
+      datasets: [{ data: [50, 15], backgroundColor: ['#0043AC', '#FF9F40'] }]
     },
     legend: ['남성', '여성']
   },
@@ -136,7 +108,7 @@ const chartDataList = [
     title: '학력',
     data: {
       labels: ['고졸', '대학교', '대학원'],
-      datasets: [{ data: [35, 50, 15], backgroundColor: ['#6a6cff', '#a084e8', '#e573b7'] }]
+      datasets: [{ data: [35, 50, 15], backgroundColor: ['#0043AC', '#36A2EB', '#FF9F40'] }]
     },
     legend: ['고졸', '대학교', '대학원']
   },
@@ -145,7 +117,7 @@ const chartDataList = [
     title: '활동 시간대',
     data: {
       labels: ['06:00~12:00', '12:00~18:00', '18:00~24:00'],
-      datasets: [{ data: [35, 50, 15], backgroundColor: ['#6a6cff', '#a084e8', '#e573b7'] }]
+      datasets: [{ data: [35, 50, 15], backgroundColor: ['#0043AC', '#36A2EB', '#FF9F40'] }]
     },
     legend: ['06:00~12:00', '12:00~18:00', '18:00~24:00']
   },
@@ -154,24 +126,24 @@ const chartDataList = [
     title: '전공',
     data: {
       labels: ['인문•사회', '상경', '자연', '공학', '예체능', '의학', '법학', '융합'],
-      datasets: [{ data: [50, 15, 35, 10, 5, 5, 5, 5], backgroundColor: ['#6a6cff', '#e573b7', '#a084e8', '#6a6cff', '#e573b7', '#a084e8', '#6a6cff', '#e573b7'] }]
+      datasets: [{ data: [20, 15, 20, 10, 10, 10, 10, 5], backgroundColor: [' #0043AC', ' #36A2EB', ' #FF9F40', ' #FFCD56', ' #4BC0C0', ' #9966FF', ' #C9CBCF', ' #DE7C7D'] }]
     },
     legend: ['인문•사회', '상경', '자연', '공학', '예체능', '의학', '법학', '융합']
   }
 ];
 
 const barData = {
-  labels: ['q1', 'q2', 'q3', 'q4'],
+  labels: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'],
   datasets: [
     {
       label: '신규 가입자 수',
-      data: [200, 400, 300, 500],
-      backgroundColor: '#6a6cff'
+      data: [200, 400, 300, 500, 600, 700, 800],
+      backgroundColor: '#0043AC'
     },
     {
       label: '총 접속자 수',
-      data: [400, 800, 600, 1000],
-      backgroundColor: '#e573b7'
+      data: [400, 800, 600, 1000, 1200, 1400, 1600],
+      backgroundColor: '#FF9F40'
     }
   ]
 };

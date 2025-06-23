@@ -39,11 +39,6 @@ const Sidebar = () => {
         </ul>
         <ul className="bottom-menu">
           <li>
-            <NavLink to="/settings" activeClassName="active">
-              Settings
-            </NavLink>
-          </li>
-          <li>
             <button
               onClick={handleLogout}
               style={{
