@@ -9,8 +9,8 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const axios = require('axios');
-const socketRouter = require('./src/routers/socketRouter');
-const authMiddleware = require('./src/middleware/authMiddleware');
+const socketRouter = require('./routers/socketRouter');
+const authMiddleware = require('./middleware/authMiddleware');
 const {
     handleJoinStudy,
     handleSendMessage,
