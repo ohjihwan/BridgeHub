@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import '../../assets/scss/ReportManage.scss';
 
+=======
+import React, { useState, useEffect } from 'react';
+import '../../assets/scss/ReportManage.scss';
+import { fetchReports, resolveReport } from '../../services/api';
+
+// API 연동을 위한 기본 데이터 (폴백용)
+>>>>>>> 551c02d81f1f01d073027b2f1f5f7c9821712fe8
 const dummyReports = [
   { 
     id: 1, 
@@ -95,13 +103,73 @@ const dummyReports = [
 ];
 
 function ReportManage() {
+<<<<<<< HEAD
   const [reports, setReports] = useState(dummyReports);
+=======
+  // API 연동을 위한 기존 state 수정
+  const [reports, setReports] = useState([]);
+>>>>>>> 551c02d81f1f01d073027b2f1f5f7c9821712fe8
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedReports, setSelectedReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
+<<<<<<< HEAD
+=======
+  
+  // API 연동을 위한 새로운 state 추가
+  const [loading, setLoading] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  // API에서 신고 데이터를 불러오는 새로운 함수
+  const loadReports = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchReports({ page, size: pageSize });
+      
+      if (response.data.success) {
+        const data = response.data.data;
+        // 백엔드 데이터 구조를 프론트엔드 구조로 매핑하는 새로운 로직
+        const mappedReports = data.content.map(report => ({
+          id: report.reportId,
+          reporterId: report.reporterId?.toString() || '',
+          reporter: report.reporterName || '알 수 없음',
+          targetId: report.reportedUserId?.toString() || '',
+          target: report.reportedUserName || '알 수 없음',
+          reportType: report.reportType === 'MESSAGE' ? '채팅방' : 
+                     report.reportType === 'USER' ? '사용자' : '게시글',
+          reason: report.reason || '기타',
+          date: report.createdAt ? new Date(report.createdAt).toLocaleString() : '',
+          status: report.status === 'PENDING' ? 'pending' : 'resolved',
+          description: report.reason || '',
+          chatRoomName: report.roomName || '',
+          messageContent: report.messageContent || '',
+          reportContent: report.reason || '',
+          penalty: report.penalty || '',
+          penaltyType: report.penaltyType || '',
+          adminNote: report.adminComment || ''
+        }));
+        
+        setReports(mappedReports);
+        setTotalElements(data.totalElements);
+      }
+    } catch (error) {
+      console.error('신고 목록 조회 실패:', error);
+      // API 실패 시 기본 더미 데이터 사용하는 새로운 에러 처리
+      setReports(dummyReports);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 데이터 로딩하는 새로운 useEffect
+  useEffect(() => {
+    loadReports();
+  }, [page, pageSize]);
+>>>>>>> 551c02d81f1f01d073027b2f1f5f7c9821712fe8
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -141,6 +209,7 @@ function ReportManage() {
     setSelectedReport(null);
   };
 
+<<<<<<< HEAD
   const handleResolve = (reportId, penaltyType = '', penalty = '', adminNote = '') => {
     setReports(reports.map(report => 
       report.id === reportId ? { 
@@ -151,6 +220,36 @@ function ReportManage() {
         adminNote
       } : report
     ));
+=======
+  // API와 연동하여 신고를 처리하는 새로운 함수
+  const handleResolve = async (reportId, penaltyType = '', penalty = '', adminNote = '') => {
+    try {
+      setLoading(true);
+      await resolveReport(reportId, { penaltyType, penalty, adminNote });
+      
+      // API 성공 시 로컬 상태 업데이트하는 새로운 로직
+      setReports(reports.map(report => 
+        report.id === reportId ? { 
+          ...report, 
+          status: 'resolved',
+          penaltyType,
+          penalty,
+          adminNote
+        } : report
+      ));
+      
+      // 상세 모달이 열려있다면 닫기
+      if (showDetail && selectedReport?.id === reportId) {
+        setShowDetail(false);
+        setSelectedReport(null);
+      }
+    } catch (error) {
+      console.error('신고 처리 실패:', error);
+      alert('신고 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+>>>>>>> 551c02d81f1f01d073027b2f1f5f7c9821712fe8
   };
 
   const handleResolveSelected = () => {
