@@ -1,0 +1,19 @@
+{
+  "name": "bridgehub-rtc-socket",
+  "version": "1.0.0",
+  "description": "Mediasoup 기반 RTC(SFU) 서버",
+  "main": "server.mjs",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.mjs",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "mediasoup": "^3.11.0",         
+    "ws": "^8.13.0",              
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

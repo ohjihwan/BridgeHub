@@ -40,3 +40,6 @@ logging:
     com.koreait.thebridgehub: DEBUG
     org.springframework.security: DEBUG
     org.springframework.mail: DEBUG 
+
+server:
+  port: 7100
