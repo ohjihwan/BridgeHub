@@ -29,6 +29,7 @@ function Chat() {
 		{ title: '할 일3', users: ['유저1', '유저2'] },
 	];
 	// --------
+	const chatEndRef = useRef(null);
 
 	// 시간 포맷 도우미
 	const getFormattedTime = () => {
@@ -111,6 +112,17 @@ function Chat() {
 		addSystemMessage('${user}님이 ${action}하셨습니다.', { user: '지환', action: '입장' });
 	}, []);
 
+	// 스크롤 하단
+	useEffect(() => {
+		if (!messages.length) return;
+
+		const lastMsg = messages[messages.length - 1];
+		if (lastMsg.type === 'me' && chatEndRef.current) {
+			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [messages]);
+
+
 	/* 소캣테스트용 */
 	const testUsers = ['김사과', '반하나', '오렌지', '이메론', '채애리'];
 
@@ -142,6 +154,7 @@ function Chat() {
 				>타이핑 테스트</button>
 				{/* // 테스트 목적 용도 */}
 
+				{/* 메시지 출력 영역 */}
 				{messages.map((msg, i) => {
 					if (msg.type === 'system') {
 						return <div key={i} className="program-msg">{msg.text}</div>;
@@ -173,30 +186,13 @@ function Chat() {
 					}
 
 					if (msg.type === 'todo') {
-						return (
-							<div key={i} className="todo-select">
-								{msg.todos.map((todo, idx) => (
-									<div key={idx} className="todo-select__unit">
-										<div className="todo-select__info">
-											<h4 className="todo-select__name">{todo.title}</h4>
-											<ul className="todo-select__users">
-												{todo.users.map((user, idx2) => (
-													<li key={idx2} className="todo-select__user">{user}</li>
-												))}
-											</ul>
-										</div>
-										<div className="todo-select__buttons">
-											<button type="button" className="todo-select__button">할일 수락</button>
-										</div>
-									</div>
-								))}
-							</div>
-						);
+						return <TodoList key={i} todos={msg.todos} />;
 					}
 
 					return null;
 				})}
 
+				{/* 입력 중 표시 */}
 				{isTyping && (
 					<div className="user-say">
 						<div className="user-say__profile"></div>
@@ -209,6 +205,8 @@ function Chat() {
 						</div>
 					</div>
 				)}
+					
+				<div ref={chatEndRef} />
 			</div>
 
 			<div className="msg-writing">

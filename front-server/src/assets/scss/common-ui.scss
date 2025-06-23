@@ -1896,7 +1896,7 @@ legend,
 	position: fixed;
     bottom: 0;
     left: 0;
-    z-index: 100;
+    z-index:200;
     width: 100%;
     padding: 0 remx(20) remx(15);
     border-radius: remx(20) remx(20) 0 0;
@@ -1977,7 +1977,7 @@ legend,
 	}
 }
 
-.todo-select {
+.todolist {
 	display: flex;
     align-items: stretch;
     overflow-x: scroll;
@@ -1994,6 +1994,10 @@ legend,
 		display: none;
 	}
 
+	&:first-child {
+		margin-left:0;
+	}
+
 	&::before, &::after {
 		content: "";
 		flex: 0 0 auto;
@@ -2006,10 +2010,15 @@ legend,
 		flex-direction: column;
 		justify-content: space-between;
 		width: remx(200);
+		margin-left:remx(10);
 		padding: remx(17) remx(15) remx(20);
 		border: 1px solid var(--list-line2);
 		border-radius: remx(12);
 		box-shadow: remx(3) remx(3) remx(8) 0 rgba(0,0,0,.1);
+
+		&:first-child {
+			margin-left:0;
+		}
 	}
 
 	&__info {
