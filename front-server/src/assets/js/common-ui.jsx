@@ -4,12 +4,10 @@ import CustomAlert from '@page/common/customAlert';
 
 export function customAlert(message) {
 	return new Promise((resolve) => {
-		const container = document.createElement('div');
-		document.getElementById('alert-root').appendChild(container);
-		const root = createRoot(container);
+		const alertRoot = document.getElementById('alert-root');
+		const root = createRoot(alertRoot);
 		const handleClose = () => {
 			root.unmount();
-			container.remove();
 			resolve();
 		};
 		root.render(
@@ -20,13 +18,11 @@ export function customAlert(message) {
 
 export function customConfirm(message, onConfirmed = null) {
 	return new Promise((resolve) => {
-		const container = document.createElement('div');
-		document.getElementById('alert-root').appendChild(container);
-		const root = createRoot(container);
+		const alertRoot = document.getElementById('alert-root');
+		const root = createRoot(alertRoot);
 
 		const handleClose = () => {
 			root.unmount();
-			container.remove();
 			resolve(false);
 		};
 
@@ -35,35 +31,31 @@ export function customConfirm(message, onConfirmed = null) {
 				onConfirmed();
 			}
 			root.unmount();
-			container.remove();
 			resolve(true);
 		};
 
 		root.render(
-			<CustomAlert
-				message={message}
-				onClose={handleClose}
-				onConfirm={handleConfirm}
-			/>
+			<CustomAlert message={message} onClose={handleClose} onConfirm={handleConfirm} />
 		);
 	});
 }
 
 export function customPrompt(message, placeholder = '', defaultValue = '', onSubmit = null) {
 	return new Promise((resolve) => {
-		const container = document.createElement('div');
-		document.getElementById('alert-root').appendChild(container);
-		const root = createRoot(container);
+		const alertRoot = document.getElementById('alert-root');
+		alertRoot.innerHTML = '';
+		const root = createRoot(alertRoot);
 
 		const handleClose = () => {
 			root.unmount();
-			container.remove();
 			resolve(null);
 		};
 
 		const handleConfirm = (value) => {
+			if (typeof onSubmit === 'function') {
+				onSubmit(value);
+			}
 			root.unmount();
-			container.remove();
 			resolve(value);
 		};
 

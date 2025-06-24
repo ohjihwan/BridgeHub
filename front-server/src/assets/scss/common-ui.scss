@@ -938,9 +938,7 @@ legend,
 .reenter-studyroom {
 	overflow:hidden;
 	position:relative;
-	padding:remx(2);
 	border-radius:remx(8);
-	background-color:$bg-root;
 
 	&::before,
 	&::after {
@@ -978,21 +976,38 @@ legend,
 		height:remx(188);
 		z-index:10;
 		border-radius:remx(8);
-		background-color:$bg-root;
 	}
 
 	&__title {
+		color:#fff;
 		font-size:remx(24);
+		text-shadow:0 0 remx(12) #000;
 	}
 
 	.room-info {
-		font-size:remx(15)
+		color:#fff;
+		font-size:remx(15);
+		text-shadow:0 0 remx(12) #000;
 	}
 
 	&__thumbnail {
+		overflow:hidden;
 		position:absolute;
 		left:0;
 		top:0;
+		z-index:-1;
+		width: 100%;
+		height: 100%;
+		border-radius:remx(14);
+		padding:remx(2);
+
+		img {
+			width:100%;
+			height:100%;
+			object-fit:cover;
+			object-position:50% 50%;
+			filter:blur(remx(1));
+		}
 	}
 }
 

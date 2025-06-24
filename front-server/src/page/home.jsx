@@ -16,7 +16,7 @@ const Home = () => {
 		time: '오후',
 		currentMembers: 4,
 		capacity: 6,
-		thumbnail: '/images/thumbnail-room1.jpg'
+		thumbnail: 'thumbnail-room1.jpg'
 	});
 	const [studyRooms, setStudyRooms] = useState([]);
 	const [showDetail, setShowDetail] = useState(false);
@@ -117,10 +117,10 @@ const Home = () => {
 					{/* 소속된 방이 있는 경우 */}
 					{studyRoom && (
 						<div className="reenter-studyroom">
-							<div className="reenter-studyroom__thumbnail">
-								<img src={studyRoom.thumbnail} alt="스터디룸 썸네일" />
-							</div>
 							<Link to="/chat" className="reenter-studyroom__link" title="참여중인 방으로 이동">
+								<div className="reenter-studyroom__thumbnail">
+									<img src={`/uploads/thumbnail/${studyRoom.thumbnail}`} alt="스터디룸 썸네일" />
+								</div>
 								<h3 className="reenter-studyroom__title">{studyRoom.title}</h3>
 								<ul className="room-info">
 									<li>{studyRoom.region}</li>
