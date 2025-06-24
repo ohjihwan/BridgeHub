@@ -304,14 +304,14 @@ function Chat() {
 						}
 					]);
 				}}>상대 메시지 테스트</button>
-				{/* <button type="button" className="testButton" onClick={() => {
+				<button type="button" className="testButton" onClick={() => {
 						setIsTyping(true); // 입력 중 상태 on
 						// 3초 후 타이핑 종료
 						setTimeout(() => {
 							setIsTyping(false);
 						}, 3000);
 					}}
-				>타이핑 테스트</button> */}
+				>타이핑 테스트</button>
 				{/* // 테스트 목적 용도 */}
 
 				{/* 메시지 출력 영역 */}
