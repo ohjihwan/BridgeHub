@@ -8,6 +8,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 	const [step, setStep] = useState(1);
 	const [visibleIndexes, setVisibleIndexes] = useState([]);
 	const [gender, setGender] = useState('man');
+	const [emailVerified, setEmailVerified] = useState(false);
 	const [formData, setFormData] = useState({
 		name: '',
 		email: '',
@@ -20,6 +21,31 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		education2: '지역무관',
 		timeZone: '',
 	});
+
+	const handleEmailVerification = async () => {
+		if (!formData.email) {
+			await window.customAlert('이메일을 입력하세요.');
+			return;
+		}
+
+		try {
+			await apiClient.post(API_ENDPOINTS.SEND_VERIFICATION, { email: formData.email });
+			await window.customAlert('인증 코드가 발송되었습니다.');
+
+			const code = await window.customPrompt('인증코드를 입력하세요.', 'XXXXXX');
+			if (!code) return;
+
+			const verifyRes = await apiClient.post(API_ENDPOINTS.VERIFY_EMAIL, { email: formData.email, code });
+			if (verifyRes.data.success) {
+				await window.customAlert('이메일 인증이 완료되었습니다.');
+				setEmailVerified(true);
+			} else {
+				await window.customAlert('인증에 실패했습니다.');
+			}
+		} catch (err) {
+			await window.customAlert(err.response?.data?.message || '이메일 인증 요청 실패');
+		}
+	};
 
 	useEffect(() => {
 		if (!isActive) return;
@@ -87,6 +113,14 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				markFieldError('passwordConfirm');
 				return;
 			}
+
+			if (!emailVerified) {
+				await window.customAlert('이메일 인증을 완료하세요.');
+				return;
+			}
+
+			setStep(2);
+			return;
 		}
 
 		try {
@@ -162,14 +196,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							</div>
 							<div className={getClassName('field', 1)}>
 								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요"/>
-								<button type="button" className="middle-button" 
-									onClick={async () => {
-										const value = await customPrompt('인증코드를 입력해주세요', 'XXXXXX');
-										if (value !== null) {
-											console.log('사용자가 입력한 값:', value);
-										}
-									}}
-								>이메일인증</button>
+								<button type="button" className="middle-button" onClick={handleEmailVerification}>이메일인증</button>
 							</div>
 							<div className={getClassName('field', 2)}>
 								<input type="password" className="text" name="password" value={formData.password || ''} onChange={handleChange} placeholder="비밀번호를 입력하세요"/>
