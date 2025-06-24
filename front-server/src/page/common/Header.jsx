@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const Header = ({ isEditing = false }) => {
+const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -65,17 +65,30 @@ const Header = ({ isEditing = false }) => {
 					</button>
 				)}
 			</div>
+
+			<h2 className="header__title">
+				{location.pathname === '/chat' && title}
+			</h2>
+			
 			<div className="header__right" ref={menuRef}>
-				<button type="button" className="header__right__search">
-					<span className="hide">검색</span>
-				</button>
+				{showSearch && (
+					<button type="button" className="header__right__search">
+						<span className="hide">검색</span>
+					</button>
+				)}
 				<button type="button" className="header__right__menu" onClick={toggleMenu}>
 					<span className="hide">메뉴 열기</span>
 				</button>
 				<div className={`user-menu${menuOpen ? ' --on' : ''}`}>
 					<ul>
-						<li className='user-menu__item'><a href="/mypage" onClick={(e) => { e.preventDefault(); handleMyPageClick(); }}>마이페이지</a></li>
-						<li className='user-menu__item'><a href="/logout" onClick={(e) => { e.preventDefault(); handleLogout(); }}>로그아웃</a></li>
+						{location.pathname !== '/mypage' && (
+							<li className='user-menu__item'>
+								<a href="/mypage" onClick={(e) => { e.preventDefault(); handleMyPageClick(); }}>마이페이지</a>
+							</li>
+						)}
+						<li className='user-menu__item'>
+							<a href="/logout" onClick={(e) => { e.preventDefault(); handleLogout(); }}>로그아웃</a>
+						</li>
 					</ul>
 				</div>
 			</div>

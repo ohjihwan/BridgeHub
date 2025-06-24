@@ -1,13 +1,14 @@
 [
 	{
 		"id": "room001",
-		"title": "리액트 중급 스터디",
+		"title": "WebRTC를 이용한 프로젝트 만들기",
 		"description": "컴포넌트 구조 설계부터 상태 관리까지 함께 공부해요.",
 		"region": "서울",
 		"time": "오후",
 		"capacity": 6,
 		"currentMembers": 4,
-		"thumbnail": "thumbnail-room1.jpg"
+		"thumbnail": "thumbnail-room1.jpg",
+		"members": ["이민우", "김채연", "노현지", "오지환", "이윤기"]
 	},
 	{
 		"id": "room002",
@@ -17,7 +18,8 @@
 		"time": "저녁",
 		"capacity": 5,
 		"currentMembers": 2,
-		"thumbnail": "thumbnail-room2.jpg"
+		"thumbnail": "thumbnail-chr1.jpg",
+		"members": ["짱구", "맹구", "유리", "철수", "훈이"]
 	},
 	{
 		"id": "room003",
@@ -27,7 +29,8 @@
 		"time": "오전",
 		"capacity": 4,
 		"currentMembers": 4,
-		"thumbnail": "thumbnail-room3.jpg"
+		"thumbnail": "thumbnail-room3.jpg",
+		"members": ["정유미", "정우성", "한지민", "공유"]
 	},
 	{
 		"id": "room004",
@@ -37,6 +40,18 @@
 		"time": "오후",
 		"capacity": 6,
 		"currentMembers": 5,
-		"thumbnail": "thumbnail-room4.jpg"
+		"thumbnail": "thumbnail-room4.jpg",
+		"members": ["김보성", "문채원", "하정우", "전지현", "이동욱"]
+	},
+	{
+		"id": "room005",
+		"title": "Node.js 실전 프로젝트",
+		"description": "실무에서 바로 쓰는 백엔드 실습 위주의 스터디입니다.",
+		"region": "부산",
+		"time": "저녁",
+		"capacity": 5,
+		"currentMembers": 2,
+		"thumbnail": "thumbnail-room2.jpg",
+		"members": ["정해인", "김태리"]
 	}
 ]
