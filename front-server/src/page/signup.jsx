@@ -23,7 +23,25 @@ function SignUp({ onSwitchToLogin, isActive }) {
 
 	useEffect(() => {
 		if (!isActive) return;
+
 		triggerStepAnimation(step);
+
+		const area = document.querySelector('.signup__area');
+
+		const handleFocus = (e) => {
+			if (e.target.matches('input.text, select.select')) {
+				const field = e.target.closest('.field');
+				if (field) {
+					field.classList.remove('--field__error');
+				}
+			}
+		};
+
+		area.addEventListener('focusin', handleFocus);
+
+		return () => {
+			area.removeEventListener('focusin', handleFocus);
+		};
 	}, [isActive, step]);
 
 	const handleChange = (e) => {
@@ -34,20 +52,43 @@ function SignUp({ onSwitchToLogin, isActive }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (step === 1) {
-			setStep(2);
-			return;
+			// 모든 필드 초기화
+			document.querySelectorAll('.signup__area .field').forEach(field => {
+				field.classList.remove('--field__error');
+			});
+
+			const markFieldError = (fieldName) => {
+				const field = document.querySelector(`.signup__area [name="${fieldName}"]`)?.closest('.field');
+				if (field) {
+					field.classList.add('--field__error');
+				}
+			};
+
+			const fieldsToCheck = [
+				{ name: 'name', message: '이름을 입력하세요.' },
+				{ name: 'nickname', message: '별명을 입력하세요.' },
+				{ name: 'email', message: '이메일을 입력하세요.' },
+				{ name: 'password', message: '비밀번호를 입력하세요.' },
+				{ name: 'passwordConfirm', message: '비밀번호를 다시 입력하세요.' },
+				{ name: 'hp', message: '휴대폰번호를 입력하세요.' },
+			];
+
+			for (const field of fieldsToCheck) {
+				if (!formData[field.name]) {
+					await window.customAlert(field.message);
+					markFieldError(field.name);
+					return;
+				}
+			}
+
+			if (formData.password !== formData.passwordConfirm) {
+				await window.customAlert('비밀번호가 일치하지 않습니다.');
+				markFieldError('password');
+				markFieldError('passwordConfirm');
+				return;
+			}
 		}
 
-		if (!formData.name || !formData.email || !formData.password || !formData.nickname) {
-			window.customAlert('필수 정보를 모두 입력하세요.');
-			return;
-		}
-
-		if (formData.password !== formData.passwordConfirm) {
-			window.customAlert('비밀번호가 일치하지 않습니다.');
-			return;
-		}
-		
 		try {
 			const requestData = {
 				username: formData.email,
@@ -113,14 +154,14 @@ function SignUp({ onSwitchToLogin, isActive }) {
 						<div className="signup__forms">
 							<div className={getClassName('half-field', 0)}>
 								<div className="field">
-									<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요" required/>
+									<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요"/>
 								</div>
 								<div className="field">
-									<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요" required/>
+									<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요"/>
 								</div>
 							</div>
 							<div className={getClassName('field', 1)}>
-								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요" required/>
+								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요"/>
 								<button type="button" className="middle-button" 
 									onClick={async () => {
 										const value = await customPrompt('인증코드를 입력해주세요', 'XXXXXX');
@@ -131,10 +172,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 								>이메일인증</button>
 							</div>
 							<div className={getClassName('field', 2)}>
-								<input type="password" className="text" name="password" value={formData.password || ''} onChange={handleChange} placeholder="비밀번호를 입력하세요" required/>
+								<input type="password" className="text" name="password" value={formData.password || ''} onChange={handleChange} placeholder="비밀번호를 입력하세요"/>
 							</div>
 							<div className={getClassName('field', 3)}>
-								<input type="password" className="text" name="passwordConfirm" value={formData.passwordConfirm || ''} onChange={handleChange} placeholder="비밀번호를 다시 입력하세요" required/>
+								<input type="password" className="text" name="passwordConfirm" value={formData.passwordConfirm || ''} onChange={handleChange} placeholder="비밀번호를 다시 입력하세요"/>
 							</div>
 							<div className={getClassName('radios', 4)}>
 								<div className="radio">
@@ -148,7 +189,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 								<span className={`switcher ${gender}`}></span>
 							</div>
 							<div className={getClassName('field', 5)}>
-								<input type="tel" className="text" name="hp" value={formData.hp || ''} onChange={handleChange} placeholder="휴대폰번호를 입력하세요" required/>
+								<input type="tel" className="text" name="hp" value={formData.hp || ''} onChange={handleChange} placeholder="휴대폰번호를 입력하세요"/>
 							</div>
 						</div>
 					) : (

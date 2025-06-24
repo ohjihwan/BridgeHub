@@ -455,15 +455,7 @@ legend,
 	&.--field__error:has(.select),
 	&.--field__error:has(.textarea) {
 		background-color:$red;
-		animation:errorEm 1s forwards;
-		@keyframes errorEm {
-			0% {transform:rotate(0);}
-			20% {transform:rotate(2deg);}
-			40% {transform:rotate(-2deg);}
-			60% {transform:rotate(2deg);}
-			80% {transform:rotate(-2deg);}
-			100% {transform:rotate(0);}
-		}
+		
 		&::before,
 		&::after {
 			display:none !important;

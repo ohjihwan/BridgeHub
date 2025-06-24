@@ -2,17 +2,22 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import CustomAlert from '@page/common/customAlert';
 
+let alertRoot = null;
+let root = null;
+
 export function customAlert(message) {
 	return new Promise((resolve) => {
-		const alertRoot = document.getElementById('alert-root');
-		const root = createRoot(alertRoot);
+		const container = document.createElement('div');
+		document.body.appendChild(container);
+		const root = createRoot(container);
+
 		const handleClose = () => {
 			root.unmount();
+			container.remove();
 			resolve();
 		};
-		root.render(
-			<CustomAlert message={message} onClose={handleClose} />
-		);
+
+		root.render(<CustomAlert message={message} onClose={handleClose} />);
 	});
 }
 
