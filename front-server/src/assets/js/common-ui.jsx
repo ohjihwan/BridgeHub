@@ -7,17 +7,17 @@ let root = null;
 
 export function customAlert(message) {
 	return new Promise((resolve) => {
-		const container = document.createElement('div');
-		document.body.appendChild(container);
-		const root = createRoot(container);
+		const alertRoot = document.getElementById('alert-root');
+		const root = createRoot(alertRoot);
 
 		const handleClose = () => {
 			root.unmount();
-			container.remove();
 			resolve();
 		};
 
-		root.render(<CustomAlert message={message} onClose={handleClose} />);
+		root.render(
+			<CustomAlert message={message} onClose={handleClose} />
+		);
 	});
 }
 
