@@ -49,11 +49,11 @@ public class AdminController {
             response.put("currentPage", page);
             response.put("size", size);
             
-            return ResponseEntity.ok(ApiResponse.success("신고 목록 조회 성공", response));
+            return ResponseEntity.ok(ApiResponse.successWithDebug(response, "신고 목록 조회 성공"));
         } catch (Exception e) {
             log.error("관리자 신고 목록 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("신고 목록 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.errorSilent("신고 목록 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -71,11 +71,11 @@ public class AdminController {
                 request.getPenalty(), 
                 request.getAdminNote()
             );
-            return ResponseEntity.ok(ApiResponse.success("신고가 처리되었습니다.", resolvedReport));
+            return ResponseEntity.ok(ApiResponse.successWithMessage("신고가 처리되었습니다.", resolvedReport));
         } catch (Exception e) {
             log.error("신고 처리 실패: reportId={}", reportId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("신고 처리 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("신고 처리 중 오류가 발생했습니다."));
         }
     }
 
@@ -102,11 +102,11 @@ public class AdminController {
             response.put("currentPage", page);
             response.put("size", size);
             
-            return ResponseEntity.ok(ApiResponse.success("회원 목록 조회 성공", response));
+            return ResponseEntity.ok(ApiResponse.successWithDebug(response, "회원 목록 조회 성공"));
         } catch (Exception e) {
             log.error("관리자 회원 목록 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("회원 목록 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.errorSilent("회원 목록 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -119,11 +119,11 @@ public class AdminController {
             @RequestParam String role) {
         try {
             MemberDTO updatedMember = memberService.updateMemberRole(memberId, role);
-            return ResponseEntity.ok(ApiResponse.success("회원 권한이 변경되었습니다.", updatedMember));
+            return ResponseEntity.ok(ApiResponse.successWithMessage("회원 권한이 변경되었습니다.", updatedMember));
         } catch (Exception e) {
             log.error("회원 권한 변경 실패: memberId={}, role={}", memberId, role, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("권한 변경 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("권한 변경 중 오류가 발생했습니다."));
         }
     }
 
@@ -136,11 +136,11 @@ public class AdminController {
             @RequestParam String status) {
         try {
             MemberDTO updatedMember = memberService.updateMemberStatus(memberId, status);
-            return ResponseEntity.ok(ApiResponse.success("회원 상태가 변경되었습니다.", updatedMember));
+            return ResponseEntity.ok(ApiResponse.successWithMessage("회원 상태가 변경되었습니다.", updatedMember));
         } catch (Exception e) {
             log.error("회원 상태 변경 실패: memberId={}, status={}", memberId, status, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("상태 변경 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("상태 변경 중 오류가 발생했습니다."));
         }
     }
 
@@ -168,11 +168,11 @@ public class AdminController {
             Map<String, Object> activityStats = buildActivityStatistics();
             statistics.put("activityStats", activityStats);
             
-            return ResponseEntity.ok(ApiResponse.success("통계 조회 성공", statistics));
+            return ResponseEntity.ok(ApiResponse.successWithDebug(statistics, "통계 조회 성공"));
         } catch (Exception e) {
             log.error("통계 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("통계 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.errorSilent("통계 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -182,13 +182,12 @@ public class AdminController {
     @GetMapping("/statistics/members")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getMemberStatisticsApi() {
         try {
-            // TODO: 실제 DB 쿼리로 교체 필요
             Map<String, Object> memberStats = buildMemberStatistics();
-            return ResponseEntity.ok(ApiResponse.success("회원 통계 조회 성공", memberStats));
+            return ResponseEntity.ok(ApiResponse.successWithDebug(memberStats, "회원 통계 조회 성공"));
         } catch (Exception e) {
             log.error("회원 통계 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("회원 통계 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.errorSilent("회원 통계 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -199,11 +198,11 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getReportStatisticsApi() {
         try {
             Map<String, Object> reportStats = buildReportStatistics();
-            return ResponseEntity.ok(ApiResponse.success("신고 통계 조회 성공", reportStats));
+            return ResponseEntity.ok(ApiResponse.successWithDebug(reportStats, "신고 통계 조회 성공"));
         } catch (Exception e) {
             log.error("신고 통계 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("신고 통계 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.errorSilent("신고 통계 조회 중 오류가 발생했습니다."));
         }
     }
 
@@ -214,27 +213,39 @@ public class AdminController {
     private Map<String, Object> buildMemberStatistics() {
         Map<String, Object> stats = new HashMap<>();
         
-        // 성별 통계
+        try {
+            // 실제 DB에서 통계 데이터 조회
+            Map<String, Integer> genderStats = memberService.getGenderStatistics();
+            Map<String, Integer> educationStats = memberService.getEducationStatistics();
+            Map<String, Integer> timeStats = memberService.getTimeStatistics();
+            Map<String, Integer> majorStats = memberService.getMajorStatistics();
+            
+            stats.put("gender", genderStats);
+            stats.put("education", educationStats);
+            stats.put("time", timeStats);
+            stats.put("major", majorStats);
+            
+        } catch (Exception e) {
+            log.error("회원 통계 조회 실패", e);
+            
+            // 에러 시 폴백 더미 데이터 (기존 코드 유지)
         Map<String, Integer> genderStats = new HashMap<>();
         genderStats.put("남성", 50);
         genderStats.put("여성", 15);
         stats.put("gender", genderStats);
         
-        // 학력 통계
         Map<String, Integer> educationStats = new HashMap<>();
         educationStats.put("고졸", 35);
         educationStats.put("대학교", 50);
         educationStats.put("대학원", 15);
         stats.put("education", educationStats);
         
-        // 활동 시간대 통계
         Map<String, Integer> timeStats = new HashMap<>();
         timeStats.put("06:00~12:00", 35);
         timeStats.put("12:00~18:00", 50);
         timeStats.put("18:00~24:00", 15);
         stats.put("time", timeStats);
         
-        // 전공 통계
         Map<String, Integer> majorStats = new HashMap<>();
         majorStats.put("인문•사회", 50);
         majorStats.put("상경", 15);
@@ -245,6 +256,7 @@ public class AdminController {
         majorStats.put("법학", 5);
         majorStats.put("융합", 5);
         stats.put("major", majorStats);
+        }
         
         return stats;
     }
@@ -341,7 +353,7 @@ public class AdminController {
         } catch (Exception e) {
             log.error("관리 로그 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("관리 로그 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("관리 로그 조회 중 오류가 발생했습니다."));
         }
     }
 

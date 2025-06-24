@@ -18,24 +18,66 @@ public class ApiResponse<T> {
     private String errorCode;
     private LocalDateTime timestamp;
     private String path;
-
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>("success", message, data, null, LocalDateTime.now(), null);
-    }
+    private Boolean showMessage;
+    private String debugMessage;
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>("success", "요청이 성공적으로 처리되었습니다.", data, null, LocalDateTime.now(), null);
+        return new ApiResponse<>("success", null, data, null, LocalDateTime.now(), null, false, null);
+    }
+
+    public static <T> ApiResponse<T> success() {
+        return new ApiResponse<>("success", null, null, null, LocalDateTime.now(), null, false, null);
+    }
+
+    public static <T> ApiResponse<T> successWithDebug(T data, String debugMessage) {
+        return new ApiResponse<>("success", null, data, null, LocalDateTime.now(), null, false, debugMessage);
+    }
+
+    public static <T> ApiResponse<T> errorSilent(String debugMessage) {
+        return new ApiResponse<>("error", null, null, null, LocalDateTime.now(), null, false, debugMessage);
+    }
+
+    public static <T> ApiResponse<T> ok(T data) {
+        return new ApiResponse<>("success", null, data, null, LocalDateTime.now(), null, false, null);
+    }
+
+    public static <T> ApiResponse<T> ok() {
+        return new ApiResponse<>("success", null, null, null, LocalDateTime.now(), null, false, null);
+    }
+
+    public static <T> ApiResponse<T> successWithMessage(String message, T data) {
+        return new ApiResponse<>("success", message, data, null, LocalDateTime.now(), null, true, null);
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data, Boolean showMessage) {
+        return new ApiResponse<>("success", message, data, null, LocalDateTime.now(), null, showMessage, null);
+    }
+
+    public static <T> ApiResponse<T> successSilent(T data) {
+        return new ApiResponse<>("success", null, data, null, LocalDateTime.now(), null, false, null);
+    }
+
+    public static <T> ApiResponse<T> successSilent(String message, T data) {
+        return new ApiResponse<>("success", null, data, null, LocalDateTime.now(), null, false, message);
     }
 
     public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>("error", message, null, null, LocalDateTime.now(), null);
+        return new ApiResponse<>("error", message, null, null, LocalDateTime.now(), null, true, null);
     }
 
     public static <T> ApiResponse<T> error(String errorCode, String message) {
-        return new ApiResponse<>("error", message, null, errorCode, LocalDateTime.now(), null);
+        return new ApiResponse<>("error", message, null, errorCode, LocalDateTime.now(), null, true, null);
     }
 
     public static <T> ApiResponse<T> error(String errorCode, String message, String path) {
-        return new ApiResponse<>("error", message, null, errorCode, LocalDateTime.now(), path);
+        return new ApiResponse<>("error", message, null, errorCode, LocalDateTime.now(), path, true, null);
+    }
+
+    public static <T> ApiResponse<T> error(String message, Boolean showMessage) {
+        return new ApiResponse<>("error", message, null, null, LocalDateTime.now(), null, showMessage, null);
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>("success", null, data, null, LocalDateTime.now(), null, false, message);
     }
 } 
