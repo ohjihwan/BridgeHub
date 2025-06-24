@@ -988,6 +988,12 @@ legend,
 	.room-info {
 		font-size:remx(15)
 	}
+
+	&__thumbnail {
+		position:absolute;
+		left:0;
+		top:0;
+	}
 }
 
 .more-box {

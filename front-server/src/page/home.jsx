@@ -10,7 +10,7 @@ const Home = () => {
 	const navigate = useNavigate();
 	const [selectedRoom, setSelectedRoom] = useState(null);
 	const [hasStudyRoom, setHasStudyRoom] = useState(true);
-	const [studyRooms, setStudyRooms] = useState({
+	const [studyRoom, setStudyRoom] = useState({
 		title: '내 스터디룸',
 		region: '서울',
 		time: '오후',
@@ -18,6 +18,7 @@ const Home = () => {
 		capacity: 6,
 		thumbnail: '/images/thumbnail-room1.jpg'
 	});
+	const [studyRooms, setStudyRooms] = useState([]);
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
@@ -50,9 +51,8 @@ const Home = () => {
 				} else {
 					setHasStudyRoom(false);
 				}
-			})
-			.catch(err => {
-				console.error(err);
+			}).catch(err => {
+				console.log(err);
 			});
 	}, []);
 	useEffect(() => {
@@ -77,6 +77,10 @@ const Home = () => {
 			document.body.style.overflow = '';
 		};
 	}, [showCreateStudy]);
+	useEffect(() => {
+		setStudyRooms(roomData);
+	}, []);
+	
 
 	return (
 		<>
@@ -111,7 +115,7 @@ const Home = () => {
 					)}
 
 					{/* 소속된 방이 있는 경우 */}
-					{hasStudyRoom && studyRoom && (
+					{studyRoom && (
 						<div className="reenter-studyroom">
 							<div className="reenter-studyroom__thumbnail">
 								<img src={studyRoom.thumbnail} alt="스터디룸 썸네일" />
