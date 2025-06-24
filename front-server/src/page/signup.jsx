@@ -1,14 +1,20 @@
 import axios from 'axios';
-import apiConfig, { API_ENDPOINTS } from '@dev/config/api';
 import { useState, useEffect } from 'react';
-
-const apiClient = axios.create(apiConfig);
+import { useNavigate } from 'react-router-dom';
 
 function SignUp({ onSwitchToLogin, isActive }) {
+	const navigate = useNavigate();
 	const [step, setStep] = useState(1);
 	const [visibleIndexes, setVisibleIndexes] = useState([]);
-	const [gender, setGender] = useState('man');
-	const [emailVerified, setEmailVerified] = useState(false);
+	const [gender, setGender] = useState('남자');
+	const [emailVerified, setEmailVerified] = useState(true);
+	const apiClient = axios.create({
+		baseURL: 'http://localhost:7100/api/auth',
+		timeout: 10000,
+		headers: { 'Content-Type': 'application/json' },
+	});
+	const [showVerificationCode, setShowVerificationCode] = useState(false);
+	const [verificationCode, setVerificationCode] = useState('');
 	const [formData, setFormData] = useState({
 		name: '',
 		email: '',
@@ -20,7 +26,11 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		education1: '지역무관',
 		education2: '지역무관',
 		timeZone: '',
+		gender: '남자',
+		hp: '',
 	});
+	
+	const API_BASE_URL = 'http://localhost:7100/api/auth';
 
 	const handleEmailVerification = async () => {
 		if (!formData.email) {
@@ -29,21 +39,23 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		}
 
 		try {
-			await apiClient.post(API_ENDPOINTS.SEND_VERIFICATION, { email: formData.email });
+			window.showLoading()
+			await axios.post(`${API_BASE_URL}/send-verification`, { email: formData.email });
+			window.hideLoading()
 			await window.customAlert('인증 코드가 발송되었습니다.');
 
 			const code = await window.customPrompt('인증코드를 입력하세요.', 'XXXXXX');
 			if (!code) return;
 
-			const verifyRes = await apiClient.post(API_ENDPOINTS.VERIFY_EMAIL, { email: formData.email, code });
-			if (verifyRes.data.success) {
+			const res = await axios.post(`${API_BASE_URL}/verify-email`, { email: formData.email, code });
+			if (res.data.success) {
 				await window.customAlert('이메일 인증이 완료되었습니다.');
 				setEmailVerified(true);
 			} else {
-				await window.customAlert('인증에 실패했습니다.');
+				await window.customAlert(res.data.message || '인증 실패');
 			}
 		} catch (err) {
-			await window.customAlert(err.response?.data?.message || '이메일 인증 요청 실패');
+			await window.customAlert(err.response?.data?.message || '인증 요청 실패');
 		}
 	};
 
@@ -53,21 +65,15 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		triggerStepAnimation(step);
 
 		const area = document.querySelector('.signup__area');
-
 		const handleFocus = (e) => {
 			if (e.target.matches('input.text, select.select')) {
 				const field = e.target.closest('.field');
-				if (field) {
-					field.classList.remove('--field__error');
-				}
+				if (field) field.classList.remove('--field__error');
 			}
 		};
 
 		area.addEventListener('focusin', handleFocus);
-
-		return () => {
-			area.removeEventListener('focusin', handleFocus);
-		};
+		return () => area.removeEventListener('focusin', handleFocus);
 	}, [isActive, step]);
 
 	const handleChange = (e) => {
@@ -75,20 +81,16 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		setFormData(prev => ({ ...prev, [name]: value }));
 	};
 
+	const markFieldError = (fieldName) => {
+		const field = document.querySelector(`.signup__area [name="${fieldName}"]`)?.closest('.field');
+		if (field) field.classList.add('--field__error');
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		if (step === 1) {
-			// 모든 필드 초기화
-			document.querySelectorAll('.signup__area .field').forEach(field => {
-				field.classList.remove('--field__error');
-			});
 
-			const markFieldError = (fieldName) => {
-				const field = document.querySelector(`.signup__area [name="${fieldName}"]`)?.closest('.field');
-				if (field) {
-					field.classList.add('--field__error');
-				}
-			};
+		if (step === 1) {
+			document.querySelectorAll('.signup__area .field').forEach(f => f.classList.remove('--field__error'));
 
 			const fieldsToCheck = [
 				{ name: 'name', message: '이름을 입력하세요.' },
@@ -123,6 +125,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 			return;
 		}
 
+		// 회원가입 최종 요청
 		try {
 			const requestData = {
 				username: formData.email,
@@ -133,22 +136,22 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				name: formData.name,
 				education: formData.department1,
 				department: formData.department2,
-				gender: gender,
+				gender: gender === 'man' ? '남자' : '여자',
 				region: formData.education1,
 				district: formData.education2 === '지역무관' ? '' : formData.education2,
-				time: formData.timeZone
+				time: formData.timeZone,
 			};
 
-			const response = await apiClient.post(API_ENDPOINTS.REGISTER, requestData);
-
-			if (response.data.success) {
-				window.customAlert('회원가입이 완료되었습니다.');
-				onSwitchToLogin();
+			const res = await axios.post(`${API_BASE_URL}/register`, requestData);
+			if (res.data.success) {
+				await window.customAlert(res.data.message || '회원가입이 완료되었습니다.');
+				navigate('/login');
+			} else {
+				await window.customAlert(res.data.message || '회원가입에 실패했습니다.');
 			}
 		} catch (err) {
-			window.customAlert(err.response?.data?.message || '회원가입에 실패했습니다.');
+			await window.customAlert(err.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
 		}
-
 	};
 
 	const triggerStepAnimation = (step) => {
@@ -207,11 +210,11 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							<div className={getClassName('radios', 4)}>
 								<div className="radio">
 									<label htmlFor="man">남자</label>
-									<input type="radio" name="gender" id="man" checked={gender === 'man'} onChange={() => setGender('man')}/>
+									<input type="radio" name="gender" id="man" checked={gender === '남자'} onChange={() => setGender('man')}/>
 								</div>
 								<div className="radio">
 									<label htmlFor="woman">여자</label>
-									<input type="radio" name="gender" id="woman" checked={gender === 'woman'} onChange={() => setGender('woman')}/>
+									<input type="radio" name="gender" id="woman" checked={gender === '여자'} onChange={() => setGender('woman')}/>
 								</div>
 								<span className={`switcher ${gender}`}></span>
 							</div>
