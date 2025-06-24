@@ -19,7 +19,11 @@ const Layer = ({ isOpen, onClose, children, header = null, footer = null }) => {
 				
 				{footer && (
 					<div className="layer__buttons">
-						{footer}
+						{typeof footer === 'string' ? (
+							<button className="layer__submit" onClick={onClose}>{footer}</button>
+						) : (
+							footer
+						)}
 					</div>
 				)}
 			</div>
