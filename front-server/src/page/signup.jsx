@@ -1,4 +1,8 @@
+import axios from 'axios';
+import apiConfig, { API_ENDPOINTS } from '@dev/config/api';
 import { useState, useEffect } from 'react';
+
+const apiClient = axios.create(apiConfig);
 
 function SignUp({ onSwitchToLogin, isActive }) {
 	const [step, setStep] = useState(1);
@@ -27,10 +31,49 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		setFormData(prev => ({ ...prev, [name]: value }));
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		if (step === 1) setStep(2);
-		else console.log('회원가입 데이터:', formData);
+		if (step === 1) {
+			setStep(2);
+			return;
+		}
+
+		if (!formData.name || !formData.email || !formData.password || !formData.nickname) {
+			window.customAlert('필수 정보를 모두 입력하세요.');
+			return;
+		}
+
+		if (formData.password !== formData.passwordConfirm) {
+			window.customAlert('비밀번호가 일치하지 않습니다.');
+			return;
+		}
+		
+		try {
+			const requestData = {
+				username: formData.email,
+				password: formData.password,
+				email: formData.email,
+				phone: formData.hp,
+				nickname: formData.nickname,
+				name: formData.name,
+				education: formData.department1,
+				department: formData.department2,
+				gender: gender,
+				region: formData.education1,
+				district: formData.education2 === '지역무관' ? '' : formData.education2,
+				time: formData.timeZone
+			};
+
+			const response = await apiClient.post(API_ENDPOINTS.REGISTER, requestData);
+
+			if (response.data.success) {
+				window.customAlert('회원가입이 완료되었습니다.');
+				onSwitchToLogin();
+			}
+		} catch (err) {
+			window.customAlert(err.response?.data?.message || '회원가입에 실패했습니다.');
+		}
+
 	};
 
 	const triggerStepAnimation = (step) => {
