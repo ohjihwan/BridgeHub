@@ -4,6 +4,7 @@ import https from "https";
 import express from "express";
 import { Server as IOServer } from "socket.io";
 import "dotenv/config";
+import { handleSocketConnection } from "./controllers/rtcSocket.mjs";
 
 const app = express();
 const port = process.env.RTC_PORT || 7600;
@@ -24,6 +25,8 @@ if (process.env.NODE_ENV === "production") {
 const io = new IOServer(server, {
   cors: { origin: process.env.FRONTEND_URL || "*" },
 });
+
+handleSocketConnection(io);
 
 // … 기존 SFU 초기화 로직 …
 
