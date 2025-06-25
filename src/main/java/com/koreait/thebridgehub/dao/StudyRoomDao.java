@@ -52,4 +52,6 @@ public interface StudyRoomDao {
     List<StudyRoom> findHotStudyRooms(@Param("limit") int limit);
     List<StudyRoom> findByMemberId(@Param("memberId") Integer memberId);
     
+    // 채팅방 ID로 스터디룸 조회
+    Optional<StudyRoom> findByRoomId(@Param("roomId") Integer roomId);
 }

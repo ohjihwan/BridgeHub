@@ -109,50 +109,67 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public MemberDTO updateMember(MemberDTO memberDTO) {
-        Optional<Member> memberOpt = memberDao.findByUsername(memberDTO.getUsername());
-        if (memberOpt.isPresent()) {
-            Member member = memberOpt.get();
+        try {
+            log.info("회원 정보 수정 시작: username={}", memberDTO.getUsername());
             
-            // DTO에서 받은 모든 필드를 Member 엔티티에 설정
-            if (memberDTO.getPassword() != null && !memberDTO.getPassword().isEmpty()) {
-                member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+            Optional<Member> memberOpt = memberDao.findByUsername(memberDTO.getUsername());
+            if (memberOpt.isPresent()) {
+                Member member = memberOpt.get();
+                log.info("기존 회원 정보 조회 완료: id={}, userid={}", member.getId(), member.getUserid());
+                
+                // DTO에서 받은 모든 필드를 Member 엔티티에 설정 (userid 제외)
+                if (memberDTO.getPassword() != null && !memberDTO.getPassword().isEmpty()) {
+                    member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+                    log.info("비밀번호 업데이트 완료");
+                }
+                if (memberDTO.getPhone() != null) {
+                    member.setPhone(memberDTO.getPhone());
+                }
+                if (memberDTO.getNickname() != null) {
+                    member.setNickname(memberDTO.getNickname());
+                }
+                if (memberDTO.getName() != null) {
+                    member.setName(memberDTO.getName());
+                }
+                if (memberDTO.getEducation() != null) {
+                    member.setEducation(memberDTO.getEducation());
+                }
+                if (memberDTO.getDepartment() != null) {
+                    member.setDepartment(memberDTO.getDepartment());
+                }
+                if (memberDTO.getGender() != null) {
+                    member.setGender(memberDTO.getGender());
+                }
+                if (memberDTO.getRegion() != null) {
+                    member.setRegion(memberDTO.getRegion());
+                }
+                if (memberDTO.getDistrict() != null) {
+                    member.setDistrict(memberDTO.getDistrict());
+                }
+                if (memberDTO.getTime() != null) {
+                    member.setTime(memberDTO.getTime());
+                }
+                if (memberDTO.getProfileImage() != null) {
+                    member.setProfileImage(memberDTO.getProfileImage());
+                }
+                
+                member.setUpdatedAt(LocalDateTime.now());
+                log.info("Member 엔티티 업데이트 준비 완료");
+                
+                int updateResult = memberDao.updateMember(member);
+                log.info("데이터베이스 업데이트 완료: result={}", updateResult);
+                
+                MemberDTO result = convertToDTO(member);
+                log.info("회원 정보 수정 완료: username={}", result.getUsername());
+                return result;
+            } else {
+                log.error("사용자를 찾을 수 없음: username={}", memberDTO.getUsername());
+                throw new RuntimeException("사용자를 찾을 수 없습니다.");
             }
-            if (memberDTO.getPhone() != null) {
-                member.setPhone(memberDTO.getPhone());
-            }
-            if (memberDTO.getNickname() != null) {
-                member.setNickname(memberDTO.getNickname());
-            }
-            if (memberDTO.getName() != null) {
-                member.setName(memberDTO.getName());
-            }
-            if (memberDTO.getEducation() != null) {
-                member.setEducation(memberDTO.getEducation());
-            }
-            if (memberDTO.getDepartment() != null) {
-                member.setDepartment(memberDTO.getDepartment());
-            }
-            if (memberDTO.getGender() != null) {
-                member.setGender(memberDTO.getGender());
-            }
-            if (memberDTO.getRegion() != null) {
-                member.setRegion(memberDTO.getRegion());
-            }
-            if (memberDTO.getDistrict() != null) {
-                member.setDistrict(memberDTO.getDistrict());
-            }
-            if (memberDTO.getTime() != null) {
-                member.setTime(memberDTO.getTime());
-            }
-            if (memberDTO.getProfileImage() != null) {
-                member.setProfileImage(memberDTO.getProfileImage());
-            }
-            
-            member.setUpdatedAt(LocalDateTime.now());
-            memberDao.updateMember(member);
-            return convertToDTO(member);
+        } catch (Exception e) {
+            log.error("회원 정보 수정 실패: username={}, error={}", memberDTO.getUsername(), e.getMessage(), e);
+            throw new RuntimeException("회원 정보 수정에 실패했습니다: " + e.getMessage(), e);
         }
-        throw new RuntimeException("사용자를 찾을 수 없습니다.");
     }
 
     @Override
@@ -207,22 +224,32 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private MemberDTO convertToDTO(Member member) {
-        MemberDTO dto = new MemberDTO();
-        dto.setUsername(member.getUsername());
-        dto.setEmail(member.getEmail());
-        dto.setPhone(member.getPhone());
-        dto.setNickname(member.getNickname());
-        dto.setName(member.getName());
-        dto.setEducation(member.getEducation());
-        dto.setDepartment(member.getDepartment());
-        dto.setGender(member.getGender());
-        dto.setRegion(member.getRegion());
-        dto.setDistrict(member.getDistrict());
-        dto.setTime(member.getTime());
-        dto.setProfileImage(member.getProfileImage());
-        dto.setEmailVerified(member.getEmailVerified());
-        dto.setCreatedAt(member.getCreatedAt());
-        dto.setUpdatedAt(member.getUpdatedAt());
-        return dto;
+        try {
+            log.info("Member 엔티티를 DTO로 변환 시작: id={}, userid={}", member.getId(), member.getUserid());
+            
+            MemberDTO dto = new MemberDTO();
+            dto.setId(member.getId());
+            dto.setUsername(member.getUsername());
+            dto.setEmail(member.getEmail());
+            dto.setPhone(member.getPhone());
+            dto.setNickname(member.getNickname());
+            dto.setName(member.getName());
+            dto.setEducation(member.getEducation());
+            dto.setDepartment(member.getDepartment());
+            dto.setGender(member.getGender());
+            dto.setRegion(member.getRegion());
+            dto.setDistrict(member.getDistrict());
+            dto.setTime(member.getTime());
+            dto.setProfileImage(member.getProfileImage());
+            dto.setEmailVerified(member.getEmailVerified());
+            dto.setCreatedAt(member.getCreatedAt());
+            dto.setUpdatedAt(member.getUpdatedAt());
+            
+            log.info("Member 엔티티를 DTO로 변환 완료: username={}, id={}", dto.getUsername(), dto.getId());
+            return dto;
+        } catch (Exception e) {
+            log.error("Member 엔티티를 DTO로 변환 실패: id={}, error={}", member.getId(), e.getMessage(), e);
+            throw new RuntimeException("DTO 변환에 실패했습니다: " + e.getMessage(), e);
+        }
     }
 }

@@ -1,6 +1,7 @@
 const socketService = require('../services/socketService');
 const MessageQueue = require('../services/messageQueue');
 const ConnectionManager = require('../services/connectionManager');
+const mongoService = require('../services/mongoService');
 const axios = require('axios');
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:7100/api';
@@ -16,18 +17,42 @@ const connectionManager = new ConnectionManager();
 connectionManager.checkConnection();
 
 // 스터디룸 참가
-const handleJoinStudy = (socket, studyId, userId) => {
+const handleJoinStudy = async (socket, studyId, userId) => {
     try {
         // 소켓에 사용자 ID 저장
         socket.userId = userId;
+        socket.currentStudyId = studyId;
         
         // 스터디룸 참가 (매개변수 순서 수정)
         const result = socketService.joinStudyRoom(socket, studyId, userId);
         
         if (result.success) {
-            // 참가자 목록 조회
+            // MongoDB에 채팅 세션 저장
+            await mongoService.updateChatSession({
+                studyId: studyId,
+                userId: userId,
+                userName: socket.userName || userId,
+                userNickname: socket.userNickname || userId,
+                status: 'ACTIVE',
+                socketId: socket.id,
+                userAgent: socket.handshake.headers['user-agent'],
+                ipAddress: socket.handshake.address
+            });
+
+            // 스터디룸 상태 업데이트
             const participants = socketService.getStudyRoomParticipants(studyId);
-            
+            await mongoService.updateStudyRoomStatus(studyId, {
+                studyTitle: `Study Room ${studyId}`,
+                currentMembers: participants.map(p => ({
+                    userId: p.userId,
+                    userName: p.userName,
+                    userNickname: p.userNickname,
+                    joinedAt: new Date(),
+                    status: 'ACTIVE'
+                })),
+                memberCount: participants.length
+            });
+
             // 참가자들에게 새 참가자 알림
             socketService.broadcastMessage(studyId, {
                 type: 'user-joined',
@@ -45,6 +70,9 @@ const handleJoinStudy = (socket, studyId, userId) => {
                 message: '스터디룸에 성공적으로 참가했습니다.'
             });
             
+            // 시스템 로그 기록
+            await mongoService.logSystemEvent('INFO', 'STUDY', studyId, userId, '스터디룸 참가');
+            
             console.log(`사용자 ${userId}가 스터디 ${studyId}에 참가했습니다.`);
         } else {
             socket.emit('join-error', {
@@ -61,15 +89,40 @@ const handleJoinStudy = (socket, studyId, userId) => {
 };
 
 // 스터디룸 퇴장
-const handleLeaveStudy = (socket, studyId) => {
+const handleLeaveStudy = async (socket, studyId) => {
     try {
         const userId = socket.userId;
         
         // 스터디룸 퇴장
         socketService.leaveStudyRoom(studyId, socket);
         
+        // MongoDB에서 채팅 세션 비활성화
+        await mongoService.updateChatSession({
+            studyId: studyId,
+            userId: userId,
+            userName: socket.userName || userId,
+            userNickname: socket.userNickname || userId,
+            status: 'INACTIVE',
+            socketId: socket.id,
+            userAgent: socket.handshake.headers['user-agent'],
+            ipAddress: socket.handshake.address
+        });
+
         // 참가자 목록 조회
         const participants = socketService.getStudyRoomParticipants(studyId);
+        
+        // 스터디룸 상태 업데이트
+        await mongoService.updateStudyRoomStatus(studyId, {
+            studyTitle: `Study Room ${studyId}`,
+            currentMembers: participants.map(p => ({
+                userId: p.userId,
+                userName: p.userName,
+                userNickname: p.userNickname,
+                joinedAt: new Date(),
+                status: 'ACTIVE'
+            })),
+            memberCount: participants.length
+        });
         
         // 참가자들에게 퇴장 알림
         socketService.broadcastMessage(studyId, {
@@ -77,6 +130,9 @@ const handleLeaveStudy = (socket, studyId) => {
             content: `${userId}님이 퇴장했습니다.`,
             participants
         });
+        
+        // 시스템 로그 기록
+        await mongoService.logSystemEvent('INFO', 'STUDY', studyId, userId, '스터디룸 퇴장');
         
         console.log(`사용자 ${userId}가 스터디 ${studyId}에서 퇴장했습니다.`);
     } catch (error) {
@@ -87,7 +143,7 @@ const handleLeaveStudy = (socket, studyId) => {
     }
 };
 
-// 메시지 전송 (강화된 에러 처리)
+// 메시지 전송 (MongoDB 연동)
 const handleSendMessage = async (socket, data) => {
     try {
         const { studyId, userId, message, fileType, fileUrl, fileName } = data;
@@ -98,9 +154,26 @@ const handleSendMessage = async (socket, data) => {
         const linkPreviews = await extractLinkPreviews(message);
         const hasLinks = linkPreviews.length > 0;
         
+        // MongoDB에 메시지 저장
+        const messageId = await mongoService.saveMessage({
+            studyId: studyId,
+            senderId: userId,
+            senderName: socket.userName || userId,
+            senderNickname: socket.userNickname || userId,
+            content: message,
+            messageType: hasLinks ? 'LINK' : (fileType ? 'FILE' : 'TEXT'),
+            fileInfo: fileType ? {
+                fileName: fileName,
+                fileUrl: fileUrl,
+                fileSize: 0, // 실제 파일 크기는 별도로 계산 필요
+                mimeType: fileType
+            } : null
+        });
+
         // 실시간 브로드캐스트 (즉시 전송) - 링크 미리보기 포함
         socketService.broadcastMessage(studyId, {
             type: 'message',
+            messageId: messageId,
             userId,
             content: message,
             fileType,

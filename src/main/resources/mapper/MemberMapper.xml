@@ -45,8 +45,7 @@
 
     <update id="updateMember" parameterType="com.koreait.thebridgehub.entity.Member">
         UPDATE members 
-        SET userid = #{userid}, 
-            phone = #{phone},
+        SET phone = #{phone},
             nickname = #{nickname},
             name = #{name},
             password = #{password}, 
