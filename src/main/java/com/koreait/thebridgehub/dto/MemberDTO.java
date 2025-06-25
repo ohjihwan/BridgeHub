@@ -18,14 +18,12 @@ public class MemberDTO {
     private String district;  // 구/군
     private String time;  // ptime을 time으로 변경
     private String profileImage;
-    private String role = "USER";
     private String status = "ACTIVE";
     private Boolean emailVerified = false;  // 이메일 인증 상태
     private String emailVerificationCode;  // 이메일 인증 코드
     private LocalDateTime emailVerificationExpiresAt;  // 이메일 인증 코드 만료 시간
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime lastLoginAt;
     
     // 기존 필드들과의 호환성을 위한 getter/setter
     public String getUsername() {

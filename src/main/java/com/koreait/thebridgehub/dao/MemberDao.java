@@ -28,9 +28,6 @@ public interface MemberDao {
     // 회원 정보 수정
     int updateMember(Member member);
     
-    // 마지막 로그인 시간 업데이트
-    int updateLastLogin(Integer id);
-    
     // 이메일 인증 정보 업데이트
     int updateEmailVerification(@Param("id") Integer id, 
                                @Param("emailVerified") Boolean emailVerified,
@@ -58,6 +55,5 @@ public interface MemberDao {
     // 관리자 기능 추가
     List<Member> findAllWithPaging(@Param("offset") int offset, @Param("size") int size);
     int getTotalCount();
-    int updateMemberRole(@Param("memberId") Integer memberId, @Param("role") String role);
     int updateMemberStatus(@Param("memberId") Integer memberId, @Param("status") String status);
 } 

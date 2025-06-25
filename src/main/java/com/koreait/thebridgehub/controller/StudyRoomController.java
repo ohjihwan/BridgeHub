@@ -32,11 +32,11 @@ public class StudyRoomController {
         try {
             log.info("스터디룸 목록 조회 요청");
             List<StudyRoomDTO> studyRooms = studyRoomService.getStudyRoomList();
-            return ResponseEntity.ok(ApiResponse.success("스터디룸 목록 조회 성공", studyRooms));
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
             log.error("스터디룸 목록 조회 실패", e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_LIST_ERROR", "스터디룸 목록 조회에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_LIST_ERROR"));
         }
     }
 
@@ -46,11 +46,11 @@ public class StudyRoomController {
         try {
             log.info("스터디룸 상세 조회 요청: {}", studyRoomId);
             StudyRoomDTO studyRoom = studyRoomService.getStudyRoom(studyRoomId);
-            return ResponseEntity.ok(ApiResponse.success("스터디룸 조회 성공", studyRoom));
+            return ResponseEntity.ok(ApiResponse.success(studyRoom));
         } catch (Exception e) {
             log.error("스터디룸 조회 실패: {}", studyRoomId, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_GET_ERROR", "스터디룸 조회에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_GET_ERROR"));
         }
     }
 
@@ -66,7 +66,7 @@ public class StudyRoomController {
             
             if (memberId == null) {
                 return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("AUTH_ERROR", "유효하지 않은 토큰입니다."));
+                    .body(ApiResponse.error("AUTH_ERROR"));
             }
             
             // 실제 로그인한 사용자의 ID를 bossId로 설정
@@ -74,11 +74,11 @@ public class StudyRoomController {
             log.info("스터디룸 생성자 ID 설정: {}", memberId);
             
             StudyRoomDTO createdStudyRoom = studyRoomService.createStudyRoom(studyRoomDTO);
-            return ResponseEntity.ok(ApiResponse.success("스터디룸 생성 성공", createdStudyRoom));
+            return ResponseEntity.ok(ApiResponse.success(createdStudyRoom));
         } catch (Exception e) {
             log.error("스터디룸 생성 실패", e);
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("STUDY_CREATE_ERROR", "스터디룸 생성에 실패했습니다: " + e.getMessage()));
+                .body(ApiResponse.error("STUDY_CREATE_ERROR"));
         }
     }
 
@@ -91,11 +91,11 @@ public class StudyRoomController {
             log.info("스터디룸 수정 요청: {}", studyRoomId);
             studyRoomDTO.setStudyRoomId(studyRoomId);
             StudyRoomDTO updatedStudyRoom = studyRoomService.updateStudyRoom(studyRoomDTO);
-            return ResponseEntity.ok(ApiResponse.success("스터디룸 수정 성공", updatedStudyRoom));
+            return ResponseEntity.ok(ApiResponse.success(updatedStudyRoom));
         } catch (Exception e) {
             log.error("스터디룸 수정 실패: {}", studyRoomId, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_UPDATE_ERROR", "스터디룸 수정에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_UPDATE_ERROR"));
         }
     }
 
@@ -105,11 +105,11 @@ public class StudyRoomController {
         try {
             log.info("스터디룸 삭제 요청: {}", studyRoomId);
             studyRoomService.deleteStudyRoom(studyRoomId);
-            return ResponseEntity.ok(ApiResponse.success("스터디룸 삭제 성공", null));
+            return ResponseEntity.ok(ApiResponse.success());
         } catch (Exception e) {
             log.error("스터디룸 삭제 실패: {}", studyRoomId, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_DELETE_ERROR", "스터디룸 삭제에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_DELETE_ERROR"));
         }
     }
 
@@ -126,11 +126,11 @@ public class StudyRoomController {
             Integer memberId = jwtService.extractMemberId(token);
             
             studyRoomService.joinStudyRoom(studyRoomId, memberId);
-            return ResponseEntity.ok(ApiResponse.success("스터디 참가 신청이 완료되었습니다.", null));
+            return ResponseEntity.ok(ApiResponse.success());
         } catch (Exception e) {
             log.error("스터디 참가 신청 실패: studyRoomId={}", studyRoomId, e);
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("JOIN_ERROR", "스터디 참가 신청에 실패했습니다: " + e.getMessage()));
+                .body(ApiResponse.error("JOIN_ERROR"));
         }
     }
     
@@ -141,11 +141,11 @@ public class StudyRoomController {
         try {
             log.info("스터디 멤버 조회: studyRoomId={}", studyRoomId);
             List<StudyRoomMemberDTO> members = studyRoomService.getStudyRoomMembers(studyRoomId);
-            return ResponseEntity.ok(ApiResponse.success("스터디 멤버 조회 성공", members));
+            return ResponseEntity.ok(ApiResponse.success(members));
         } catch (Exception e) {
             log.error("스터디 멤버 조회 실패: studyRoomId={}", studyRoomId, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("MEMBERS_GET_ERROR", "스터디 멤버 조회에 실패했습니다."));
+                .body(ApiResponse.error("MEMBERS_GET_ERROR"));
         }
     }
     
@@ -162,11 +162,11 @@ public class StudyRoomController {
             Integer bossId = jwtService.extractMemberId(token);
             
             studyRoomService.updateMemberStatus(studyRoomId, memberId, status, bossId);
-            return ResponseEntity.ok(ApiResponse.success("멤버 상태가 업데이트되었습니다.", null));
+            return ResponseEntity.ok(ApiResponse.success());
         } catch (Exception e) {
             log.error("멤버 상태 업데이트 실패", e);
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("STATUS_UPDATE_ERROR", "멤버 상태 업데이트에 실패했습니다: " + e.getMessage()));
+                .body(ApiResponse.error("STATUS_UPDATE_ERROR"));
         }
     }
     
@@ -181,11 +181,11 @@ public class StudyRoomController {
             Integer bossId = jwtService.extractMemberId(token);
             
             List<StudyRoomMemberDTO> pendingMembers = studyRoomService.getPendingMembers(studyRoomId, bossId);
-            return ResponseEntity.ok(ApiResponse.success("대기중인 멤버 조회 성공", pendingMembers));
+            return ResponseEntity.ok(ApiResponse.success(pendingMembers));
         } catch (Exception e) {
             log.error("대기중인 멤버 조회 실패: studyRoomId={}", studyRoomId, e);
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("PENDING_MEMBERS_ERROR", "대기중인 멤버 조회에 실패했습니다: " + e.getMessage()));
+                .body(ApiResponse.error("PENDING_MEMBERS_ERROR"));
         }
     }
     
@@ -200,11 +200,11 @@ public class StudyRoomController {
             Integer memberId = jwtService.extractMemberId(token);
             
             studyRoomService.leaveStudyRoom(studyRoomId, memberId);
-            return ResponseEntity.ok(ApiResponse.success("스터디에서 탈퇴했습니다.", null));
+            return ResponseEntity.ok(ApiResponse.success());
         } catch (Exception e) {
             log.error("스터디 탈퇴 실패", e);
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("LEAVE_ERROR", "스터디 탈퇴에 실패했습니다: " + e.getMessage()));
+                .body(ApiResponse.error("LEAVE_ERROR"));
         }
     }
 
@@ -214,11 +214,11 @@ public class StudyRoomController {
         try {
             log.info("학과별 스터디룸 조회 요청: {}", department);
             List<StudyRoomDTO> studyRooms = studyRoomService.getStudyRoomsByDepartment(department);
-            return ResponseEntity.ok(ApiResponse.success("학과별 스터디룸 조회 성공", studyRooms));
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
             log.error("학과별 스터디룸 조회 실패: {}", department, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_DEPARTMENT_ERROR", "학과별 스터디룸 조회에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_DEPARTMENT_ERROR"));
         }
     }
 
@@ -228,11 +228,11 @@ public class StudyRoomController {
         try {
             log.info("지역별 스터디룸 조회 요청: {}", region);
             List<StudyRoomDTO> studyRooms = studyRoomService.getStudyRoomsByRegion(region);
-            return ResponseEntity.ok(ApiResponse.success("지역별 스터디룸 조회 성공", studyRooms));
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
             log.error("지역별 스터디룸 조회 실패: {}", region, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_REGION_ERROR", "지역별 스터디룸 조회에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_REGION_ERROR"));
         }
     }
 
@@ -242,11 +242,11 @@ public class StudyRoomController {
         try {
             log.info("시간대별 스터디룸 조회 요청: {}", time);
             List<StudyRoomDTO> studyRooms = studyRoomService.getStudyRoomsByTime(time);
-            return ResponseEntity.ok(ApiResponse.success("시간대별 스터디룸 조회 성공", studyRooms));
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
             log.error("시간대별 스터디룸 조회 실패: {}", time, e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_TIME_ERROR", "시간대별 스터디룸 조회에 실패했습니다."));
+                .body(ApiResponse.error("STUDY_TIME_ERROR"));
         }
     }
 
@@ -257,11 +257,11 @@ public class StudyRoomController {
         try {
             log.info("인기 스터디룸 조회 요청: limit={}", limit);
             List<StudyRoomDTO> studyRooms = studyRoomService.getHotStudyRooms(limit);
-            return ResponseEntity.ok(ApiResponse.success("인기 스터디룸 조회 성공", studyRooms));
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
             log.error("인기 스터디룸 조회 실패", e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("HOT_STUDY_ERROR", "인기 스터디룸 조회에 실패했습니다."));
+                .body(ApiResponse.error("HOT_STUDY_ERROR"));
         }
     }
 
@@ -275,30 +275,29 @@ public class StudyRoomController {
             Integer memberId = jwtService.extractMemberId(token);
             
             List<StudyRoomDTO> studyRooms = studyRoomService.getStudyRoomsByMemberId(memberId);
-            return ResponseEntity.ok(ApiResponse.success("참여 스터디룸 조회 성공", studyRooms));
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
             log.error("참여 스터디룸 조회 실패", e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("MY_STUDY_ERROR", "참여 스터디룸 조회에 실패했습니다."));
+                .body(ApiResponse.error("MY_STUDY_ERROR"));
         }
     }
 
-    // front-server 연동을 위한 새로운 API: 스터디룸 검색
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<StudyRoomDTO>>> searchStudyRooms(
-            @RequestParam String keyword,
-            @RequestParam(required = false) String department,
-            @RequestParam(required = false) String region,
-            @RequestParam(required = false) String time) {
+    // front-server 연동을 위한 새로운 API: 내가 개설한 스터디룸 조회
+    @GetMapping("/my-created")
+    public ResponseEntity<ApiResponse<List<StudyRoomDTO>>> getMyCreatedStudyRooms(
+            @RequestHeader("Authorization") String authHeader) {
         try {
-            log.info("스터디룸 검색 요청: keyword={}, department={}, region={}, time={}", 
-                    keyword, department, region, time);
-            List<StudyRoomDTO> studyRooms = studyRoomService.searchStudyRooms(keyword, department, region, time);
-            return ResponseEntity.ok(ApiResponse.success("스터디룸 검색 성공", studyRooms));
+            log.info("개설한 스터디룸 조회 요청");
+            String token = authHeader.replace("Bearer ", "");
+            Integer memberId = jwtService.extractMemberId(token);
+            
+            List<StudyRoomDTO> studyRooms = studyRoomService.getStudyRoomsByBossId(memberId);
+            return ResponseEntity.ok(ApiResponse.success(studyRooms));
         } catch (Exception e) {
-            log.error("스터디룸 검색 실패", e);
+            log.error("개설한 스터디룸 조회 실패", e);
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("STUDY_SEARCH_ERROR", "스터디룸 검색에 실패했습니다."));
+                .body(ApiResponse.error("MY_CREATED_STUDY_ERROR"));
         }
     }
 }

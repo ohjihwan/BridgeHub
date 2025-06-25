@@ -20,14 +20,12 @@ public class Member {
     private String district;  // 구/군
     private String time;  // ptime을 time으로 변경
     private String profileImage;
-    private String role = "USER";
     private String status = "ACTIVE";
     private boolean emailVerified = false;  // 이메일 인증 상태
     private String emailVerificationCode;  // 이메일 인증 코드
     private LocalDateTime emailVerificationExpiresAt;  // 이메일 인증 코드 만료 시간
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private LocalDateTime lastLoginAt;
     
     // Getter/Setter 메서드들
     public Integer getId() { return id; }
@@ -69,9 +67,6 @@ public class Member {
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
     
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-    
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     
@@ -89,9 +84,6 @@ public class Member {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-    
-    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
-    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
     
     // 기존 필드들과의 호환성을 위한 getter/setter
     public String getUsername() {
