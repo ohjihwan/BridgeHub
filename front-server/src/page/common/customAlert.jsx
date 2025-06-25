@@ -18,7 +18,7 @@ export default function CustomAlert({
 		return () => window.removeEventListener('keydown', handler);
 	}, [onClose]);
 
-	return ReactDOM.createPortal(
+	return (
 		<div className="alert-wrapper">
 			<div className="alert-container">
 				<div className="alert-header">
@@ -49,7 +49,6 @@ export default function CustomAlert({
 					>확인</button>
 				</div>
 			</div>
-		</div>,
-		document.getElementById('alert-root')
+		</div>
 	);
 }
