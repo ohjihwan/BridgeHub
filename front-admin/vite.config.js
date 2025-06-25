@@ -8,7 +8,7 @@ export default defineConfig({
     port: 7700,
     proxy: {
       '/api': {
-        target: 'http://localhost:8800',
+        target: 'http://localhost:7100',
         changeOrigin: true,
       },
     },
@@ -23,4 +23,4 @@ export default defineConfig({
 // cd front-user
 // npm install
 // npm run dev
-// # → http://localhost:7007
+// # → http://localhost:7700
