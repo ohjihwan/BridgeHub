@@ -1,7 +1,20 @@
-const StudyRoomList = ({ rooms, onItemClick, limit = rooms.length }) => {
+import { useState, useEffect } from 'react';
+import roomData from '@json/Room.json';
+
+const StudyRoomList = ({ searchKeyword = '', onItemClick, limit = roomData.length }) => {
+	const [filteredRooms, setFilteredRooms] = useState(roomData);
+
+	useEffect(() => {
+		const keyword = (searchKeyword || '').toLowerCase();
+		const filtered = roomData.filter(room =>
+			room.title.toLowerCase().includes(keyword) || room.region.toLowerCase().includes(keyword)
+		);
+		setFilteredRooms(filtered);
+	}, [searchKeyword]);
+
 	return (
 		<ul className="studyroom">
-			{rooms.slice(0, limit).map((room) => (
+			{filteredRooms.slice(0, limit).map((room) => (
 				<li className="studyroom__item" onClick={() => onItemClick(room)} key={room.id}>
 					<button type="button" className="studyroom__info">
 						<img src={`/uploads/thumbnail/${room.thumbnail}`} className="studyroom__img" />

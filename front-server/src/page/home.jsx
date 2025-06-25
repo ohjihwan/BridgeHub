@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
-import Detail from './components/Detail';
-import CreateStudy from './components/CreateStudy';
-import Header from './common/Header';
+import Detail from '@components/Detail';
+import CreateStudy from '@components/CreateStudy';
+import Header from '@common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
-import roomData from '@json/Room.json';
-import { useNavigate, Link } from "react-router-dom";
-import StudyRoomList from '@components/StudyRoomList';
+import { Link } from "react-router-dom";
 import StudyRoomPage from '@components/StudyRoomPage';
+import StudyRoomList from '@components/StudyRoomList';
 
 const Home = () => {
-	const navigate = useNavigate();
 	const [selectedRoom, setSelectedRoom] = useState(null);
 	const [hasStudyRoom, setHasStudyRoom] = useState(true);
 	const [studyRoom, setStudyRoom] = useState({
@@ -20,12 +18,16 @@ const Home = () => {
 		capacity: 6,
 		thumbnail: 'thumbnail-room1.jpg'
 	});
-	const [studyRooms, setStudyRooms] = useState([]);
-	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
+	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
-	const [showStudyRoom] = useState(false);
-
+	const [showStudyRoom, setShowStudyRoom] = useState(false);
+	const [showInitialSearch, setShowInitialSearch] = useState(false);
+	
+	const openStudyRoom = (withSearch = false) => {
+		setShowInitialSearch(withSearch);
+		setShowStudyRoom(true);
+	};
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
 		setShowDetail(true);
@@ -40,27 +42,9 @@ const Home = () => {
 	const closeCreateStudy = () => {
 		setShowCreateStudy(false);
 	};
-	const showStudyRoomList = () => {
-		navigate('/studyroom');
-	};
 	const goToMyStudyRoom = () => {
 		// 내 스터디룸으로 이동 로직
 	};
-
-	const handleHomeSearch = async () => {
-		const keyword = await customPrompt('검색어를 입력하세요');
-		if (keyword === null) return;
-
-		const lowerKeyword = keyword.toLowerCase();
-
-		const filtered = roomData.filter(room =>
-			room.title.toLowerCase().includes(lowerKeyword) ||
-			room.region.toLowerCase().includes(lowerKeyword)
-		);
-
-		setFilteredRooms(filtered);
-	};
-
 
 	useEffect(() => {
 		// 나중에 백엔드 연결 후 fetch 또는 axios 사용
@@ -76,9 +60,6 @@ const Home = () => {
 			}).catch(err => {
 				console.log(err);
 			});
-	}, []);
-	useEffect(() => {
-		setStudyRooms(roomData);
 	}, []);
 	useEffect(() => {
 		if (isClosing) {
@@ -103,10 +84,7 @@ const Home = () => {
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
-				<Header
-					showSearch={true}
-					onSearch={showStudyRoomList}
-				/>
+				<Header showSearch={true} onSearch={() => openStudyRoom(true)} />
 
 				<div className="create-studyroom">
 					<button className="create-studyroom__button" onClick={openCreateStudy}>
@@ -167,10 +145,10 @@ const Home = () => {
 				<div className="studyroom-area">
 					<div className="more-box">
 						<h2 className="more-box__title">JUST ADDED</h2>
-						<button type="button" className="more-box__link" onClick={showStudyRoomList}>더보기</button>
+						<button type="button" className="more-box__link" onClick={() => openStudyRoom(false)}>더보기</button>
 					</div>
 					
-					<StudyRoomList rooms={studyRooms} onItemClick={handleItemClick} limit={10} />
+					<StudyRoomList onItemClick={handleItemClick} limit={10} />
 
 				</div>
 			</div>
@@ -188,7 +166,10 @@ const Home = () => {
 			)}
 
 			{showStudyRoom && (
-				<StudyRoomPage onClose={showStudyRoomList} />
+				<StudyRoomPage
+					onClose={() => setShowStudyRoom(false)}
+					initialShowSearch={showInitialSearch}
+				/>
 			)}
 		</>
 	);

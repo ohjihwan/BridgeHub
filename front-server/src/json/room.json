@@ -1,7 +1,7 @@
 [
     {
         "id": "room001",
-        "title": "리액트 상태 관리 마스터",
+        "title": "001 리액트 상태 관리 마스터",
         "description": "상태 관리 기법을 학습해요.",
         "region": "대구",
         "time": "오후",
@@ -12,7 +12,7 @@
     },
     {
         "id": "room002",
-        "title": "프론트엔드 면접 대비반",
+        "title": "002 프론트엔드 면접 대비반",
         "description": "모의 면접도 해봐요.",
         "region": "인천",
         "time": "오후",
@@ -23,7 +23,7 @@
     },
     {
         "id": "room003",
-        "title": "Node.js 실전 프로젝트",
+        "title": "003 Node.js 실전 프로젝트",
         "description": "실습 위주의 스터디입니다.",
         "region": "대구",
         "time": "오전",
@@ -34,7 +34,7 @@
     },
     {
         "id": "room004",
-        "title": "SCSS 디자인 스터디",
+        "title": "004 SCSS 디자인 스터디",
         "description": "모던 UI 디자인 실습.",
         "region": "대전",
         "time": "오전",
@@ -45,7 +45,7 @@
     },
     {
         "id": "room005",
-        "title": "SCSS 디자인 스터디",
+        "title": "005 SCSS 디자인 스터디",
         "description": "모던 UI 디자인 실습.",
         "region": "서울",
         "time": "저녁",
@@ -56,7 +56,7 @@
     },
     {
         "id": "room006",
-        "title": "자바스크립트 심화반",
+        "title": "006 자바스크립트 심화반",
         "description": "JS를 깊게 파헤쳐요.",
         "region": "대구",
         "time": "오전",
@@ -67,7 +67,7 @@
     },
     {
         "id": "room007",
-        "title": "자바스크립트 심화반",
+        "title": "007 자바스크립트 심화반",
         "description": "JS를 깊게 파헤쳐요.",
         "region": "대구",
         "time": "오후",
@@ -78,7 +78,7 @@
     },
     {
         "id": "room008",
-        "title": "리액트 상태 관리 마스터",
+        "title": "008 리액트 상태 관리 마스터",
         "description": "상태 관리 기법을 학습해요.",
         "region": "광주",
         "time": "저녁",
@@ -89,7 +89,7 @@
     },
     {
         "id": "room009",
-        "title": "SCSS 디자인 스터디",
+        "title": "009 SCSS 디자인 스터디",
         "description": "모던 UI 디자인 실습.",
         "region": "서울",
         "time": "저녁",
@@ -100,7 +100,7 @@
     },
     {
         "id": "room010",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "010 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "부산",
         "time": "오후",
@@ -111,7 +111,7 @@
     },
     {
         "id": "room011",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "011 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "부산",
         "time": "오후",
@@ -122,7 +122,7 @@
     },
     {
         "id": "room012",
-        "title": "프론트엔드 면접 대비반",
+        "title": "012 프론트엔드 면접 대비반",
         "description": "모의 면접도 해봐요.",
         "region": "서울",
         "time": "오후",
@@ -133,7 +133,7 @@
     },
     {
         "id": "room013",
-        "title": "프론트엔드 면접 대비반",
+        "title": "013 프론트엔드 면접 대비반",
         "description": "모의 면접도 해봐요.",
         "region": "부산",
         "time": "오전",
@@ -144,7 +144,7 @@
     },
     {
         "id": "room014",
-        "title": "프론트엔드 면접 대비반",
+        "title": "014 프론트엔드 면접 대비반",
         "description": "모의 면접도 해봐요.",
         "region": "서울",
         "time": "저녁",
@@ -155,7 +155,7 @@
     },
     {
         "id": "room015",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "015 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "부산",
         "time": "저녁",
@@ -166,7 +166,7 @@
     },
     {
         "id": "room016",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "016 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "서울",
         "time": "저녁",
@@ -177,7 +177,7 @@
     },
     {
         "id": "room017",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "017 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "광주",
         "time": "오후",
@@ -188,7 +188,7 @@
     },
     {
         "id": "room018",
-        "title": "자바스크립트 심화반",
+        "title": "018 자바스크립트 심화반",
         "description": "JS를 깊게 파헤쳐요.",
         "region": "대구",
         "time": "오전",
@@ -199,7 +199,7 @@
     },
     {
         "id": "room019",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "019 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "대구",
         "time": "오전",
@@ -210,7 +210,7 @@
     },
     {
         "id": "room020",
-        "title": "백엔드 API 실무반",
+        "title": "020 백엔드 API 실무반",
         "description": "API 서버를 구축해요.",
         "region": "대전",
         "time": "오전",
@@ -221,7 +221,7 @@
     },
     {
         "id": "room021",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "021 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "서울",
         "time": "오후",
@@ -232,7 +232,7 @@
     },
     {
         "id": "room022",
-        "title": "웹 성능 최적화 연구반",
+        "title": "022 웹 성능 최적화 연구반",
         "description": "성능 개선 연구.",
         "region": "부산",
         "time": "저녁",
@@ -243,7 +243,7 @@
     },
     {
         "id": "room023",
-        "title": "Node.js 실전 프로젝트",
+        "title": "023 Node.js 실전 프로젝트",
         "description": "실습 위주의 스터디입니다.",
         "region": "인천",
         "time": "저녁",
@@ -254,7 +254,7 @@
     },
     {
         "id": "room024",
-        "title": "프론트엔드 면접 대비반",
+        "title": "024 프론트엔드 면접 대비반",
         "description": "모의 면접도 해봐요.",
         "region": "부산",
         "time": "저녁",
@@ -265,7 +265,7 @@
     },
     {
         "id": "room025",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "025 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "광주",
         "time": "오전",
@@ -276,7 +276,7 @@
     },
     {
         "id": "room026",
-        "title": "프론트엔드 면접 대비반",
+        "title": "026 프론트엔드 면접 대비반",
         "description": "모의 면접도 해봐요.",
         "region": "인천",
         "time": "오후",
@@ -287,7 +287,7 @@
     },
     {
         "id": "room027",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "027 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "인천",
         "time": "오후",
@@ -298,7 +298,7 @@
     },
     {
         "id": "room028",
-        "title": "웹 성능 최적화 연구반",
+        "title": "028 웹 성능 최적화 연구반",
         "description": "성능 개선 연구.",
         "region": "광주",
         "time": "오전",
@@ -309,7 +309,7 @@
     },
     {
         "id": "room029",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "029 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "인천",
         "time": "오후",
@@ -320,7 +320,7 @@
     },
     {
         "id": "room030",
-        "title": "SCSS 디자인 스터디",
+        "title": "030 SCSS 디자인 스터디",
         "description": "모던 UI 디자인 실습.",
         "region": "부산",
         "time": "오전",
@@ -331,7 +331,7 @@
     },
     {
         "id": "room031",
-        "title": "웹 성능 최적화 연구반",
+        "title": "031 웹 성능 최적화 연구반",
         "description": "성능 개선 연구.",
         "region": "서울",
         "time": "오전",
@@ -342,7 +342,7 @@
     },
     {
         "id": "room032",
-        "title": "웹 성능 최적화 연구반",
+        "title": "032 웹 성능 최적화 연구반",
         "description": "성능 개선 연구.",
         "region": "대전",
         "time": "오전",
@@ -353,7 +353,7 @@
     },
     {
         "id": "room033",
-        "title": "자바스크립트 심화반",
+        "title": "033 자바스크립트 심화반",
         "description": "JS를 깊게 파헤쳐요.",
         "region": "부산",
         "time": "저녁",
@@ -364,7 +364,7 @@
     },
     {
         "id": "room034",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "034 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "광주",
         "time": "오전",
@@ -375,7 +375,7 @@
     },
     {
         "id": "room035",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "035 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "대전",
         "time": "저녁",
@@ -386,7 +386,7 @@
     },
     {
         "id": "room036",
-        "title": "Node.js 실전 프로젝트",
+        "title": "036 Node.js 실전 프로젝트",
         "description": "실습 위주의 스터디입니다.",
         "region": "부산",
         "time": "오후",
@@ -397,7 +397,7 @@
     },
     {
         "id": "room037",
-        "title": "WebRTC 프로젝트 만들기",
+        "title": "037 WebRTC 프로젝트 만들기",
         "description": "함께 공부해요.",
         "region": "경기",
         "time": "오후",
@@ -408,7 +408,7 @@
     },
     {
         "id": "room038",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "038 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "경기",
         "time": "오전",
@@ -419,7 +419,7 @@
     },
     {
         "id": "room039",
-        "title": "웹 퍼블리싱 실습반",
+        "title": "039 웹 퍼블리싱 실습반",
         "description": "UI 퍼블리싱 실습!",
         "region": "광주",
         "time": "오전",
@@ -430,7 +430,7 @@
     },
     {
         "id": "room040",
-        "title": "웹 성능 최적화 연구반",
+        "title": "040 웹 성능 최적화 연구반",
         "description": "성능 개선 연구.",
         "region": "서울",
         "time": "저녁",
