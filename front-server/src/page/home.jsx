@@ -88,7 +88,7 @@ const Home = () => {
 				<Header
 					showSearch={true}
 					onSearch={() => {
-						customAlert('메인 검색기능 미구현')
+						 
 					}}
 				/>
 
