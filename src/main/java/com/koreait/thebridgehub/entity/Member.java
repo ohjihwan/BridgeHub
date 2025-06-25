@@ -22,8 +22,6 @@ public class Member {
     private String profileImage;
     private String status = "ACTIVE";
     private boolean emailVerified = false;  // 이메일 인증 상태
-    private String emailVerificationCode;  // 이메일 인증 코드
-    private LocalDateTime emailVerificationExpiresAt;  // 이메일 인증 코드 만료 시간
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
@@ -72,12 +70,6 @@ public class Member {
     
     public Boolean getEmailVerified() { return emailVerified; }
     public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
-    
-    public String getEmailVerificationCode() { return emailVerificationCode; }
-    public void setEmailVerificationCode(String emailVerificationCode) { this.emailVerificationCode = emailVerificationCode; }
-    
-    public LocalDateTime getEmailVerificationExpiresAt() { return emailVerificationExpiresAt; }
-    public void setEmailVerificationExpiresAt(LocalDateTime emailVerificationExpiresAt) { this.emailVerificationExpiresAt = emailVerificationExpiresAt; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

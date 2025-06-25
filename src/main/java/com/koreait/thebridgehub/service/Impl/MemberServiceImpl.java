@@ -51,8 +51,6 @@ public class MemberServiceImpl implements MemberService {
         member.setProfileImage(memberDTO.getProfileImage());
         member.setStatus("ACTIVE");
         member.setEmailVerified(memberDTO.getEmailVerified());
-        member.setEmailVerificationCode(null);
-        member.setEmailVerificationExpiresAt(null);
         member.setCreatedAt(LocalDateTime.now());
         member.setUpdatedAt(LocalDateTime.now());
 
@@ -90,7 +88,7 @@ public class MemberServiceImpl implements MemberService {
         Optional<Member> memberOpt = memberDao.findByEmail(email);
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
-            memberDao.updateEmailVerification(member.getId(), true, null, null);
+            memberDao.updateEmailVerification(member.getId(), true);
         } else {
             throw new RuntimeException("사용자를 찾을 수 없습니다.");
         }

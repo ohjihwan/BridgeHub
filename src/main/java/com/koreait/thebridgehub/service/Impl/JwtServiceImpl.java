@@ -24,6 +24,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    @Value("${jwt.refresh-expiration:604800000}") // 7일 (밀리초)
+    private Long refreshExpiration;
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -50,6 +53,20 @@ public class JwtServiceImpl implements JwtService {
         return Jwts.builder()
                 .subject(username)
                 .claims(claims)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    @Override
+    public String generateRefreshToken(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + refreshExpiration);
+
+        return Jwts.builder()
+                .subject(username)
+                .claim("type", "refresh")
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
