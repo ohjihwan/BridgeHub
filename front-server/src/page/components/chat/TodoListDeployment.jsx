@@ -1,4 +1,4 @@
-const TodoList = ({ todos, onClose }) => {
+const TodoList = ({ todos, selectedIndex, onAssignUser }) => {
 	return (
 		<div className="todolist">
 			{todos.map((todo, index) => (
@@ -12,7 +12,13 @@ const TodoList = ({ todos, onClose }) => {
 						</ul>
 					</div>
 					<div className="todolist__buttons">
-						<button type="button" className="todolist__button">임무 가져오기</button>
+						<button 
+							type="button" 
+							className={`todolist__button ${selectedIndex === index ? 'todolist__button--active' : ''}`} 
+							onClick={() => onAssignUser(index)}
+						>
+							{selectedIndex === index ? "목표 선택 취소하기" : "목표 선택"}
+						</button>
 					</div>
 				</div>
 			))}
