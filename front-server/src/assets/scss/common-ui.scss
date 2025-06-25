@@ -1019,6 +1019,7 @@ legend,
 		display:flex;
 		align-items:center;
 		font-size:remx(14);
+		background-color:$bg-root;
 
 		&::after {
 			content:'';
@@ -1137,85 +1138,138 @@ legend,
 .studyroom-area {
 	margin-top:remx(32);
 
-	.studyroom {
-		&__item {
-			overflow:hidden;
-			position:relative;
-			height:remx(130);
-			margin-top:remx(16);
-			border-radius:remx(20);
+	&:first-child {
+		margin-top:0;
+	}
+}
 
-			&:first-child {
-				margin-top:0;
-			}
+
+.studyroom {
+	&__item {
+		overflow:hidden;
+		position:relative;
+		height:remx(130);
+		margin-top:remx(16);
+		border-radius:remx(20);
+
+		&:first-child {
+			margin-top:0;
 		}
+	}
 
-		&__img {
+	&__img {
+		position:absolute;
+		left:0;
+		top:0;
+		width:100%;
+		height:100%;
+		object-fit:cover;
+		object-position:50% 50%;
+		filter:blur(remx(2));
+	}
+
+	&__info {
+		display:block;
+		width:100%;
+		height:100%;
+		border:1px solid $line2;
+		padding:remx(15);
+		margin-bottom:remx(16);
+		text-align:left;
+		background-color:transparent;
+	}
+
+	&__title {
+		position:relative;
+		color:$font1;
+		font-size:remx(18);
+		margin-bottom:remx(5);
+		color:#fff;
+		text-align:center;
+		text-shadow:0 0 remx(12) #000;
+	}
+
+	&__details {
+		display:flex;
+		justify-content:center;
+		margin-top:remx(10);
+		font-size:remx(11);
+		text-wrap:nowrap;
+		text-shadow:0 0 remx(12) #000;
+	}
+
+	&__detail {
+		position:relative;
+		padding-left:remx(8);
+		color:#fff;
+
+		&::before {
+			content:'';
 			position:absolute;
-			left:0;
-			top:0;
-			z-index:-1;
-			width:100%;
-			height:100%;
-			object-fit:cover;
-			object-position:50% 50%;
-			filter:blur(remx(2));
+			left:remx(2);
+			top:50%;
+			transform:translateY(-50%);
+			width:remx(4);
+			height:remx(4);
+			border-radius:50%;
+			background-color:#fff;
 		}
 
-		&__info {
-			display:block;
-			width:100%;
-			height:100%;
-			border:1px solid $line2;
-			padding:remx(15);
-			margin-bottom:remx(16);
-			text-align:left;
-			background-color:transparent;
-		}
-
-		&__title {
-			color:$font1;
-			font-size:remx(18);
-			margin-bottom:remx(5);
-			color:#fff;
-			text-align:center;
-			text-shadow:0 0 remx(12) #000;
-		}
-
-		&__details {
-			display:flex;
-			justify-content:center;
-			margin-top:remx(10);
-			font-size:remx(11);
-			text-wrap:nowrap;
-			text-shadow:0 0 remx(12) #000;
-		}
-
-		&__detail {
-			position:relative;
-			padding-left:remx(8);
-			color:#fff;
+		&:first-child {
+			padding-left:0;
 
 			&::before {
-				content:'';
-				position:absolute;
-				left:remx(2);
-				top:50%;
-				transform:translateY(-50%);
-				width:remx(4);
-				height:remx(4);
-				border-radius:50%;
-				background-color:#fff;
-			}
-
-			&:first-child {
-				padding-left:0;
-
-				&::before {
-					display:none;
-				}
+				display:none;
 			}
 		}
+	}
+}
+// ─────────────────────────────
+// 📄 StudyroomPage.jsx page
+// ─────────────────────────────
+.studyroom-list {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index:999;
+
+	&.show {
+		.studyroom-list__content {
+			transform: translateY(0);
+		}
+	}
+
+	&__header {
+		@include flex-center;
+		position:relative;
+		height:remx(50);
+		padding:0 $padding-x;
+
+		h2 {
+			font-size:remx(17)
+		}
+	}
+
+	&__close {
+		position:absolute;
+		right:$padding-x;
+		top:50%;
+		transform:translateY(-50%);
+		width:remx(24);
+		height:remx(24);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 100% auto;
+		cursor:pointer;
+	}
+
+	&__content {
+		overflow:scroll;
+		height:100vh;
+		padding:remx(50) $padding-x;
+		background: $bg-root;
+		transform: translateY(100%);
+		transition: transform 0.4s ease;
 	}
 }
 // ─────────────────────────────

@@ -4,6 +4,7 @@ import Auth from '@page/Auth'
 import Home from '@page/home'
 import MyPage from '@page/MyPage'
 import Chat from '@page/chat'
+import StudyRoomPage from '@components/StudyRoomPage'
 
 function App() {
 	const [showIntro, setShowIntro] = useState(false);
@@ -37,6 +38,7 @@ function App() {
 					<Route path="/home" element={<Home />} />
 					<Route path="/mypage" element={<MyPage />} />
 					<Route path="/chat" element={<Chat />} />
+					<Route path="/studyroom" element={<StudyRoomPage />} />
 					<Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
 				</Routes>
 			)}

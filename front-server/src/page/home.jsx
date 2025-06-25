@@ -5,6 +5,8 @@ import Header from './common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import roomData from '@json/Room.json';
 import { useNavigate, Link } from "react-router-dom";
+import StudyRoomList from '@components/StudyRoomList';
+import StudyRoomPage from '@components/StudyRoomPage';
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -22,6 +24,8 @@ const Home = () => {
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
+	const [showStudyRoom] = useState(false);
+
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
 		setShowDetail(true);
@@ -36,9 +40,27 @@ const Home = () => {
 	const closeCreateStudy = () => {
 		setShowCreateStudy(false);
 	};
+	const showStudyRoomList = () => {
+		navigate('/studyroom');
+	};
 	const goToMyStudyRoom = () => {
 		// 내 스터디룸으로 이동 로직
 	};
+
+	const handleHomeSearch = async () => {
+		const keyword = await customPrompt('검색어를 입력하세요');
+		if (keyword === null) return;
+
+		const lowerKeyword = keyword.toLowerCase();
+
+		const filtered = roomData.filter(room =>
+			room.title.toLowerCase().includes(lowerKeyword) ||
+			room.region.toLowerCase().includes(lowerKeyword)
+		);
+
+		setFilteredRooms(filtered);
+	};
+
 
 	useEffect(() => {
 		// 나중에 백엔드 연결 후 fetch 또는 axios 사용
@@ -77,19 +99,13 @@ const Home = () => {
 			document.body.style.overflow = '';
 		};
 	}, [showCreateStudy]);
-	useEffect(() => {
-		setStudyRooms(roomData);
-	}, []);
-	
 
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
 				<Header
 					showSearch={true}
-					onSearch={() => {
-						 
-					}}
+					onSearch={showStudyRoomList}
 				/>
 
 				<div className="create-studyroom">
@@ -151,23 +167,11 @@ const Home = () => {
 				<div className="studyroom-area">
 					<div className="more-box">
 						<h2 className="more-box__title">JUST ADDED</h2>
-						<a href="#none" className="more-box__link">더보기</a>
+						<button type="button" className="more-box__link" onClick={showStudyRoomList}>더보기</button>
 					</div>
-					<ul className="studyroom">
-						{studyRooms.map((room) => (
-							<li className="studyroom__item" onClick={() => handleItemClick(room)} key={room.id}>
-								<button type="button" className="studyroom__info">
-									<img src={`/uploads/thumbnail/${room.thumbnail}`} className="studyroom__img"/>
-									<h3 className="studyroom__title">{room.title}</h3>
-									<div className="studyroom__details">
-										<span className="studyroom__detail">{room.region}</span>
-										<span className="studyroom__detail">{room.time}</span>
-										<span className="studyroom__detail">{room.currentMembers}/{room.capacity}명</span>
-									</div>
-								</button>
-							</li>
-						))}
-					</ul>
+					
+					<StudyRoomList rooms={studyRooms} onItemClick={handleItemClick} limit={10} />
+
 				</div>
 			</div>
 		
@@ -181,6 +185,10 @@ const Home = () => {
 					isClosing={isClosing}
 					onClose={handleDetailClose}
 				/>
+			)}
+
+			{showStudyRoom && (
+				<StudyRoomPage onClose={showStudyRoomList} />
 			)}
 		</>
 	);

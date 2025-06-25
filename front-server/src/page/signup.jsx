@@ -8,8 +8,8 @@ function SignUp({ onSwitchToLogin, isActive }) {
 	const navigate = useNavigate();
 	const [step, setStep] = useState(1);
 	const [visibleIndexes, setVisibleIndexes] = useState([]);
-	const [gender, setGender] = useState('남자');
-	const [emailVerified, setEmailVerified] = useState(true);
+	const [gender, setGender] = useState('man');
+	const [emailVerified, setEmailVerified] = useState(false);
 	const apiClient = axios.create({
 		baseURL: 'http://localhost:7100/api/auth',
 		timeout: 10000,
@@ -50,14 +50,16 @@ function SignUp({ onSwitchToLogin, isActive }) {
 			if (!code) return;
 
 			const res = await axios.post(`${API_BASE_URL}/verify-email`, { email: formData.email, code });
-			if (res.data.success) {
+			if (res.data.status === 'success') {
 				await window.customAlert('이메일 인증이 완료되었습니다.');
 				setEmailVerified(true);
 			} else {
 				await window.customAlert(res.data.message || '인증 실패');
+				console.log('서버 응답:', res.data);
 			}
 		} catch (err) {
 			await window.customAlert(err.response?.data?.message || '인증 요청 실패');
+			console.log('에러 전체:', err);
 		}
 	};
 
@@ -143,7 +145,9 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				district: formData.education2 === '지역무관' ? '' : formData.education2,
 				time: formData.timeZone,
 			};
-
+			
+			console.log(requestData)
+			
 			const res = await axios.post(`${API_BASE_URL}/register`, requestData);
 			if (res.data.success) {
 				await window.customAlert(res.data.message || '회원가입이 완료되었습니다.');
@@ -152,6 +156,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				await window.customAlert(res.data.message || '회원가입에 실패했습니다.');
 			}
 		} catch (err) {
+			
 			await window.customAlert(err.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
 		}
 	};
