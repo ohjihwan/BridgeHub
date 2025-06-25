@@ -33,26 +33,9 @@
     "clean": "npx rimraf node_modules && npx rimraf api-server/node_modules && npx rimraf socket-server/node_modules && npx rimraf front-server/node_modules",
     "clean:install": "npm run clean && npm run install:all"
   },
-  "keywords": [
-    "study",
-    "matching",
-    "platform",
-    "bridgehub"
-  ],
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3",
-    "rimraf": "^5.0.5"
-  },
-  "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-native-webrtc": "^124.0.5",
-    "react-router-dom": "^7.6.2",
-    "socket.io-client": "^4.8.1"
-  },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
@@ -65,15 +48,28 @@
     "sass": "^1.89.1",
     "vite": "^6.3.5"
   },
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-native-webrtc": "^124.0.5",
+    "react-router-dom": "^7.6.2",
+    "socket.io-client": "^4.8.1",
+    "swiper": "^11.2.8"
+  },
   "main": "eslint.config.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ohjihwan/BridgeHub.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/ohjihwan/BridgeHub/issues"
   },

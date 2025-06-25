@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
+const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = () => {} }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -39,6 +39,14 @@ const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
 		setMenuOpen(prev => !prev);
 	};
 
+	const handleExitChat = () => {
+		customConfirm('정말 스터디룸을 탈퇴하시겠습니까?', () => {
+			setMenuOpen(false);
+			customAlert('스터디룸을 탈퇴했습니다.');
+			navigate('/home');
+		});
+	};
+
 	// 바깥 클릭 시 메뉴 닫기 (선택사항)
 	useEffect(() => {
 		const handleClickOutside = (e) => {
@@ -72,7 +80,7 @@ const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
 			
 			<div className="header__right" ref={menuRef}>
 				{showSearch && (
-					<button type="button" className="header__right__search">
+					<button type="button" className="header__right__search" onClick={onSearch}>
 						<span className="hide">검색</span>
 					</button>
 				)}
@@ -89,6 +97,11 @@ const Header = ({ isEditing = false, showSearch = true, title = '' }) => {
 						<li className='user-menu__item'>
 							<a href="/logout" onClick={(e) => { e.preventDefault(); handleLogout(); }}>로그아웃</a>
 						</li>
+						{location.pathname === '/chat' && (
+							<li className="user-menu__item">
+								<a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>퇴장하기</a>
+							</li>
+						)}
 					</ul>
 				</div>
 			</div>
