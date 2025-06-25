@@ -5,6 +5,7 @@ import Header from '@common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
+import roomData from '@json/Room.json';
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -21,9 +22,6 @@ const Home = () => {
 	const [isClosing, setIsClosing] = useState(false);
 	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
-	const [showStudyRoom, setShowStudyRoom] = useState(false);
-	const [showInitialSearch, setShowInitialSearch] = useState(false);
-	const [shouldNavigate, setShouldNavigate] = useState(false);
 	
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
@@ -39,11 +37,8 @@ const Home = () => {
 	const closeCreateStudy = () => {
 		setShowCreateStudy(false);
 	};
-	const goToMyStudyRoom = () => {
-		// 내 스터디룸으로 이동 로직
-	};
-
-	useEffect(() => {
+	
+	/* useEffect(() => {
 		// 나중에 백엔드 연결 후 fetch 또는 axios 사용
 		fetch('/api/my-studyroom')
 			.then(res => res.json())
@@ -57,7 +52,7 @@ const Home = () => {
 			}).catch(err => {
 				console.log(err);
 			});
-	}, []);
+	}, []); */
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {
@@ -77,11 +72,6 @@ const Home = () => {
 			document.body.style.overflow = '';
 		};
 	}, [showCreateStudy]);
-	useEffect(() => {
-		if (shouldNavigate) {
-			navigate('/list');
-		}
-	}, [shouldNavigate]);
 
 	return (
 		<>
@@ -147,11 +137,10 @@ const Home = () => {
 				<div className="studyroom-area">
 					<div className="more-box">
 						<h2 className="more-box__title">JUST ADDED</h2>
-						<button type="button" className="more-box__link" onClick={() => setShouldNavigate(true)}>더보기</button>
+						<button type="button" className="more-box__link" onClick={() => navigate('/list')}>더보기</button>
 					</div>
 					
-					<StudyRoomList onItemClick={handleItemClick} limit={10} />
-
+					<StudyRoomList rooms={roomData} onItemClick={handleItemClick} limit={10} />
 				</div>
 			</div>
 		
@@ -164,13 +153,6 @@ const Home = () => {
 					room={selectedRoom}
 					isClosing={isClosing}
 					onClose={handleDetailClose}
-				/>
-			)}
-
-			{showStudyRoom && (
-				<StudyRoomPage
-					onClose={() => setShowStudyRoom(false)}
-					initialShowSearch={showInitialSearch}
 				/>
 			)}
 		</>

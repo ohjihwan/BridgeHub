@@ -1,17 +1,10 @@
-import { useState, useEffect } from 'react';
-import roomData from '@json/Room.json';
-
-const StudyRoomList = ({ searchKeyword = '', onItemClick, limit = roomData.length }) => {
-	const [filteredRooms, setFilteredRooms] = useState(roomData);
-
-	useEffect(() => {
-		const keyword = (searchKeyword || '').toLowerCase();
-		const filtered = roomData.filter(room =>
-			room.title.toLowerCase().includes(keyword) || room.region.toLowerCase().includes(keyword)
-		);
-		setFilteredRooms(filtered);
-	}, [searchKeyword]);
-
+const StudyRoomList = ({ rooms = [], searchKeyword = '', limit, onItemClick }) => {
+	const keyword = searchKeyword.toLowerCase();
+	const filteredRooms = rooms.filter(room =>
+		room.title.toLowerCase().includes(keyword) ||
+		room.region.toLowerCase().includes(keyword)
+	);
+	
 	return (
 		<ul className="studyroom">
 			{filteredRooms.slice(0, limit).map((room) => (

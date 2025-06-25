@@ -1228,18 +1228,8 @@ legend,
 // 📄 StudyroomPage.jsx page
 // ─────────────────────────────
 .studyroom-list {
-	position: fixed;
-	left: 0;
-	top: 0;
 	width: 100%;
 	height: 100%;
-	z-index:999;
-
-	&.show {
-		.studyroom-list__content {
-			transform: translateY(0);
-		}
-	}
 
 	&__header {
 		@include flex-center;
@@ -1264,12 +1254,9 @@ legend,
 	}
 
 	&__content {
-		overflow:scroll;
-		height:100vh;
+		margin-top:remx(20);
 		padding:remx(50) $padding-x;
 		background: $bg-root;
-		transform: translateY(100%);
-		transition: transform 0.4s ease;
 	}
 }
 // ─────────────────────────────
@@ -2662,6 +2649,29 @@ legend,
 		height:remx(6);
 		transform:translateX(-50%);
 		background-color:$bg-root;
+	}
+}
+// ─────────────────────────────
+// 📄 searchPopup.jsx page
+// ─────────────────────────────
+.search-room {
+	position:sticky;
+	top:remx(50);
+	left:0;
+	z-index:200;
+	padding:remx(25) $padding-x remx(5);
+	border-radius:0 0 remx(16) remx(16);
+	background-color:$bg-root;
+	box-shadow:0 remx(3) remx(10) rgba(0,0,0,0.3); 
+
+	&__button {
+		position:absolute;
+		right:$padding-x;
+		top:0;
+		width:remx(20);
+		height:remx(20);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 100% auto;
+		cursor:pointer;
 	}
 }
 
