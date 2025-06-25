@@ -5,6 +5,7 @@ import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
 import ResultModal from '@components/chat/ResultModal';
 import TodoList from '@components/chat/TodoListDeployment';
+import Video from '@components/Video';
 
 function Chat() {
 	const location = useLocation();
@@ -30,6 +31,8 @@ function Chat() {
 	const [searchResults, setSearchResults] = useState([]); // 검색된 요소 배열
 	const [currentIndex, setCurrentIndex] = useState(0); // 현재 몇 번째 결과인지
 	const [showNavigator, setShowNavigator] = useState(false); // 말풍선 표시 여부
+	// WebRTC
+	const [showVideo, setShowVideo] = useState(false);
 	const handleTodoSettingAddInput = () => {
 		if (todoSettingInputs.length < 10) {
 			setTodoSettingInputs([...todoSettingInputs, '']);
@@ -250,6 +253,9 @@ function Chat() {
 		}
 	};
 
+	// WebRTC
+	
+
 	// 첫 입장 메시지
 	useEffect(() => {
 		addSystemMessage('${user}님이 ${action}하셨습니다.', { user: '지환', action: '입장' });
@@ -378,25 +384,30 @@ function Chat() {
 			</div>
 
 			<div className="msg-writing">
-				<ul className="msg-writing__actions">
-					<li>
-						<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
-							랜덤게임
-						</button>
-					</li>
-					<li>
-						<button type="button" className="msg-writing__action" onClick={() => {
-							if (showTodo) {
-									handleRemoveTodoList();
-								} else {
-									setShowTodoSetting(true);
-								}
-							}}
-						>
-						{showTodo ? '목표 취소' : '목표 생성'}
-						</button>
-					</li>
-				</ul>
+				<div className="msg-writing__box">
+					<div className="msg-writing__services">
+						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => setShowVideo(true)}></button>
+					</div>
+					<ul className="msg-writing__actions">
+						<li>
+							<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
+								랜덤게임
+							</button>
+						</li>
+						<li>
+							<button type="button" className="msg-writing__action" onClick={() => {
+								if (showTodo) {
+										handleRemoveTodoList();
+									} else {
+										setShowTodoSetting(true);
+									}
+								}}
+							>
+							{showTodo ? '목표 취소' : '목표 생성'}
+							</button>
+						</li>
+					</ul>
+				</div>
 				<div className="msg-writing__inputs">
 					<div className="msg-writing__field">
 						<textarea className="msg-writing__input" placeholder="메세지 입력!" value={message} onChange={handleChange} onKeyDown={handleKeyDown} ref={textareaRef} rows={1} />
@@ -479,6 +490,10 @@ function Chat() {
 					}}
 				/>
 			)}
+
+			{showVideo && 
+				<Video onClose={() => setShowVideo(false)} />
+			}
 		</>
 	);
 }
