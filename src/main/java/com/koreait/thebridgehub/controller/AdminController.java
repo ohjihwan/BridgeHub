@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,16 +19,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")  // 관리자만 접근 가능
+// @PreAuthorize("hasRole('ADMIN')")  // 인증 제거
 public class AdminController {
 
     private final ReportService reportService;
     private final MemberService memberService;
 
-    // =============================================
-    // 신고 관리 API
-    // =============================================
-
+   
     /**
      * 관리자용 신고 목록 조회 (페이징)
      */
@@ -49,11 +45,11 @@ public class AdminController {
             response.put("currentPage", page);
             response.put("size", size);
             
-            return ResponseEntity.ok(ApiResponse.success("신고 목록 조회 성공", response));
+            return ResponseEntity.ok(ApiResponse.success(response));
         } catch (Exception e) {
             log.error("관리자 신고 목록 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("신고 목록 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("REPORT_LIST_ERROR"));
         }
     }
 
@@ -71,17 +67,17 @@ public class AdminController {
                 request.getPenalty(), 
                 request.getAdminNote()
             );
-            return ResponseEntity.ok(ApiResponse.success("신고가 처리되었습니다.", resolvedReport));
+            return ResponseEntity.ok(ApiResponse.success(resolvedReport));
         } catch (Exception e) {
             log.error("신고 처리 실패: reportId={}", reportId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("신고 처리 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("REPORT_RESOLVE_ERROR"));
         }
     }
 
-    // =============================================
+    
     // 회원 관리 API
-    // =============================================
+   
 
     /**
      * 관리자용 회원 목록 조회 (페이징)
@@ -102,28 +98,11 @@ public class AdminController {
             response.put("currentPage", page);
             response.put("size", size);
             
-            return ResponseEntity.ok(ApiResponse.success("회원 목록 조회 성공", response));
+            return ResponseEntity.ok(ApiResponse.success(response));
         } catch (Exception e) {
             log.error("관리자 회원 목록 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("회원 목록 조회 중 오류가 발생했습니다.", null));
-        }
-    }
-
-    /**
-     * 회원 권한 변경
-     */
-    @PatchMapping("/users/{memberId}")
-    public ResponseEntity<ApiResponse<MemberDTO>> updateUserRole(
-            @PathVariable Integer memberId,
-            @RequestParam String role) {
-        try {
-            MemberDTO updatedMember = memberService.updateMemberRole(memberId, role);
-            return ResponseEntity.ok(ApiResponse.success("회원 권한이 변경되었습니다.", updatedMember));
-        } catch (Exception e) {
-            log.error("회원 권한 변경 실패: memberId={}, role={}", memberId, role, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("권한 변경 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("USER_LIST_ERROR"));
         }
     }
 
@@ -136,11 +115,11 @@ public class AdminController {
             @RequestParam String status) {
         try {
             MemberDTO updatedMember = memberService.updateMemberStatus(memberId, status);
-            return ResponseEntity.ok(ApiResponse.success("회원 상태가 변경되었습니다.", updatedMember));
+            return ResponseEntity.ok(ApiResponse.success(updatedMember));
         } catch (Exception e) {
             log.error("회원 상태 변경 실패: memberId={}, status={}", memberId, status, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("상태 변경 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("USER_STATUS_UPDATE_ERROR"));
         }
     }
 
@@ -168,11 +147,11 @@ public class AdminController {
             Map<String, Object> activityStats = buildActivityStatistics();
             statistics.put("activityStats", activityStats);
             
-            return ResponseEntity.ok(ApiResponse.success("통계 조회 성공", statistics));
+            return ResponseEntity.ok(ApiResponse.success(statistics));
         } catch (Exception e) {
             log.error("통계 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("통계 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("STATISTICS_ERROR"));
         }
     }
 
@@ -182,13 +161,12 @@ public class AdminController {
     @GetMapping("/statistics/members")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getMemberStatisticsApi() {
         try {
-            // TODO: 실제 DB 쿼리로 교체 필요
             Map<String, Object> memberStats = buildMemberStatistics();
-            return ResponseEntity.ok(ApiResponse.success("회원 통계 조회 성공", memberStats));
+            return ResponseEntity.ok(ApiResponse.success(memberStats));
         } catch (Exception e) {
             log.error("회원 통계 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("회원 통계 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("MEMBER_STATISTICS_ERROR"));
         }
     }
 
@@ -199,51 +177,35 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getReportStatisticsApi() {
         try {
             Map<String, Object> reportStats = buildReportStatistics();
-            return ResponseEntity.ok(ApiResponse.success("신고 통계 조회 성공", reportStats));
+            return ResponseEntity.ok(ApiResponse.success(reportStats));
         } catch (Exception e) {
             log.error("신고 통계 조회 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("신고 통계 조회 중 오류가 발생했습니다.", null));
+                .body(ApiResponse.error("REPORT_STATISTICS_ERROR"));
         }
     }
 
-    // =============================================
+    
     // 통계 데이터 생성 헬퍼 메서드들
-    // =============================================
+    
 
     private Map<String, Object> buildMemberStatistics() {
         Map<String, Object> stats = new HashMap<>();
         
         // 성별 통계
         Map<String, Integer> genderStats = new HashMap<>();
-        genderStats.put("남성", 50);
-        genderStats.put("여성", 15);
         stats.put("gender", genderStats);
         
         // 학력 통계
         Map<String, Integer> educationStats = new HashMap<>();
-        educationStats.put("고졸", 35);
-        educationStats.put("대학교", 50);
-        educationStats.put("대학원", 15);
         stats.put("education", educationStats);
         
         // 활동 시간대 통계
         Map<String, Integer> timeStats = new HashMap<>();
-        timeStats.put("06:00~12:00", 35);
-        timeStats.put("12:00~18:00", 50);
-        timeStats.put("18:00~24:00", 15);
         stats.put("time", timeStats);
         
         // 전공 통계
         Map<String, Integer> majorStats = new HashMap<>();
-        majorStats.put("인문•사회", 50);
-        majorStats.put("상경", 15);
-        majorStats.put("자연", 35);
-        majorStats.put("공학", 10);
-        majorStats.put("예체능", 5);
-        majorStats.put("의학", 5);
-        majorStats.put("법학", 5);
-        majorStats.put("융합", 5);
         stats.put("major", majorStats);
         
         return stats;
@@ -253,20 +215,11 @@ public class AdminController {
         Map<String, Object> stats = new HashMap<>();
         
         // 최근 신고 현황
-        List<Map<String, Object>> recentReports = List.of(
-            Map.of("id", 1, "reporter", "이민우", "target", "오지환", "reason", "욕설", "date", "2024-01-15"),
-            Map.of("id", 2, "reporter", "노현지", "target", "이민우", "reason", "스팸", "date", "2024-01-14"),
-            Map.of("id", 3, "reporter", "김철수", "target", "박영희", "reason", "부적절", "date", "2024-01-13"),
-            Map.of("id", 4, "reporter", "최영희", "target", "정민수", "reason", "괴롭힘", "date", "2024-01-12")
-        );
+        List<Map<String, Object>> recentReports = List.of();
         stats.put("recentReports", recentReports);
         
         // 신고 타입별 통계
         Map<String, Integer> reportTypeStats = new HashMap<>();
-        reportTypeStats.put("욕설", 5);
-        reportTypeStats.put("스팸", 3);
-        reportTypeStats.put("부적절", 2);
-        reportTypeStats.put("괴롭힘", 4);
         stats.put("reportTypes", reportTypeStats);
         
         return stats;
@@ -277,77 +230,29 @@ public class AdminController {
         
         // 분기별 가입자 통계
         Map<String, Integer> quarterlySignups = new HashMap<>();
-        quarterlySignups.put("q1", 200);
-        quarterlySignups.put("q2", 400);
-        quarterlySignups.put("q3", 300);
-        quarterlySignups.put("q4", 500);
         stats.put("quarterlySignups", quarterlySignups);
         
         // 분기별 총 접속자
         Map<String, Integer> quarterlyVisitors = new HashMap<>();
-        quarterlyVisitors.put("q1", 400);
-        quarterlyVisitors.put("q2", 800);
-        quarterlyVisitors.put("q3", 600);
-        quarterlyVisitors.put("q4", 1000);
         stats.put("quarterlyVisitors", quarterlyVisitors);
         
         // 활동 TOP 5 사용자
-        List<Map<String, Object>> topActiveUsers = List.of(
-            Map.of("name", "이민우", "activity", 120),
-            Map.of("name", "노현지", "activity", 110),
-            Map.of("name", "김철수", "activity", 100),
-            Map.of("name", "최영희", "activity", 95),
-            Map.of("name", "한지민", "activity", 90)
-        );
+        List<Map<String, Object>> topActiveUsers = List.of();
         stats.put("topActiveUsers", topActiveUsers);
         
         // 인기 채팅방
-        List<Map<String, Object>> popularRooms = List.of(
-            Map.of("name", "프로그래밍 스터디 A", "count", 45),
-            Map.of("name", "영어 스터디 B", "count", 38),
-            Map.of("name", "취미 공유방", "count", 32),
-            Map.of("name", "자유게시판", "count", 28),
-            Map.of("name", "정보공유방", "count", 25)
-        );
+        List<Map<String, Object>> popularRooms = List.of();
         stats.put("popularRooms", popularRooms);
         
         // 총 방문자 수
-        stats.put("totalVisitors", 5000000);
+        stats.put("totalVisitors", 0);
         
         return stats;
     }
 
-    // =============================================
-    // 관리 로그 API (향후 구현)
-    // =============================================
-
-    /**
-     * 관리 로그 조회 (페이징) - 임시 구현
-     */
-    @GetMapping("/logs")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getLogs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            // TODO: 관리 로그 서비스 구현 후 연결
-            Map<String, Object> response = new HashMap<>();
-            response.put("content", List.of());
-            response.put("totalElements", 0);
-            response.put("totalPages", 0);
-            response.put("currentPage", page);
-            response.put("size", size);
-            
-            return ResponseEntity.ok(ApiResponse.success("관리 로그 조회 성공", response));
-        } catch (Exception e) {
-            log.error("관리 로그 조회 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("관리 로그 조회 중 오류가 발생했습니다.", null));
-        }
-    }
-
-    // =============================================
+    
     // 내부 클래스 (Request DTO)
-    // =============================================
+    
 
     public static class ResolveReportRequest {
         private String penaltyType;

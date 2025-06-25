@@ -49,7 +49,6 @@ public class MemberServiceImpl implements MemberService {
         member.setDistrict(memberDTO.getDistrict());
         member.setTime(memberDTO.getTime());
         member.setProfileImage(memberDTO.getProfileImage());
-        member.setRole("USER");
         member.setStatus("ACTIVE");
         member.setEmailVerified(memberDTO.getEmailVerified());
         member.setEmailVerificationCode(null);
@@ -169,9 +168,9 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    // =============================================
+   
     // 관리자 기능 구현
-    // =============================================
+   
 
     @Override
     public List<MemberDTO> getMembersWithPaging(int page, int size) {
@@ -185,28 +184,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public int getTotalMembersCount() {
         return memberDao.getTotalCount();
-    }
-
-    @Override
-    @Transactional
-    public MemberDTO updateMemberRole(Integer memberId, String role) {
-        try {
-            Optional<Member> memberOpt = memberDao.findById(memberId);
-            if (!memberOpt.isPresent()) {
-                throw new RuntimeException("회원을 찾을 수 없습니다.");
-            }
-
-            memberDao.updateMemberRole(memberId, role);
-            Member updatedMember = memberDao.findById(memberId).orElseThrow();
-            
-            log.info("회원 권한 변경 완료: memberId={}, role={}", memberId, role);
-            
-            return convertToDTO(updatedMember);
-            
-        } catch (Exception e) {
-            log.error("회원 권한 변경 실패: memberId={}, role={}", memberId, role, e);
-            throw new RuntimeException("회원 권한 변경에 실패했습니다.", e);
-        }
     }
 
     @Override

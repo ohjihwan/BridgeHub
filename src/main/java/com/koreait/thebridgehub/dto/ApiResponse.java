@@ -5,37 +5,32 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
     private String status;
-    private String message;
     private T data;
     private String errorCode;
-    private LocalDateTime timestamp;
-    private String path;
 
-    public static <T> ApiResponse<T> success(String message, T data) {
-        return new ApiResponse<>("success", message, data, null, LocalDateTime.now(), null);
-    }
-
+    // 성공 응답 - 데이터만
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>("success", "요청이 성공적으로 처리되었습니다.", data, null, LocalDateTime.now(), null);
+        return new ApiResponse<>("success", data, null);
     }
 
-    public static <T> ApiResponse<T> error(String message) {
-        return new ApiResponse<>("error", message, null, null, LocalDateTime.now(), null);
+    // 성공 응답 - 데이터 없음
+    public static <T> ApiResponse<T> success() {
+        return new ApiResponse<>("success", null, null);
     }
 
-    public static <T> ApiResponse<T> error(String errorCode, String message) {
-        return new ApiResponse<>("error", message, null, errorCode, LocalDateTime.now(), null);
+    // 에러 응답 - 에러 코드만
+    public static <T> ApiResponse<T> error(String errorCode) {
+        return new ApiResponse<>("error", null, errorCode);
     }
 
-    public static <T> ApiResponse<T> error(String errorCode, String message, String path) {
-        return new ApiResponse<>("error", message, null, errorCode, LocalDateTime.now(), path);
+    // 에러 응답 - 에러 코드와 데이터
+    public static <T> ApiResponse<T> error(String errorCode, T data) {
+        return new ApiResponse<>("error", data, errorCode);
     }
 } 
