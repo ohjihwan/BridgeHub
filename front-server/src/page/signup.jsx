@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import subjects from '@json/subject';
+import regionData from '@json/region';
 
 function SignUp({ onSwitchToLogin, isActive }) {
 	const navigate = useNavigate();
@@ -228,17 +230,17 @@ function SignUp({ onSwitchToLogin, isActive }) {
 								<div className="field">
 									<select className="select" name="department1" value={formData.department1} onChange={handleChange}>
 										<option value="">학력</option>
-										<option value="고졸">고졸</option>
-										<option value="대학교">대학교</option>
-										<option value="대학원">대학원</option>
+										{subjects["학력"].map((v) => (
+											<option key={v} value={v}>{v}</option>
+										))}
 									</select>
 								</div>
 								<div className="field">
 									<select className="select" name="department2" value={formData.department2} onChange={handleChange}>
-										<option value="">학과/학부 선택</option>
-										<option value="컴퓨터공학과">컴퓨터공학과</option>
-										<option value="소프트웨어학과">소프트웨어학과</option>
-										<option value="정보통신공학과">정보통신공학과</option>
+										<option value="">계열 선택</option>
+										{subjects["계열"].map((v) => (
+											<option key={v} value={v}>{v}</option>
+										))}
 									</select>
 								</div>
 							</div>
@@ -246,25 +248,29 @@ function SignUp({ onSwitchToLogin, isActive }) {
 								<div className="field">
 									<select className="select" name="education1" value={formData.education1} onChange={handleChange}>
 										<option value="지역무관">지역무관</option>
-										<option value="서울">서울</option>
-										<option value="대구">대구</option>
-										<option value="부산">부산</option>
+										{Object.keys(regionData).map((region) => (
+											<option key={region} value={region}>
+												{region}
+											</option>
+										))}
 									</select>
 								</div>
 								<div className="field" style={{ display: formData.education1 === '지역무관' ? 'none' : 'block' }}>
 									<select className="select" name="education2" value={formData.education2} onChange={handleChange}>
-										<option value="강남구">강남구</option>
-										<option value="서초구">서초구</option>
-										<option value="종로구">종로구</option>
+									{regionData[formData.education1]?.map((district) => (
+										<option key={district} value={district}>
+											{district}
+										</option>
+									))}
 									</select>
 								</div>
 							</div>
 							<div className={getClassName('field', 2)}>
 								<select className="select" name="timeZone" value={formData.timeZone} onChange={handleChange}>
-									<option value="">선호 시간대 선택</option>
-									<option value="오전">오전 (06:00-12:00)</option>
-									<option value="오후">오후 (12:00-18:00)</option>
-									<option value="저녁">저녁 (18:00-24:00)</option>
+									<option value="">선호 시간대</option>
+									{subjects["선호 시간대"].map((v) => (
+										<option key={v} value={v}>{v}</option>
+									))}
 								</select>
 							</div>
 						</div>
