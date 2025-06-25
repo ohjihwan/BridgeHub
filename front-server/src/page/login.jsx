@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:7100/api/auth';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
@@ -8,7 +11,25 @@ function Login({ onSwitchToSignUp }) {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		console.log('로그인 시도:', userId, userPw);
+		
+		/* try {
+			const res = await axios.post(`${API_BASE_URL}/login`, {
+				username: userId,
+				password: userPw
+			});
+
+			if (res.data.success) {
+				const token = res.data.data.token;
+				localStorage.setItem('authorization', token);
+				await window.customAlert('로그인 성공').then(() => {
+					navigate('/home');
+				});
+			} else {
+				await window.customAlert(res.data.message || '로그인에 실패했습니다.');
+			}
+		} catch (err) {
+			await window.customAlert(err.response?.data?.message || '로그인 중 오류가 발생했습니다.');
+		} */
 		navigate('/home');
 	};
 
@@ -54,7 +75,7 @@ function Login({ onSwitchToSignUp }) {
 					<div className="login__buttons">
 						<button type="submit" className="login__button">로그인</button>
 						<button type="button" className="login__button login__button--signup" onClick={onSwitchToSignUp}>회원가입</button>
-					</div>					
+					</div>
 				</form>
 			</div>
 		</div>
