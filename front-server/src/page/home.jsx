@@ -76,7 +76,7 @@ const Home = () => {
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
-				<Header showSearch={true} /* onSearch={() => setShouldNavigate(true)} */ />
+				<Header showSearch={true} onSearch={() => navigate('/search')} />
 
 				<div className="create-studyroom">
 					<button className="create-studyroom__button" onClick={openCreateStudy}>

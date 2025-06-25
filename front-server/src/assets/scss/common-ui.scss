@@ -2652,7 +2652,7 @@ legend,
 	}
 }
 // ─────────────────────────────
-// 📄 searchPopup.jsx page
+// 📄 searchRoom.jsx page
 // ─────────────────────────────
 .search-room {
 	position:sticky;
@@ -2674,8 +2674,40 @@ legend,
 		cursor:pointer;
 	}
 }
+// ─────────────────────────────
+// 📄 searchpage.jsx page
+// ─────────────────────────────
+.search-page {
+	padding:remx(60) $padding-x remx(5);
+	background-color:$bg-root;
 
+	&__keywords {
+		display:block;
+		overflow:scroll;
+		width:100%;
+		max-height:remx(235);
+		background-color: $bg-root;
+	}
 
+	&__word {
+		display:block;
+		overflow:hidden;
+		width:100%;
+		margin:remx(20) 0;
+		padding-right:remx(20);
+		color:$font1;
+		font-size:remx(15);
+		text-align:left;
+		background-color:$bg-root;
+		white-space:nowrap;
+		text-overflow:hidden;
+		text-overflow:ellipsis;
+
+		.key-point {
+			color:$red
+		}
+	}
+}
 
 
 /* 테스트 목적 */
