@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node RTC-socket/server.mjs",
-    "dev": "nodemon RTC-socket/server.mjs"
+    "start": "node rtc/server.mjs",
+    "dev": "nodemon rtc/server.mjs"
   },
   "keywords": [],
   "author": "",
