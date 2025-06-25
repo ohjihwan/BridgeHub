@@ -24,3 +24,6 @@ export const resolveReport = (id) =>
 // Logs (관리 로그)
 export const fetchLogs = ({ page = 0, size = 10 }) =>
   api.get('/logs', { params: { page, size } });
+
+// Statistics (통계)
+export const fetchStatistics = () => api.get('/statistics');
