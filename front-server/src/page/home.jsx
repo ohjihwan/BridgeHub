@@ -3,11 +3,11 @@ import Detail from '@components/Detail';
 import CreateStudy from '@components/CreateStudy';
 import Header from '@common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
-import { Link } from "react-router-dom";
-import StudyRoomPage from '@components/StudyRoomPage';
+import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
 
 const Home = () => {
+	const navigate = useNavigate();
 	const [selectedRoom, setSelectedRoom] = useState(null);
 	const [hasStudyRoom, setHasStudyRoom] = useState(true);
 	const [studyRoom, setStudyRoom] = useState({
@@ -23,11 +23,8 @@ const Home = () => {
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
 	const [showStudyRoom, setShowStudyRoom] = useState(false);
 	const [showInitialSearch, setShowInitialSearch] = useState(false);
+	const [shouldNavigate, setShouldNavigate] = useState(false);
 	
-	const openStudyRoom = (withSearch = false) => {
-		setShowInitialSearch(withSearch);
-		setShowStudyRoom(true);
-	};
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
 		setShowDetail(true);
@@ -80,11 +77,16 @@ const Home = () => {
 			document.body.style.overflow = '';
 		};
 	}, [showCreateStudy]);
+	useEffect(() => {
+		if (shouldNavigate) {
+			navigate('/list');
+		}
+	}, [shouldNavigate]);
 
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
-				<Header showSearch={true} onSearch={() => openStudyRoom(true)} />
+				<Header showSearch={true} /* onSearch={() => setShouldNavigate(true)} */ />
 
 				<div className="create-studyroom">
 					<button className="create-studyroom__button" onClick={openCreateStudy}>
@@ -145,7 +147,7 @@ const Home = () => {
 				<div className="studyroom-area">
 					<div className="more-box">
 						<h2 className="more-box__title">JUST ADDED</h2>
-						<button type="button" className="more-box__link" onClick={() => openStudyRoom(false)}>더보기</button>
+						<button type="button" className="more-box__link" onClick={() => setShouldNavigate(true)}>더보기</button>
 					</div>
 					
 					<StudyRoomList onItemClick={handleItemClick} limit={10} />

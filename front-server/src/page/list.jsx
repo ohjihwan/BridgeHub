@@ -4,15 +4,13 @@ import StudyRoomList from '@components/StudyRoomList';
 import Detail from '@components/Detail';
 import roomData from '@json/Room.json';
 
-const StudyRoomPage = ({ onClose, initialShowSearch }) => {
-	const [showSearch, setShowSearch] = useState(initialShowSearch);
+const StudyRoomPage = () => {
+	const [showSearch, setShowSearch] = useState(false);
 	const [searchKeyword, setSearchKeyword] = useState('');
-	const [studyRooms, setStudyRooms] = useState([]);
 	const [visibleCount, setVisibleCount] = useState(10);
 	const [selectedRoom, setSelectedRoom] = useState(null);
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
-	const [show, setShow] = useState(false);
 
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
@@ -24,19 +22,15 @@ const StudyRoomPage = ({ onClose, initialShowSearch }) => {
 	};
 
 	useEffect(() => {
-		setStudyRooms(roomData);
-		const timer = setTimeout(() => setShow(true), 10);
-		return () => clearTimeout(timer);
-	}, []);
-	useEffect(() => {
 		const handleScroll = () => {
 			if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-				setVisibleCount((prev) => Math.min(prev + 10, studyRooms.length));
+				setVisibleCount((prev) => Math.min(prev + 10, roomData.length));
 			}
 		};
 		window.addEventListener('scroll', handleScroll);
 		return () => window.removeEventListener('scroll', handleScroll);
-	}, [studyRooms.length]);
+	}, []);
+
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {
@@ -46,19 +40,9 @@ const StudyRoomPage = ({ onClose, initialShowSearch }) => {
 			return () => clearTimeout(timer);
 		}
 	}, [isClosing]);
-	useEffect(() => {
-		if (showSearch) {
-			document.body.style.overflow = 'hidden';
-		} else {
-			document.body.style.overflow = '';
-		}
-		return () => {
-			document.body.style.overflow = '';
-		};
-	}, [showSearch]);
 
 	return (
-		<div className={`studyroom-list ${show ? 'show' : ''}`}>
+		<div className="studyroom-list">
 			<Header showSearch={true} onSearch={() => setShowSearch(true)} isHome={false} />
 
 			{showSearch && (
