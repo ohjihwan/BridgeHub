@@ -28,6 +28,26 @@ public class MemberServiceImpl implements MemberService {
     public void register(MemberDTO memberDTO) {
         log.info("회원가입 시작: {}", memberDTO.getUserid());
         
+        // 필수 필드 검증
+        if (memberDTO.getUserid() == null || memberDTO.getUserid().trim().isEmpty()) {
+            throw new RuntimeException("USERID_REQUIRED");
+        }
+        if (memberDTO.getName() == null || memberDTO.getName().trim().isEmpty()) {
+            throw new RuntimeException("NAME_REQUIRED");
+        }
+        if (memberDTO.getPassword() == null || memberDTO.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("PASSWORD_REQUIRED");
+        }
+        if (memberDTO.getPhone() == null || memberDTO.getPhone().trim().isEmpty()) {
+            throw new RuntimeException("PHONE_REQUIRED");
+        }
+        if (memberDTO.getGender() == null || memberDTO.getGender().trim().isEmpty()) {
+            throw new RuntimeException("GENDER_REQUIRED");
+        }
+        if (memberDTO.getNickname() == null || memberDTO.getNickname().trim().isEmpty()) {
+            throw new RuntimeException("NICKNAME_REQUIRED");
+        }
+        
         if (memberDao.existsByUsername(memberDTO.getUsername())) {
             throw new RuntimeException("이미 존재하는 사용자명입니다.");
         }
@@ -38,17 +58,32 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = new Member();
         member.setUserid(memberDTO.getUserid());
-        member.setPhone(memberDTO.getPhone());
-        member.setNickname(memberDTO.getNickname());
         member.setName(memberDTO.getName());
         member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
-        member.setEducation(memberDTO.getEducation());
-        member.setDepartment(memberDTO.getDepartment());
+        member.setPhone(memberDTO.getPhone());
         member.setGender(memberDTO.getGender());
-        member.setRegion(memberDTO.getRegion());
-        member.setDistrict(memberDTO.getDistrict());
-        member.setTime(memberDTO.getTime());
-        member.setProfileImage(memberDTO.getProfileImage());
+        member.setNickname(memberDTO.getNickname());
+        
+        // 선택적 필드는 null 체크 후 설정
+        if (memberDTO.getEducation() != null && !memberDTO.getEducation().trim().isEmpty()) {
+            member.setEducation(memberDTO.getEducation());
+        }
+        if (memberDTO.getDepartment() != null && !memberDTO.getDepartment().trim().isEmpty()) {
+            member.setDepartment(memberDTO.getDepartment());
+        }
+        if (memberDTO.getRegion() != null && !memberDTO.getRegion().trim().isEmpty()) {
+            member.setRegion(memberDTO.getRegion());
+        }
+        if (memberDTO.getDistrict() != null && !memberDTO.getDistrict().trim().isEmpty()) {
+            member.setDistrict(memberDTO.getDistrict());
+        }
+        if (memberDTO.getTime() != null && !memberDTO.getTime().trim().isEmpty()) {
+            member.setTime(memberDTO.getTime());
+        }
+        if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().trim().isEmpty()) {
+            member.setProfileImage(memberDTO.getProfileImage());
+        }
+        
         member.setStatus("ACTIVE");
         member.setEmailVerified(memberDTO.getEmailVerified());
         member.setCreatedAt(LocalDateTime.now());
