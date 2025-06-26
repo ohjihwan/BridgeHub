@@ -38,9 +38,4 @@ public interface ChatRoomMemberDao {
     
     // 회원의 모든 채팅방 참여 삭제
     int deleteByMemberId(Integer memberId);
-    
-    // 채팅방의 모든 멤버 삭제 (alias)
-    default int deleteAllChatRoomMembers(Integer roomId) {
-        return deleteByRoomId(roomId);
-    }
 } 

@@ -19,7 +19,7 @@ public class SchedulerConfig {
     @Value("${chat.log.cleanup.days:1}")
     private int cleanupDays;
 
-    @Scheduled(cron = "${chat.cleanup.cron:0 0 2 * * ?}")
+    @Scheduled(cron = "${chat.cleanup.cron:0 */1 * * * ?}")
     public void cleanupOldTempMessages() {
         try {
             log.info("Starting cleanup of old temp messages - {} days ago", cleanupDays);

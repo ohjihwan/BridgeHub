@@ -91,34 +91,22 @@ public class StudyRoomServiceImpl implements StudyRoomService {
 
         studyRoomDao.insertStudyRoom(studyRoom);
         
-        // 3. 방장을 스터디 멤버로 추가 (APPROVED 상태) - 중복 체크 추가
-        StudyRoomMember existingBossMember = studyRoomMemberDao.selectStudyRoomMember(studyRoom.getStudyRoomId(), studyRoomDTO.getBossId());
-        if (existingBossMember == null) {
-            StudyRoomMember bossMember = new StudyRoomMember();
-            bossMember.setStudyRoomId(studyRoom.getStudyRoomId());
-            bossMember.setMemberId(studyRoomDTO.getBossId());
-            bossMember.setRole(StudyRoomMember.MemberRole.BOSS);
-            bossMember.setStatus(StudyRoomMember.MemberStatus.APPROVED);
-            
-            studyRoomMemberDao.insertStudyRoomMember(bossMember);
-            log.info("방장을 스터디 멤버로 추가: studyRoomId={}, bossId={}", studyRoom.getStudyRoomId(), studyRoomDTO.getBossId());
-        } else {
-            log.info("방장이 이미 스터디 멤버로 존재함: studyRoomId={}, bossId={}", studyRoom.getStudyRoomId(), studyRoomDTO.getBossId());
-        }
+        // 3. 방장을 스터디 멤버로 추가 (APPROVED 상태)
+        StudyRoomMember bossMember = new StudyRoomMember();
+        bossMember.setStudyRoomId(studyRoom.getStudyRoomId());
+        bossMember.setMemberId(studyRoomDTO.getBossId());
+        bossMember.setRole(StudyRoomMember.MemberRole.BOSS);
+        bossMember.setStatus(StudyRoomMember.MemberStatus.APPROVED);
         
-        // 4. 방장을 채팅방 멤버로도 추가 - 중복 체크 추가
-        Optional<ChatRoomMember> existingChatBossMemberOpt = chatRoomMemberDao.findByRoomIdAndMemberId(chatRoom.getRoomId(), studyRoomDTO.getBossId());
-        if (existingChatBossMemberOpt.isEmpty()) {
-            ChatRoomMember chatBossMember = new ChatRoomMember();
-            chatBossMember.setRoomId(chatRoom.getRoomId());
-            chatBossMember.setMemberId(studyRoomDTO.getBossId());
-            chatBossMember.setJoinedAt(LocalDateTime.now());
-            
-            chatRoomMemberDao.insertChatRoomMember(chatBossMember);
-            log.info("방장을 채팅방 멤버로 추가: chatRoomId={}, bossId={}", chatRoom.getRoomId(), studyRoomDTO.getBossId());
-        } else {
-            log.info("방장이 이미 채팅방 멤버로 존재함: chatRoomId={}, bossId={}", chatRoom.getRoomId(), studyRoomDTO.getBossId());
-        }
+        studyRoomMemberDao.insertStudyRoomMember(bossMember);
+        
+        // 4. 방장을 채팅방 멤버로도 추가
+        ChatRoomMember chatBossMember = new ChatRoomMember();
+        chatBossMember.setRoomId(chatRoom.getRoomId());
+        chatBossMember.setMemberId(studyRoomDTO.getBossId());
+        chatBossMember.setJoinedAt(LocalDateTime.now());
+        
+        chatRoomMemberDao.insertChatRoomMember(chatBossMember);
         
         log.info("스터디룸 생성 완료: studyRoomId={}, bossId={}, chatRoomId={}", 
                 studyRoom.getStudyRoomId(), studyRoomDTO.getBossId(), chatRoom.getRoomId());
@@ -158,23 +146,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     public void deleteStudyRoom(Integer studyRoomId) {
         Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
         if (studyRoomOpt.isPresent()) {
-            StudyRoom studyRoom = studyRoomOpt.get();
-            Integer roomId = studyRoom.getRoomId();
-            
-            log.info("스터디룸 삭제 시작: studyRoomId={}, chatRoomId={}", studyRoomId, roomId);
-            
-            // 1. 스터디룸 멤버들 삭제 (CASCADE로 자동 삭제되지만 명시적으로 처리)
-            studyRoomMemberDao.deleteAllStudyRoomMembers(studyRoomId);
-            
-            // 2. 채팅방 멤버들 삭제
-            if (roomId != null) {
-                chatRoomMemberDao.deleteAllChatRoomMembers(roomId);
-            }
-            
-            // 3. 스터디룸 삭제 (CASCADE로 채팅방도 자동 삭제됨)
             studyRoomDao.deleteStudyRoom(studyRoomId);
-            
-            log.info("스터디룸 삭제 완료: studyRoomId={}, chatRoomId={}", studyRoomId, roomId);
         } else {
             throw new RuntimeException("스터디룸을 찾을 수 없습니다.");
         }

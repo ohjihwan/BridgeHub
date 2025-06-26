@@ -94,12 +94,10 @@ public class MemberController {
                 
                 // JWT 토큰 생성
                 String token = jwtService.generateToken(result.getUsername());
-                String refreshToken = jwtService.generateRefreshToken(result.getUsername());
                 
                 // 로그인 응답 DTO 생성
                 LoginResponseDTO loginResponse = new LoginResponseDTO();
                 loginResponse.setToken(token);
-                loginResponse.setRefreshToken(refreshToken);
                 loginResponse.setUsername(result.getUsername());
                 loginResponse.setEmail(result.getEmail());
                 loginResponse.setEmailVerified(result.getEmailVerified());

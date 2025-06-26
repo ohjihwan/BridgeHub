@@ -16,15 +16,18 @@
         <result property="district" column="district"/>
         <result property="time" column="time"/>
         <result property="profileImage" column="profile_image"/>
+        <result property="role" column="role"/>
         <result property="status" column="status"/>
         <result property="emailVerified" column="email_verified"/>
+        <result property="emailVerificationCode" column="email_verification_code"/>
+        <result property="emailVerificationExpiresAt" column="email_verification_expires_at"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <insert id="insertMember" parameterType="com.koreait.apiserver.entity.Member" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, status, email_verified, created_at, updated_at)
-        VALUES (#{userid}, #{phone}, #{nickname}, #{name}, #{password}, #{education}, #{department}, #{gender}, #{region}, #{district}, #{time}, #{profileImage}, #{status}, #{emailVerified}, NOW(), NOW())
+        INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image,  status, email_verified,  created_at, updated_at)
+        VALUES (#{userid}, #{phone}, #{nickname}, #{name}, #{password}, #{education}, #{department}, #{gender}, #{region}, #{district}, #{time}, #{profileImage},  #{status}, #{emailVerified},  NOW(), NOW())
     </insert>
 
     <select id="findById" resultMap="MemberResultMap">
@@ -45,7 +48,8 @@
 
     <update id="updateMember" parameterType="com.koreait.apiserver.entity.Member">
         UPDATE members 
-        SET phone = #{phone},
+        SET userid = #{userid}, 
+            phone = #{phone},
             nickname = #{nickname},
             name = #{name},
             password = #{password}, 
@@ -56,8 +60,11 @@
             district = #{district},
             time = #{time},
             profile_image = #{profileImage},
+            role = #{role}, 
             status = #{status},
             email_verified = #{emailVerified},
+            email_verification_code = #{emailVerificationCode},
+            email_verification_expires_at = #{emailVerificationExpiresAt},
             updated_at = NOW()
         WHERE id = #{id}
     </update>
@@ -65,6 +72,8 @@
     <update id="updateEmailVerification">
         UPDATE members 
         SET email_verified = #{emailVerified}, 
+            email_verification_code = #{emailVerificationCode},
+            email_verification_expires_at = #{emailVerificationExpiresAt},
             updated_at = NOW()
         WHERE id = #{id}
     </update>
@@ -103,6 +112,13 @@
     <select id="getTotalCount" resultType="int">
         SELECT COUNT(*) FROM members
     </select>
+
+    <update id="updateMemberRole">
+        UPDATE members 
+        SET role = #{role}, 
+            updated_at = NOW()
+        WHERE id = #{memberId}
+    </update>
 
     <update id="updateMemberStatus">
         UPDATE members 
