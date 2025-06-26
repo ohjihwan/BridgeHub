@@ -14,6 +14,7 @@ const { Server } = require('socket.io');
 const authMiddleware = require('./src/middleware/authMiddleware');
 const jwt = require('jsonwebtoken');
 const socketService = require('./src/services/socketService');
+const mongoService = require('./src/services/mongoService');
 const { 
     handleJoinStudy, 
     handleSendMessage, 
@@ -24,16 +25,21 @@ const {
     connectionManager
 } = require('./src/controllers/socketController');
 
+// 환경 변수 설정
+const PORT = process.env.PORT || 7500;
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:7100/api';
+const CORS_ORIGINS = process.env.CORS_ORIGINS?.split(',') || [
+    "http://localhost:7000", 
+    "http://localhost:7700",
+    "http://127.0.0.1:5500",
+    "http://localhost:5500"
+];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.CORS_ORIGINS?.split(',') || [
-            "http://localhost:7000", 
-            "http://localhost:7700",
-            "http://127.0.0.1:5500",
-            "http://localhost:5500"
-        ], // 환경변수로 설정 가능
+        origin: CORS_ORIGINS,
         methods: ['GET', 'POST'],
         credentials: true,
         allowedHeaders: ["*"]
@@ -45,13 +51,10 @@ const io = new Server(server, {
 // Socket.IO 인스턴스를 socketService에 전달
 socketService.setSocketIO(io);
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:7100/api';
-const PORT = process.env.PORT || 7500;
-
 // 스터디별 소켓 연결 관리
 const studySockets = new Map();
 
-// 인증 미들웨어 적용 (활성화)
+// 인증 미들웨어 적용
 io.use(authMiddleware);
 
 // 에러 처리 미들웨어
@@ -64,14 +67,44 @@ io.use((socket, next) => {
 
 // 기본 라우트
 app.get('/', (req, res) => {
-    res.send('BridgeHub 소켓 서버가 실행 중입니다.');
+    res.json({
+        status: 'running',
+        service: 'BridgeHub Socket Server',
+        version: '1.0.0',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// 헬스 체크 엔드포인트
+app.get('/health', async (req, res) => {
+    try {
+        const mongoHealth = await mongoService.healthCheck();
+        res.json({
+            status: 'healthy',
+            services: {
+                socket: 'running',
+                mongodb: mongoHealth.status,
+                java_api: connectionManager.isConnected ? 'connected' : 'disconnected'
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'unhealthy',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 // 소켓 핸들러 설정
 socketRouter(io);
 
 // 미들웨어 설정
-app.use(cors());
+app.use(cors({
+    origin: CORS_ORIGINS,
+    credentials: true
+}));
 app.use(express.json());
 app.use('/test', express.static(path.join(__dirname, 'test')));
 
@@ -85,7 +118,8 @@ io.on('connection', (socket) => {
     // 연결 시 초기 상태 전송
     socket.emit('connection-established', {
         socketId: socket.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        user: socket.user
     });
 
     // 스터디룸 참가
@@ -243,7 +277,21 @@ process.on('SIGINT', () => {
 });
 
 // 서버 시작
-server.listen(PORT, () => {
-    console.log(`소켓 서버가 포트 ${PORT}에서 실행 중입니다.`);
-    console.log(`API 서버 URL: ${API_BASE_URL}`);
-}); 
+async function startServer() {
+    try {
+        // MongoDB 서비스 초기화
+        await mongoService.initialize();
+        
+        server.listen(PORT, () => {
+            console.log(`🚀 소켓 서버가 포트 ${PORT}에서 실행 중입니다.`);
+            console.log(`📡 API 서버 URL: ${API_BASE_URL}`);
+            console.log(`🌐 CORS Origins: ${CORS_ORIGINS.join(', ')}`);
+            console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? '설정됨' : '기본값 사용'}`);
+        });
+    } catch (error) {
+        console.error('서버 시작 실패:', error);
+        process.exit(1);
+    }
+}
+
+startServer(); 
