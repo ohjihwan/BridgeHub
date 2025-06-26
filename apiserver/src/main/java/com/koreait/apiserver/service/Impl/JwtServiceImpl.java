@@ -24,6 +24,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    @Value("${jwt.refresh-expiration:604800000}") // 7일 (밀리초)
+    private Long refreshExpiration;
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -46,10 +49,25 @@ public class JwtServiceImpl implements JwtService {
         claims.put("username", member.getUsername());
         claims.put("nickname", member.getNickname() != null ? member.getNickname() : member.getUsername());
         claims.put("email", member.getEmail());
+        claims.put("memberId", member.getId());
 
         return Jwts.builder()
                 .subject(username)
                 .claims(claims)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    @Override
+    public String generateRefreshToken(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + refreshExpiration);
+
+        return Jwts.builder()
+                .subject(username)
+                .claim("type", "refresh")
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
@@ -92,13 +110,28 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public Integer extractMemberId(String token) {
         try {
-            String username = getUsernameFromToken(token);
+            Claims claims = getAllClaimsFromToken(token);
             
-            // MemberService를 통해 사용자 ID 조회
+            // 클레임에서 직접 memberId 추출
+            Object memberIdObj = claims.get("memberId");
+            if (memberIdObj != null) {
+                if (memberIdObj instanceof Integer) {
+                    return (Integer) memberIdObj;
+                } else if (memberIdObj instanceof Number) {
+                    return ((Number) memberIdObj).intValue();
+                }
+            }
+            
+            // 기존 방식으로 fallback
+            String username = getUsernameFromToken(token);
             MemberService memberService = applicationContext.getBean(MemberService.class);
             MemberDTO member = memberService.getMemberByUsername(username);
             
-            return member.getId();
+            if (member != null && member.getId() != null) {
+                return member.getId();
+            } else {
+                throw new RuntimeException("사용자 ID를 찾을 수 없습니다: " + username);
+            }
         } catch (Exception e) {
             throw new RuntimeException("토큰에서 사용자 ID 추출 실패", e);
         }

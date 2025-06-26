@@ -8,8 +8,5 @@ import java.util.List;
 public interface ChatRoomService {
     List<ChatRoomDTO> getChatRoomList();
     ChatRoomDTO getChatRoom(Integer roomId);
-    ChatRoomDTO createChatRoom(ChatRoomDTO chatRoomDTO);
-    ChatRoomDTO updateChatRoom(ChatRoomDTO chatRoomDTO);
-    void deleteChatRoom(Integer roomId);
 }
 

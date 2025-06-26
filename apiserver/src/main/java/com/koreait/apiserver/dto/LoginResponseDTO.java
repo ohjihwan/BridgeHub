@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class LoginResponseDTO {
     private String token;
+    private String refreshToken;
     private String username;
     private String email;
     private boolean emailVerified;

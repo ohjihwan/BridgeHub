@@ -43,4 +43,7 @@ public interface StudyRoomMemberDao {
     // 방장 여부 확인
     boolean isBoss(@Param("studyRoomId") Integer studyRoomId, 
                    @Param("memberId") Integer memberId);
+    
+    // 스터디룸의 모든 멤버 삭제
+    int deleteAllStudyRoomMembers(@Param("studyRoomId") Integer studyRoomId);
 } 

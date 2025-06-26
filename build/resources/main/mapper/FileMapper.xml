@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.koreait.thebridgehub.dao.FileDao">
+<mapper namespace="com.koreait.apiserver.dao.FileDao">
 
-    <resultMap id="FileResultMap" type="com.koreait.thebridgehub.entity.File">
+    <resultMap id="FileResultMap" type="com.koreait.apiserver.entity.File">
         <id property="fileId" column="file_id"/>
         <result property="fileType" column="file_type"/>
         <result property="originalFilename" column="original_filename"/>
@@ -18,7 +18,7 @@
         <result property="studyRoomId" column="study_room_id"/>
     </resultMap>
 
-    <insert id="insertFile" parameterType="com.koreait.thebridgehub.entity.File" useGeneratedKeys="true" keyProperty="fileId">
+    <insert id="insertFile" parameterType="com.koreait.apiserver.entity.File" useGeneratedKeys="true" keyProperty="fileId">
         INSERT INTO file (file_type, original_filename, stored_filename, file_path, file_size, mime_type, file_hash, message_id, member_id, study_room_id, uploaded_at)
         VALUES (#{fileType}, #{originalFilename}, #{storedFilename}, #{filePath}, #{fileSize}, #{mimeType}, #{fileHash}, #{messageId}, #{memberId}, #{studyRoomId}, NOW())
     </insert>
@@ -63,7 +63,7 @@
         SELECT * FROM file WHERE file_hash = #{fileHash} AND is_deleted = false
     </select>
 
-    <update id="updateFile" parameterType="com.koreait.thebridgehub.entity.File">
+    <update id="updateFile" parameterType="com.koreait.apiserver.entity.File">
         UPDATE file 
         SET file_type = #{fileType},
             original_filename = #{originalFilename}, 

@@ -83,6 +83,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/files/download/**").permitAll()
                         .requestMatchers("/api/health/**").permitAll()
                         .requestMatchers("/api/studies/**").permitAll()
+                        .requestMatchers("/api/chat/**").authenticated()
                         .requestMatchers("/api/reports/**").permitAll()
                         .requestMatchers("/api/messages/**").permitAll()
                         .requestMatchers("/api/link-preview/**").permitAll()

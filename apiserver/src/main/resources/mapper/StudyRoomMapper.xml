@@ -156,4 +156,15 @@
         ORDER BY sr.created_at DESC
     </select>
 
+<<<<<<< HEAD
+=======
+    <!-- 채팅방 ID로 스터디룸 조회 -->
+    <select id="findByRoomId" resultMap="StudyRoomResultMap">
+        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        FROM studyroom sr
+        LEFT JOIN members m ON sr.boss_id = m.id
+        WHERE sr.room_id = #{roomId}
+    </select>
+
+>>>>>>> a022c23c4391cf6ee6d4b2fd0655a7fc7cc5db78
 </mapper> 
