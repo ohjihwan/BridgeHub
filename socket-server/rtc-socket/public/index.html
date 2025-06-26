@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BridgeHub RTC 데모</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #F7F7F7;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 500px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px #0001;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      label,
+      input,
+      button {
+        font-size: 1rem;
+      }
+      .video-area {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      video {
+        width: 48%;
+        background: #222;
+        border-radius: 6px;
+      }
+      .status {
+        margin-top: 16px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>BridgeHub 1:1 화상채팅 데모</h1>
+      <label for="roomId">방 ID 입력:</label>
+      <input type="text" id="roomId" placeholder="예: testroom" />
+      <button id="joinBtn">입장</button>
+      <button id="startCallBtn">전화 시작하기</button>
+      <button id="shareScreenBtn">화면 공유</button>
+      <div class="status" id="status">방에 입장해 주세요.</div>
+      <div class="video-area" id="videoArea">
+        <!-- 참가자 비디오가 여기에 동적으로 추가됨 -->
+      </div>
+    </div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
