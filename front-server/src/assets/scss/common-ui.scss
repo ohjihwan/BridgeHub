@@ -2725,6 +2725,49 @@ legend,
 			color:$red
 		}
 	}
+
+	&__noresult {
+		padding-top:remx(310);
+		text-align:center;
+		font-weight:bold;
+		font-size:remx(26);
+
+		&.--ready {
+			position:relative;
+			
+			&::before,
+			&::after {
+				content:'';
+				position:absolute;
+				left:50%;
+				width:remx(200);
+				background:url('@img/img-anima-top.png') no-repeat 50% / 100% auto;
+				transform-origin:bottom center;
+			}
+
+			&::before {
+				top:remx(20);
+				z-index:5;
+				height:remx(175);
+				margin-left:-10rem;
+				background:url('@img/img-anima-top.png') no-repeat 50% / 100% auto;
+				animation:imgAnimaTop 4s infinite linear;
+				@keyframes imgAnimaTop {
+					0%, 100% {transform:rotate(0deg);}
+					10%, 90% {transform:rotate(15deg);}
+				}
+			}
+			&::after {
+				top:remx(140);
+				height:remx(175);
+				margin-left:-8.7rem;
+				background:url('@img/img-anima-bottom.png') no-repeat 50% / 100% auto;
+			}
+		}
+	}
+
+/* 	--not-result
+--ready */
 }
 // ─────────────────────────────
 // 📄 searchpage.jsx page

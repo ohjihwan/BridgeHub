@@ -92,10 +92,10 @@ const Search = () => {
 								onItemClick={() => {}}
 							/>
 						) : (
-							<p className="search-page__noresult">검색 결과가 없습니다.</p>
+							<p className="search-page__noresult --not-result">검색 결과가 없습니다.</p>
 						)
 					) : (
-						<p className="search-page__noresult">검색어를 입력하세요.</p>
+						<p className="search-page__noresult --ready">검색어를 입력하세요.</p>
 					)}
 				</div>
 			</div>
