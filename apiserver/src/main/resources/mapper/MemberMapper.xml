@@ -26,8 +26,8 @@
     </resultMap>
 
     <insert id="insertMember" parameterType="com.koreait.apiserver.entity.Member" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, role, status, email_verified, email_verification_code, email_verification_expires_at, created_at, updated_at)
-        VALUES (#{userid}, #{phone}, #{nickname}, #{name}, #{password}, #{education}, #{department}, #{gender}, #{region}, #{district}, #{time}, #{profileImage}, #{role}, #{status}, #{emailVerified}, #{emailVerificationCode}, #{emailVerificationExpiresAt}, NOW(), NOW())
+        INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image,  status, email_verified,  created_at, updated_at)
+        VALUES (#{userid}, #{phone}, #{nickname}, #{name}, #{password}, #{education}, #{department}, #{gender}, #{region}, #{district}, #{time}, #{profileImage},  #{status}, #{emailVerified},  NOW(), NOW())
     </insert>
 
     <select id="findById" resultMap="MemberResultMap">
