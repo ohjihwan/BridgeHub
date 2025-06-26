@@ -29,8 +29,7 @@ class MongoDBManager {
                 maxPoolSize: 10,
                 serverSelectionTimeoutMS: 5000,
                 socketTimeoutMS: 45000,
-                bufferCommands: false,
-                bufferMaxEntries: 0
+                bufferCommands: false
             });
 
             // Native MongoDB 클라이언트 연결 (성능 최적화용)
