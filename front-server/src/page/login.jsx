@@ -20,7 +20,8 @@ function Login({ onSwitchToSignUp }) {
 
 			if (res.data.status === 'success') {
 				const token = res.data.data.token;
-				localStorage.setItem('authorization', token);
+				console.log('토큰 확인:', token);
+				localStorage.setItem('token', token);
 				navigate('/home');
 			} else {
 				await window.customAlert('로그인에 실패했습니다.');

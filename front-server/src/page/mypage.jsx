@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './common/Header';
 import profileDefault from '/uploads/profile/default-profile1.png';
+import { userClient, getUsernameFromToken } from '@js/common-ui';
 
 const MyPage = () => {
 	const navigate = useNavigate();
@@ -9,25 +10,21 @@ const MyPage = () => {
 	const [profileData, setProfileData] = useState({
 		profileImg: '',
 		nickname: '',
-		password: '',
-		passwordConfirm: '',
-		hp:'',
+		hp: '',
 		education: '',
-		major: '',
-		location: '',
-		subLocation: '',
+		department: '',
+		region: '',
+		district: '',
 		timeZone: '',
+		memo: ''
 	});
-	
 	const [editData, setEditData] = useState({...profileData});
-
 	const locationOptions = {
 		'지역무관': [],
 		'서울': ['강남구', '서초구', '송파구', '강동구', '마포구'],
 		'부산': ['해운대구', '수영구', '부산진구', '동래구', '남구'],
 		'대구': ['중구', '수성구', '달서구', '동구', '북구']
 	};
-
 	const handleEditProfile = () => {
 		if (isEditing) {
 			setProfileData({...editData});
@@ -36,22 +33,55 @@ const MyPage = () => {
 		}
 		setIsEditing(!isEditing);
 	};
-
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
-		if (name === 'location') {
-			setEditData(prev => ({
-				...prev,
-				location: value,
-				subLocation: ''
-			}));
-		} else {
-			setEditData(prev => ({
-				...prev,
-				[name]: value
-			}));
-		}
+		setEditData(prev => ({
+			...prev,
+			[name]: value
+		}));
 	};
+
+	useEffect(() => {
+		console.log('로컬스토리지 토큰:', localStorage.getItem('token'));
+		const username = getUsernameFromToken();
+		console.log('토큰에서 추출한 username:', username);
+		if (!username) {
+			window.customAlert('로그인이 필요합니다.');
+			navigate('/login');
+			return;
+		}
+
+		const fetchProfile = async () => {
+			try {
+				const res = await userClient.get(`/api/members/${username}`, {
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('token')}`,
+					},
+				});
+				
+				console.log(res.data);  // 바로 여기!
+
+				if (res.data.status === 'success') {
+					setProfileData({
+						profileImg: res.data.data.profileImage || '',
+						nickname: res.data.data.nickname || '',
+						hp: res.data.data.phone || '',
+						education: res.data.data.education || '',
+						department: res.data.data.department || '',
+						region: res.data.data.region || '',
+						district: res.data.data.district || '',
+						timeZone: res.data.data.time || '',
+						memo: ''
+					});
+				} else {
+					await window.customAlert('회원 정보를 불러오는데 실패했습니다.');
+				}
+			} catch (err) {
+				await window.customAlert('회원 정보 조회 중 오류가 발생했습니다.');
+			}
+		};
+		fetchProfile();
+	}, []);
 
 	return (
 		<div className="mypage-container">
@@ -61,35 +91,34 @@ const MyPage = () => {
 				<Header showSearch={false} />
 			)}
 
-			{isEditing ? (
-				<div className="profile-img">
-					<button type="button" className='profile-img__button' onClick={() => document.getElementById('profileImgInput').click()}>
-						<span className='hide'>프로필 변경하기</span>
-					</button>
-					<input type="file" id="profileImgInput" accept="image/*" style={{ display: 'none' }}
-						onChange={(e) => {
-							const file = e.target.files[0];
-							if (file) {
-								const reader = new FileReader();
-								reader.onloadend = () => {
-									setEditData(prev => ({
-										...prev,
-										profileImg: reader.result
-									}));
-								};
-								reader.readAsDataURL(file);
-							}
-						}}
-					/>
-					<img src={editData.profileImg || profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
-				</div>
-			) : (
-				<div className="profile-img">
-					<img src={profileData.profileImg ? profileData.profileImg : profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
-				</div>
-			)}
+			<div className="profile-img">
+				{isEditing ? (
+					<>
+						<button type="button" className='profile-img__button' onClick={() => document.getElementById('profileImgInput').click()}>
+							<span className='hide'>프로필 변경하기</span>
+						</button>
+						<input type="file" id="profileImgInput" accept="image/*" style={{ display: 'none' }}
+							onChange={(e) => {
+								const file = e.target.files[0];
+								if (file) {
+									const reader = new FileReader();
+									reader.onloadend = () => {
+										setEditData(prev => ({
+											...prev,
+											profileImg: reader.result
+										}));
+									};
+									reader.readAsDataURL(file);
+								}
+							}}
+						/>
+						<img src={editData.profileImg || profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
+					</>
+				) : (
+					<img src={profileData.profileImg || profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
+				)}
+			</div>
 			
-
 			<div className="info-row-area">
 				{isEditing ? (
 					<>
@@ -115,7 +144,7 @@ const MyPage = () => {
 							</div>
 						</div>
 						<div className="info-row info-row--major">
-							<h4 htmlFor="nickname" className="label">전공</h4>
+							<h4 className="label">전공</h4>
 							<div className="half-field">
 								<div className="field">
 									<select className="select" name="education" value={editData.education} onChange={handleInputChange}>
@@ -126,7 +155,7 @@ const MyPage = () => {
 									</select>
 								</div>
 								<div className="field">
-									<select className="select" name="major" value={editData.major} onChange={handleInputChange}>
+									<select className="select" name="department" value={editData.department} onChange={handleInputChange}>
 										<option value="">학과/학부 선택</option>
 										<option value="컴퓨터공학과">컴퓨터공학과</option>
 										<option value="소프트웨어학과">소프트웨어학과</option>
@@ -139,18 +168,18 @@ const MyPage = () => {
 							<h4 className="label">지역</h4>
 							<div className="half-field">
 								<div className="field">
-									<select className="select" name="location" value={editData.location} onChange={handleInputChange}>
+									<select className="select" name="region" value={editData.region} onChange={handleInputChange}>
 										<option value="지역무관">지역무관</option>
 										<option value="서울">서울</option>
 										<option value="대구">대구</option>
 										<option value="부산">부산</option>
 									</select>
 								</div>
-								{editData.location && editData.location !== '지역무관' && (
+								{editData.region && editData.region !== '지역무관' && (
 									<div className="field">
-										<select className="select" name="subLocation" value={editData.subLocation} onChange={handleInputChange}>
+										<select className="select" name="district" value={editData.district} onChange={handleInputChange}>
 											<option value="">세부 지역 선택</option>
-											{locationOptions[editData.location]?.map(sub => (
+											{locationOptions[editData.region]?.map(sub => (
 												<option key={sub} value={sub}>{sub}</option>
 											))}
 										</select>
@@ -169,6 +198,12 @@ const MyPage = () => {
 								</select>
 							</div>
 						</div>
+						<div className="info-row">
+							<label htmlFor="memo" className="label">메모</label>
+							<div className="field __textarea">
+								<textarea className="textarea" id="memo" name="memo" value={editData.memo} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
+							</div>
+						</div>
 					</>
 				) : (
 					<>
@@ -182,30 +217,24 @@ const MyPage = () => {
 						</div>
 						<div className="info-row profile-data">
 							<span className="label">전공</span>
-							<span className="value">
-								{profileData.education && profileData.major 
-									? `${profileData.education} ${profileData.major}`
-									: profileData.education || profileData.major}
-							</span>
+							<span className="value">{profileData.education && profileData.department ? `${profileData.education} ${profileData.department}` : profileData.education || profileData.department}</span>
 						</div>
 						<div className="info-row profile-data">
 							<span className="label">지역</span>
-							<span className="value">
-								{profileData.location === '지역무관' 
-									? '지역무관' 
-									: `${profileData.location} ${profileData.subLocation}`}
-							</span>
+							<span className="value">{profileData.region === '지역무관' ? '지역무관' : `${profileData.region} ${profileData.district}`}</span>
 						</div>
 						<div className="info-row profile-data">
 							<span className="label">시간대</span>
 							<span className="value">{profileData.timeZone}</span>
 						</div>
+						<div className="info-row profile-data">
+							<span className="label">메모</span>
+							<span className="value">{profileData.memo}</span>
+						</div>
 					</>
 				)}
 			</div>
-			
 			<div className="fixed">
-				{/* 목표가 확정되면 버튼 추가 "목표 보기" */}
 				<button type="button" className="button button-primary" onClick={handleEditProfile}>
 					{isEditing ? '수정 완료' : '프로필 수정'}
 				</button>

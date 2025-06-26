@@ -99,7 +99,8 @@ const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = 
 						</li>
 						{location.pathname === '/chat' && (
 							<li className="user-menu__item">
-								<a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>퇴장하기</a>
+								<a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>방신고하기</a>
+								<a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>탈퇴하기</a>
 							</li>
 						)}
 					</ul>
