@@ -3,6 +3,7 @@ package com.koreait.thebridgehub.controller;
 import com.koreait.thebridgehub.dto.ApiResponse;
 import com.koreait.thebridgehub.dto.FileDTO;
 import com.koreait.thebridgehub.service.FileService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/files")
 @CrossOrigin(origins = "*")
@@ -24,23 +26,18 @@ public class FileController {
 
     // 파일 업로드
     @PostMapping("/upload")
-    public ResponseEntity<ApiResponse<FileDTO>> uploadFile(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("studyRoomId") Integer studyRoomId,
-            @RequestParam("uploaderId") Integer uploaderId,
-            @RequestParam(value = "fileType", required = false) String fileType) {
-        
+    public ResponseEntity<ApiResponse<FileDTO>> uploadFile(@RequestParam("file") MultipartFile file,
+                                                         @RequestParam("studyRoomId") Integer studyRoomId,
+                                                         @RequestParam("uploaderId") Integer uploaderId,
+                                                         @RequestParam(value = "fileType", required = false) String fileType) {
         try {
-            // fileType이 없으면 파일의 contentType에서 추출
-            if (fileType == null || fileType.isEmpty()) {
-                fileType = file.getContentType();
-            }
-            
+            log.info("파일 업로드 요청: studyRoomId={}, uploaderId={}, fileType={}", studyRoomId, uploaderId, fileType);
             FileDTO uploadedFile = fileService.uploadFile(file, fileType, studyRoomId, uploaderId);
-            return ResponseEntity.ok(ApiResponse.success("파일 업로드 성공", uploadedFile));
+            return ResponseEntity.ok(ApiResponse.success(uploadedFile));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("파일 업로드 실패: " + e.getMessage()));
+            log.error("파일 업로드 실패: studyRoomId={}, uploaderId={}", studyRoomId, uploaderId, e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("FILE_UPLOAD_ERROR"));
         }
     }
 
@@ -70,53 +67,83 @@ public class FileController {
     // 파일 정보 조회
     @GetMapping("/info/{fileId}")
     public ResponseEntity<ApiResponse<FileDTO>> getFileInfo(@PathVariable Integer fileId) {
-        FileDTO fileInfo = fileService.getFileInfo(fileId);
-        if (fileInfo == null) {
-            return ResponseEntity.ok(ApiResponse.error("파일을 찾을 수 없습니다."));
+        try {
+            FileDTO fileInfo = fileService.getFileInfo(fileId);
+            if (fileInfo == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(ApiResponse.success(fileInfo));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("FILE_INFO_ERROR"));
         }
-        return ResponseEntity.ok(ApiResponse.success("파일 정보 조회 성공", fileInfo));
     }
 
     // 메시지별 파일 목록 조회
     @GetMapping("/message/{messageId}")
     public ResponseEntity<ApiResponse<List<FileDTO>>> getFilesByMessageId(@PathVariable Integer messageId) {
-        List<FileDTO> files = fileService.getFilesByMessageId(messageId);
-        return ResponseEntity.ok(ApiResponse.success("메시지 파일 목록 조회 성공", files));
+        try {
+            List<FileDTO> files = fileService.getFilesByMessageId(messageId);
+            return ResponseEntity.ok(ApiResponse.success(files));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("MESSAGE_FILES_ERROR"));
+        }
     }
 
     // 스터디룸별 파일 목록 조회
     @GetMapping("/studyroom/{studyRoomId}")
     public ResponseEntity<ApiResponse<List<FileDTO>>> getFilesByStudyRoomId(@PathVariable Integer studyRoomId) {
-        List<FileDTO> files = fileService.getFilesByStudyRoomId(studyRoomId);
-        return ResponseEntity.ok(ApiResponse.success("스터디룸 파일 목록 조회 성공", files));
+        try {
+            List<FileDTO> files = fileService.getFilesByStudyRoomId(studyRoomId);
+            return ResponseEntity.ok(ApiResponse.success(files));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("STUDYROOM_FILES_ERROR"));
+        }
     }
 
     // 회원별 파일 목록 조회
     @GetMapping("/member/{memberId}")
     public ResponseEntity<ApiResponse<List<FileDTO>>> getFilesByMemberId(@PathVariable Integer memberId) {
-        List<FileDTO> files = fileService.getFilesByMemberId(memberId);
-        return ResponseEntity.ok(ApiResponse.success("회원 파일 목록 조회 성공", files));
+        try {
+            List<FileDTO> files = fileService.getFilesByMemberId(memberId);
+            return ResponseEntity.ok(ApiResponse.success(files));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("MEMBER_FILES_ERROR"));
+        }
     }
 
     // 파일 삭제 (논리적 삭제)
     @DeleteMapping("/{fileId}")
-    public ResponseEntity<ApiResponse<String>> deleteFile(@PathVariable Integer fileId) {
-        boolean deleted = fileService.deleteFile(fileId);
-        if (deleted) {
-            return ResponseEntity.ok(ApiResponse.success("파일 삭제 성공", "파일이 삭제되었습니다."));
-        } else {
-            return ResponseEntity.ok(ApiResponse.error("파일 삭제 실패"));
+    public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable Integer fileId) {
+        try {
+            boolean deleted = fileService.deleteFile(fileId);
+            if (deleted) {
+                return ResponseEntity.ok(ApiResponse.success());
+            } else {
+                return ResponseEntity.badRequest().body(ApiResponse.error("FILE_DELETE_ERROR"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("FILE_DELETE_ERROR"));
         }
     }
 
     // 파일 물리적 삭제
     @DeleteMapping("/{fileId}/permanent")
-    public ResponseEntity<ApiResponse<String>> deleteFilePermanently(@PathVariable Integer fileId) {
-        boolean deleted = fileService.deleteFilePhysically(fileId);
-        if (deleted) {
-            return ResponseEntity.ok(ApiResponse.success("파일 영구 삭제 성공", "파일이 영구적으로 삭제되었습니다."));
-        } else {
-            return ResponseEntity.ok(ApiResponse.error("파일 영구 삭제 실패"));
+    public ResponseEntity<ApiResponse<Void>> deleteFilePermanently(@PathVariable Integer fileId) {
+        try {
+            boolean deleted = fileService.deleteFilePhysically(fileId);
+            if (deleted) {
+                return ResponseEntity.ok(ApiResponse.success());
+            } else {
+                return ResponseEntity.badRequest().body(ApiResponse.error("FILE_PERMANENT_DELETE_ERROR"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("FILE_PERMANENT_DELETE_ERROR"));
         }
     }
 
@@ -142,8 +169,8 @@ public class FileController {
 
     // 파일 업로드 상태 확인
     @GetMapping("/status")
-    public ResponseEntity<ApiResponse<String>> getFileServiceStatus() {
-        return ResponseEntity.ok(ApiResponse.success("파일 서비스 정상", "파일 서비스가 정상적으로 작동 중입니다."));
+    public ResponseEntity<ApiResponse<Void>> getFileServiceStatus() {
+        return ResponseEntity.ok(ApiResponse.success());
     }
 }
 

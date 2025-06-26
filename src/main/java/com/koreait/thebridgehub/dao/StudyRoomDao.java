@@ -52,9 +52,4 @@ public interface StudyRoomDao {
     List<StudyRoom> findHotStudyRooms(@Param("limit") int limit);
     List<StudyRoom> findByMemberId(@Param("memberId") Integer memberId);
     
-    // 검색 기능 (나중에 구현)
-    // List<StudyRoom> searchStudyRooms(@Param("keyword") String keyword, 
-    //                                  @Param("department") String department, 
-    //                                  @Param("region") String region, 
-    //                                  @Param("time") String time);
-} 
+}

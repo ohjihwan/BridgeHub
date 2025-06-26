@@ -23,7 +23,6 @@
         <result property="emailVerificationExpiresAt" column="email_verification_expires_at"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
-        <result property="lastLoginAt" column="last_login_at"/>
     </resultMap>
 
     <insert id="insertMember" parameterType="com.koreait.thebridgehub.entity.Member" useGeneratedKeys="true" keyProperty="id">
@@ -67,12 +66,6 @@
             email_verification_code = #{emailVerificationCode},
             email_verification_expires_at = #{emailVerificationExpiresAt},
             updated_at = NOW()
-        WHERE id = #{id}
-    </update>
-
-    <update id="updateLastLogin">
-        UPDATE members 
-        SET last_login_at = NOW()
         WHERE id = #{id}
     </update>
 

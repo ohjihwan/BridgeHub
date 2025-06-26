@@ -28,14 +28,10 @@ CREATE TABLE members (
     district VARCHAR(100) COMMENT '구/군',
     time VARCHAR(20) COMMENT '선호 시간대 (오전/오후/저녁)',
     profile_image VARCHAR(500) COMMENT '프로필 이미지 경로',
-    role ENUM('USER','ADMIN') DEFAULT 'USER' COMMENT '권한 (회원/관리자)',
     status ENUM('ACTIVE','BANNED','DELETED') DEFAULT 'ACTIVE' COMMENT '계정 상태',
     email_verified BOOLEAN DEFAULT FALSE COMMENT '이메일 인증 여부',
-    email_verification_code VARCHAR(10) COMMENT '이메일 인증 코드',
-    email_verification_expires_at DATETIME COMMENT '이메일 인증 코드 만료 시간',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '가입일',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
-    last_login_at DATETIME COMMENT '마지막 로그인'
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='회원 정보';
 
 -- =============================================
@@ -276,7 +272,6 @@ DELIMITER ;
 -- 회원 관련 인덱스
 CREATE INDEX idx_members_userid ON members(userid);
 CREATE INDEX idx_members_status ON members(status);
-CREATE INDEX idx_members_role ON members(role);
 CREATE INDEX idx_members_department ON members(department);
 CREATE INDEX idx_members_region ON members(region);
 CREATE INDEX idx_members_district ON members(district);

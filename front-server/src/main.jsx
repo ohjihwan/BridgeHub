@@ -1,6 +1,5 @@
 import { createRoot } from 'react-dom/client';
 import '@scss/common-ui.scss';
-import '@js/common-ui.jsx';
 import alertUtils from '@js/common-ui';
 import App from '@/App.jsx';
 import Loading from '@common/Loading';

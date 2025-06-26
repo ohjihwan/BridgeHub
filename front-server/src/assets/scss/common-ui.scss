@@ -1019,6 +1019,7 @@ legend,
 		display:flex;
 		align-items:center;
 		font-size:remx(14);
+		background-color:$bg-root;
 
 		&::after {
 			content:'';
@@ -1137,85 +1138,125 @@ legend,
 .studyroom-area {
 	margin-top:remx(32);
 
-	.studyroom {
-		&__item {
-			overflow:hidden;
-			position:relative;
-			height:remx(130);
-			margin-top:remx(16);
-			border-radius:remx(20);
+	&:first-child {
+		margin-top:0;
+	}
+}
 
-			&:first-child {
-				margin-top:0;
-			}
+
+.studyroom {
+	&__item {
+		overflow:hidden;
+		position:relative;
+		height:remx(130);
+		margin-top:remx(16);
+		border-radius:remx(20);
+
+		&:first-child {
+			margin-top:0;
 		}
+	}
 
-		&__img {
+	&__img {
+		position:absolute;
+		left:0;
+		top:0;
+		width:100%;
+		height:100%;
+		object-fit:cover;
+		object-position:50% 50%;
+		filter:blur(remx(2));
+	}
+
+	&__info {
+		display:block;
+		width:100%;
+		height:100%;
+		border:1px solid $line2;
+		padding:remx(15);
+		margin-bottom:remx(16);
+		text-align:left;
+		background-color:transparent;
+	}
+
+	&__title {
+		position:relative;
+		color:$font1;
+		font-size:remx(18);
+		margin-bottom:remx(5);
+		color:#fff;
+		text-align:center;
+		text-shadow:0 0 remx(12) #000;
+	}
+
+	&__details {
+		display:flex;
+		justify-content:center;
+		margin-top:remx(10);
+		font-size:remx(11);
+		text-wrap:nowrap;
+		text-shadow:0 0 remx(12) #000;
+	}
+
+	&__detail {
+		position:relative;
+		padding-left:remx(8);
+		color:#fff;
+
+		&::before {
+			content:'';
 			position:absolute;
-			left:0;
-			top:0;
-			z-index:-1;
-			width:100%;
-			height:100%;
-			object-fit:cover;
-			object-position:50% 50%;
-			filter:blur(remx(2));
+			left:remx(2);
+			top:50%;
+			transform:translateY(-50%);
+			width:remx(4);
+			height:remx(4);
+			border-radius:50%;
+			background-color:#fff;
 		}
 
-		&__info {
-			display:block;
-			width:100%;
-			height:100%;
-			border:1px solid $line2;
-			padding:remx(15);
-			margin-bottom:remx(16);
-			text-align:left;
-			background-color:transparent;
-		}
-
-		&__title {
-			color:$font1;
-			font-size:remx(18);
-			margin-bottom:remx(5);
-			color:#fff;
-			text-align:center;
-			text-shadow:0 0 remx(12) #000;
-		}
-
-		&__details {
-			display:flex;
-			justify-content:center;
-			margin-top:remx(10);
-			font-size:remx(11);
-			text-wrap:nowrap;
-			text-shadow:0 0 remx(12) #000;
-		}
-
-		&__detail {
-			position:relative;
-			padding-left:remx(8);
-			color:#fff;
+		&:first-child {
+			padding-left:0;
 
 			&::before {
-				content:'';
-				position:absolute;
-				left:remx(2);
-				top:50%;
-				transform:translateY(-50%);
-				width:remx(4);
-				height:remx(4);
-				border-radius:50%;
-				background-color:#fff;
-			}
-
-			&:first-child {
-				padding-left:0;
-
-				&::before {
-					display:none;
-				}
+				display:none;
 			}
 		}
+	}
+}
+// ─────────────────────────────
+// 📄 StudyroomPage.jsx page
+// ─────────────────────────────
+.studyroom-list {
+	width: 100%;
+	height: 100%;
+
+	&__header {
+		@include flex-center;
+		position:relative;
+		height:remx(50);
+		padding:0 $padding-x;
+
+		h2 {
+			font-size:remx(17)
+		}
+	}
+
+	&__close {
+		position:absolute;
+		right:$padding-x;
+		top:50%;
+		transform:translateY(-50%);
+		width:remx(24);
+		height:remx(24);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 100% auto;
+		cursor:pointer;
+	}
+
+	&__content {
+		margin-top:remx(20);
+		padding:remx(50) $padding-x;
+		background: $bg-root;
 	}
 }
 // ─────────────────────────────
@@ -2010,6 +2051,24 @@ legend,
     background-color:#fff;
     box-shadow:0 -0.3rem 0.5rem 0 rgba(0,0,0,.1);
 
+	&__box {
+		display:flex;
+		justify-content:space-between;
+		align-items:center;
+	}
+
+	&__services {
+		
+	}
+
+	&__toggle {
+		display:block;
+		width:remx(32);
+		height:remx(32);
+		border-radius:50%;
+		background:url('@ico/ico-camera.svg') no-repeat 50% / 2.4rem auto;
+	}
+
 	&__actions {
 		display:flex;
 		justify-content:flex-end;
@@ -2610,8 +2669,143 @@ legend,
 		background-color:$bg-root;
 	}
 }
+// ─────────────────────────────
+// 📄 searchRoom.jsx page
+// ─────────────────────────────
+.search-room {
+	position:sticky;
+	top:remx(50);
+	left:0;
+	z-index:200;
+	padding:remx(25) $padding-x remx(5);
+	border-radius:0 0 remx(16) remx(16);
+	background-color:$bg-root;
+	box-shadow:0 remx(3) remx(10) rgba(0,0,0,0.3); 
 
+	&__button {
+		position:absolute;
+		right:$padding-x;
+		top:0;
+		width:remx(20);
+		height:remx(20);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 100% auto;
+		cursor:pointer;
+	}
+}
+// ─────────────────────────────
+// 📄 searchpage.jsx page
+// ─────────────────────────────
+.search-page {
+	padding:remx(60) $padding-x remx(5);
+	background-color:$bg-root;
 
+	&__keywords {
+		display:block;
+		overflow:scroll;
+		width:100%;
+		max-height:remx(235);
+		background-color: $bg-root;
+	}
+
+	&__word {
+		display:block;
+		overflow:hidden;
+		width:100%;
+		margin:remx(20) 0;
+		padding-right:remx(20);
+		color:$font1;
+		font-size:remx(15);
+		text-align:left;
+		background-color:$bg-root;
+		white-space:nowrap;
+		text-overflow:hidden;
+		text-overflow:ellipsis;
+
+		.key-point {
+			color:$red
+		}
+	}
+}
+// ─────────────────────────────
+// 📄 searchpage.jsx page
+// ─────────────────────────────
+.video-rtc {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #000;
+	display: flex;
+	flex-direction: column;
+	z-index: 9999;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px;
+		background: rgba(0, 0, 0, 0.7);
+		color: #fff;
+
+		& .video-rtc__title {
+			font-size: 16px;
+			font-weight: bold;
+		}
+
+		& .video-rtc__close {
+			background: none;
+			border: none;
+			color: #fff;
+			font-size: 20px;
+		}
+	}
+
+	&__screen {
+		position: relative;
+		flex: 1;
+		background: #000;
+		overflow: hidden;
+
+		.video-rtc__remote {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.video-rtc__local {
+			position: absolute;
+			bottom: 16px;
+			right: 16px;
+			width: 100px;
+			height: 150px;
+			background: #333;
+			border: 2px solid #fff;
+			object-fit: cover;
+		}
+	}
+
+	&__controls {
+		display: flex;
+		justify-content: center;
+		gap: 16px;
+		padding: 12px;
+		background: rgba(0, 0, 0, 0.7);
+
+		.video-rtc__control {
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			color: #fff;
+			padding: 10px 16px;
+			border-radius: 20px;
+			font-size: 14px;
+
+			&--end {
+				background: #e74c3c;
+			}
+		}
+	}
+}
 
 
 /* 테스트 목적 */

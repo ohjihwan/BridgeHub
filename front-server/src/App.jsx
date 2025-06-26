@@ -6,6 +6,8 @@ import MyPage from '@page/MyPage'
 import Chat from '@page/chat'
 import BoardList from '@components/BoardList'
 import BoardWrite from '@components/BoardWrite'
+import List from '@page/list'
+import Search from '@page/Search'
 
 function App() {
 	const [showIntro, setShowIntro] = useState(false);

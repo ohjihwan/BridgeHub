@@ -1,6 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import CustomAlert from '@page/common/customAlert';
+import axios from 'axios';
+
+// ----------- 커스텀 알럿 관련 -----------
 
 let alertRoot = null;
 let root = null;
@@ -77,7 +80,9 @@ export function customPrompt(message, placeholder = '', defaultValue = '', onSub
 	});
 }
 
-export default {customAlert, customConfirm, customPrompt};
+export default { customAlert, customConfirm, customPrompt };
+
+// ----------- 로딩 관련 -----------
 
 export function showLoading() {
 	const loading = document.getElementById('global-loading');
@@ -91,3 +96,29 @@ export function hideLoading() {
 
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;
+
+// ----------- axios 다중 클라이언트 -----------
+
+export const authClient = axios.create({
+	baseURL: 'http://localhost:7100/api/auth',
+	timeout: 10000,
+	headers: { 'Content-Type': 'application/json' },
+});
+
+[authClient].forEach(client => {
+	client.interceptors.request.use(config => {
+		window.showLoading?.();
+		return config;
+	}, error => {
+		window.hideLoading?.();
+		return Promise.reject(error);
+	});
+
+	client.interceptors.response.use(response => {
+		window.hideLoading?.();
+		return response;
+	}, error => {
+		window.hideLoading?.();
+		return Promise.reject(error);
+	});
+});

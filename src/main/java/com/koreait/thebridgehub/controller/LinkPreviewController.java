@@ -4,11 +4,14 @@ import com.koreait.thebridgehub.dto.ApiResponse;
 import com.koreait.thebridgehub.dto.LinkPreviewDTO;
 import com.koreait.thebridgehub.service.LinkPreviewService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/link-preview")
 @RequiredArgsConstructor
@@ -21,19 +24,19 @@ public class LinkPreviewController {
      * URL 메타데이터 추출 (링크 미리보기)
      */
     @PostMapping("/extract")
-    public ResponseEntity<ApiResponse<LinkPreviewDTO>> extractLinkPreview(@RequestBody String url) {
+    public ResponseEntity<ApiResponse<LinkPreviewDTO>> extractLinkPreview(@RequestBody Map<String, String> request) {
         try {
-            LinkPreviewDTO preview = linkPreviewService.extractLinkPreview(url.trim());
-            
-            if (preview.isSuccess()) {
-                return ResponseEntity.ok(ApiResponse.success("링크 미리보기 추출 성공", preview));
-            } else {
-                return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("링크 미리보기 추출 실패: " + preview.getError()));
+            String url = request.get("url");
+            if (url == null || url.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("URL_REQUIRED"));
             }
+            
+            LinkPreviewDTO preview = linkPreviewService.extractLinkPreview(url);
+            return ResponseEntity.ok(ApiResponse.success(preview));
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("링크 미리보기 추출 중 오류 발생: " + e.getMessage()));
+            log.error("링크 미리보기 추출 실패: {}", request.get("url"), e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("LINK_PREVIEW_EXTRACT_ERROR"));
         }
     }
 
@@ -44,10 +47,10 @@ public class LinkPreviewController {
     public ResponseEntity<ApiResponse<List<String>>> extractUrls(@RequestBody String text) {
         try {
             List<String> urls = linkPreviewService.extractUrls(text);
-            return ResponseEntity.ok(ApiResponse.success("URL 추출 성공", urls));
+            return ResponseEntity.ok(ApiResponse.success(urls));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("URL 추출 실패: " + e.getMessage()));
+                    .body(ApiResponse.error("URL_EXTRACT_ERROR"));
         }
     }
 
@@ -55,13 +58,19 @@ public class LinkPreviewController {
      * URL 유효성 검사
      */
     @PostMapping("/validate")
-    public ResponseEntity<ApiResponse<Boolean>> validateUrl(@RequestBody String url) {
+    public ResponseEntity<ApiResponse<Boolean>> validateUrl(@RequestBody Map<String, String> request) {
         try {
-            boolean isValid = linkPreviewService.isValidUrl(url.trim());
-            return ResponseEntity.ok(ApiResponse.success("URL 유효성 검사 완료", isValid));
+            String url = request.get("url");
+            if (url == null || url.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("URL_REQUIRED"));
+            }
+            
+            boolean isValid = linkPreviewService.isValidUrl(url);
+            return ResponseEntity.ok(ApiResponse.success(isValid));
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("URL 유효성 검사 실패: " + e.getMessage()));
+            log.error("URL 유효성 검사 실패: {}", request.get("url"), e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("URL_VALIDATION_ERROR"));
         }
     }
 } 
