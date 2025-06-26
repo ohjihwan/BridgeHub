@@ -52,6 +52,17 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     @Override
     @Transactional
     public StudyRoomDTO createStudyRoom(StudyRoomDTO studyRoomDTO) {
+        // 정원 제한 검증
+        if (studyRoomDTO.getCapacity() == null || studyRoomDTO.getCapacity() < 2 || studyRoomDTO.getCapacity() > 10) {
+            throw new IllegalArgumentException("스터디 정원은 2~10명 사이여야 합니다.");
+        }
+        
+        // 사용자별 스터디룸 개설 제한 검증
+        List<StudyRoom> existingStudies = studyRoomDao.findByBossId(studyRoomDTO.getBossId());
+        if (!existingStudies.isEmpty()) {
+            throw new RuntimeException("이미 스터디룸을 개설한 사용자입니다. 한 사용자는 하나의 스터디룸만 개설할 수 있습니다.");
+        }
+        
         // 1. 먼저 채팅방 생성
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.setRoomName(studyRoomDTO.getTitle() + " 채팅방");
@@ -106,6 +117,10 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     @Override
     @Transactional
     public StudyRoomDTO updateStudyRoom(StudyRoomDTO studyRoomDTO) {
+        // 정원 제한 검증
+        if (studyRoomDTO.getCapacity() == null || studyRoomDTO.getCapacity() < 2 || studyRoomDTO.getCapacity() > 10) {
+            throw new IllegalArgumentException("스터디 정원은 2~10명 사이여야 합니다.");
+        }
         Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomDTO.getStudyRoomId());
         if (studyRoomOpt.isPresent()) {
             StudyRoom studyRoom = studyRoomOpt.get();
@@ -334,12 +349,14 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     }
     
     @Override
-    public List<StudyRoomDTO> searchStudyRooms(String keyword, String department, String region, String time) {
-        // TODO: 검색 기능은 나중에 구현 - 현재는 기본 목록 반환
-        log.warn("검색 기능 미구현 - 기본 목록 반환: keyword={}, department={}, region={}, time={}", 
-                keyword, department, region, time);
-        return getStudyRoomList(); // 임시로 전체 목록 반환
+    public List<StudyRoomDTO> getStudyRoomsByBossId(Integer bossId) {
+        List<StudyRoom> studyRooms = studyRoomDao.findByBossId(bossId);
+        return studyRooms.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
+
+    // ========== DTO 변환 메서드들 ==========
 
     private StudyRoomDTO convertToDTO(StudyRoom studyRoom) {
         StudyRoomDTO dto = new StudyRoomDTO();
@@ -359,7 +376,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         dto.setIsPublic(studyRoom.getIsPublic());
         dto.setCreatedAt(studyRoom.getCreatedAt());
         
-        // 생성자 정보 추가
+        // 방장 정보 설정
         dto.setBossName(studyRoom.getBossName());
         dto.setBossNickname(studyRoom.getBossNickname());
         dto.setBossProfileImage(studyRoom.getBossProfileImage());
@@ -377,10 +394,13 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         dto.setJoinedAt(member.getJoinedAt());
         dto.setApprovedAt(member.getApprovedAt());
         dto.setApprovedBy(member.getApprovedBy());
+        
+        // 멤버 정보 설정
         dto.setMemberName(member.getMemberName());
         dto.setMemberNickname(member.getMemberNickname());
         dto.setMemberEmail(member.getMemberEmail());
         dto.setMemberProfileImage(member.getMemberProfileImage());
+        
         return dto;
     }
 }

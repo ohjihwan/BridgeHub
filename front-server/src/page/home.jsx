@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import Detail from './components/Detail';
-import CreateStudy from './components/CreateStudy';
-import Header from './common/Header';
+import Detail from '@components/Detail';
+import CreateStudy from '@components/CreateStudy';
+import Header from '@common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
-import roomData from '@json/Room.json';
 import { useNavigate, Link } from "react-router-dom";
+import StudyRoomList from '@components/StudyRoomList';
+import roomData from '@json/Room.json';
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -18,10 +19,10 @@ const Home = () => {
 		capacity: 6,
 		thumbnail: 'thumbnail-room1.jpg'
 	});
-	const [studyRooms, setStudyRooms] = useState([]);
-	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
+	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
+	
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
 		setShowDetail(true);
@@ -36,11 +37,8 @@ const Home = () => {
 	const closeCreateStudy = () => {
 		setShowCreateStudy(false);
 	};
-	const goToMyStudyRoom = () => {
-		// 내 스터디룸으로 이동 로직
-	};
-
-	useEffect(() => {
+	
+	/* useEffect(() => {
 		// 나중에 백엔드 연결 후 fetch 또는 axios 사용
 		fetch('/api/my-studyroom')
 			.then(res => res.json())
@@ -54,10 +52,7 @@ const Home = () => {
 			}).catch(err => {
 				console.log(err);
 			});
-	}, []);
-	useEffect(() => {
-		setStudyRooms(roomData);
-	}, []);
+	}, []); */
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {
@@ -77,20 +72,11 @@ const Home = () => {
 			document.body.style.overflow = '';
 		};
 	}, [showCreateStudy]);
-	useEffect(() => {
-		setStudyRooms(roomData);
-	}, []);
-	
 
 	return (
 		<>
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
-				<Header
-					showSearch={true}
-					onSearch={() => {
-						 
-					}}
-				/>
+				<Header showSearch={true} onSearch={() => navigate('/search')} />
 
 				<div className="create-studyroom">
 					<button className="create-studyroom__button" onClick={openCreateStudy}>
@@ -151,23 +137,10 @@ const Home = () => {
 				<div className="studyroom-area">
 					<div className="more-box">
 						<h2 className="more-box__title">JUST ADDED</h2>
-						<a href="#none" className="more-box__link">더보기</a>
+						<button type="button" className="more-box__link" onClick={() => navigate('/list')}>더보기</button>
 					</div>
-					<ul className="studyroom">
-						{studyRooms.map((room) => (
-							<li className="studyroom__item" onClick={() => handleItemClick(room)} key={room.id}>
-								<button type="button" className="studyroom__info">
-									<img src={`/uploads/thumbnail/${room.thumbnail}`} className="studyroom__img"/>
-									<h3 className="studyroom__title">{room.title}</h3>
-									<div className="studyroom__details">
-										<span className="studyroom__detail">{room.region}</span>
-										<span className="studyroom__detail">{room.time}</span>
-										<span className="studyroom__detail">{room.currentMembers}/{room.capacity}명</span>
-									</div>
-								</button>
-							</li>
-						))}
-					</ul>
+					
+					<StudyRoomList rooms={roomData} onItemClick={handleItemClick} limit={10} />
 				</div>
 			</div>
 		

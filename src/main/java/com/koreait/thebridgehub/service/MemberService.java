@@ -17,6 +17,5 @@ public interface MemberService {
     // 관리자 기능 추가
     List<MemberDTO> getMembersWithPaging(int page, int size);
     int getTotalMembersCount();
-    MemberDTO updateMemberRole(Integer memberId, String role);
     MemberDTO updateMemberStatus(Integer memberId, String status);
 }

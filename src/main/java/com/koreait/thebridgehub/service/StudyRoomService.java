@@ -29,5 +29,5 @@ public interface StudyRoomService {
     // front-server 연동을 위한 새로운 메서드들
     List<StudyRoomDTO> getHotStudyRooms(int limit);
     List<StudyRoomDTO> getStudyRoomsByMemberId(Integer memberId);
-    List<StudyRoomDTO> searchStudyRooms(String keyword, String department, String region, String time);
+    List<StudyRoomDTO> getStudyRoomsByBossId(Integer bossId);
 }

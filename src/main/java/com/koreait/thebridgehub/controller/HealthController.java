@@ -23,7 +23,7 @@ public class HealthController {
         healthData.put("version", "1.0.0");
         healthData.put("port", 7100);
         
-        return ResponseEntity.ok(ApiResponse.success("서버가 정상적으로 실행 중입니다.", healthData));
+        return ResponseEntity.ok(ApiResponse.success(healthData));
     }
 
     @GetMapping("/status")

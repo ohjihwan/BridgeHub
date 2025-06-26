@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { authClient } from '@/assets/js/common-ui';
 
 const API_BASE_URL = 'http://localhost:7100/api/auth';
 
@@ -13,8 +13,8 @@ function Login({ onSwitchToSignUp }) {
 		e.preventDefault();
 		
 		/* try {
-			const res = await axios.post(`${API_BASE_URL}/login`, {
-				username: userId,
+			const res = await authClient.post(`/login`, {
+				userid: userId,
 				password: userPw
 			});
 

@@ -46,7 +46,6 @@ public class JwtServiceImpl implements JwtService {
         claims.put("username", member.getUsername());
         claims.put("nickname", member.getNickname() != null ? member.getNickname() : member.getUsername());
         claims.put("email", member.getEmail());
-        claims.put("role", member.getRole()); // 실제 사용자 권한 정보 포함
 
         return Jwts.builder()
                 .subject(username)
@@ -102,16 +101,6 @@ public class JwtServiceImpl implements JwtService {
             return member.getId();
         } catch (Exception e) {
             throw new RuntimeException("토큰에서 사용자 ID 추출 실패", e);
-        }
-    }
-
-    @Override
-    public String extractRole(String token) {
-        try {
-            Claims claims = getAllClaimsFromToken(token);
-            return claims.get("role", String.class);
-        } catch (Exception e) {
-            throw new RuntimeException("토큰에서 role 정보 추출 실패", e);
         }
     }
 }
