@@ -12,25 +12,22 @@ function Login({ onSwitchToSignUp }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		
-		/* try {
+		try {
 			const res = await authClient.post(`/login`, {
 				userid: userId,
 				password: userPw
 			});
 
-			if (res.data.success) {
+			if (res.data.status === 'success') {
 				const token = res.data.data.token;
 				localStorage.setItem('authorization', token);
-				await window.customAlert('로그인 성공').then(() => {
-					navigate('/home');
-				});
+				navigate('/home');
 			} else {
-				await window.customAlert(res.data.message || '로그인에 실패했습니다.');
+				await window.customAlert('로그인에 실패했습니다.');
 			}
 		} catch (err) {
-			await window.customAlert(err.response?.data?.message || '로그인 중 오류가 발생했습니다.');
-		} */
-		navigate('/home');
+			await window.customAlert('로그인 중 오류가 발생했습니다.');
+		}
 	};
 
 	function texttext(e) {
@@ -83,3 +80,4 @@ function Login({ onSwitchToSignUp }) {
 }
 
 export default Login; 
+
