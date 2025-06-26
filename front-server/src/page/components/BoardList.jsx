@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { getPosts } from '../api/board'
 import './BoardList.css'
 
+
 export default function BoardList(){
     const [posts, setPosts] = useState([])
     const [page, setPage] = useState(1)
@@ -42,14 +43,12 @@ export default function BoardList(){
     }, [loading, hasMore])
     const navigate = useNavigate()
     return (
-        <div className="boardlist-container">
-            <div className="boardlist-header">
-                <h2>게시판</h2>
-                <button className="boardlist-write-btn" onClick={() => navigate('/board/write')}>글쓰기</button>
-            </div>
-            <ul className="boardlist-list">
+        <div>
+            <h2>게시판</h2>
+            <button onClick={() => navigate('/board/write')}>글쓰기</button>
+            <ul>
                 {posts.map((post, idx) => (
-                    <li key={`post-${post.id}`} ref={idx === posts.length - 1 ? lastPostRef : null} onClick={() => setSelectedPost(post)}>
+                    <li key={`post-${post.id}`} ref={idx === posts.length - 1 ? lastPostRef : null} style={{ marginBottom: '1em', borderBottom: '1px solid #ccc', paddingBottom: '0.5em', cursor: 'pointer'}} onClick={() => setSelectedPost(post)}>
                         <strong>{post.title}</strong> - {post.writerName}<br/>
                         <small>{new Date(post.createdAt).toLocaleString()}</small>
                     </li>
@@ -60,7 +59,7 @@ export default function BoardList(){
                     <div className='modal-content' onClick={(e) => e.stopPropagation()}>
                         <h3>{selectedPost.title}</h3>
                         <p><strong>작성자:</strong> {selectedPost.writerName}</p>
-                        <p><strong>작성일:</strong> {new Date(selectedPost.createdAt).toLocaleString()}</p>
+                        <p><strong>작성일:</strong> {new Date(selectedPost.createdAt).toLocaleString}</p>
                         {selectedPost.thumbnailUrl && (
                             <div style={{margin:'1em 0'}}>
                                 <h3>첨부 이미지 😍</h3>
@@ -81,4 +80,4 @@ export default function BoardList(){
             )}
         </div>
     )
-} 
+}
