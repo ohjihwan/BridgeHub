@@ -42,6 +42,13 @@
         WHERE sr.study_room_id = #{studyRoomId}
     </select>
 
+    <select id="findByRoomId" resultMap="StudyRoomResultMap">
+        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        FROM studyroom sr
+        LEFT JOIN members m ON sr.boss_id = m.id
+        WHERE sr.room_id = #{roomId}
+    </select>
+
     <select id="findAll" resultMap="StudyRoomResultMap">
         SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr

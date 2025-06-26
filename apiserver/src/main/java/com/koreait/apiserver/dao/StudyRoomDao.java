@@ -15,6 +15,9 @@ public interface StudyRoomDao {
     // 스터디룸 조회 (ID로)
     Optional<StudyRoom> findById(Integer studyRoomId);
     
+    // 채팅방 ID로 스터디룸 조회
+    Optional<StudyRoom> findByRoomId(Integer roomId);
+    
     // 모든 스터디룸 조회 (페이징)
     List<StudyRoom> findAll(@Param("limit") int limit, @Param("offset") int offset);
     

@@ -30,9 +30,7 @@ public interface MemberDao {
     
     // 이메일 인증 정보 업데이트
     int updateEmailVerification(@Param("id") Integer id, 
-                               @Param("emailVerified") Boolean emailVerified,
-                               @Param("emailVerificationCode") String emailVerificationCode,
-                               @Param("emailVerificationExpiresAt") LocalDateTime emailVerificationExpiresAt);
+                               @Param("emailVerified") Boolean emailVerified);
     
     // 회원 삭제
     int deleteMember(Integer id);

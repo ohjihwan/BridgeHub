@@ -12,6 +12,7 @@
         <result property="isDeleted" column="is_deleted"/>
         <result property="isLogged" column="is_logged"/>
         <result property="logFileId" column="log_file_id"/>
+        <result property="logMessageIndex" column="log_message_index"/>
         <result property="senderNickname" column="sender_nickname"/>
         <result property="senderName" column="sender_name"/>
         <result property="senderProfileImage" column="sender_profile_image"/>
