@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SPRING_BASE_URL } from './config.mjs';
+import { SPRING_BASE_URL } from '../config/index.mjs';
 
 const client = axios.create({
   baseURL: SPRING_BASE_URL,

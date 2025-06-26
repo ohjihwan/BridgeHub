@@ -1,4 +1,4 @@
-import { validateUserToken } from '../services/springClient.mjs';
+import { validateUserToken } from '../service/springClient.mjs';
 
 export async function jwtAuth(req, res, next) {
   try {

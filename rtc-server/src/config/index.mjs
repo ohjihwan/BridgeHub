@@ -2,9 +2,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const RTC_PORT = parseInt(process.env.RTC_PORT, 10);
+export const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// SSL 경로(운영만!)
 export const SSL_KEY_PATH  = process.env.SSL_KEY_PATH;
 export const SSL_CERT_PATH = process.env.SSL_CERT_PATH;
+
 
 export const SPRING_BASE_URL = process.env.SPRING_BASE_URL;
 

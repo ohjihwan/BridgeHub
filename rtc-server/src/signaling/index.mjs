@@ -1,6 +1,6 @@
 import { MEDIASOUP_OPTIONS } from '../config/index.mjs';
-import { log } from '../utils/logger.mjs';
-import { getRoomManager } from '../services/rtcService.mjs';
+import { log } from '../util/logger.mjs';
+import { getRoomManager } from '../service/rtcService.mjs';
 import mediasoup from 'mediasoup';
 
 export default async function bindSignaling(io) {

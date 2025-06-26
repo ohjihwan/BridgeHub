@@ -1,13 +1,19 @@
+// src/routes/rtcRoutes.mjs
 import { Router } from 'express';
-import { jwtAuth } from '../utils/authMiddleware.mjs';
-import * as rtcCtrl from '../controllers/rtcController.mjs';
+import { createRoom, validateToken } from '../controller/rtcController.mjs';
+import { jwtAuth } from '../util/authMiddleware.mjs';
+
+// 테스트 토큰
+import { issueTestToken } from '../controller/rtcController.mjs';
 
 const router = Router();
 
-// 방 생성: POST /api/rtc/rooms
-router.post('/rooms', jwtAuth, rtcCtrl.createRoom);
+// POST /api/rtc/rooms
+router.post('/rooms', jwtAuth, createRoom);    
+// GET  /api/rtc/auth
+router.get('/auth', jwtAuth, validateToken); 
 
-// 토큰 검증: GET /api/rtc/auth
-router.get('/auth', jwtAuth, rtcCtrl.validateToken);
+// POST /api/rtc/test/token -> 나중에 삭제하기
+router.post('/test/token', issueTestToken);
 
 export default router;
