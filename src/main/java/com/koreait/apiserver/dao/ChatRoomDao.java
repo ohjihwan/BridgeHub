@@ -1,8 +1,8 @@
-package com.koreait.thebridgehub.dao;
+package com.koreait.apiserver.dao;
 
-import com.koreait.thebridgehub.entity.ChatRoom;
+import com.koreait.apiserver.entity.ChatRoom;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 import java.util.Optional;
 

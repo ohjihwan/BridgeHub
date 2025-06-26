@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.dto;
+package com.koreait.apiserver.dto;
 
-import com.koreait.thebridgehub.entity.StudyRoomMember;
+import com.koreait.apiserver.entity.StudyRoomMember;
 import lombok.Data;
 import java.time.LocalDateTime;
 

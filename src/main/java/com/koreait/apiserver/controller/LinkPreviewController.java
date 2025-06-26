@@ -1,8 +1,8 @@
-package com.koreait.thebridgehub.controller;
+package com.koreait.apiserver.controller;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
-import com.koreait.thebridgehub.dto.LinkPreviewDTO;
-import com.koreait.thebridgehub.service.LinkPreviewService;
+import com.koreait.apiserver.dto.ApiResponse;
+import com.koreait.apiserver.dto.LinkPreviewDTO;
+import com.koreait.apiserver.service.LinkPreviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

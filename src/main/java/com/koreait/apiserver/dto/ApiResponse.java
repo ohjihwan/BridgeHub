@@ -1,4 +1,4 @@
-package com.koreait.thebridgehub.dto;
+package com.koreait.apiserver.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

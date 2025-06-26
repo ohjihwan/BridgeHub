@@ -1,11 +1,11 @@
-package com.koreait.thebridgehub.controller;
+package com.koreait.apiserver.controller;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
-import com.koreait.thebridgehub.dto.ChatRoomDTO;
-import com.koreait.thebridgehub.dto.ChatRoomMemberDTO;
-import com.koreait.thebridgehub.service.ChatRoomService;
-import com.koreait.thebridgehub.service.ChatRoomMemberService;
-import com.koreait.thebridgehub.service.JwtService;
+import com.koreait.apiserver.dto.ApiResponse;
+import com.koreait.apiserver.dto.ChatRoomDTO;
+import com.koreait.apiserver.dto.ChatRoomMemberDTO;
+import com.koreait.apiserver.service.ChatRoomService;
+import com.koreait.apiserver.service.ChatRoomMemberService;
+import com.koreait.apiserver.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

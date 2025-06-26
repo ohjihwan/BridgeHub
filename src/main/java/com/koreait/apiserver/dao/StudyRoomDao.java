@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.dao;
+package com.koreait.apiserver.dao;
 
-import com.koreait.thebridgehub.entity.StudyRoom;
+import com.koreait.apiserver.entity.StudyRoom;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;

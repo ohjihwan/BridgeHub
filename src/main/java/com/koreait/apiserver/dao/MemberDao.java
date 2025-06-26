@@ -1,9 +1,9 @@
-package com.koreait.thebridgehub.dao;
+package com.koreait.apiserver.dao;
 
-import com.koreait.thebridgehub.entity.Member;
+import com.koreait.apiserver.entity.Member;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 

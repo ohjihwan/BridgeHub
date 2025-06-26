@@ -1,11 +1,11 @@
-package com.koreait.thebridgehub.controller;
+package com.koreait.apiserver.controller;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
-import com.koreait.thebridgehub.dto.StudyRoomDTO;
-import com.koreait.thebridgehub.dto.StudyRoomMemberDTO;
-import com.koreait.thebridgehub.service.StudyRoomService;
-import com.koreait.thebridgehub.service.JwtService;
-import com.koreait.thebridgehub.service.MemberService;
+import com.koreait.apiserver.dto.ApiResponse;
+import com.koreait.apiserver.dto.StudyRoomDTO;
+import com.koreait.apiserver.dto.StudyRoomMemberDTO;
+import com.koreait.apiserver.service.StudyRoomService;
+import com.koreait.apiserver.service.JwtService;
+import com.koreait.apiserver.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,10 @@
-package com.koreait.thebridgehub.controller;
-import com.koreait.thebridgehub.dto.ApiResponse;
-import com.koreait.thebridgehub.dto.LoginResponseDTO;
-import com.koreait.thebridgehub.dto.MemberDTO;
-import com.koreait.thebridgehub.service.EmailService;
-import com.koreait.thebridgehub.service.JwtService;
-import com.koreait.thebridgehub.service.MemberService;
+package com.koreait.apiserver.controller;
+import com.koreait.apiserver.dto.ApiResponse;
+import com.koreait.apiserver.dto.LoginResponseDTO;
+import com.koreait.apiserver.dto.MemberDTO;
+import com.koreait.apiserver.service.EmailService;
+import com.koreait.apiserver.service.JwtService;
+import com.koreait.apiserver.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

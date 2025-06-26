@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.FileDTO;
+import com.koreait.apiserver.dto.FileDTO;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 

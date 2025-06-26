@@ -1,4 +1,4 @@
-package com.koreait.thebridgehub.entity;
+package com.koreait.apiserver.entity;
 
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

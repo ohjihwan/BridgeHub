@@ -1,10 +1,10 @@
-package com.koreait.thebridgehub.controller;
+package com.koreait.apiserver.controller;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
-import com.koreait.thebridgehub.dto.MessageDTO;
-import com.koreait.thebridgehub.dto.ReportDTO;
-import com.koreait.thebridgehub.service.JwtService;
-import com.koreait.thebridgehub.service.ReportService;
+import com.koreait.apiserver.dto.ApiResponse;
+import com.koreait.apiserver.dto.MessageDTO;
+import com.koreait.apiserver.dto.ReportDTO;
+import com.koreait.apiserver.service.JwtService;
+import com.koreait.apiserver.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

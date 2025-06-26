@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.koreait.thebridgehub.dao.ChatRoomMemberDao">
+<mapper namespace="com.koreait.apiserver.dao.ChatRoomMemberDao">
 
-    <resultMap id="ChatRoomMemberResultMap" type="com.koreait.thebridgehub.entity.ChatRoomMember">
+    <resultMap id="ChatRoomMemberResultMap" type="com.koreait.apiserver.entity.ChatRoomMember">
         <id property="roomId" column="room_id"/>
         <id property="memberId" column="member_id"/>
         <result property="joinedAt" column="joined_at"/>
         <result property="isAdmin" column="is_admin"/>
     </resultMap>
 
-    <insert id="insertChatRoomMember" parameterType="com.koreait.thebridgehub.entity.ChatRoomMember">
+    <insert id="insertChatRoomMember" parameterType="com.koreait.apiserver.entity.ChatRoomMember">
         INSERT INTO ChatRoomMember (room_id, member_id, joined_at, is_admin)
         VALUES (#{roomId}, #{memberId}, NOW(), #{isAdmin})
     </insert>

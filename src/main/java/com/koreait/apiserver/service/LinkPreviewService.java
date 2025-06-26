@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.LinkPreviewDTO;
+import com.koreait.apiserver.dto.LinkPreviewDTO;
 
 public interface LinkPreviewService {
     

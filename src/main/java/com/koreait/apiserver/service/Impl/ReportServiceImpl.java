@@ -1,11 +1,11 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dao.ReportDao;
-import com.koreait.thebridgehub.dto.MessageDTO;
-import com.koreait.thebridgehub.dto.ReportDTO;
-import com.koreait.thebridgehub.entity.Report;
-import com.koreait.thebridgehub.service.ChatLogService;
-import com.koreait.thebridgehub.service.ReportService;
+import com.koreait.apiserver.dao.ReportDao;
+import com.koreait.apiserver.dto.MessageDTO;
+import com.koreait.apiserver.dto.ReportDTO;
+import com.koreait.apiserver.entity.Report;
+import com.koreait.apiserver.service.ChatLogService;
+import com.koreait.apiserver.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

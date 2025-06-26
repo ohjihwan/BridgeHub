@@ -1,7 +1,7 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dto.LinkPreviewDTO;
-import com.koreait.thebridgehub.service.LinkPreviewService;
+import com.koreait.apiserver.dto.LinkPreviewDTO;
+import com.koreait.apiserver.service.LinkPreviewService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

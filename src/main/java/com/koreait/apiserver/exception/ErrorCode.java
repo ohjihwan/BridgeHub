@@ -1,4 +1,4 @@
-package com.koreait.thebridgehub.exception;
+package com.koreait.apiserver.exception;
 
 public enum ErrorCode {
     

@@ -1,4 +1,4 @@
-package com.koreait.thebridgehub.dto;
+package com.koreait.apiserver.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

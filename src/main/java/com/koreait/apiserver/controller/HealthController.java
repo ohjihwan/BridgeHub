@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.controller;
+package com.koreait.apiserver.controller;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
+import com.koreait.apiserver.dto.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

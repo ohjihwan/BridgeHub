@@ -1,7 +1,7 @@
-package com.koreait.thebridgehub.security;
+package com.koreait.apiserver.security;
 
-import com.koreait.thebridgehub.dao.MemberDao;
-import com.koreait.thebridgehub.entity.Member;
+import com.koreait.apiserver.dao.MemberDao;
+import com.koreait.apiserver.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

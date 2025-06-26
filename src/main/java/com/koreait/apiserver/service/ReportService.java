@@ -1,7 +1,7 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.MessageDTO;
-import com.koreait.thebridgehub.dto.ReportDTO;
+import com.koreait.apiserver.dto.MessageDTO;
+import com.koreait.apiserver.dto.ReportDTO;
 
 import java.util.List;
 

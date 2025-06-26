@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.koreait.thebridgehub.dao.MessageDao">
+<mapper namespace="com.koreait.apiserver.dao.MessageDao">
 
-    <resultMap id="MessageResultMap" type="com.koreait.thebridgehub.entity.Message">
+    <resultMap id="MessageResultMap" type="com.koreait.apiserver.entity.Message">
         <id property="messageId" column="message_id"/>
         <result property="roomId" column="room_id"/>
         <result property="senderId" column="sender_id"/>
@@ -17,7 +17,7 @@
         <result property="senderProfileImage" column="sender_profile_image"/>
     </resultMap>
 
-    <insert id="insertMessage" parameterType="com.koreait.thebridgehub.entity.Message" useGeneratedKeys="true" keyProperty="messageId">
+    <insert id="insertMessage" parameterType="com.koreait.apiserver.entity.Message" useGeneratedKeys="true" keyProperty="messageId">
         INSERT INTO Message (room_id, sender_id, content, message_type, sent_at, is_deleted, is_logged, log_file_id)
         VALUES (#{roomId}, #{senderId}, #{content}, #{messageType}, NOW(), #{isDeleted}, #{isLogged}, #{logFileId})
     </insert>
@@ -76,7 +76,7 @@
         WHERE room_id = #{roomId} AND is_deleted = false
     </select>
 
-    <update id="updateMessage" parameterType="com.koreait.thebridgehub.entity.Message">
+    <update id="updateMessage" parameterType="com.koreait.apiserver.entity.Message">
         UPDATE Message 
         SET content = #{content}, 
             message_type = #{messageType},

@@ -1,10 +1,10 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dao.ChatRoomDao;
-import com.koreait.thebridgehub.dao.ChatRoomMemberDao;
-import com.koreait.thebridgehub.dto.ChatRoomDTO;
-import com.koreait.thebridgehub.entity.ChatRoom;
-import com.koreait.thebridgehub.service.ChatRoomService;
+import com.koreait.apiserver.dao.ChatRoomDao;
+import com.koreait.apiserver.dao.ChatRoomMemberDao;
+import com.koreait.apiserver.dto.ChatRoomDTO;
+import com.koreait.apiserver.entity.ChatRoom;
+import com.koreait.apiserver.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

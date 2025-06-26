@@ -1,8 +1,8 @@
-package com.koreait.thebridgehub.controller;
+package com.koreait.apiserver.controller;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
-import com.koreait.thebridgehub.dto.FileDTO;
-import com.koreait.thebridgehub.service.FileService;
+import com.koreait.apiserver.dto.ApiResponse;
+import com.koreait.apiserver.dto.FileDTO;
+import com.koreait.apiserver.service.FileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;

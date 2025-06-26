@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.koreait.thebridgehub.dao.StudyRoomDao">
+<mapper namespace="com.koreait.apiserver.dao.StudyRoomDao">
 
-    <resultMap id="StudyRoomResultMap" type="com.koreait.thebridgehub.entity.StudyRoom">
+    <resultMap id="StudyRoomResultMap" type="com.koreait.apiserver.entity.StudyRoom">
         <id property="studyRoomId" column="study_room_id"/>
         <result property="roomId" column="room_id"/>
         <result property="bossId" column="boss_id"/>
@@ -23,7 +23,7 @@
         <result property="bossProfileImage" column="boss_profile_image"/>
     </resultMap>
 
-    <insert id="insertStudyRoom" parameterType="com.koreait.thebridgehub.entity.StudyRoom" useGeneratedKeys="true" keyProperty="studyRoomId">
+    <insert id="insertStudyRoom" parameterType="com.koreait.apiserver.entity.StudyRoom" useGeneratedKeys="true" keyProperty="studyRoomId">
         INSERT INTO studyroom (
             room_id, boss_id, title, description, education, department, 
             region, district, capacity, current_members, time, thumbnail, 
@@ -82,7 +82,7 @@
         ORDER BY sr.created_at DESC
     </select>
 
-    <update id="updateStudyRoom" parameterType="com.koreait.thebridgehub.entity.StudyRoom">
+    <update id="updateStudyRoom" parameterType="com.koreait.apiserver.entity.StudyRoom">
         UPDATE studyroom 
         SET title = #{title},
             description = #{description},

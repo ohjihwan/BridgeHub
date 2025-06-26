@@ -1,15 +1,15 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dao.ChatRoomMemberDao;
-import com.koreait.thebridgehub.dao.ChatRoomDao;
-import com.koreait.thebridgehub.dao.StudyRoomDao;
-import com.koreait.thebridgehub.dao.StudyRoomMemberDao;
-import com.koreait.thebridgehub.dto.ChatRoomMemberDTO;
-import com.koreait.thebridgehub.entity.ChatRoomMember;
-import com.koreait.thebridgehub.entity.ChatRoom;
-import com.koreait.thebridgehub.entity.StudyRoom;
-import com.koreait.thebridgehub.entity.StudyRoomMember;
-import com.koreait.thebridgehub.service.ChatRoomMemberService;
+import com.koreait.apiserver.dao.ChatRoomMemberDao;
+import com.koreait.apiserver.dao.ChatRoomDao;
+import com.koreait.apiserver.dao.StudyRoomDao;
+import com.koreait.apiserver.dao.StudyRoomMemberDao;
+import com.koreait.apiserver.dto.ChatRoomMemberDTO;
+import com.koreait.apiserver.entity.ChatRoomMember;
+import com.koreait.apiserver.entity.ChatRoom;
+import com.koreait.apiserver.entity.StudyRoom;
+import com.koreait.apiserver.entity.StudyRoomMember;
+import com.koreait.apiserver.service.ChatRoomMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

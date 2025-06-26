@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.ChatRoomMemberDTO;
+import com.koreait.apiserver.dto.ChatRoomMemberDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

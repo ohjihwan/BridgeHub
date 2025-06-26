@@ -1,7 +1,7 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.MessageDTO;
-import com.koreait.thebridgehub.entity.ChatLogFile;
+import com.koreait.apiserver.dto.MessageDTO;
+import com.koreait.apiserver.entity.ChatLogFile;
 
 import java.time.LocalDate;
 import java.util.List;

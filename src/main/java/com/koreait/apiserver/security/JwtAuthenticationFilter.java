@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.security;
+package com.koreait.apiserver.security;
 
-import com.koreait.thebridgehub.service.JwtService;
+import com.koreait.apiserver.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

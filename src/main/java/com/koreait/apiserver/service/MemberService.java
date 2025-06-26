@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.MemberDTO;
+import com.koreait.apiserver.dto.MemberDTO;
 
 import java.util.List;
 

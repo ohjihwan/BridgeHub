@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.koreait.thebridgehub.dao.ChatRoomDao">
+<mapper namespace="com.koreait.apiserver.dao.ChatRoomDao">
 
-    <resultMap id="ChatRoomResultMap" type="com.koreait.thebridgehub.entity.ChatRoom">
+    <resultMap id="ChatRoomResultMap" type="com.koreait.apiserver.entity.ChatRoom">
         <id property="roomId" column="room_id"/>
         <result property="roomName" column="room_name"/>
         <result property="createdAt" column="created_at"/>
@@ -10,7 +10,7 @@
         <result property="isActive" column="is_active"/>
     </resultMap>
 
-    <insert id="insertChatRoom" parameterType="com.koreait.thebridgehub.entity.ChatRoom" useGeneratedKeys="true" keyProperty="roomId">
+    <insert id="insertChatRoom" parameterType="com.koreait.apiserver.entity.ChatRoom" useGeneratedKeys="true" keyProperty="roomId">
         INSERT INTO ChatRoom (room_name, created_at, max_members, is_active)
         VALUES (#{roomName}, #{createdAt}, #{maxMembers}, #{isActive})
     </insert>
@@ -23,7 +23,7 @@
         SELECT * FROM ChatRoom ORDER BY created_at DESC
     </select>
 
-    <update id="updateChatRoom" parameterType="com.koreait.thebridgehub.entity.ChatRoom">
+    <update id="updateChatRoom" parameterType="com.koreait.apiserver.entity.ChatRoom">
         UPDATE ChatRoom 
         SET room_name = #{roomName},
             max_members = #{maxMembers},

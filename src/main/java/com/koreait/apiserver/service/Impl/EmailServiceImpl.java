@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.service.Impl;
-import com.koreait.thebridgehub.dto.EmailDTO;
-import com.koreait.thebridgehub.service.EmailService;
+package com.koreait.apiserver.service.Impl;
+import com.koreait.apiserver.dto.EmailDTO;
+import com.koreait.apiserver.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

@@ -1,4 +1,4 @@
-package com.koreait.thebridgehub.security;
+package com.koreait.apiserver.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

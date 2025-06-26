@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.exception;
+package com.koreait.apiserver.exception;
 
-import com.koreait.thebridgehub.dto.ApiResponse;
+import com.koreait.apiserver.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

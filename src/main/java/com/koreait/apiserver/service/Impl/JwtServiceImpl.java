@@ -1,7 +1,7 @@
-package com.koreait.thebridgehub.service.Impl;
-import com.koreait.thebridgehub.service.JwtService;
-import com.koreait.thebridgehub.dto.MemberDTO;
-import com.koreait.thebridgehub.service.MemberService;
+package com.koreait.apiserver.service.Impl;
+import com.koreait.apiserver.service.JwtService;
+import com.koreait.apiserver.dto.MemberDTO;
+import com.koreait.apiserver.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -1,9 +1,9 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dao.MemberDao;
-import com.koreait.thebridgehub.dto.MemberDTO;
-import com.koreait.thebridgehub.entity.Member;
-import com.koreait.thebridgehub.service.MemberService;
+import com.koreait.apiserver.dao.MemberDao;
+import com.koreait.apiserver.dto.MemberDTO;
+import com.koreait.apiserver.entity.Member;
+import com.koreait.apiserver.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

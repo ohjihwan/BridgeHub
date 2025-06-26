@@ -1,6 +1,6 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
-import com.koreait.thebridgehub.dto.MessageDTO;
+import com.koreait.apiserver.dto.MessageDTO;
 import java.util.List;
 
 public interface MessageService {

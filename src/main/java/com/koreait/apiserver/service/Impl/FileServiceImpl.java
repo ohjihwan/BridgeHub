@@ -1,18 +1,14 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dao.FileDao;
-import com.koreait.thebridgehub.dto.FileDTO;
-import com.koreait.thebridgehub.entity.File;
-import com.koreait.thebridgehub.service.FileService;
+import com.koreait.apiserver.dao.FileDao;
+import com.koreait.apiserver.dto.FileDTO;
+import com.koreait.apiserver.entity.File;
+import com.koreait.apiserver.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

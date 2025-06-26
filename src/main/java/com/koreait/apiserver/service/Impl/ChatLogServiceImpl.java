@@ -1,9 +1,9 @@
-package com.koreait.thebridgehub.service.Impl;
+package com.koreait.apiserver.service.Impl;
 
-import com.koreait.thebridgehub.dao.MessageDao;
-import com.koreait.thebridgehub.dto.MessageDTO;
-import com.koreait.thebridgehub.entity.ChatLogFile;
-import com.koreait.thebridgehub.service.ChatLogService;
+import com.koreait.apiserver.dao.MessageDao;
+import com.koreait.apiserver.dto.MessageDTO;
+import com.koreait.apiserver.entity.ChatLogFile;
+import com.koreait.apiserver.service.ChatLogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;

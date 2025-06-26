@@ -1,4 +1,4 @@
-package com.koreait.thebridgehub.service;
+package com.koreait.apiserver.service;
 
 import io.jsonwebtoken.Claims;
 
