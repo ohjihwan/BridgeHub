@@ -49,11 +49,11 @@ public class MemberServiceImpl implements MemberService {
         }
         
         if (memberDao.existsByUsername(memberDTO.getUsername())) {
-            throw new RuntimeException("이미 존재하는 사용자명입니다.");
+            throw new RuntimeException("USERNAME_ALREADY_EXISTS");
         }
         
         if (memberDao.existsByEmail(memberDTO.getEmail())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new RuntimeException("EMAIL_ALREADY_EXISTS");
         }
 
         Member member = new Member();
@@ -125,7 +125,7 @@ public class MemberServiceImpl implements MemberService {
             Member member = memberOpt.get();
             memberDao.updateEmailVerification(member.getId(), true);
         } else {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+            throw new RuntimeException("USER_NOT_FOUND");
         }
     }
 
@@ -187,7 +187,7 @@ public class MemberServiceImpl implements MemberService {
             memberDao.updateMember(member);
             return convertToDTO(member);
         }
-        throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        throw new RuntimeException("USER_NOT_FOUND");
     }
 
     @Override
@@ -197,7 +197,7 @@ public class MemberServiceImpl implements MemberService {
         if (memberOpt.isPresent()) {
             memberDao.deleteMember(memberOpt.get().getId());
         } else {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+            throw new RuntimeException("USER_NOT_FOUND");
         }
     }
 
@@ -225,7 +225,7 @@ public class MemberServiceImpl implements MemberService {
         try {
             Optional<Member> memberOpt = memberDao.findById(memberId);
             if (!memberOpt.isPresent()) {
-                throw new RuntimeException("회원을 찾을 수 없습니다.");
+                throw new RuntimeException("MEMBER_NOT_FOUND");
             }
 
             memberDao.updateMemberStatus(memberId, status);
@@ -237,7 +237,7 @@ public class MemberServiceImpl implements MemberService {
             
         } catch (Exception e) {
             log.error("회원 상태 변경 실패: memberId={}, status={}", memberId, status, e);
-            throw new RuntimeException("회원 상태 변경에 실패했습니다.", e);
+            throw new RuntimeException("MEMBER_STATUS_UPDATE_FAILED", e);
         }
     }
 
