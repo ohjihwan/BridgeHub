@@ -178,3 +178,6 @@ Thumbs.db
 ### Application specific ###
 chat-logs/
 *.chat.log
+###
+.gradle
+.idea
