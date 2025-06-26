@@ -9,9 +9,10 @@ class MongoService {
     constructor() {
         this.messagesCollection = null;
         this.chatSessionsCollection = null;
-        this.studyRoomStatusCollection = null;
+        this.studyRoomsCollection = null;
         this.userStatusCollection = null;
         this.systemLogsCollection = null;
+        this.fileUploadsCollection = null;
     }
 
     /**
@@ -21,12 +22,13 @@ class MongoService {
         try {
             await mongoDBManager.connect();
             
-            // 컬렉션 참조 설정
+            // 컬렉션 참조 설정 (스키마와 일치하는 이름 사용)
             this.messagesCollection = mongoDBManager.getCollection('messages');
-            this.chatSessionsCollection = mongoDBManager.getCollection('chat_sessions');
-            this.studyRoomStatusCollection = mongoDBManager.getCollection('study_room_status');
-            this.userStatusCollection = mongoDBManager.getCollection('user_status');
-            this.systemLogsCollection = mongoDBManager.getCollection('system_logs');
+            this.chatSessionsCollection = mongoDBManager.getCollection('chatSessions');
+            this.studyRoomsCollection = mongoDBManager.getCollection('studyRooms');
+            this.userStatusCollection = mongoDBManager.getCollection('userStatus');
+            this.systemLogsCollection = mongoDBManager.getCollection('systemLogs');
+            this.fileUploadsCollection = mongoDBManager.getCollection('fileUploads');
             
             console.log('✅ MongoDB 서비스 초기화 완료');
         } catch (error) {
@@ -48,6 +50,7 @@ class MongoService {
                 content: messageData.content,
                 messageType: messageData.messageType || 'TEXT',
                 fileInfo: messageData.fileInfo || null,
+                linkPreviews: messageData.linkPreviews || null,
                 timestamp: new Date(),
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -105,14 +108,12 @@ class MongoService {
                 userId: sessionData.userId,
                 userName: sessionData.userName,
                 userNickname: sessionData.userNickname,
-                status: sessionData.status || 'ACTIVE',
-                joinedAt: sessionData.joinedAt || new Date(),
-                lastActivity: new Date(),
-                lastMessageAt: sessionData.lastMessageAt || null,
-                messageCount: sessionData.messageCount || 0,
                 socketId: sessionData.socketId,
+                status: sessionData.status || 'ACTIVE',
                 userAgent: sessionData.userAgent,
                 ipAddress: sessionData.ipAddress,
+                joinedAt: sessionData.joinedAt || new Date(),
+                lastActivity: new Date(),
                 createdAt: sessionData.createdAt || new Date(),
                 updatedAt: new Date()
             };
@@ -154,12 +155,11 @@ class MongoService {
                 memberCount: studyData.memberCount || 0,
                 lastMessage: studyData.lastMessage || null,
                 lastActivity: new Date(),
-                isActive: studyData.isActive !== false,
                 createdAt: studyData.createdAt || new Date(),
                 updatedAt: new Date()
             };
 
-            const result = await this.studyRoomStatusCollection.updateOne(
+            const result = await this.studyRoomsCollection.updateOne(
                 { studyId: studyId },
                 { $set: status },
                 { upsert: true }
@@ -177,7 +177,7 @@ class MongoService {
      */
     async updateStudyRoomLastMessage(studyId, lastMessage) {
         try {
-            await this.studyRoomStatusCollection.updateOne(
+            await this.studyRoomsCollection.updateOne(
                 { studyId: studyId },
                 { 
                     $set: { 
@@ -204,13 +204,9 @@ class MongoService {
                 status: userData.status || 'ONLINE',
                 currentStudyId: userData.currentStudyId,
                 socketId: userData.socketId,
+                userAgent: userData.userAgent,
+                ipAddress: userData.ipAddress,
                 lastSeen: new Date(),
-                lastActivity: new Date(),
-                deviceInfo: {
-                    userAgent: userData.userAgent,
-                    ipAddress: userData.ipAddress,
-                    platform: userData.platform
-                },
                 createdAt: userData.createdAt || new Date(),
                 updatedAt: new Date()
             };
@@ -229,7 +225,7 @@ class MongoService {
     }
 
     /**
-     * 사용자 오프라인 처리
+     * 사용자 오프라인 설정
      */
     async setUserOffline(userId) {
         try {
@@ -244,7 +240,7 @@ class MongoService {
                 }
             );
 
-            // 채팅 세션 비활성화
+            // 채팅 세션도 비활성화
             await this.chatSessionsCollection.updateMany(
                 { userId: userId },
                 { 
@@ -256,7 +252,7 @@ class MongoService {
                 }
             );
         } catch (error) {
-            console.error('사용자 오프라인 처리 실패:', error);
+            console.error('사용자 오프라인 설정 실패:', error);
         }
     }
 
@@ -265,7 +261,7 @@ class MongoService {
      */
     async logSystemEvent(level, category, studyId, userId, message, details = {}) {
         try {
-            const log = {
+            const logEntry = {
                 level: level,
                 category: category,
                 studyId: studyId,
@@ -276,18 +272,18 @@ class MongoService {
                 createdAt: new Date()
             };
 
-            await this.systemLogsCollection.insertOne(log);
+            await this.systemLogsCollection.insertOne(logEntry);
         } catch (error) {
             console.error('시스템 로그 기록 실패:', error);
         }
     }
 
     /**
-     * 스터디룸 참가자 목록 조회
+     * 스터디룸 멤버 조회
      */
     async getStudyRoomMembers(studyId) {
         try {
-            const sessions = await this.chatSessionsCollection
+            const members = await this.chatSessionsCollection
                 .find({ 
                     studyId: studyId, 
                     status: 'ACTIVE' 
@@ -295,15 +291,15 @@ class MongoService {
                 .sort({ joinedAt: 1 })
                 .toArray();
 
-            return sessions;
+            return members;
         } catch (error) {
-            console.error('스터디룸 참가자 조회 실패:', error);
+            console.error('스터디룸 멤버 조회 실패:', error);
             throw error;
         }
     }
 
     /**
-     * 사용자별 메시지 통계
+     * 사용자 메시지 통계 조회
      */
     async getUserMessageStats(userId, studyId) {
         try {
@@ -332,7 +328,7 @@ class MongoService {
     }
 
     /**
-     * 스터디룸 통계
+     * 스터디룸 통계 조회
      */
     async getStudyRoomStats(studyId) {
         try {
@@ -368,7 +364,7 @@ class MongoService {
     }
 
     /**
-     * 서비스 종료 (연결 해제)
+     * 연결 해제
      */
     async disconnect() {
         try {
@@ -383,11 +379,7 @@ class MongoService {
      * 연결 상태 확인
      */
     isConnected() {
-        try {
-            return mongoDBManager.isConnected;
-        } catch (error) {
-            return false;
-        }
+        return mongoDBManager.isConnected();
     }
 
     /**
