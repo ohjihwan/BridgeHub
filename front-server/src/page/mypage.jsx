@@ -25,14 +25,73 @@ const MyPage = () => {
 		'부산': ['해운대구', '수영구', '부산진구', '동래구', '남구'],
 		'대구': ['중구', '수성구', '달서구', '동구', '북구']
 	};
-	const handleEditProfile = () => {
+	
+	const handleEditProfile = async () => {
 		if (isEditing) {
-			setProfileData({...editData});
+			if (editData.password && editData.password !== editData.passwordConfirm) {
+				await window.customAlert('비밀번호가 일치하지 않습니다.');
+				return;
+			}
+
+			const username = getUsernameFromToken();
+			try {
+				const requestBody = {
+					nickname: editData.nickname,
+					phone: editData.hp,
+					education: editData.education,
+					department: editData.department,
+					region: editData.region,
+					district: editData.district,
+					time: editData.timeZone
+				};
+
+				// 비밀번호 입력이 있으면 함께 전송
+				if (editData.password) {
+					requestBody.password = editData.password;
+				}
+
+				const res = await userClient.put(`/api/members/${username}`, requestBody, {
+					headers: {
+						Authorization: `Bearer ${localStorage.getItem('token')}`,
+					},
+				});
+
+				if (res.data.status === 'success') {
+					await window.customAlert('회원 정보가 수정되었습니다.');
+					setProfileData({
+						...profileData,
+						...editData,
+						password: '',
+						passwordConfirm: ''
+					});
+					setEditData(prev => ({
+						...prev,
+						password: '',
+						passwordConfirm: ''
+					}));
+					setIsEditing(false);
+				} else {
+					await window.customAlert('회원 정보 수정에 실패했습니다.');
+				}
+			} catch (err) {
+				await window.customAlert('회원 정보 수정 중 오류가 발생했습니다.');
+			}
 		} else {
-			setEditData({...profileData});
+			setEditData({
+				nickname: profileData.nickname || '',
+				hp: profileData.hp || '',
+				education: profileData.education || '',
+				department: profileData.department || '',
+				region: profileData.region || '',
+				district: profileData.district || '',
+				timeZone: profileData.timeZone || '',
+				memo: profileData.memo || '',
+				profileImg: profileData.profileImg || ''
+			});
+			setIsEditing(true);
 		}
-		setIsEditing(!isEditing);
 	};
+
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
 		setEditData(prev => ({
@@ -125,13 +184,13 @@ const MyPage = () => {
 						<div className="info-row">
 							<label htmlFor='nickname' className="label">닉네임</label>
 							<div className="field">
-								<input type="text" name="nickname" id="nickname" value={editData.nickname} className="text" placeholder="별명을 입력하세요" onChange={handleInputChange}/>
+								<input type="text" name="nickname" id="nickname" value={editData.nickname || ''} className="text" placeholder="별명을 입력하세요" onChange={handleInputChange}/>
 							</div>
 						</div>
 						<div className="info-row">
 							<label htmlFor='password' className="label">비밀번호</label>
 							<div className="field">
-								<input type="password" name="password" id="password" value={editData.password} className="text" placeholder="비밀번호를 입력하세요" onChange={handleInputChange}/>
+								<input type="password" name="password" id="password" value={editData.password || ''} className="text" placeholder="비밀번호를 입력하세요" onChange={handleInputChange}/>
 							</div>
 							<div className="field">
 								<input type="password" name="passwordConfirm" value={editData.passwordConfirm} className="text" placeholder="비밀번호를 다시 입력하세요" onChange={handleInputChange}/>

@@ -1,22 +1,24 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import CustomAlert from '@page/common/customAlert';
+import CustomAlert from '@common/customAlert';
 import axios from 'axios';
 
 // ----------- 커스텀 알럿 관련 -----------
 
-let alertRoot = null;
 let root = null;
-let confirmRoot = null;
 
 export function customAlert(message) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
 		if (!root) {
 			root = createRoot(alertRoot);
 		}
 		const handleClose = () => {
-			root.render(null); 
+			root.render(null);
 			resolve();
 		};
 		root.render(
@@ -27,30 +29,46 @@ export function customAlert(message) {
 
 export function customConfirm(message, onConfirm) {
 	return new Promise((resolve) => {
-		const rootElement = document.getElementById('confirm-root');
-		if (!confirmRoot) {
-			confirmRoot = createRoot(rootElement);
+		const alertRoot = document.getElementById('alert-root');
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
 		}
-		const handleClose = (result) => {
-			confirmRoot.render(null);
-			if (result) onConfirm?.();
-			resolve(result);
+
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
+
+		const handleClose = () => {
+			root.render(null);
+			resolve(false);
 		};
-		confirmRoot.render(
-			<CustomConfirm message={message} onClose={handleClose} />
+
+		const handleConfirm = () => {
+			root.render(null);
+			onConfirm?.();
+			resolve(true);
+		};
+
+		root.render(
+			<CustomAlert message={message} onClose={handleClose} onConfirm={handleConfirm} />
 		);
 	});
 }
 
-
 export function customPrompt(message, placeholder = '', defaultValue = '', onSubmit = null) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
-		alertRoot.innerHTML = '';
-		const root = createRoot(alertRoot);
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
 
 		const handleClose = () => {
-			root.unmount();
+			root.render(null);
 			resolve(null);
 		};
 
@@ -58,7 +76,7 @@ export function customPrompt(message, placeholder = '', defaultValue = '', onSub
 			if (typeof onSubmit === 'function') {
 				onSubmit(value);
 			}
-			root.unmount();
+			root.render(null);
 			resolve(value);
 		};
 
