@@ -1,14 +1,14 @@
 const StudyRoomList = ({ rooms = [], searchKeyword = '', limit, onItemClick }) => {
-	const keyword = searchKeyword.toLowerCase();
-	const filteredRooms = rooms.filter(room =>
-		room.title.toLowerCase().includes(keyword) ||
-		room.region.toLowerCase().includes(keyword)
+	const keyword = (searchKeyword || '').toLowerCase();
+	const filteredRooms = (Array.isArray(rooms) ? rooms : []).filter(room =>
+		room.title?.toLowerCase().includes(keyword) ||
+		room.region?.toLowerCase().includes(keyword)
 	);
 	
 	return (
 		<ul className="studyroom">
 			{filteredRooms.slice(0, limit).map((room) => (
-				<li className="studyroom__item" onClick={() => onItemClick(room)} key={room.id}>
+				<li className="studyroom__item" onClick={() => onItemClick(room)} key={room.studyRoomId}>
 					<button type="button" className="studyroom__info">
 						<img src={`/uploads/thumbnail/${room.thumbnail}`} className="studyroom__img" />
 						<h3 className="studyroom__title">{room.title}</h3>
