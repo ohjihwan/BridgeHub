@@ -1,19 +1,17 @@
-// src/routes/rtcRoutes.mjs
 import { Router } from 'express';
-import { createRoom, validateToken } from '../controller/rtcController.mjs';
 import { jwtAuth } from '../util/authMiddleware.mjs';
-
-// 테스트 토큰
-import { issueTestToken } from '../controller/rtcController.mjs';
+import * as rtcController from '../controller/rtcController.mjs';
 
 const router = Router();
 
-// POST /api/rtc/rooms
-router.post('/rooms', jwtAuth, createRoom);    
-// GET  /api/rtc/auth
-router.get('/auth', jwtAuth, validateToken); 
+// REST API 접두사는 /rtc-api 이지만 실제 호출은 /api/rtc/... 으로 프록시 설정 예정
+router.use(jwtAuth);
 
-// POST /api/rtc/test/token -> 나중에 삭제하기
-router.post('/test/token', issueTestToken);
+// GET  /api/rtc/status
+router.get('/status', rtcController.status);      
+// POST /api/rtc/start
+router.post('/start',  rtcController.startSession); 
+// POST /api/rtc/stop
+router.post('/stop',   rtcController.stopSession);  
 
 export default router;

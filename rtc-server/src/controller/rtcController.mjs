@@ -1,42 +1,14 @@
-import { createRoomInSpring } from '../service/springClient.mjs';
-import { log, error } from '../util/logger.mjs';
-import 'dotenv/config';
+// 간단한 상태 API
+export const status = (req, res) => {
+  res.json({ success: true, message: 'SUCCESS', data: 'OK' });
+};
 
-// 임시 토큰으로 테스트
-import jwt from 'jsonwebtoken';
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
+// 세션 시작 (선택적 로깅 등)
+export const startSession = (req, res) => {
+  res.json({ success: true, message: 'SUCCESS', data: null });
+};
 
-// 테스트 토큰 발행
-export function issueTestToken(req, res) {
-  try {
-    const { userId = 'test-user' } = req.body;
-    // payload: userId, roles
-    const token = jwt.sign(
-      { userId, roles: ['ROLE_USER'] },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-    log('[TestToken] issued for', userId);
-    res.json({ token });
-  } catch (err) {
-    error('[TestToken] error', err);
-    res.status(500).json({ message: 'Token issuance failed' });
-  }
-}
-
-export async function createRoom(req, res) {
-  try {
-    const { roomName } = req.body;
-    const ownerId = req.user.userId;
-    const room    = await createRoomInSpring({ roomName, ownerId });
-    log('Created room', room.roomId, 'by', ownerId);
-    res.json(room);
-  } catch (e) {
-    error('createRoom error', e);
-    res.status(500).json({ message: 'Room creation failed' });
-  }
-}
-
-export async function validateToken(req, res) {
-  res.json({ user: req.user });
-}
+// 세션 종료
+export const stopSession = (req, res) => {
+  res.json({ success: true, message: 'SUCCESS', data: null });
+};
