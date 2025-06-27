@@ -9,8 +9,9 @@ export default defineConfig({
 		port: 7000,
 		proxy: {
 			'/api': {
-				target: 'http://localhost:7100', // 백엔드 포트
-				changeOrigin: true
+				target: 'http://localhost:7100',
+				changeOrigin: true,
+				secure: false
 			}
 		},
 	},

@@ -8,7 +8,7 @@ const StudyRoomList = ({ rooms = [], searchKeyword = '', limit, onItemClick }) =
 	return (
 		<ul className="studyroom">
 			{filteredRooms.slice(0, limit).map((room) => (
-				<li className="studyroom__item" onClick={() => onItemClick(room)} key={room.studyRoomId}>
+				<li className="studyroom__item" onClick={() => onItemClick({ ...room, id: room.studyRoomId })} key={room.studyRoomId}>
 					<button type="button" className="studyroom__info">
 						<img src={`/uploads/thumbnail/${room.thumbnail}`} className="studyroom__img" />
 						<h3 className="studyroom__title">{room.title}</h3>

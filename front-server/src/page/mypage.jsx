@@ -50,11 +50,13 @@ const MyPage = () => {
 					requestBody.password = editData.password;
 				}
 
-				const res = await userClient.put(`/api/members/${username}`, requestBody, {
+				const res = await userClient.post('/api/studies', requestData, {
 					headers: {
-						Authorization: `Bearer ${localStorage.getItem('token')}`,
+						Authorization: `Bearer ${token}`
 					},
+					withCredentials: true
 				});
+				
 
 				if (res.data.status === 'success') {
 					await window.customAlert('회원 정보가 수정되었습니다.');

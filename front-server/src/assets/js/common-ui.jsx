@@ -122,6 +122,9 @@ export const userClient = axios.create({
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
+export const getAccessToken = () => {
+	return localStorage.getItem('token');
+};
 
 [authClient, userClient].forEach(client => {
 	client.interceptors.request.use(config => {
