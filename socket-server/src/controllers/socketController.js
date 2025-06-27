@@ -148,13 +148,38 @@ const handleSendMessage = async (socket, data) => {
     try {
         const { studyId, userId, message, fileType, fileUrl, fileName } = data;
         
-        console.log('메시지 전송 요청:', { studyId, userId, message, fileType });
+        console.log('📨 메시지 전송 요청 수신:', {
+            studyId: studyId,
+            userId: userId,
+            userName: socket.userName || userId,
+            userNickname: socket.userNickname || userId,
+            messageLength: message?.length || 0,
+            messagePreview: message?.length > 50 ? message.substring(0, 50) + '...' : message,
+            fileType: fileType || 'none',
+            timestamp: new Date().toISOString()
+        });
         
         // URL 감지 및 링크 미리보기 추출
         const linkPreviews = await extractLinkPreviews(message);
         const hasLinks = linkPreviews.length > 0;
         
+        console.log('🔗 링크 미리보기 처리 결과:', {
+            studyId: studyId,
+            hasLinks: hasLinks,
+            linkCount: linkPreviews.length,
+            linkPreviews: linkPreviews.map(preview => ({
+                url: preview.url,
+                title: preview.title
+            }))
+        });
+        
         // MongoDB에 메시지 저장
+        console.log('💾 MongoDB 메시지 저장 시작...', {
+            studyId: studyId,
+            senderId: userId,
+            messageType: hasLinks ? 'LINK' : (fileType ? 'FILE' : 'TEXT')
+        });
+        
         const messageId = await mongoService.saveMessage({
             studyId: studyId,
             senderId: userId,
@@ -167,10 +192,27 @@ const handleSendMessage = async (socket, data) => {
                 fileUrl: fileUrl,
                 fileSize: 0, // 실제 파일 크기는 별도로 계산 필요
                 mimeType: fileType
-            } : null
+            } : null,
+            linkPreviews: linkPreviews
+        });
+        
+        console.log('🎉 MongoDB 메시지 저장 완료!', {
+            messageId: messageId,
+            studyId: studyId,
+            senderId: userId,
+            timestamp: new Date().toISOString()
         });
 
         // 실시간 브로드캐스트 (즉시 전송) - 링크 미리보기 포함
+        console.log('📢 실시간 브로드캐스트 시작...', {
+            studyId: studyId,
+            messageId: messageId,
+            userId: userId,
+            messageType: hasLinks ? 'LINK' : (fileType ? 'FILE' : 'TEXT'),
+            hasLinks: hasLinks,
+            linkPreviewCount: linkPreviews.length
+        });
+        
         socketService.broadcastMessage(studyId, {
             type: 'message',
             messageId: messageId,
@@ -183,6 +225,13 @@ const handleSendMessage = async (socket, data) => {
             linkPreviews,
             messageType: hasLinks ? 'LINK' : (fileType ? 'FILE' : 'TEXT'),
             timestamp: new Date().toISOString()
+        });
+        
+        console.log('📡 실시간 브로드캐스트 완료!', {
+            studyId: studyId,
+            messageId: messageId,
+            userId: userId,
+            broadcastTimestamp: new Date().toISOString()
         });
         
         // Java Server에 메시지 저장 (큐를 통한 비동기 처리)
@@ -228,9 +277,24 @@ const handleSendMessage = async (socket, data) => {
             messageQueue.addMessage(messageData);
         }
         
-        console.log(`스터디 ${studyId}에서 메시지 전송 완료: ${message}`);
+        console.log('🏁 메시지 처리 완료!', {
+            studyId: studyId,
+            userId: userId,
+            messageId: messageId,
+            messagePreview: message?.length > 30 ? message.substring(0, 30) + '...' : message,
+            totalProcessingTime: new Date().toISOString(),
+            success: true
+        });
+        
     } catch (error) {
-        console.error('메시지 전송 실패:', error);
+        console.error('❌ 메시지 전송 실패:', {
+            studyId: studyId || 'unknown',
+            userId: userId || 'unknown',
+            error: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+        });
+        
         socket.emit('error', {
             message: '메시지 전송에 실패했습니다.',
             error: error.message

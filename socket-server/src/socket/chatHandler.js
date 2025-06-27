@@ -234,7 +234,14 @@ class ChatHandler {
             // 메시지 전송
             socket.on('send-message', (data) => {
                 const { studyId, userId, message, fileType, fileUrl, fileName } = data;
-                console.log(`메시지 수신 - 방: ${studyId}, 사용자: ${userId}, 내용: ${message}`);
+                console.log(`💬 ChatHandler - 메시지 수신:`, {
+                    studyId: studyId,
+                    userId: userId,
+                    messageLength: message?.length || 0,
+                    messagePreview: message?.length > 40 ? message.substring(0, 40) + '...' : message,
+                    fileType: fileType || 'none',
+                    timestamp: new Date().toISOString()
+                });
                 
                 // 메시지 전송 시 타이핑 상태 자동 해제
                 this.stopTyping(socket, studyId, userId);
@@ -243,27 +250,41 @@ class ChatHandler {
                 const room = this.rooms.get(studyId);
                 
                 if (room) {
-                    // 메시지 저장
-                    room.messages.push({
+                    // 메시지 저장 (메모리)
+                    const messageData = {
                         userId,
                         content: message,
                         timestamp,
                         fileType,
                         fileUrl,
                         fileName
+                    };
+                    
+                    room.messages.push(messageData);
+                    
+                    console.log(`📝 ChatHandler - 메모리에 메시지 저장:`, {
+                        studyId: studyId,
+                        userId: userId,
+                        totalMessagesInRoom: room.messages.length,
+                        savedAt: timestamp
                     });
 
                     // 같은 방의 모든 클라이언트에게 메시지 전송
-                    this.io.to(studyId).emit('new-message', {
-                        userId,
-                        content: message,
-                        timestamp,
-                        fileType,
-                        fileUrl,
-                        fileName
+                    this.io.to(studyId).emit('new-message', messageData);
+                    
+                    console.log(`📤 ChatHandler - 클라이언트 브로드캐스트 완료:`, {
+                        studyId: studyId,
+                        userId: userId,
+                        participantCount: room.participants.size,
+                        broadcastAt: new Date().toISOString()
                     });
                 } else {
-                    console.error(`채팅방을 찾을 수 없음: ${studyId}`);
+                    console.error(`❌ ChatHandler - 채팅방을 찾을 수 없음:`, {
+                        studyId: studyId,
+                        userId: userId,
+                        availableRooms: Array.from(this.rooms.keys()),
+                        timestamp: new Date().toISOString()
+                    });
                 }
             });
 
@@ -428,9 +449,4 @@ const handleFileUploadComplete = (socket, data) => {
     });
 };
 
-module.exports = {
-    handleJoinStudy,
-    handleLeaveStudy,
-    handleSendMessage,
-    handleFileUploadComplete
-}; 
+module.exports = ChatHandler; 

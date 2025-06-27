@@ -37,7 +37,7 @@
             srm.*,
             m.name as member_name,
             m.nickname as member_nickname,
-            m.email as member_email,
+            m.userid as member_email,
             m.profile_image as member_profile_image
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
@@ -51,7 +51,7 @@
             srm.*,
             m.name as member_name,
             m.nickname as member_nickname,
-            m.email as member_email,
+            m.userid as member_email,
             m.profile_image as member_profile_image
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
@@ -66,7 +66,7 @@
             srm.*,
             m.name as member_name,
             m.nickname as member_nickname,
-            m.email as member_email,
+            m.userid as member_email,
             m.profile_image as member_profile_image
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
@@ -91,7 +91,7 @@
             srm.*,
             m.name as member_name,
             m.nickname as member_nickname,
-            m.email as member_email,
+            m.userid as member_email,
             m.profile_image as member_profile_image
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
