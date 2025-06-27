@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import thumbnailList from '@json/Thumbnail';
-import { customAlert } from '@/assets/js/common-ui';
+import { customAlert, userClient, getAccessToken } from '@js/common-ui';
 
 const CreateStudy = ({ onClose }) => {
 	const navigate = useNavigate();
@@ -25,27 +25,6 @@ const CreateStudy = ({ onClose }) => {
 		description: false,
 		thumbnail: false
 	});
-
-
-	const handleClose = () => {
-		setIsVisible(false);
-		setTimeout(() => {
-			setIsMounted(false); // DOM 제거
-			onClose(); // 부모에게 알림
-		}, 400);
-	};
-
-	useEffect(() => {
-		const timer = setTimeout(() => setIsVisible(true), 10);
-		return () => clearTimeout(timer);
-	}, []);
-	useEffect(() => {
-		setThumbnails(thumbnailList[category] || []);
-	}, [category]);
-
-	if (!isMounted) return null; // 실제 DOM 제거
-
-	/* 콘솔 */
 	const [title, setTitle] = useState('');
 	const [department, setDepartment] = useState('');
 	const [major, setMajor] = useState('');
@@ -54,6 +33,26 @@ const CreateStudy = ({ onClose }) => {
 	const [capacity, setCapacity] = useState('');
 	const [time, setTime] = useState('');
 	const [description, setDescription] = useState('');
+
+	const handleClose = () => {
+		setIsVisible(false);
+		setTimeout(() => {
+			setIsMounted(false);
+			onClose();
+		}, 400);
+	};
+
+	useEffect(() => {
+		const timer = setTimeout(() => setIsVisible(true), 10);
+		return () => clearTimeout(timer);
+	}, []);
+
+	useEffect(() => {
+		setThumbnails(thumbnailList[category] || []);
+	}, [category]);
+
+	if (!isMounted) return null;
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
@@ -79,15 +78,34 @@ const CreateStudy = ({ onClose }) => {
 			return;
 		}
 
-		const studyInfo = {
-			title, department, major, city, district,
-			capacity, time, description, selectedThumbnail
+		const requestData = {
+			title,
+			description,
+			education: department,
+			department: major,
+			region: city,
+			district,
+			capacity: Number(capacity),
+			time,
+			thumbnail: selectedThumbnail.replace('/uploads/thumbnail/', ''),
+			isPublic: true,
+			currentMembers: 1
 		};
 
-		// 정상 콘솔 출력
-		console.log(studyInfo);
+		try {
+			const token = getAccessToken();
+			const res = await userClient.post('/api/studies', requestData, {
+				headers: {
+					Authorization: `Bearer ${token}`
+				},
+				withCredentials: true
+			});
 
-		navigate('/chat', { state: studyInfo });
+			await customAlert('스터디가 성공적으로 생성되었습니다!');
+			navigate('/chat', { state: res.data });
+		} catch (err) {
+			await customAlert(err.response?.data?.message || '스터디 생성에 실패했습니다.');
+		}
 	};
 	/* // 콘솔 */
 

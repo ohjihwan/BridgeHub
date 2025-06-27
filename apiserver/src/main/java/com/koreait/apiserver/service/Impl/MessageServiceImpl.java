@@ -193,7 +193,6 @@ public class MessageServiceImpl implements MessageService {
         dto.setIsDeleted(message.getIsDeleted());
         
         dto.setSenderNickname(message.getSenderNickname());
-        dto.setSenderName(message.getSenderName());
         dto.setSenderProfileImage(message.getSenderProfileImage());
         
         return dto;

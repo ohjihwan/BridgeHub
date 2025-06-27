@@ -22,6 +22,7 @@ public class Member {
     private String profileImage;
     private String status = "ACTIVE";
     private boolean emailVerified = false;  // 이메일 인증 상태
+    private String description;  // 사용자 자기소개
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
@@ -70,6 +71,9 @@ public class Member {
     
     public Boolean getEmailVerified() { return emailVerified; }
     public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

@@ -83,6 +83,9 @@ public class MemberServiceImpl implements MemberService {
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().trim().isEmpty()) {
         member.setProfileImage(memberDTO.getProfileImage());
         }
+        if (memberDTO.getDescription() != null && !memberDTO.getDescription().trim().isEmpty()) {
+            member.setDescription(memberDTO.getDescription());
+        }
         
         member.setStatus("ACTIVE");
         member.setEmailVerified(memberDTO.getEmailVerified());
@@ -183,6 +186,9 @@ public class MemberServiceImpl implements MemberService {
             if (memberDTO.getProfileImage() != null) {
                 member.setProfileImage(memberDTO.getProfileImage());
             }
+            if (memberDTO.getDescription() != null) {
+                member.setDescription(memberDTO.getDescription());
+            }
             
             member.setUpdatedAt(LocalDateTime.now());
             memberDao.updateMember(member);
@@ -257,6 +263,7 @@ public class MemberServiceImpl implements MemberService {
         dto.setDistrict(member.getDistrict());
         dto.setTime(member.getTime());
         dto.setProfileImage(member.getProfileImage());
+        dto.setDescription(member.getDescription());
         dto.setEmailVerified(member.getEmailVerified());
         dto.setCreatedAt(member.getCreatedAt());
         dto.setUpdatedAt(member.getUpdatedAt());

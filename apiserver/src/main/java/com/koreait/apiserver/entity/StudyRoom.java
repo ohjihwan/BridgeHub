@@ -26,8 +26,7 @@ public class StudyRoom {
     private Boolean isPublic = true;
     private LocalDateTime createdAt;
     
-    // 생성자 정보 (JOIN 결과)
-    private String bossName;
+    // 생성자 정보 (JOIN 결과) - 이름 제거, 닉네임만 유지
     private String bossNickname;
     private String bossProfileImage;
     

@@ -44,7 +44,17 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
         if (studyRoomOpt.isPresent()) {
             StudyRoom studyRoom = studyRoomOpt.get();
-            return convertToDTO(studyRoom);
+            StudyRoomDTO dto = convertToDTO(studyRoom);
+            
+            // 현재 참가 중인 모든 멤버의 닉네임 조회
+            List<StudyRoomMember> approvedMembers = studyRoomMemberDao.selectApprovedMembers(studyRoomId);
+            List<String> memberNicknames = approvedMembers.stream()
+                    .map(StudyRoomMember::getMemberNickname)
+                    .filter(nickname -> nickname != null && !nickname.trim().isEmpty())
+                    .collect(Collectors.toList());
+            dto.setMemberNicknames(memberNicknames);
+            
+            return dto;
         }
         throw new RuntimeException("스터디룸을 찾을 수 없습니다.");
     }
@@ -405,8 +415,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         dto.setIsPublic(studyRoom.getIsPublic());
         dto.setCreatedAt(studyRoom.getCreatedAt());
         
-        // 방장 정보 설정
-        dto.setBossName(studyRoom.getBossName());
+        // 방장 정보 설정 (이름 제거, 닉네임만 유지)
         dto.setBossNickname(studyRoom.getBossNickname());
         dto.setBossProfileImage(studyRoom.getBossProfileImage());
         
@@ -424,11 +433,11 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         dto.setApprovedAt(member.getApprovedAt());
         dto.setApprovedBy(member.getApprovedBy());
         
-        // 멤버 정보 설정
-        dto.setMemberName(member.getMemberName());
+        // 멤버 정보 설정 (이름 제거, 닉네임만 유지)
         dto.setMemberNickname(member.getMemberNickname());
         dto.setMemberEmail(member.getMemberEmail());
         dto.setMemberProfileImage(member.getMemberProfileImage());
+        dto.setMemberDescription(member.getMemberDescription());
         
         return dto;
     }

@@ -20,6 +20,7 @@
         <result property="memberNickname" column="member_nickname"/>
         <result property="memberEmail" column="member_email"/>
         <result property="memberProfileImage" column="member_profile_image"/>
+        <result property="memberDescription" column="member_description"/>
     </resultMap>
 
     <!-- 스터디 참가 신청 -->
@@ -38,7 +39,8 @@
             m.name as member_name,
             m.nickname as member_nickname,
             m.userid as member_email,
-            m.profile_image as member_profile_image
+            m.profile_image as member_profile_image,
+            m.description as member_description
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
         WHERE srm.study_room_id = #{studyRoomId}
@@ -52,7 +54,8 @@
             m.name as member_name,
             m.nickname as member_nickname,
             m.userid as member_email,
-            m.profile_image as member_profile_image
+            m.profile_image as member_profile_image,
+            m.description as member_description
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
         WHERE srm.study_room_id = #{studyRoomId} 
@@ -67,7 +70,8 @@
             m.name as member_name,
             m.nickname as member_nickname,
             m.userid as member_email,
-            m.profile_image as member_profile_image
+            m.profile_image as member_profile_image,
+            m.description as member_description
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
         WHERE srm.study_room_id = #{studyRoomId} 
@@ -92,7 +96,8 @@
             m.name as member_name,
             m.nickname as member_nickname,
             m.userid as member_email,
-            m.profile_image as member_profile_image
+            m.profile_image as member_profile_image,
+            m.description as member_description
         FROM study_room_members srm
         LEFT JOIN members m ON srm.member_id = m.id
         WHERE srm.study_room_id = #{studyRoomId} 

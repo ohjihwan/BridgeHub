@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authClient } from '@/assets/js/common-ui';
 
@@ -7,35 +7,43 @@ const API_BASE_URL = 'http://localhost:7100/api/auth';
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
 	const [userPw, setUserPw] = useState('');
+	const [remember, setRemember] = useState(false);
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		const savedId = localStorage.getItem('rememberId');
+		if (savedId) {
+			setUserId(savedId);
+			setRemember(true);
+		}
+	}, []);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		
-		/* try {
+		try {
 			const res = await authClient.post(`/login`, {
 				userid: userId,
 				password: userPw
 			});
-
-			if (res.data.success) {
+			if (res.data.status === 'success') {
 				const token = res.data.data.token;
-				localStorage.setItem('authorization', token);
-				await window.customAlert('로그인 성공').then(() => {
-					navigate('/home');
-				});
+				localStorage.setItem('token', token);
+
+				// 아이디 저장 여부 반영
+				if (remember) {
+					localStorage.setItem('rememberId', userId);
+				} else {
+					localStorage.removeItem('rememberId');
+				}
+
+				navigate('/home');
 			} else {
-				await window.customAlert(res.data.message || '로그인에 실패했습니다.');
+				await window.customAlert('로그인에 실패했습니다.');
 			}
 		} catch (err) {
-			await window.customAlert(err.response?.data?.message || '로그인 중 오류가 발생했습니다.');
-		} */
-		navigate('/home');
+			await window.customAlert('로그인 중 오류가 발생했습니다.');
+		}
 	};
-
-	function texttext(e) {
-		console.log("이렇게 실행");
-	}
 
 	return (
 		<div className="login">
@@ -64,10 +72,10 @@ function Login({ onSwitchToSignUp }) {
 						<div className="find-buttons">
 							<button type="button" className='fund-button' onClick={() => customAlert('안녕하세요! 여긴 안내창입니다.')}>아이디 찾기</button>
 							<i className='slash'>/</i>
-							<button type="button" className='fund-button' onClick={() => customConfirm('정말 비밀번호를 찾으시겠습니까?', texttext)}>비밀번호 찾기</button>
+							<button type="button" className='fund-button' onClick={() => customConfirm('정말 비밀번호를 찾으시겠습니까?')}>비밀번호 찾기</button>
 						</div>
 						<div className="login__checkbox">
-							<input type="checkbox" id="remember" className='hide'/>
+							<input type="checkbox" id="remember" className='hide' checked={remember} onChange={(e) => setRemember(e.target.checked)} />
 							<label htmlFor="remember">아이디 기억하기</label>
 						</div>
 					</div>
@@ -83,3 +91,4 @@ function Login({ onSwitchToSignUp }) {
 }
 
 export default Login; 
+
