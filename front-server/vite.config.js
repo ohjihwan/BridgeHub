@@ -6,14 +6,7 @@ import path from 'path'
 export default defineConfig({
 	plugins: [react()],
 	server: {
-		port: 7000,
-		proxy: {
-			'/api': {
-				target: 'http://localhost:7100',
-				changeOrigin: true,
-				secure: false
-			}
-		},
+		port: 7000
 	},
 	resolve: {
 		alias: {
@@ -26,7 +19,7 @@ export default defineConfig({
 			'@components': path.resolve(__dirname, 'src/page/components'),
 			'@common': path.resolve(__dirname, 'src/page/common'),
 			'@json': path.resolve(__dirname, 'src/json'),
-			'@dev': path.resolve(__dirname, 'src/dev'),
+			'@dev': path.resolve(__dirname, 'dev'),
 		},
 	}
 })
