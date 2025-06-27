@@ -30,8 +30,10 @@ CREATE TABLE members (
     profile_image VARCHAR(500) COMMENT '프로필 이미지 경로',
     status ENUM('ACTIVE','BANNED','DELETED') DEFAULT 'ACTIVE' COMMENT '계정 상태',
     email_verified BOOLEAN DEFAULT FALSE COMMENT '이메일 인증 여부',
+    description TEXT COMMENT '사용자 자기소개 (스터디 참가 신청시 방장이 참고)',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '가입일',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일'
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
+    INDEX idx_members_description (description(100))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='회원 정보';
 
 -- =============================================
@@ -276,6 +278,7 @@ CREATE INDEX idx_members_department ON members(department);
 CREATE INDEX idx_members_region ON members(region);
 CREATE INDEX idx_members_district ON members(district);
 CREATE INDEX idx_members_time ON members(time);
+CREATE INDEX idx_members_description ON members(description(100));
 
 -- 메시지 관련 인덱스
 CREATE INDEX idx_message_room_id ON Message(room_id);
@@ -357,3 +360,10 @@ CREATE INDEX idx_study_room_department ON studyroom(department);
 - 스터디 참가 승인 → 채팅방 자동 참가
 - 스터디 탈퇴 → 채팅방 자동 퇴장
 */
+
+-- =============================================
+-- 13. description 컬럼 추가 (스터디 참가 신청시 참고용)
+-- =============================================
+
+-- description 컬럼에 대한 인덱스 추가 (검색 최적화)
+CREATE INDEX idx_members_description ON members(description(100));
