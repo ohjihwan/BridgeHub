@@ -22,6 +22,5 @@ public class Message {
     private Integer logMessageIndex;
     
     private String senderNickname;
-    private String senderName;
     private String senderProfileImage;
 } 
