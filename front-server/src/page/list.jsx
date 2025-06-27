@@ -62,6 +62,7 @@ const StudyRoomPage = () => {
 
 			<div className="studyroom-list__content">
 				<StudyRoomList
+					/* StudyRoomList rooms={rooms || []} */
 					rooms={filteredRooms.slice(0, visibleCount)}
 					onItemClick={handleItemClick}
 				/>
