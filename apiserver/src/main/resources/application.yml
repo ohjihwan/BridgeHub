@@ -6,28 +6,20 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # 이메일 설정 (Gmail)
-  # mail:
-  #   host: smtp.gmail.com
-  #   port: 587
-  #   username: ${GMAIL_USERNAME:bglyk83@gmail.com}
-  #   password: ${GMAIL_PASSWORD:ipbeaplyaqbqmdsy}
-  #   properties:
-  #     mail:
-  #       smtp:
-  #         auth: true
-  #         starttls:
-  #           enable: false
-  #         timeout: 5000
-  #         connectiontimeout: 5000
-  #         writetimeout: 5000
   mail:
-    host: 
-    port: 
-    username:
-    password:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME:bglyk83@gmail.com}
+    password: ${GMAIL_PASSWORD:ipbeaplyaqbqmdsy}
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: false
+          timeout: 5000
+          connectiontimeout: 5000
+          writetimeout: 5000
 
 # MyBatis 설정
 mybatis:
@@ -48,3 +40,7 @@ logging:
     com.koreait.thebridgehub: DEBUG
     org.springframework.security: DEBUG
     org.springframework.mail: DEBUG 
+
+server:
+  port: 7100
+  address: 0.0.0.0

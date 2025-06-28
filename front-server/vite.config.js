@@ -8,6 +8,13 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 7000,
     allowedHosts: ['thebridgehub.org', 'localhost', '0.0.0.0'],
+    proxy: {
+      '/api': {
+        target: 'http://172.31.10.210:7100',  // 또는 배포 도메인 http://api.thebridgehub.org
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   resolve: {
     alias: {
