@@ -93,7 +93,7 @@ const schemas = {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["studyId", "studyTitle"],
+                required: ["studyId"],
                 properties: {
                     studyId: {
                         bsonType: ["int", "string"],
@@ -101,33 +101,20 @@ const schemas = {
                     },
                     studyTitle: {
                         bsonType: "string",
-                        description: "스터디 제목 (필수)"
+                        description: "스터디 제목"
                     },
                     currentMembers: {
                         bsonType: "array",
                         items: {
-                            bsonType: "object",
-                            properties: {
-                                userId: { bsonType: ["int", "string"] },
-                                userName: { bsonType: "string" },
-                                userNickname: { bsonType: "string" },
-                                joinedAt: { bsonType: "date" },
-                                status: { enum: ["ACTIVE", "INACTIVE"] }
-                            }
+                            bsonType: "object"
                         }
                     },
                     memberCount: {
-                        bsonType: "int",
+                        bsonType: ["int", "long"],
                         description: "현재 멤버 수"
                     },
                     lastMessage: {
-                        bsonType: "object",
-                        properties: {
-                            content: { bsonType: "string" },
-                            senderId: { bsonType: ["int", "string"] },
-                            senderName: { bsonType: "string" },
-                            timestamp: { bsonType: "date" }
-                        }
+                        bsonType: "object"
                     },
                     lastActivity: {
                         bsonType: "date",
@@ -156,7 +143,7 @@ const schemas = {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["studyId", "userId", "socketId", "status"],
+                required: ["studyId", "userId", "status"],
                 properties: {
                     studyId: {
                         bsonType: ["int", "string"],
@@ -176,7 +163,7 @@ const schemas = {
                     },
                     socketId: {
                         bsonType: "string",
-                        description: "Socket ID (필수)"
+                        description: "Socket ID"
                     },
                     status: {
                         enum: ["ACTIVE", "INACTIVE"],
@@ -222,15 +209,15 @@ const schemas = {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["level", "category", "message", "timestamp"],
+                required: ["level", "message"],
                 properties: {
                     level: {
-                        enum: ["INFO", "WARN", "ERROR", "DEBUG"],
-                        description: "로그 레벨 (필수)"
+                        bsonType: "string",
+                        description: "로그 레벨"
                     },
                     category: {
-                        enum: ["SYSTEM", "MESSAGE", "STUDY", "USER", "CONNECTION"],
-                        description: "로그 카테고리 (필수)"
+                        bsonType: "string",
+                        description: "로그 카테고리"
                     },
                     studyId: {
                         bsonType: ["int", "string"],
@@ -250,7 +237,7 @@ const schemas = {
                     },
                     timestamp: {
                         bsonType: "date",
-                        description: "로그 시간 (필수)"
+                        description: "로그 시간"
                     },
                     createdAt: {
                         bsonType: "date",
@@ -449,4 +436,17 @@ module.exports = {
     validateSchema,
     MONGODB_URI,
     DB_NAME
-}; 
+};
+
+// 스크립트로 직접 실행될 때만 초기화 실행
+if (require.main === module) {
+    initializeSchemas()
+        .then(() => {
+            console.log('✅ 스키마 초기화 성공!');
+            process.exit(0);
+        })
+        .catch((error) => {
+            console.error('❌ 스키마 초기화 실패:', error);
+            process.exit(1);
+        });
+} 

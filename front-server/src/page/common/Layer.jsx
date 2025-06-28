@@ -1,12 +1,24 @@
 import ReactDOM from 'react-dom';
+import { useState, useEffect } from 'react';
 
 const Layer = ({ isOpen, onClose, children, header = null, footer = null }) => {
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		if (isOpen) {
+			const timer = setTimeout(() => {
+				setIsVisible(true);
+			}, 100);
+			return () => clearTimeout(timer);
+		}
+	}, [isOpen]);
+
 	if (!isOpen) return null;
 
 	return ReactDOM.createPortal(
 		<>
 			<div className="overlay" onClick={onClose}></div>
-			<div className="layer slide-up">
+			<div className={`layer ${isVisible ? 'slide-up' : ''}`}>
 				{header && (
 					<div className="layer__header">
 						<h2 className="layer__title">{header}</h2>

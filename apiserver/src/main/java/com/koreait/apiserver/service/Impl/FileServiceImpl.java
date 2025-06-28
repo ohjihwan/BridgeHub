@@ -108,6 +108,77 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public FileDTO uploadProfileImage(MultipartFile multipartFile, String type, Integer memberId) throws Exception {
+        // 파일 검증
+        if (multipartFile.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+
+        String originalFilename = multipartFile.getOriginalFilename();
+        
+        // 이미지 파일만 허용
+        if (!isImageFile(originalFilename)) {
+            throw new IllegalArgumentException("이미지 파일만 업로드할 수 있습니다.");
+        }
+
+        // 파일 크기 검증 (5MB)
+        if (multipartFile.getSize() > 5 * 1024 * 1024) {
+            throw new IllegalArgumentException("파일 크기가 너무 큽니다. (최대 5MB)");
+        }
+
+        // 파일 저장 경로 생성
+        String storedFilename = generateStoredFilename(originalFilename);
+        String relativePath = getRelativePath("PROFILE", storedFilename);
+        Path fullPath = Paths.get(uploadPath, relativePath);
+
+        System.out.println("=== 파일 저장 디버깅 ===");
+        System.out.println("uploadPath: " + uploadPath);
+        System.out.println("storedFilename: " + storedFilename);
+        System.out.println("relativePath: " + relativePath);
+        System.out.println("fullPath: " + fullPath.toAbsolutePath());
+
+        // 디렉토리 생성
+        Files.createDirectories(fullPath.getParent());
+        System.out.println("디렉토리 생성 완료: " + fullPath.getParent().toAbsolutePath());
+
+        // 파일 저장
+        Files.copy(multipartFile.getInputStream(), fullPath);
+        System.out.println("파일 저장 완료: " + fullPath.toAbsolutePath());
+        System.out.println("파일 존재 확인: " + Files.exists(fullPath));
+
+        // 파일 해시 생성
+        String fileHash = generateFileHash(multipartFile.getBytes());
+
+        // DB에 파일 정보 저장
+        File fileEntity = new File();
+        fileEntity.setFileType("PROFILE");
+        fileEntity.setOriginalFilename(originalFilename);
+        fileEntity.setStoredFilename(storedFilename);
+        fileEntity.setFilePath(relativePath);
+        fileEntity.setFileSize(multipartFile.getSize());
+        fileEntity.setMimeType(multipartFile.getContentType());
+        fileEntity.setFileHash(fileHash);
+        fileEntity.setUploadedAt(LocalDateTime.now());
+        fileEntity.setMemberId(memberId); // 프로필 이미지의 소유자 ID 설정
+
+        fileDao.insertFile(fileEntity);
+
+        // DTO로 변환하여 반환
+        FileDTO fileDTO = convertToDTO(fileEntity);
+        
+        // 웹에서 접근 가능한 URL 생성
+        String fileUrl = "http://localhost:7100/uploads/" + relativePath;
+        fileDTO.setFileUrl(fileUrl);
+        fileDTO.setDownloadUrl("/api/files/download/" + fileEntity.getFileId());
+        fileDTO.setThumbnailUrl("/api/files/thumbnail/" + fileEntity.getFileId());
+        
+        System.out.println("생성된 파일 URL: " + fileUrl);
+        System.out.println("=== 파일 저장 디버깅 끝 ===");
+
+        return fileDTO;
+    }
+
+    @Override
     public byte[] downloadFile(Integer fileId) throws Exception {
         File fileEntity = fileDao.getFileById(fileId);
         if (fileEntity == null || fileEntity.getIsDeleted()) {
