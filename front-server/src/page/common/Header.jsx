@@ -26,7 +26,6 @@ const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = 
 		customConfirm('로그아웃 하시겠습니까?', () => {
 			localStorage.removeItem('token');
 			setMenuOpen(false);
-			customAlert('로그아웃 되었습니다');
 			navigate('/login');
 		});
 	};
