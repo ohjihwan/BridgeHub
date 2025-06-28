@@ -21,6 +21,23 @@ class ChatHandler {
         this.io.on('connection', (socket) => {
             console.log('🔌 ChatHandler - 클라이언트 연결됨:', socket.id, new Date().toISOString());
 
+            // 모든 소켓 이벤트 로깅 (디버깅용)
+            const originalEmit = socket.emit;
+            const originalOn = socket.on;
+            
+            socket.on = function(event, callback) {
+                console.log(`📥 [${socket.id}] 이벤트 리스너 등록:`, event);
+                return originalOn.call(this, event, (...args) => {
+                    console.log(`📥 [${socket.id}] 이벤트 수신:`, event, args.length > 0 ? args[0] : '(no data)');
+                    return callback(...args);
+                });
+            };
+            
+            socket.emit = function(event, ...args) {
+                console.log(`📤 [${socket.id}] 이벤트 전송:`, event, args.length > 0 ? args[0] : '(no data)');
+                return originalEmit.call(this, event, ...args);
+            };
+
             // 스터디룸 참가 (socketRouter에서 가져온 핸들러 사용)
             socket.on('join-study', async (data) => {
                 try {
@@ -262,10 +279,12 @@ class ChatHandler {
                     const room = this.rooms.get(studyId);
                     
                     if (room) {
-                        // 메시지 데이터 생성
+                        // 메시지 데이터 생성 (프론트엔드 호환)
                         const messageData = {
                             userId,
-                            content: message,
+                            senderId: userId,
+                            message: message,  // 프론트엔드가 기대하는 필드
+                            text: message,     // 백업 필드
                             timestamp,
                             fileType,
                             fileUrl,
@@ -402,7 +421,9 @@ class ChatHandler {
                             // 퇴장 메시지 전송 (닉네임 사용)
                             this.io.to(studyId).emit('new-message', {
                                 userId: '시스템',
-                                content: `${participant.displayName || participant.userId}님이 퇴장하셨습니다.`,
+                                senderId: '시스템',
+                                message: `${participant.displayName || participant.userId}님이 퇴장하셨습니다.`,
+                                text: `${participant.displayName || participant.userId}님이 퇴장하셨습니다.`,
                                 timestamp: new Date().toISOString()
                             });
                         }
@@ -445,7 +466,9 @@ class ChatHandler {
                 
                 const formattedMessages = recentMessages.map(msg => ({
                     userId: msg.senderId,
-                    content: msg.content,
+                    senderId: msg.senderId,
+                    message: msg.content,  // 프론트엔드가 기대하는 필드
+                    text: msg.content,     // 백업 필드
                     timestamp: msg.timestamp,
                     messageId: msg._id,
                     senderName: msg.senderName,
@@ -532,10 +555,12 @@ class ChatHandler {
             console.log(`✅ ChatHandler - MongoDB 채팅 기록 조회 성공: ${recentMessages.length}개 메시지`);
             
             // MongoDB에서 가져온 메시지를 클라이언트 형식으로 변환
-            const formattedMessages = recentMessages.map(msg => ({
-                userId: msg.senderId,
-                content: msg.content,
-                timestamp: msg.timestamp,
+                            const formattedMessages = recentMessages.map(msg => ({
+                    userId: msg.senderId,
+                    senderId: msg.senderId,
+                    message: msg.content,  // 프론트엔드가 기대하는 필드
+                    text: msg.content,     // 백업 필드
+                    timestamp: msg.timestamp,
                 messageId: msg._id,
                 senderName: msg.senderName,
                 senderNickname: msg.senderNickname,
@@ -612,7 +637,9 @@ class ChatHandler {
         // 입장 메시지 전송 (닉네임 사용)
         this.io.to(studyId).emit('new-message', {
             userId: '시스템',
-            content: `${userDisplayName}님이 입장하셨습니다.`,
+            senderId: '시스템',
+            message: `${userDisplayName}님이 입장하셨습니다.`,
+            text: `${userDisplayName}님이 입장하셨습니다.`,
             timestamp: new Date().toISOString()
         });
         
