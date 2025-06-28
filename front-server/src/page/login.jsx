@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authClient } from '@js/common-ui';
+import { authClient, formatPhone, cleanPhone } from '@js/common-ui';
 import Layer from '@common/Layer';
-
-const API_BASE_URL = 'http://localhost:7100/api/auth';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
@@ -13,6 +11,7 @@ function Login({ onSwitchToSignUp }) {
 
 	const [findName, setFindName] = useState('');
 	const [findPhone, setFindPhone] = useState('');
+	const [resetCode, setResetCode] = useState('');
 	const [findEmail, setFindEmail] = useState('');
 	const [emailVerified, setEmailVerified] = useState(false);
 	const [newPassword, setNewPassword] = useState('');
@@ -56,13 +55,13 @@ function Login({ onSwitchToSignUp }) {
 	};
 
 	const handleEmailVerification = async () => {
-		if (!findEmail) {
+		if (!findEmail.trim()) {
 			await window.customAlert('이메일을 입력하세요.');
 			return;
 		}
 
 		try {
-			await authClient.post('/send-verification', { email: findEmail });
+			await authClient.post('/forgot-password', { email: findEmail });
 			await window.customAlert('인증 코드가 발송되었습니다.');
 
 			const code = await window.customPrompt('인증코드를 입력하세요.', 'XXXXXX');
@@ -85,15 +84,11 @@ function Login({ onSwitchToSignUp }) {
 			await window.customAlert('이름, 휴대폰 번호, 이메일을 모두 입력해주세요.');
 			return;
 		}
-		if (!emailVerified) {
-			await window.customAlert('이메일 인증을 먼저 완료하세요.');
-			return;
-		}
 
 		try {
 			const res = await authClient.post(`/find-password`, {
 				name: findName,
-				phone: findPhone,
+				phone: cleanPhone(findPhone),
 				email: findEmail
 			});
 
@@ -107,21 +102,33 @@ function Login({ onSwitchToSignUp }) {
 			await window.customAlert('비밀번호 찾기 중 오류가 발생했습니다.');
 		}
 	};
+
+	const requestData = {
+		name: findName,
+		phone: cleanPhone(findPhone),
+		email: findEmail
+	};
 	
 	const handleChangePassword = async () => {
+		if (!newPassword || !newPasswordCheck) {
+			await window.customAlert('새 비밀번호를 모두 입력하세요.');
+			return;
+		}
 		if (newPassword !== newPasswordCheck) {
 			await window.customAlert('비밀번호가 일치하지 않습니다.');
 			return;
 		}
+		if (!emailVerified || !resetCode) {
+			await window.customAlert('이메일 인증을 먼저 완료하세요.');
+			return;
+		}
 
 		try {
-			const token = localStorage.getItem('token'); // 이미 authClient에 자동 포함되는 구조라 따로 안 붙여도 됨
-
-			const res = await authClient.put('/members/password', {
-				currentPassword: currentPassword,  // 현재 비밀번호 입력값 필요
+			const res = await authClient.post('/api/auth/reset-password', {
+				email: findEmail,
+				resetCode: resetCode,
 				newPassword: newPassword
 			});
-
 			if (res.data.status === 'success') {
 				await window.customAlert('비밀번호가 성공적으로 변경되었습니다.');
 				// 원하면 비밀번호 입력 필드 초기화
@@ -138,6 +145,7 @@ function Login({ onSwitchToSignUp }) {
 			findPhone.trim() &&
 			findEmail.trim() &&
 			emailVerified &&
+			resetCode.trim() &&
 			newPassword.trim() &&
 			newPasswordCheck.trim()
 		);
@@ -186,10 +194,16 @@ function Login({ onSwitchToSignUp }) {
 				</div>
 			</div>,
 			{showFindPw && (
-				<Layer isOpen={showFindPw} onClose={() => setShowFindPw(false)} header="비밀번호 찾기" footer={
-					<button className="layer__submit" onClick={handleChangePassword} disabled={!isFormFilled} >
-						비밀번호를 변경
-					</button>
+				<Layer isOpen={showFindPw} onClose={() => setShowFindPw(false)} closeOnOverlayClick={false} header="비밀번호 찾기" footer={
+					emailVerified ? (
+						<button className="layer__submit" onClick={handleChangePassword} disabled={!isFormFilled}>
+							비밀번호 변경
+						</button>
+					) : (
+						<button className="layer__submit" onClick={handleFindPwRequest} disabled={!isFormFilled}>
+							임시 비밀번호 발송
+						</button>
+					)
 				}>
 					<label htmlFor='findId' className="label hide">이름</label>
 					<div className="field">
@@ -197,7 +211,7 @@ function Login({ onSwitchToSignUp }) {
 					</div>
 					<label htmlFor='findHp' className="label hide">휴대폰 번호</label>
 					<div className="field">
-						<input type="tel" name="findHp" id="findHp" className="text" placeholder="휴대폰 번호를 입력하세요" value={findPhone} onChange={(e) => setFindPhone(e.target.value)} />
+						<input type="tel" className="text" name="hp" value={findPhone || ''} onChange={(e) => setFindPhone(formatPhone(e.target.value))} maxLength={13} placeholder="휴대폰번호를 입력하세요"/>
 					</div>
 					<div className="field">
 						<input type="email" className="text" name="email" value={findEmail} onChange={(e) => setFindEmail(e.target.value)} placeholder="이메일을 입력하세요"/>
