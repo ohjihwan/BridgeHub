@@ -988,6 +988,8 @@ legend,
 	&__title {
 		color:#fff;
 		font-size:remx(24);
+		text-align:center;
+		word-break:keep-all;
 		text-shadow:0 0 remx(12) #000;
 	}
 
