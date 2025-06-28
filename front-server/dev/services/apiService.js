@@ -122,9 +122,18 @@ export const chatAPI = {
 
 // 파일 관련 API
 export const fileAPI = {
-    // 파일 업로드
+    // 파일 업로드 (스터디룸용)
     uploadFile: (formData) => {
         return apiClient.post('/files/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    },
+    
+    // 프로필 이미지 업로드
+    uploadProfileImage: (formData) => {
+        return apiClient.post('/files/upload/profile', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

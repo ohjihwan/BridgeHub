@@ -94,6 +94,7 @@ export const useSocket = () => {
 export const useStudySocket = (studyId, userId) => {
     const [messages, setMessages] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState([]);
+    const [typingUsers, setTypingUsers] = useState([]);
     const [isJoined, setIsJoined] = useState(false);
     const { isConnected, socketService } = useSocket();
 
@@ -129,6 +130,22 @@ export const useStudySocket = (studyId, userId) => {
     const sendMessage = useCallback((messageData) => {
         return socketService.sendMessage(messageData);
     }, [socketService]);
+
+    /**
+     * 타이핑 시작
+     */
+    const startTyping = useCallback(() => {
+        if (!isConnected || !isJoined || !studyId || !userId) return;
+        socketService.startTyping();
+    }, [isConnected, isJoined, studyId, userId, socketService]);
+
+    /**
+     * 타이핑 중지
+     */
+    const stopTyping = useCallback(() => {
+        if (!isConnected || !isJoined || !studyId || !userId) return;
+        socketService.stopTyping();
+    }, [isConnected, isJoined, studyId, userId, socketService]);
 
     /**
      * 소켓 이벤트 리스너 설정
@@ -171,6 +188,11 @@ export const useStudySocket = (studyId, userId) => {
             }]);
         });
 
+        // 타이핑 사용자 업데이트
+        socketService.on('typing-users-update', (data) => {
+            setTypingUsers(data.typingUsers || []);
+        });
+
         // 에러 처리
         socketService.on('error', (error) => {
             console.error('스터디 소켓 에러:', error);
@@ -188,6 +210,7 @@ export const useStudySocket = (studyId, userId) => {
             socketService.off('user-left');
             socketService.off('online-users');
             socketService.off('file-uploaded');
+            socketService.off('typing-users-update');
             socketService.off('error');
         };
     }, [isConnected, studyId, userId, joinStudy, socketService]);
@@ -206,10 +229,13 @@ export const useStudySocket = (studyId, userId) => {
     return {
         messages,
         onlineUsers,
+        typingUsers,
         isJoined,
         joinStudy,
         leaveStudy,
         sendMessage,
+        startTyping,
+        stopTyping,
         isConnected
     };
 };
