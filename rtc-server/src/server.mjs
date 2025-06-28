@@ -5,7 +5,7 @@ import { Server } from "socket.io";
 
 import router from "./router.mjs"; 
 import socketAuth from "./util/authMiddleware.mjs"; 
-import logger from "./util/logger.mjs"; 
+import * as logger from "./util/logger.mjs"; 
 import { getRoomManager } from "./service/rtcService.mjs"; 
 import config, { RTC_PORT } from "./config/index.mjs";
 
