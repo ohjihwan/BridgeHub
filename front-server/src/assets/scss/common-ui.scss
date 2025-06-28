@@ -2658,7 +2658,8 @@ legend,
 
 .search-navigator {
 	display:flex;
-	justify-content:flex-end;
+	justify-content:space-around;
+	align-items:center;
 	position:absolute;
 	right:remx(20);
 	top:remx(50);
@@ -2671,11 +2672,11 @@ legend,
 	&::before {
 		content:'';
 		position:absolute;
-		left:50%;
+		right:remx(49);
 		top:-0.6rem;
 		width:remx(12);
 		height:remx(12);
-		transform:translateX(-50%) rotate(45deg);
+		transform:rotate(45deg);
 		border-top:1px solid $line1;
 		border-left:1px solid $line1;
 		background-color:$bg-root;
@@ -2686,10 +2687,74 @@ legend,
 		position:absolute;
 		left:50%;
 		top:0rem;
-		width:remx(24);
+		width:remx(40);
 		height:remx(6);
-		transform:translateX(-50%);
 		background-color:$bg-root;
+	}
+
+	&__controllers {
+		display:flex;
+		justify-content:space-around;
+		align-items:center;
+		gap:0 remx(8);
+		min-width:remx(100);
+	}
+
+	&__arr--up {
+		position:relative;
+		width:remx(24);
+		height:remx(24);
+		background-color:$bg-root;
+
+		&::before {
+			content:'';
+			display:block;
+			width:remx(12);
+			height:remx(12);
+			margin:remx(6) 0 0 remx(6);
+			border-top:1px solid $black;
+			border-right:1px solid $black;
+			transform:rotate(-45deg);
+		}
+	}
+
+	&__arr--down {
+		position:relative;
+		width:remx(24);
+		height:remx(24);
+		background-color:$bg-root;
+
+		&::before {
+			content:'';
+			display:block;
+			width:remx(12);
+			height:remx(12);
+			margin:0 0 remx(6) remx(6);
+			border-top:1px solid $black;
+			border-right:1px solid $black;
+			transform:rotate(-225deg);
+		}
+	}
+
+	&__close {
+		width:remx(24);
+		height:remx(24);
+		background:url("@ico/ico-close.svg") no-repeat center right / 1.2rem auto;
+	}
+}
+
+.attachment-list {
+	position:absolute;
+	right:0;
+	top:0;
+	z-index:270;
+	transform:translateX(0);
+	width:remx(200);
+	height:100vh;
+	box-shadow:0 0 remx(10) rgba(0,0,0,0.3); 
+	
+	&.slide-right {
+		transform:translateX(0);
 	}
 }
 // ─────────────────────────────
