@@ -1725,6 +1725,14 @@ legend,
 				.label {
 					margin-bottom:0;
 				}
+
+				.value {
+
+					&:empty::before {
+						content:'비어있어요! 수정해주세요';
+						color:$font3;
+					}
+				}
 			}
 		}
 	}
@@ -2725,6 +2733,64 @@ legend,
 			color:$red
 		}
 	}
+
+	&__noresult {
+		position:relative;
+		padding-top:remx(160);
+		text-align:center;
+		font-weight:bold;
+		font-size:remx(26);
+
+		&.--ready {
+			
+			&::before,
+			&::after {
+				content:'';
+				position:absolute;
+				left:50%;
+				width:remx(100);
+				background:url('@img/img-anima-top.png') no-repeat 50% / 100% auto;
+				transform-origin:bottom center;
+			}
+
+			&::before {
+				top:remx(10);
+				z-index:5;
+				height:remx(95);
+				margin-left:-5rem;
+				background:url('@img/img-anima-top.png') no-repeat 50% / 100% auto;
+				animation:imgAnimaTop 4s infinite linear;
+				@keyframes imgAnimaTop {
+					0%, 100% {transform:rotate(0deg);}
+					10%, 90% {transform:rotate(15deg);}
+				}
+			}
+			&::after {
+				top:remx(82);
+				height:remx(65);
+				margin-left:-4.3rem;
+				background:url('@img/img-anima-bottom.png') no-repeat 50% / 100% auto;
+			}
+		}
+
+		&.--not-result {
+
+			&::before {
+				content:'';
+				position:absolute;
+				top:remx(10);
+				left:50%;
+				transform:translateX(-50%);
+				width:remx(150);
+				height:remx(150);
+				background:url('@img/img-not-result.png') no-repeat 50% / 100% auto;
+				transform-origin:bottom center;
+			}
+		}
+	}
+
+/* 	--not-result
+--ready */
 }
 // ─────────────────────────────
 // 📄 searchpage.jsx page

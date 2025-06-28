@@ -4,6 +4,8 @@ import Auth from '@page/Auth'
 import Home from '@page/home'
 import MyPage from '@page/MyPage'
 import Chat from '@page/chat'
+import BoardList from '@components/BoardList'
+import BoardWrite from '@components/BoardWrite'
 import List from '@page/list'
 import Search from '@page/Search'
 
@@ -39,8 +41,9 @@ function App() {
 					<Route path="/home" element={<Home />} />
 					<Route path="/mypage" element={<MyPage />} />
 					<Route path="/chat" element={<Chat />} />
-					<Route path="/list" element={<List />} />
-					<Route path="/search" element={<Search />} />
+					<Route path="/board" element={<BoardList />} />
+					<Route path="/board/write" element={<BoardWrite />} />
+					<Route path="search" element={<Search />} />
 					<Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
 				</Routes>
 			)}

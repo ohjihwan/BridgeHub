@@ -18,10 +18,18 @@ const StudyRoomPage = () => {
 			room.region?.toLowerCase().includes(searchKeyword.toLowerCase())
 		), [searchKeyword]
 	);
-	const handleItemClick = (room) => {
-		setSelectedRoom(room);
-		setShowDetail(true);
-		setIsClosing(false);
+	const handleItemClick = async (room) => {
+		if (!room?.id) {
+			console.warn('잘못된 방 정보');
+			return;
+		}
+		try {
+			const res = await axios.get(`/api/studies/${room.id}`);
+			setSelectedRoom(res.data);
+			setShowDetail(true);
+		} catch (err) {
+			console.error(err);
+		}
 	};
 	const handleDetailClose = () => {
 		setIsClosing(true);
@@ -62,6 +70,7 @@ const StudyRoomPage = () => {
 
 			<div className="studyroom-list__content">
 				<StudyRoomList
+					/* StudyRoomList rooms={rooms || []} */
 					rooms={filteredRooms.slice(0, visibleCount)}
 					onItemClick={handleItemClick}
 				/>

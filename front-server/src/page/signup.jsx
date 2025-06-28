@@ -17,10 +17,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		password: '',
 		passwordConfirm: '',
 		nickname: '',
-		department1: '',
-		department2: '',
-		education1: '지역무관',
-		education2: '지역무관',
+		education: '',
+		department: '',
+		region: '지역무관',
+		district: '지역무관',
 		timeZone: '',
 		gender: '남자',
 		hp: '',
@@ -44,10 +44,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				await window.customAlert('이메일 인증이 완료되었습니다.');
 				setEmailVerified(true);
 			} else {
-				await window.customAlert(res.data.message || '인증 실패');
+				await window.customAlert('인증 실패');
 			}
 		} catch (err) {
-			await window.customAlert(err.response?.data?.message || '인증 요청 실패');
+			await window.customAlert('인증 요청 실패');
 		}
 	};
 
@@ -70,7 +70,15 @@ function SignUp({ onSwitchToLogin, isActive }) {
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
-		setFormData(prev => ({ ...prev, [name]: value }));
+		if (name === 'region') {
+			setFormData(prev => ({
+				...prev,
+				region: value,
+				district: '지역무관'
+			}));
+		} else {
+			setFormData(prev => ({ ...prev, [name]: value }));
+		}
 	};
 
 	const markFieldError = (fieldName) => {
@@ -95,9 +103,9 @@ function SignUp({ onSwitchToLogin, isActive }) {
 
 			for (const field of fieldsToCheck) {
 				if (!formData[field.name]) {
-					await window.customAlert(field.message);
-					markFieldError(field.name);
-					return;
+				await window.customAlert(field.message);
+				markFieldError(field.name);
+				return;
 				}
 			}
 
@@ -125,24 +133,27 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				phone: formData.hp,
 				nickname: formData.nickname,
 				name: formData.name,
-				education: formData.department1,
-				department: formData.department2,
+				education: formData.education,
+				department: formData.department,
 				gender: gender === 'man' ? '남자' : '여자',
-				region: formData.education1,
-				district: formData.education2 === '지역무관' ? '' : formData.education2,
+				region: formData.region,
+				district: formData.district === '지역무관' ? '' : formData.district,
 				time: formData.timeZone,
 				emailVerified: true,
 			};
 			
+			console.log('전송할 데이터:', requestData);
+			
 			const res = await authClient.post(`/register`, requestData);
-			if (res.data.success) {
-				await window.customAlert(res.data.message || '회원가입이 완료되었습니다.');
-				navigate('/login');
+			if (res.data.status === 'success') {
+				await window.customAlert('회원가입이 완료되었습니다.');
+				onSwitchToLogin();
 			} else {
-				await window.customAlert(res.data.message || '회원가입에 실패했습니다.');
+				await window.customAlert('회원가입에 실패했습니다.');
 			}
 		} catch (err) {
-			await window.customAlert(err.response?.data?.message || '회원가입 중 오류가 발생했습니다.');
+			console.error('회원가입 에러:', err.response?.data);
+			await window.customAlert('회원가입 중 오류가 발생했습니다.');
 		}
 	};
 
@@ -169,7 +180,6 @@ function SignUp({ onSwitchToLogin, isActive }) {
 	return (
 		<div className="signup">
 			<div className="signup__container">
-				
 				<h1 className='animation-logo' aria-label="Bridge Hub">
 					<div className="animation-logo__imgmotion">
 						<div className="animation-logo__wave">
@@ -183,10 +193,10 @@ function SignUp({ onSwitchToLogin, isActive }) {
 						<div className="signup__forms">
 							<div className={getClassName('half-field', 0)}>
 								<div className="field">
-									<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요"/>
+								<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요"/>
 								</div>
 								<div className="field">
-									<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요"/>
+								<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요"/>
 								</div>
 							</div>
 							<div className={getClassName('field', 1)}>
@@ -201,12 +211,12 @@ function SignUp({ onSwitchToLogin, isActive }) {
 							</div>
 							<div className={getClassName('radios', 4)}>
 								<div className="radio">
-									<label htmlFor="man">남자</label>
-									<input type="radio" name="gender" id="man" checked={gender === '남자'} onChange={() => setGender('man')}/>
+								<label htmlFor="man">남자</label>
+								<input type="radio" name="gender" id="man" checked={gender === 'man'} onChange={() => setGender('man')}/>
 								</div>
 								<div className="radio">
-									<label htmlFor="woman">여자</label>
-									<input type="radio" name="gender" id="woman" checked={gender === '여자'} onChange={() => setGender('woman')}/>
+								<label htmlFor="woman">여자</label>
+								<input type="radio" name="gender" id="woman" checked={gender === 'woman'} onChange={() => setGender('woman')}/>
 								</div>
 								<span className={`switcher ${gender}`}></span>
 							</div>
@@ -218,49 +228,49 @@ function SignUp({ onSwitchToLogin, isActive }) {
 						<div className="signup__forms">
 							<div className={getClassName('half-field', 0)}>
 								<div className="field">
-									<select className="select" name="department1" value={formData.department1} onChange={handleChange}>
-										<option value="">학력</option>
-										{subjects["학력"].map((v) => (
-											<option key={v} value={v}>{v}</option>
-										))}
-									</select>
+								<select className="select" name="education" value={formData.education} onChange={handleChange}>
+									<option value="">학력</option>
+									{subjects["학력"].map((v) => (
+										<option key={v} value={v}>{v}</option>
+									))}
+								</select>
 								</div>
 								<div className="field">
-									<select className="select" name="department2" value={formData.department2} onChange={handleChange}>
-										<option value="">계열 선택</option>
-										{subjects["계열"].map((v) => (
-											<option key={v} value={v}>{v}</option>
-										))}
-									</select>
+								<select className="select" name="department" value={formData.department} onChange={handleChange}>
+									<option value="">계열 선택</option>
+									{subjects["계열"].map((v) => (
+										<option key={v} value={v}>{v}</option>
+									))}
+								</select>
 								</div>
 							</div>
 							<div className={getClassName('half-field', 1)}>
 								<div className="field">
-									<select className="select" name="education1" value={formData.education1} onChange={handleChange}>
-										<option value="지역무관">지역무관</option>
-										{Object.keys(regionData).map((region) => (
-											<option key={region} value={region}>
-												{region}
-											</option>
-										))}
-									</select>
-								</div>
-								<div className="field" style={{ display: formData.education1 === '지역무관' ? 'none' : 'block' }}>
-									<select className="select" name="education2" value={formData.education2} onChange={handleChange}>
-									{regionData[formData.education1]?.map((district) => (
-										<option key={district} value={district}>
-											{district}
+								<select className="select" name="region" value={formData.region} onChange={handleChange}>
+									<option value="지역무관">지역무관</option>
+									{Object.keys(regionData).map((region) => (
+										<option key={region} value={region}>
+											{region}
 										</option>
 									))}
-									</select>
+								</select>
+								</div>
+								<div className="field" style={{ display: formData.region === '지역무관' ? 'none' : 'block' }}>
+								<select className="select" name="district" value={formData.district} onChange={handleChange}>
+								{regionData[formData.region]?.map((district) => (
+									<option key={district} value={district}>
+										{district}
+									</option>
+								))}
+								</select>
 								</div>
 							</div>
 							<div className={getClassName('field', 2)}>
 								<select className="select" name="timeZone" value={formData.timeZone} onChange={handleChange}>
-									<option value="">선호 시간대</option>
-									{subjects["선호 시간대"].map((v) => (
-										<option key={v} value={v}>{v}</option>
-									))}
+								<option value="">선호 시간대</option>
+								{subjects["선호 시간대"].map((v) => (
+									<option key={v} value={v}>{v}</option>
+								))}
 								</select>
 							</div>
 						</div>

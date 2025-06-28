@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import hotRooms from '@json/HotRoom.json';
+import { useNavigate } from 'react-router-dom';
 
 function HotRoomSwiper({ onItemClick }) {
 	const [rooms, setRooms] = useState([]);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		setRooms(hotRooms);
@@ -14,7 +16,7 @@ function HotRoomSwiper({ onItemClick }) {
 		<div className="hot-room-box">
 			<div className="more-box">
 				<h2 className="more-box__title">TRENDING</h2>
-				<a href="#none" className="more-box__link">더보기</a>
+				<a href="#none" className="more-box__link" onClick={() => navigate('/board')}>게시판</a>
 			</div>
 			<Swiper spaceBetween={12} slidesPerView={1} centeredSlides={true} className="hot-room-swiper">
 				{rooms.map((room) => (

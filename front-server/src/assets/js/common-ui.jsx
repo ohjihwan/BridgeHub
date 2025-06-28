@@ -1,44 +1,52 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import CustomAlert from '@page/common/customAlert';
+import CustomAlert from '@common/customAlert';
 import axios from 'axios';
 
 // ----------- 커스텀 알럿 관련 -----------
 
-let alertRoot = null;
 let root = null;
 
 export function customAlert(message) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
-		const root = createRoot(alertRoot);
-
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
 		const handleClose = () => {
-			root.unmount();
+			root.render(null);
 			resolve();
 		};
-
 		root.render(
 			<CustomAlert message={message} onClose={handleClose} />
 		);
 	});
 }
 
-export function customConfirm(message, onConfirmed = null) {
+export function customConfirm(message, onConfirm) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
-		const root = createRoot(alertRoot);
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
+
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
 
 		const handleClose = () => {
-			root.unmount();
+			root.render(null);
 			resolve(false);
 		};
 
 		const handleConfirm = () => {
-			if (typeof onConfirmed === 'function') {
-				onConfirmed();
-			}
-			root.unmount();
+			root.render(null);
+			onConfirm?.();
 			resolve(true);
 		};
 
@@ -51,11 +59,16 @@ export function customConfirm(message, onConfirmed = null) {
 export function customPrompt(message, placeholder = '', defaultValue = '', onSubmit = null) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
-		alertRoot.innerHTML = '';
-		const root = createRoot(alertRoot);
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
 
 		const handleClose = () => {
-			root.unmount();
+			root.render(null);
 			resolve(null);
 		};
 
@@ -63,7 +76,7 @@ export function customPrompt(message, placeholder = '', defaultValue = '', onSub
 			if (typeof onSubmit === 'function') {
 				onSubmit(value);
 			}
-			root.unmount();
+			root.render(null);
 			resolve(value);
 		};
 
@@ -104,8 +117,16 @@ export const authClient = axios.create({
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
+export const userClient = axios.create({
+	baseURL: 'http://localhost:7100',
+	timeout: 10000,
+	headers: { 'Content-Type': 'application/json' },
+});
+export const getAccessToken = () => {
+	return localStorage.getItem('token');
+};
 
-[authClient].forEach(client => {
+[authClient, userClient].forEach(client => {
 	client.interceptors.request.use(config => {
 		window.showLoading?.();
 		return config;
@@ -122,3 +143,18 @@ export const authClient = axios.create({
 		return Promise.reject(error);
 	});
 });
+
+export const getUsernameFromToken = () => {
+	const token = localStorage.getItem('token');
+	if (!token) return null;
+
+	try {
+		const base64Payload = token.split('.')[1];
+		if (!base64Payload) return null;
+
+		const payload = JSON.parse(atob(base64Payload));
+		return payload.sub || payload.username || payload.email || null;
+	} catch (e) {
+		return null;
+	}
+};
