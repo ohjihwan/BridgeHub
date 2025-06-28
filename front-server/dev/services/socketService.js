@@ -171,6 +171,36 @@ class SocketService {
     }
 
     /**
+     * 타이핑 시작 알림
+     */
+    startTyping() {
+        if (!this.socket || !this.isConnected || !this.currentStudyId || !this.currentUserId) {
+            return false;
+        }
+
+        this.socket.emit('typing-start', {
+            studyId: this.currentStudyId,
+            userId: this.currentUserId
+        });
+        return true;
+    }
+
+    /**
+     * 타이핑 중지 알림
+     */
+    stopTyping() {
+        if (!this.socket || !this.isConnected || !this.currentStudyId || !this.currentUserId) {
+            return false;
+        }
+
+        this.socket.emit('typing-stop', {
+            studyId: this.currentStudyId,
+            userId: this.currentUserId
+        });
+        return true;
+    }
+
+    /**
      * 이벤트 리스너 등록
      */
     on(eventName, callback) {
