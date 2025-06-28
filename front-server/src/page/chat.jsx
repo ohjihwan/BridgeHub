@@ -6,15 +6,34 @@ import Roulette from '@components/chat/Roulette';
 import ResultModal from '@components/chat/ResultModal';
 import TodoList from '@components/chat/TodoListDeployment';
 import Video from '@components/Video';
+import { useStudySocket } from '@dev/hooks/useSocket';
+import { chatAPI, userAPI } from '@dev/services/apiService';
 
 function Chat() {
 	const location = useLocation();
-	const studyInfo = location.state;
+	const studyInfo = location.state?.studyRoom || location.state;
+	
+	// 사용자 정보 상태
+	const [currentUserId, setCurrentUserId] = useState(null);
+	const [currentUserInfo, setCurrentUserInfo] = useState(null);
+	
+	const studyId = studyInfo?.studyRoomId || studyInfo?.id;
+	const roomId = studyInfo?.roomId;
+	
+	// 실제 소켓 연동 (사용자 ID가 설정된 후에만)
+	const { 
+		messages: socketMessages, 
+		onlineUsers, 
+		isJoined, 
+		sendMessage: socketSendMessage,
+		isConnected 
+	} = useStudySocket(studyId, currentUserId);
 
 	const [message, setMessage] = useState('');
 	const [messages, setMessages] = useState([]);
 	const [isTyping, setIsTyping] = useState(false);
 	const textareaRef = useRef(null);
+	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
 	// 랜덤 기능
 	const isOwner = true; // 추후 socket or props로 실제 값 연결
@@ -216,10 +235,26 @@ function Chat() {
 	const handleSend = () => {
 		if (!message.trim()) return;
 
+		// 실제 소켓으로 메시지 전송
+		if (isConnected && studyId) {
+			const messageData = {
+				message: message.trim(),
+				messageType: 'TEXT'
+			};
+
+			const success = socketSendMessage(messageData);
+			
+			if (!success) {
+				console.error('메시지 전송 실패');
+				return;
+			}
+		}
+
+		// 로컬 UI 업데이트
 		const { ampm, timeStr } = getFormattedTime();
 		setMessages(prev => [
 			...prev,
-			{ type: 'me', text: message, time: timeStr, ampm }
+			{ type: 'me', text: message, time: timeStr, ampm, senderId: currentUserId }
 		]);
 		setMessage('');
 		if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -256,10 +291,149 @@ function Chat() {
 	// WebRTC
 	
 
-	// 첫 입장 메시지
+	// 사용자 정보 로드
 	useEffect(() => {
-		addSystemMessage('${user}님이 ${action}하셨습니다.', { user: '지환', action: '입장' });
+		const loadUserInfo = async () => {
+			try {
+				console.log('사용자 정보 로드 시작...');
+				
+				// 토큰 확인
+				const token = localStorage.getItem('token');
+				console.log('저장된 토큰:', token);
+				
+				if (!token) {
+					console.error('토큰이 없습니다!');
+					window.location.href = '/auth';
+					return;
+				}
+				
+				const response = await userAPI.getUserInfo();
+				console.log('API 응답:', response);
+				console.log('응답 데이터:', response.data);
+				
+				if (response.data && response.data.status === 'success' && response.data.data) {
+					setCurrentUserId(response.data.data.id);
+					setCurrentUserInfo(response.data.data);
+					console.log('사용자 정보 로드 성공:', response.data.data);
+					console.log('설정된 사용자 ID:', response.data.data.id);
+				} else {
+					console.error('응답 데이터 구조가 예상과 다름:', response.data);
+				}
+			} catch (error) {
+				console.error('사용자 정보 로드 실패:', error);
+				console.error('에러 응답:', error.response);
+				// 토큰이 없거나 만료된 경우 로그인 페이지로 리다이렉트
+				if (error.response?.status === 401) {
+					console.log('인증 실패 - 로그인 페이지로 이동');
+					window.location.href = '/auth';
+				}
+			}
+		};
+
+		loadUserInfo();
 	}, []);
+
+	// 소켓 메시지 수신 처리
+	useEffect(() => {
+		if (socketMessages && socketMessages.length > 0) {
+			const latestMessage = socketMessages[socketMessages.length - 1];
+			
+			// 내가 보낸 메시지가 아닌 경우에만 추가
+			if (latestMessage.senderId !== currentUserId) {
+				const { ampm, timeStr } = getFormattedTime();
+				
+				const newMessage = {
+					type: 'user',
+					text: latestMessage.message || latestMessage.text,
+					time: timeStr,
+					ampm: ampm,
+					senderId: latestMessage.senderId,
+					senderName: latestMessage.senderName || '사용자'
+				};
+				
+				setMessages(prev => {
+					// 중복 메시지 방지
+					const exists = prev.find(msg => 
+						msg.text === newMessage.text && 
+						msg.senderId === newMessage.senderId &&
+						Math.abs(new Date() - new Date(msg.timestamp || 0)) < 1000
+					);
+					
+					if (!exists) {
+						return [...prev, { ...newMessage, timestamp: new Date() }];
+					}
+					return prev;
+				});
+			}
+		}
+	}, [socketMessages, currentUserId]);
+
+	// 채팅 히스토리 로드
+	useEffect(() => {
+		const loadChatHistory = async () => {
+			console.log('채팅 히스토리 로드 시작:', { roomId, studyId, currentUserId });
+			
+			// roomId 또는 studyId 중 하나라도 있으면 시도
+			const chatRoomId = roomId || studyId;
+			
+			if (chatRoomId && currentUserId) {
+				try {
+					console.log('채팅 히스토리 API 호출:', chatRoomId);
+					const response = await chatAPI.getRecentMessages(chatRoomId);
+					console.log('채팅 히스토리 응답:', response);
+					
+					if (response.data && response.data.status === 'success') {
+						const messages = response.data.data || [];
+						console.log('받은 메시지 개수:', messages.length);
+						
+						if (messages.length > 0) {
+							const historyMessages = messages.map(msg => ({
+								type: msg.senderId === currentUserId ? 'me' : 'user',
+								text: msg.content,
+								time: new Date(msg.sentAt).toLocaleTimeString('ko-KR', { 
+									hour: '2-digit', 
+									minute: '2-digit' 
+								}),
+								ampm: new Date(msg.sentAt).getHours() >= 12 ? '오후' : '오전',
+								senderId: msg.senderId,
+								senderName: msg.senderNickname || msg.senderName
+							}));
+							
+							setChatHistory(historyMessages);
+							setMessages(prev => [...historyMessages, ...prev]);
+							console.log('채팅 히스토리 로드 완료:', historyMessages.length, '개 메시지');
+						} else {
+							console.log('채팅 히스토리가 비어있습니다.');
+						}
+					} else {
+						console.warn('채팅 히스토리 응답 구조가 예상과 다름:', response.data);
+					}
+				} catch (error) {
+					console.error('채팅 히스토리 로드 실패:', error);
+					console.error('에러 상세:', error.response?.data);
+					
+					// 에러가 발생해도 채팅 기능은 계속 사용할 수 있도록 함
+					if (error.response?.status === 404) {
+						console.log('채팅방이 존재하지 않거나 메시지가 없습니다.');
+					}
+				}
+			} else {
+				console.log('채팅 히스토리 로드 조건 미충족:', { chatRoomId, currentUserId });
+			}
+		};
+
+		loadChatHistory();
+	}, [roomId, studyId, currentUserId]);
+
+	// 연결 상태 메시지
+	useEffect(() => {
+		if (isJoined && studyInfo) {
+			addSystemMessage('${user}님이 ${action}하셨습니다.', { 
+				user: '나', 
+				action: '입장' 
+			});
+		}
+	}, [isJoined, studyInfo]);
 
 	// 스크롤 하단
 	useEffect(() => {
