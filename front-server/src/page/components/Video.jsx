@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import * as mediasoupClient from 'mediasoup-client';                  
+import * as mediasoupClient from 'mediasoup-client';
 
 const Video = ({ onClose, userNickname, roomId }) => {
-  const localRef   = useRef(null);
-  const remoteRef  = useRef(null);
-  const [device, setDevice]           = useState(null);
+  const localRef = useRef(null);
+  const remoteRef = useRef(null);
+  const [device, setDevice] = useState(null);
   const [sendTransport, setSendTrans] = useState(null);
   const [recvTransport, setRecvTrans] = useState(null);
-  const [socket, setSocket]           = useState(null);
-  const [videoOn, setVideoOn]         = useState(true);
-  const [screenShared, setScreen]     = useState(false);
+  const [socket, setSocket] = useState(null);
+  const [videoOn, setVideoOn] = useState(true);
+  const [screenShared, setScreen] = useState(false);
 
   useEffect(() => {
     setVideoOn(window.confirm('카메라를 켜시겠습니까?'));
@@ -18,12 +18,29 @@ const Video = ({ onClose, userNickname, roomId }) => {
 
   useEffect(() => {
     if (!roomId) return;
+
+    // 🔒 TURN 서버 설정
+    const iceServers = [
+      {
+        urls: process.env.NEXT_PUBLIC_TURN_URL,
+        username: process.env.NEXT_PUBLIC_TURN_USER,
+        credential: process.env.NEXT_PUBLIC_TURN_PASS,
+      }
+    ];
+
+    // 🌐 socket 연결
     const sock = io(process.env.NEXT_PUBLIC_SIGNALING_URL, {
       path: '/rtc',
-      auth: { token: localStorage.getItem('token'), roomId }
+      auth: {
+        token: localStorage.getItem('token'),
+        roomId,
+        iceServers, // TURN 정보도 함께 전달
+      }
     });
+
     setSocket(sock);
 
+    // 🚫 방 꽉 찼을 때 처리
     sock.on('connect_error', err => {
       if (err.message === 'ROOM_FULL') {
         alert('방이 가득 찼습니다 (최대 10명)');
@@ -31,6 +48,7 @@ const Video = ({ onClose, userNickname, roomId }) => {
       }
     });
 
+    // 📡 라우터 RTP Capabilities 수신
     sock.on('rtp-capabilities', async ({ rtpCapabilities }) => {
       const dev = new mediasoupClient.Device();
       await dev.load({ routerRtpCapabilities: rtpCapabilities });
@@ -38,6 +56,7 @@ const Video = ({ onClose, userNickname, roomId }) => {
       sock.emit('create-send-transport');
     });
 
+    // 🔀 전송용 transport 생성
     sock.on('send-transport-created', async params => {
       const transport = device.createSendTransport(params);
       transport.on('connect', ({ dtlsParameters }, cb) => {
@@ -48,9 +67,9 @@ const Video = ({ onClose, userNickname, roomId }) => {
         sock.emit('produce', { kind, rtpParameters }, ({ id }) => cb({ id }));
       });
       setSendTrans(transport);
-      await api.post(`/studies/${roomId}/join`);
     });
 
+    // 🆕 상대 프로듀서 감지
     sock.on('new-producer', ({ producerId }) => {
       if (!recvTransport) {
         sock.emit('create-recv-transport');
@@ -58,6 +77,7 @@ const Video = ({ onClose, userNickname, roomId }) => {
       sock.emit('consume', { producerId, rtpCapabilities: device.rtpCapabilities });
     });
 
+    // 📥 수신용 transport 생성
     sock.on('recv-transport-created', async params => {
       const rTransport = device.createRecvTransport(params);
       rTransport.on('connect', ({ dtlsParameters }, cb) => {
@@ -67,6 +87,7 @@ const Video = ({ onClose, userNickname, roomId }) => {
       setRecvTrans(rTransport);
     });
 
+    // 📺 수신 consumer 생성
     sock.on('consumer-created', async ({ params }) => {
       const consumer = await recvTransport.consume({
         id: params.id,
@@ -85,7 +106,7 @@ const Video = ({ onClose, userNickname, roomId }) => {
       recvTransport?.close();
       onClose();
     };
-  }, [device]);
+  }, [roomId]);
 
   const startCamera = async () => {
     if (!sendTransport) return;
