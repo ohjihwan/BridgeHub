@@ -51,11 +51,11 @@ function Chat() {
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
 	// 첨부파일 모아보기
+	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([ // 테스트 중
 		{ name: '파일1.pdf' }, 
 		{ name: '이미지.png' }
 	]);
-	const [showAttachments, setShowAttachments] = useState(false);
 	// 랜덤 기능
 	const isOwner = true; // 추후 socket or props로 실제 값 연결
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
@@ -711,8 +711,9 @@ function Chat() {
 
 			{showAttachments && (
 				<AttachmentList
+					isOpen={showAttachments}
 					attachments={attachments}
-        			onClose={() => setShowAttachments(false)}
+					onClose={() => setShowAttachments(false)}
 				/>
 			)}
 

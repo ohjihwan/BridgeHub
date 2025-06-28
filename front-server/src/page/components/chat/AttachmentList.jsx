@@ -3,21 +3,23 @@ import { useState, useEffect } from 'react';
 
 const AttachmentList = ({ isOpen, attachments, onClose }) => {
 	const [isVisible, setIsVisible] = useState(false);
-	
+
 	useEffect(() => {
 		if (isOpen) {
 			const timer = setTimeout(() => {
 				setIsVisible(true);
 			}, 100);
 			return () => clearTimeout(timer);
+		} else {
+			setIsVisible(false);
 		}
 	}, [isOpen]);
-
-	if (!isOpen) return null;
 
 	useEffect(() => {
 		console.log('attachments:', attachments);
 	}, [attachments]);
+
+	if (!isOpen) return null;
 
 	return ReactDOM.createPortal(
 		<div className={`attachment-list ${isVisible ? 'slide-right' : ''}`}>
@@ -28,7 +30,8 @@ const AttachmentList = ({ isOpen, attachments, onClose }) => {
 				))}
 			</ul>
 			<button onClick={onClose}>닫기</button>
-		</div>
+		</div>,
+		document.body
 	);
 };
 

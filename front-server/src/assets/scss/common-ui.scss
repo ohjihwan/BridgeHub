@@ -2744,14 +2744,16 @@ legend,
 }
 
 .attachment-list {
-	position:absolute;
+	position:fixed;
 	right:0;
 	top:0;
 	z-index:270;
-	transform:translateX(0);
+	transform:translateX(100%);
 	width:remx(200);
 	height:100vh;
+	background-color:$bg-root;
 	box-shadow:0 0 remx(10) rgba(0,0,0,0.3); 
+	transition:transform 0.4s ease;
 	
 	&.slide-right {
 		transform:translateX(0);
