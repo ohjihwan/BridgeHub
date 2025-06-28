@@ -42,6 +42,6 @@ io.on('connection', socket => {
   });
 });
 
-server.listen(RTC_PORT, () => {
+server.listen(RTC_PORT, '0.0.0.0',() => {
   console.log(`RTC server listening on port ${RTC_PORT}`);
 });
