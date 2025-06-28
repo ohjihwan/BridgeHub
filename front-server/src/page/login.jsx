@@ -61,6 +61,7 @@ function Login({ onSwitchToSignUp }) {
 		}
 
 		try {
+			console.log('요청 이메일:', findEmail);
 			await authClient.post('/forgot-password', { email: findEmail });
 			await window.customAlert('인증 코드가 발송되었습니다.');
 
@@ -75,6 +76,7 @@ function Login({ onSwitchToSignUp }) {
 				await window.customAlert('인증 실패');
 			}
 		} catch (err) {
+			console.log(err.response?.data);
 			await window.customAlert('인증 요청 실패');
 		}
 	};
