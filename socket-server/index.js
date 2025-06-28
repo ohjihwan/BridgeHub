@@ -149,7 +149,7 @@ async function startServer() {
         // MongoDB 서비스 초기화
         await mongoService.initialize();
         
-        server.listen(PORT, '0.0.0.0',() => {
+        server.listen(PORT,() => {
             console.log(`🚀 소켓 서버가 포트 ${PORT}에서 실행 중입니다.`);
             console.log(`📡 API 서버 URL: ${API_BASE_URL}`);
             console.log(`🌐 CORS Origins: ${CORS_ORIGINS.join(', ')}`);
