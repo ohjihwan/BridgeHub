@@ -5,9 +5,9 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0', // 올바른 설정: 외부 접속 허용
+    host: '0.0.0.0',
     port: 7000,
-    allowedHosts: ['thebridgehub.org'],
+    allowedHosts: ['thebridgehub.org', 'localhost', '0.0.0.0'],
   },
   resolve: {
     alias: {
@@ -22,5 +22,5 @@ export default defineConfig({
       "@json": path.resolve(__dirname, "src/json"),
       "@dev": path.resolve(__dirname, "dev"),
     },
-  },
+  }
 });
