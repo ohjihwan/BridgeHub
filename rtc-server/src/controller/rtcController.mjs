@@ -1,9 +1,9 @@
-// 간단한 상태 API
+// 상태 조회
 export const status = (req, res) => {
   res.json({ success: true, message: 'SUCCESS', data: 'OK' });
 };
 
-// 세션 시작 (선택적 로깅 등)
+// 세션 시작
 export const startSession = (req, res) => {
   res.json({ success: true, message: 'SUCCESS', data: null });
 };

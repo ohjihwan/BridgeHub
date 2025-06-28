@@ -6,7 +6,7 @@ export const MAX_PEERS_PER_ROOM = parseInt(process.env.MAX_PEERS_PER_ROOM, 10) |
 
 export default {
   serverOptions: {
-    path: '/rtc',         // Nginx proxy 설정과 일치
+    path: '/rtc',
     cors: { origin: '*' },
     transports: ['websocket'],
     pingInterval: 10000,

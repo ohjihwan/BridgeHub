@@ -1,8 +1,7 @@
-// src/util/authMiddleware.mjs
 import jwt from 'jsonwebtoken';
-import { validateUserToken } from '../service/springClient.mjs';
+import { validateUserToken } from './springClient.mjs';  // :contentReference[oaicite:23]{index=23}
 
-// 1) Socket.IO 인증 미들웨어 (default export)
+// Socket.IO 인증
 export default function socketAuth(socket, next) {
   const token = socket.handshake.auth.token;
   if (!token) return next(new Error('AUTH_REQUIRED'));
@@ -15,19 +14,18 @@ export default function socketAuth(socket, next) {
   }
 }
 
-// 2) REST API용 JWT 인증 미들웨어 (named export)
+// REST API 인증
 export async function jwtAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token  = header.replace(/^Bearer\s+/, '');
   if (!token) {
-    return res.status(401).json({ success: false, message: 'AUTH_REQUIRED', data: null });
+    return res.status(401).json({ success: false, message: 'AUTH_REQUIRED' });
   }
   try {
-    // 스프링 백엔드로 토큰 검증
     const userInfo = await validateUserToken(token);
     req.user = userInfo;
     next();
   } catch {
-    res.status(401).json({ success: false, message: 'AUTH_ERROR', data: null });
+    res.status(401).json({ success: false, message: 'AUTH_ERROR' });
   }
 }
