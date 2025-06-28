@@ -5,7 +5,8 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0',
+    host: 'true',
+    allowedHosts: ['thebridgehub.org'],
     port: 7700,
     proxy: {
       '/api': {
