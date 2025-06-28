@@ -18,7 +18,19 @@ const MyPage = () => {
 		timeZone: '',
 		memo: ''
 	});
-	const [editData, setEditData] = useState({...profileData});
+	const [editData, setEditData] = useState({
+		profileImg: '',
+		nickname: '',
+		hp: '',
+		education: '',
+		department: '',
+		region: '',
+		district: '',
+		timeZone: '',
+		memo: '',
+		password: '',
+		passwordConfirm: ''
+	});
 	const locationOptions = {
 		'지역무관': [],
 		'서울': ['강남구', '서초구', '송파구', '강동구', '마포구'],
@@ -50,11 +62,16 @@ const MyPage = () => {
 					requestBody.password = editData.password;
 				}
 
-				const res = await userClient.post('/api/studies', requestData, {
+				// 프로필 이미지가 변경되었으면 함께 전송
+				if (editData.profileImg && editData.profileImg !== profileData.profileImg) {
+					requestBody.profileImage = editData.profileImg;
+				}
+
+				const res = await userClient.put(`/api/members/${username}`, requestBody, {
 					headers: {
-						Authorization: `Bearer ${token}`
-					},
-					withCredentials: true
+						Authorization: `Bearer ${localStorage.getItem('token')}`,
+						'Content-Type': 'application/json'
+					}
 				});
 				
 
@@ -123,7 +140,7 @@ const MyPage = () => {
 				console.log(res.data);  // 바로 여기!
 
 				if (res.data.status === 'success') {
-					setProfileData({
+					const newProfileData = {
 						profileImg: res.data.data.profileImage || '',
 						nickname: res.data.data.nickname || '',
 						hp: res.data.data.phone || '',
@@ -133,6 +150,13 @@ const MyPage = () => {
 						district: res.data.data.district || '',
 						timeZone: res.data.data.time || '',
 						memo: ''
+					};
+					setProfileData(newProfileData);
+					// editData도 초기값으로 설정
+					setEditData({
+						...newProfileData,
+						password: '',
+						passwordConfirm: ''
 					});
 				} else {
 					await window.customAlert('회원 정보를 불러오는데 실패했습니다.');
@@ -195,20 +219,20 @@ const MyPage = () => {
 								<input type="password" name="password" id="password" value={editData.password || ''} className="text" placeholder="비밀번호를 입력하세요" onChange={handleInputChange}/>
 							</div>
 							<div className="field">
-								<input type="password" name="passwordConfirm" value={editData.passwordConfirm} className="text" placeholder="비밀번호를 다시 입력하세요" onChange={handleInputChange}/>
+								<input type="password" name="passwordConfirm" value={editData.passwordConfirm || ''} className="text" placeholder="비밀번호를 다시 입력하세요" onChange={handleInputChange}/>
 							</div>
 						</div>
 						<div className="info-row">
 							<label htmlFor='hp' className="label">휴대폰번호</label>
-							<div className="field">
-								<input type="tel" name="hp" id="hp" value={editData.hp} className="text" placeholder="휴대폰번호를 입력하세요" onChange={handleInputChange}/>
-							</div>
+															<div className="field">
+									<input type="tel" name="hp" id="hp" value={editData.hp || ''} className="text" placeholder="휴대폰번호를 입력하세요" onChange={handleInputChange}/>
+								</div>
 						</div>
 						<div className="info-row info-row--major">
 							<h4 className="label">전공</h4>
 							<div className="half-field">
 								<div className="field">
-									<select className="select" name="education" value={editData.education} onChange={handleInputChange}>
+									<select className="select" name="education" value={editData.education || ''} onChange={handleInputChange}>
 										<option value="">학력</option>
 										<option value="고졸">고졸</option>
 										<option value="대학교">대학교</option>
@@ -216,7 +240,7 @@ const MyPage = () => {
 									</select>
 								</div>
 								<div className="field">
-									<select className="select" name="department" value={editData.department} onChange={handleInputChange}>
+									<select className="select" name="department" value={editData.department || ''} onChange={handleInputChange}>
 										<option value="">학과/학부 선택</option>
 										<option value="컴퓨터공학과">컴퓨터공학과</option>
 										<option value="소프트웨어학과">소프트웨어학과</option>
@@ -229,7 +253,7 @@ const MyPage = () => {
 							<h4 className="label">지역</h4>
 							<div className="half-field">
 								<div className="field">
-									<select className="select" name="region" value={editData.region} onChange={handleInputChange}>
+									<select className="select" name="region" value={editData.region || ''} onChange={handleInputChange}>
 										<option value="지역무관">지역무관</option>
 										<option value="서울">서울</option>
 										<option value="대구">대구</option>
@@ -238,7 +262,7 @@ const MyPage = () => {
 								</div>
 								{editData.region && editData.region !== '지역무관' && (
 									<div className="field">
-										<select className="select" name="district" value={editData.district} onChange={handleInputChange}>
+										<select className="select" name="district" value={editData.district || ''} onChange={handleInputChange}>
 											<option value="">세부 지역 선택</option>
 											{locationOptions[editData.region]?.map(sub => (
 												<option key={sub} value={sub}>{sub}</option>
@@ -251,7 +275,7 @@ const MyPage = () => {
 						<div className="info-row">
 							<span className="label">시간대</span>
 							<div className="field">
-								<select className="select" name="timeZone" value={editData.timeZone} onChange={handleInputChange}>
+								<select className="select" name="timeZone" value={editData.timeZone || ''} onChange={handleInputChange}>
 									<option value="">선호 시간대 선택</option>
 									<option value="오전">오전 (06:00-12:00)</option>
 									<option value="오후">오후 (12:00-18:00)</option>
@@ -262,7 +286,7 @@ const MyPage = () => {
 						<div className="info-row">
 							<label htmlFor="memo" className="label">메모</label>
 							<div className="field __textarea">
-								<textarea className="textarea" id="memo" name="memo" value={editData.memo} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
+								<textarea className="textarea" id="memo" name="memo" value={editData.memo || ''} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
 							</div>
 						</div>
 					</>

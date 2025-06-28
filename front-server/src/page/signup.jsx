@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import subjects from '@json/subject';
 import regionData from '@json/region';
-import { authClient } from '@js/common-ui';
+import { authClient, formatPhone, cleanPhone } from '@js/common-ui';
 
 function SignUp({ onSwitchToLogin, isActive }) {
 	const navigate = useNavigate();
@@ -23,7 +23,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		district: '지역무관',
 		timeZone: '',
 		gender: '남자',
-		hp: '',
+		hp: ''
 	});
 
 	const handleEmailVerification = async () => {
@@ -76,6 +76,11 @@ function SignUp({ onSwitchToLogin, isActive }) {
 				region: value,
 				district: '지역무관'
 			}));
+		} else if (name === 'hp') {
+			setFormData(prev => ({
+				...prev,
+				hp: formatPhone(value)
+			}));
 		} else {
 			setFormData(prev => ({ ...prev, [name]: value }));
 		}
@@ -92,22 +97,16 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		if (step === 1) {
 			document.querySelectorAll('.signup__area .field').forEach(f => f.classList.remove('--field__error'));
 
-			const fieldsToCheck = [
-				{ name: 'name', message: '이름을 입력하세요.' },
-				{ name: 'nickname', message: '별명을 입력하세요.' },
-				{ name: 'email', message: '이메일을 입력하세요.' },
-				{ name: 'password', message: '비밀번호를 입력하세요.' },
-				{ name: 'passwordConfirm', message: '비밀번호를 다시 입력하세요.' },
-				{ name: 'hp', message: '휴대폰번호를 입력하세요.' },
+			const requiredFields = [
+				{ key: 'name', label: '이름' },
+				{ key: 'nickname', label: '별명' },
+				{ key: 'email', label: '이메일' },
+				{ key: 'password', label: '비밀번호' },
+				{ key: 'passwordConfirm', label: '비밀번호 확인' },
+				{ key: 'hp', label: '휴대폰번호' },
+				{ key: 'gender', label: '성별' }
 			];
 
-			for (const field of fieldsToCheck) {
-				if (!formData[field.name]) {
-				await window.customAlert(field.message);
-				markFieldError(field.name);
-				return;
-				}
-			}
 
 			if (formData.password !== formData.passwordConfirm) {
 				await window.customAlert('비밀번호가 일치하지 않습니다.');
@@ -130,16 +129,16 @@ function SignUp({ onSwitchToLogin, isActive }) {
 			const requestData = {
 				userid: formData.email,
 				password: formData.password,
-				phone: formData.hp,
-				nickname: formData.nickname,
 				name: formData.name,
-				education: formData.education,
-				department: formData.department,
+				phone: cleanPhone(formData.hp),
+				nickname: formData.nickname,
+				education: formData.education || '',
+				department: formData.department || '',
 				gender: gender === 'man' ? '남자' : '여자',
 				region: formData.region,
 				district: formData.district === '지역무관' ? '' : formData.district,
-				time: formData.timeZone,
-				emailVerified: true,
+				time: formData.timeZone || '',
+				emailVerified: true
 			};
 			
 			console.log('전송할 데이터:', requestData);
@@ -193,15 +192,19 @@ function SignUp({ onSwitchToLogin, isActive }) {
 						<div className="signup__forms">
 							<div className={getClassName('half-field', 0)}>
 								<div className="field">
-								<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요"/>
+									<input type="text" className="text" name="name" value={formData.name || ''} onChange={handleChange} placeholder="이름을 입력하세요"/>
 								</div>
 								<div className="field">
-								<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요"/>
+									<input type="text" className="text" name="nickname" value={formData.nickname || ''} onChange={handleChange} placeholder="별명을 입력하세요"/>
 								</div>
 							</div>
 							<div className={getClassName('field', 1)}>
-								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} placeholder="이메일을 입력하세요"/>
-								<button type="button" className="middle-button" onClick={handleEmailVerification}>이메일인증</button>
+								<input type="email" className="text" name="email" value={formData.email || ''} onChange={handleChange} readOnly={emailVerified} placeholder="이메일을 입력하세요"/>
+								{emailVerified ? (
+									<button type="button" className="middle-button" onClick={() => {setEmailVerified(false); setFormData({ ...formData, email: '' });}}>다시 입력</button>
+								) : ( 
+									<button type="button" className="middle-button" onClick={handleEmailVerification}>이메일인증</button>
+								)}
 							</div>
 							<div className={getClassName('field', 2)}>
 								<input type="password" className="text" name="password" value={formData.password || ''} onChange={handleChange} placeholder="비밀번호를 입력하세요"/>
@@ -221,7 +224,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 								<span className={`switcher ${gender}`}></span>
 							</div>
 							<div className={getClassName('field', 5)}>
-								<input type="tel" className="text" name="hp" value={formData.hp || ''} onChange={handleChange} placeholder="휴대폰번호를 입력하세요"/>
+								<input type="tel" className="text" name="hp" value={formData.hp || ''} onChange={(e) => setFormData({ ...formData, hp: formatPhone(e.target.value) })} maxLength={13} placeholder="휴대폰번호를 입력하세요"/>
 							</div>
 						</div>
 					) : (

@@ -158,3 +158,14 @@ export const getUsernameFromToken = () => {
 		return null;
 	}
 };
+
+export const formatPhone = (value) => {
+	const onlyNumber = value.replace(/\D/g, '');
+	if (onlyNumber.length < 4) return onlyNumber;
+	if (onlyNumber.length < 8) return `${onlyNumber.slice(0, 3)}-${onlyNumber.slice(3)}`;
+	return `${onlyNumber.slice(0, 3)}-${onlyNumber.slice(3, 7)}-${onlyNumber.slice(7, 11)}`;
+};
+
+export const cleanPhone = (value) => {
+	return value.replace(/-/g, '');
+};

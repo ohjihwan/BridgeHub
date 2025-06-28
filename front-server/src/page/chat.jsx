@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
@@ -8,17 +8,32 @@ import TodoList from '@components/chat/TodoListDeployment';
 import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
 import { chatAPI, userAPI } from '@dev/services/apiService';
+import AttachmentList from '@components/chat/AttachmentList';
 
 function Chat() {
 	const location = useLocation();
+	const params = useParams();
 	const studyInfo = location.state?.studyRoom || location.state;
+	
+	// URL query string에서 정보 추출
+	const urlParams = new URLSearchParams(location.search);
 	
 	// 사용자 정보 상태
 	const [currentUserId, setCurrentUserId] = useState(null);
 	const [currentUserInfo, setCurrentUserInfo] = useState(null);
 	
-	const studyId = studyInfo?.studyRoomId || studyInfo?.id;
-	const roomId = studyInfo?.roomId;
+	// URL 파라미터에서 정보를 읽어오거나 location.state에서 가져오기
+	const studyId = studyInfo?.studyRoomId || studyInfo?.id || params.studyId || params.id || urlParams.get('studyId') || urlParams.get('id');
+	const roomId = studyInfo?.roomId || params.roomId || urlParams.get('roomId');
+	
+	console.log('Chat 컴포넌트 초기화:', { 
+		studyInfo, 
+		params, 
+		urlParams: Object.fromEntries(urlParams.entries()),
+		studyId, 
+		roomId,
+		location: location.pathname + location.search
+	});
 	
 	// 실제 소켓 연동 (사용자 ID가 설정된 후에만)
 	const { 
@@ -35,6 +50,12 @@ function Chat() {
 	const textareaRef = useRef(null);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
+	// 첨부파일 모아보기
+	const [showAttachments, setShowAttachments] = useState(false);
+	const [attachments, setAttachments] = useState([ // 테스트 중
+		{ name: '파일1.pdf' }, 
+		{ name: '이미지.png' }
+	]);
 	// 랜덤 기능
 	const isOwner = true; // 추후 socket or props로 실제 값 연결
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
@@ -84,6 +105,24 @@ function Chat() {
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
 	};
+
+	// 파일 첨부 모아보기
+	const handleFileSelect = (file) => {
+		if (!file || !file.name) {
+			console.error('유효하지 않은 파일:', file);
+			return;
+		}
+
+		const newAttachment = {
+			name: file.name,
+			url: `/uploads/chat/${file.name}`, // 실제 업로드 경로에 맞게 수정
+			type: file.type?.includes('image') ? 'image' : 'file'
+		};
+
+		setAttachments(prev => [...prev, newAttachment]);
+	};
+
+	// 랜덤 게임
 	const handleAssignUser = (index) => {
 		const userName = '김사과';
 		const newTodos = [...todoList];
@@ -242,10 +281,12 @@ function Chat() {
 				messageType: 'TEXT'
 			};
 
+			console.log('📤 소켓으로 메시지 전송:', messageData);
 			const success = socketSendMessage(messageData);
 			
 			if (!success) {
-				console.error('메시지 전송 실패');
+				console.error('❌ 메시지 전송 실패 - 소켓 서비스 응답:', success);
+				window.customAlert && window.customAlert('메시지 전송에 실패했습니다. 연결 상태를 확인해주세요.');
 				return;
 			}
 		}
@@ -468,6 +509,7 @@ function Chat() {
 					e.stopPropagation();
 					handleChatSearch()
 				}}
+				onShowAttachments={() => setShowAttachments(true)}
 			/>
 			<div className={"chatroom-history"}>
 
@@ -646,10 +688,12 @@ function Chat() {
 
 			{showNavigator && (
 				<div className="search-navigator">
-					<span>{currentIndex + 1} / {searchResults.length}</span>
-					<button type="button" onClick={goToPrevNavigator}>▲</button>
-					<button type="button" onClick={goToNextNavigator}>▼</button>
-					<button type="button" onClick={closeNavigator}>닫기</button>
+					<div className="search-navigator__controllers">
+						<button type="button" className="search-navigator__arr search-navigator__arr--up" onClick={goToPrevNavigator} aria-label="검색된 이전 단어 찾기"></button>
+						<span>{currentIndex + 1} / {searchResults.length}</span>
+						<button type="button" className="search-navigator__arr search-navigator__arr--down" onClick={goToNextNavigator} aria-label="검색된 다음 단어 찾기"></button>
+					</div>
+					<button type="button" className="search-navigator__close" onClick={closeNavigator} aria-label="닫기"></button>
 				</div>
 			)}
 			
@@ -665,6 +709,14 @@ function Chat() {
 				/>
 			)}
 
+			{showAttachments && (
+				<AttachmentList
+					isOpen={showAttachments}
+					attachments={attachments}
+					onClose={() => setShowAttachments(false)}
+				/>
+			)}
+
 			{showVideo && 
 				<Video onClose={() => setShowVideo(false)} />
 			}
@@ -673,3 +725,8 @@ function Chat() {
 }
 
 export default Chat;
+
+
+
+
+

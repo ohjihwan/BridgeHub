@@ -13,6 +13,24 @@ class SocketService {
     }
 
     /**
+     * JWT 토큰에서 사용자 정보 추출
+     */
+    extractUserFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return {
+                userId: payload.userId || payload.username,
+                username: payload.username,
+                memberId: payload.memberId,
+                nickname: payload.nickname
+            };
+        } catch (error) {
+            console.warn('토큰에서 사용자 정보 추출 실패:', error);
+            return null;
+        }
+    }
+
+    /**
      * 소켓 연결
      */
     connect(token) {
@@ -23,6 +41,12 @@ class SocketService {
 
         return new Promise((resolve, reject) => {
             try {
+                // 토큰에서 사용자 정보 추출
+                const userInfo = this.extractUserFromToken(token);
+                if (userInfo) {
+                    this.currentUserId = userInfo.userId;
+                }
+
                 this.socket = io(SOCKET_SERVER_URL, {
                     auth: { token },
                     transports: ['websocket', 'polling'],
@@ -39,11 +63,7 @@ class SocketService {
                     resolve();
                 });
 
-                // 연결 확인
-                this.socket.on('connection-established', (data) => {
-                    console.log('연결 확인됨:', data);
-                    this.currentUserId = data.user?.id;
-                });
+
 
                 // 연결 실패
                 this.socket.on('connect_error', (error) => {
@@ -100,18 +120,46 @@ class SocketService {
      * 스터디룸 참가
      */
     joinStudy(studyId, userId) {
+        console.log('🏠 SocketService - 스터디룸 참가 요청:', {
+            studyId,
+            userId,
+            socketExists: !!this.socket,
+            isConnected: this.isConnected,
+            socketConnected: this.socket?.connected,
+            previousStudyId: this.currentStudyId,
+            previousUserId: this.currentUserId
+        });
+
         if (!this.socket || !this.isConnected) {
-            console.error('소켓이 연결되어 있지 않습니다.');
+            console.error('❌ 소켓이 연결되어 있지 않습니다:', {
+                hasSocket: !!this.socket,
+                isConnected: this.isConnected,
+                socketConnected: this.socket?.connected
+            });
             return false;
         }
 
-        console.log(`스터디룸 참가: studyId=${studyId}, userId=${userId}`);
+        if (!studyId || !userId) {
+            console.error('❌ studyId 또는 userId가 누락되었습니다:', {
+                studyId,
+                userId
+            });
+            return false;
+        }
+
+        console.log(`🏠 스터디룸 참가 시도: studyId=${studyId}, userId=${userId}`);
         
         this.currentStudyId = studyId;
         this.currentUserId = userId;
         
-        this.socket.emit('join-study', { studyId, userId });
-        return true;
+        try {
+            this.socket.emit('join-study', { studyId, userId });
+            console.log('✅ join-study 이벤트 emit 성공');
+            return true;
+        } catch (error) {
+            console.error('❌ join-study 이벤트 emit 실패:', error);
+            return false;
+        }
     }
 
     /**
@@ -133,13 +181,35 @@ class SocketService {
      * 메시지 전송
      */
     sendMessage(messageData) {
+        console.log('📡 SocketService - 메시지 전송 요청:', {
+            messageData,
+            socketExists: !!this.socket,
+            isConnected: this.isConnected,
+            socketConnected: this.socket?.connected,
+            currentStudyId: this.currentStudyId,
+            currentUserId: this.currentUserId
+        });
+
         if (!this.socket || !this.isConnected) {
-            console.error('소켓이 연결되어 있지 않습니다.');
+            console.error('❌ 소켓이 연결되어 있지 않습니다:', {
+                hasSocket: !!this.socket,
+                isConnected: this.isConnected,
+                socketConnected: this.socket?.connected
+            });
             return false;
         }
 
         if (!this.currentStudyId) {
-            console.error('스터디룸에 참가되어 있지 않습니다.');
+            console.error('❌ 스터디룸에 참가되어 있지 않습니다:', {
+                currentStudyId: this.currentStudyId
+            });
+            return false;
+        }
+
+        if (!this.currentUserId) {
+            console.error('❌ 사용자 ID가 설정되지 않았습니다:', {
+                currentUserId: this.currentUserId
+            });
             return false;
         }
 
@@ -149,9 +219,16 @@ class SocketService {
             ...messageData
         };
 
-        console.log('메시지 전송:', fullMessageData);
-        this.socket.emit('send-message', fullMessageData);
-        return true;
+        console.log('📤 메시지 전송 데이터:', fullMessageData);
+        
+        try {
+            this.socket.emit('send-message', fullMessageData);
+            console.log('✅ 메시지 emit 성공');
+            return true;
+        } catch (error) {
+            console.error('❌ 메시지 emit 실패:', error);
+            return false;
+        }
     }
 
     /**
