@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "start": "npx concurrently \"npm run start:admin\" \"npm run start:socket\" \"npm run start:front\" \"npm run start:rtc\"",
-    "start:admin": "cd front-admin && npm start",
+    "start:admin": "cd front-admin && npm dev",
     "start:socket": "cd socket-server && npm start",
     "start:front": "cd front-server && npm run dev",
     "start:rtc": "cd rtc-server && npm run dev",
