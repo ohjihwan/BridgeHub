@@ -72,16 +72,16 @@ public class MemberServiceImpl implements MemberService {
             member.setDepartment(memberDTO.getDepartment());
         }
         if (memberDTO.getRegion() != null && !memberDTO.getRegion().trim().isEmpty()) {
-            member.setRegion(memberDTO.getRegion());
+        member.setRegion(memberDTO.getRegion());
         }
         if (memberDTO.getDistrict() != null && !memberDTO.getDistrict().trim().isEmpty()) {
-            member.setDistrict(memberDTO.getDistrict());
+        member.setDistrict(memberDTO.getDistrict());
         }
         if (memberDTO.getTime() != null && !memberDTO.getTime().trim().isEmpty()) {
-            member.setTime(memberDTO.getTime());
+        member.setTime(memberDTO.getTime());
         }
         if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().trim().isEmpty()) {
-            member.setProfileImage(memberDTO.getProfileImage());
+        member.setProfileImage(memberDTO.getProfileImage());
         }
         if (memberDTO.getDescription() != null && !memberDTO.getDescription().trim().isEmpty()) {
             member.setDescription(memberDTO.getDescription());
@@ -105,6 +105,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO login(String username, String password) {
+        // username은 실제로는 이메일(userid)이므로 userid로 조회
         Optional<Member> memberOpt = memberDao.findByUsername(username);
         
         if (memberOpt.isPresent() && passwordEncoder.matches(password, memberOpt.get().getPassword())) {
@@ -249,8 +250,9 @@ public class MemberServiceImpl implements MemberService {
 
     private MemberDTO convertToDTO(Member member) {
         MemberDTO dto = new MemberDTO();
-        dto.setUsername(member.getUsername());
-        dto.setEmail(member.getEmail());
+        dto.setId(member.getId()); // ID 필드 추가 (JWT 토큰에서 사용자 ID 추출에 필요)
+        dto.setUsername(member.getUsername()); // userid 반환
+        dto.setEmail(member.getEmail()); // userid 반환 (이메일)
         dto.setPhone(member.getPhone());
         dto.setNickname(member.getNickname());
         dto.setName(member.getName());

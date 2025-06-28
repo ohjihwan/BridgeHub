@@ -19,11 +19,9 @@ const schemas = {
                 required: ["studyId", "senderId", "content", "timestamp"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
                         description: "스터디룸 ID (필수)"
                     },
                     senderId: {
-                        bsonType: "int",
                         description: "발신자 ID (필수)"
                     },
                     senderName: {
@@ -98,7 +96,7 @@ const schemas = {
                 required: ["studyId", "studyTitle"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID (필수)"
                     },
                     studyTitle: {
@@ -110,7 +108,7 @@ const schemas = {
                         items: {
                             bsonType: "object",
                             properties: {
-                                userId: { bsonType: "int" },
+                                userId: { bsonType: ["int", "string"] },
                                 userName: { bsonType: "string" },
                                 userNickname: { bsonType: "string" },
                                 joinedAt: { bsonType: "date" },
@@ -126,7 +124,7 @@ const schemas = {
                         bsonType: "object",
                         properties: {
                             content: { bsonType: "string" },
-                            senderId: { bsonType: "int" },
+                            senderId: { bsonType: ["int", "string"] },
                             senderName: { bsonType: "string" },
                             timestamp: { bsonType: "date" }
                         }
@@ -161,11 +159,11 @@ const schemas = {
                 required: ["studyId", "userId", "socketId", "status"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID (필수)"
                     },
                     userId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "사용자 ID (필수)"
                     },
                     userName: {
@@ -235,11 +233,11 @@ const schemas = {
                         description: "로그 카테고리 (필수)"
                     },
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID"
                     },
                     userId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "사용자 ID"
                     },
                     message: {
@@ -278,11 +276,11 @@ const schemas = {
                 required: ["studyId", "senderId", "fileName", "fileUrl", "fileSize"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID (필수)"
                     },
                     senderId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "업로드자 ID (필수)"
                     },
                     senderName: {

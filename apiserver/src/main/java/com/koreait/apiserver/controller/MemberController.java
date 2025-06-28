@@ -172,6 +172,37 @@ public class MemberController {
         }
     }
 
+    // 현재 사용자 정보 조회 (JWT 토큰 기반)
+    @GetMapping("/api/members/me")
+    public ResponseEntity<ApiResponse<MemberDTO>> getCurrentUser(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error("AUTHORIZATION_REQUIRED"));
+            }
+            
+            String token = authHeader.replace("Bearer ", "");
+            String username = jwtService.getUsernameFromToken(token);
+            
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error("INVALID_TOKEN"));
+            }
+            
+            MemberDTO member = memberService.getMemberByUsername(username);
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("USER_NOT_FOUND"));
+            }
+            
+            return ResponseEntity.ok(ApiResponse.success(member));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("TOKEN_VALIDATION_ERROR"));
+        }
+    }
+
     // 관리자 계정 생성 (개발/테스트용 - 실제 운영에서는 제거 권장)
     @PostMapping("/api/auth/create-admin")
     public ResponseEntity<ApiResponse<String>> createAdminAccount(@RequestBody MemberDTO adminMember) {
