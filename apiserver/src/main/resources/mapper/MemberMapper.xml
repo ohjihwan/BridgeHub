@@ -46,22 +46,24 @@
 
     <update id="updateMember" parameterType="com.koreait.apiserver.entity.Member">
         UPDATE members 
-        SET userid = #{userid}, 
-            phone = #{phone},
-            nickname = #{nickname},
-            name = #{name},
-            password = #{password}, 
-            education = #{education},
-            department = #{department},
-            gender = #{gender},
-            region = #{region},
-            district = #{district},
-            time = #{time},
-            profile_image = #{profileImage},
-            status = #{status},
-            email_verified = #{emailVerified},
-            description = #{description},
+        <set>
+            <if test="userid != null">userid = #{userid},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="education != null">education = #{education},</if>
+            <if test="department != null">department = #{department},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="region != null">region = #{region},</if>
+            <if test="district != null">district = #{district},</if>
+            <if test="time != null">time = #{time},</if>
+            <if test="profileImage != null">profile_image = #{profileImage},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="emailVerified != null">email_verified = #{emailVerified},</if>
+            <if test="description != null">description = #{description},</if>
             updated_at = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 

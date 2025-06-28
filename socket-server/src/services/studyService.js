@@ -23,7 +23,7 @@ class StudyService {
         try {
             console.log(`📚 StudyService - 스터디 정보 조회 시작: ${studyId}`);
             
-            const response = await axios.get(`${this.apiBaseUrl}/study-rooms/${studyId}`, {
+            const response = await axios.get(`${this.apiBaseUrl}/studies/${studyId}`, {
                 timeout: 5000,
                 headers: {
                     'Content-Type': 'application/json',
@@ -62,9 +62,10 @@ class StudyService {
                 statusText: error.response?.statusText
             });
             
-            // API 서버 연결 실패 시 기본 정보 반환
-            if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-                console.warn(`🔄 StudyService - API 서버 연결 실패, 기본 스터디 정보 반환`);
+            // API 서버 연결 실패 또는 500 에러 시 기본 정보 반환
+            if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || 
+                (error.response && error.response.status >= 500)) {
+                console.warn(`🔄 StudyService - API 서버 에러 (${error.response?.status || error.code}), 기본 스터디 정보 반환`);
                 return {
                     id: studyId,
                     title: `Study Room ${studyId}`,
@@ -72,7 +73,7 @@ class StudyService {
                     currentMembers: 0,
                     bossId: null,
                     createdBy: null,
-                    description: 'API 서버 연결 실패로 인한 기본 정보',
+                    description: 'API 서버 에러로 인한 기본 정보',
                     status: 'ACTIVE'
                 };
             }
@@ -90,7 +91,7 @@ class StudyService {
         try {
             console.log(`👥 StudyService - 스터디 멤버 조회 시작: ${studyId}`);
             
-            const response = await axios.get(`${this.apiBaseUrl}/study-rooms/${studyId}/members`, {
+            const response = await axios.get(`${this.apiBaseUrl}/studies/${studyId}/members`, {
                 timeout: 5000,
                 headers: {
                     'Content-Type': 'application/json',
@@ -150,6 +151,66 @@ class StudyService {
         } catch (error) {
             console.error(`❌ StudyService - 참가 권한 확인 실패:`, error);
             return false;
+        }
+    }
+
+    /**
+     * 사용자 정보 조회
+     * @param {string|number} userId - 사용자 ID
+     * @returns {Promise<Object|null>} 사용자 정보
+     */
+    async getUserInfo(userId) {
+        try {
+            console.log(`👤 StudyService - 사용자 정보 조회 시작: ${userId}`);
+            
+            const response = await axios.get(`${this.apiBaseUrl}/members/id/${userId}`, {
+                timeout: 5000,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-System-Token': this.systemToken
+                }
+            });
+
+            if (response.data && response.data.status === 'success') {
+                const user = response.data.data;
+                console.log(`✅ StudyService - 사용자 정보 조회 성공:`, {
+                    userId: user.id,
+                    nickname: user.nickname,
+                    name: user.name
+                });
+                
+                return {
+                    id: user.id,
+                    name: user.name,
+                    nickname: user.nickname,
+                    email: user.email,
+                    profileImage: user.profileImage
+                };
+            } else {
+                console.warn(`⚠️ StudyService - 사용자 조회 응답 이상:`, response.data);
+                return null;
+            }
+        } catch (error) {
+            console.error(`❌ StudyService - 사용자 정보 조회 실패:`, {
+                userId: userId,
+                error: error.message,
+                status: error.response?.status
+            });
+            
+            // API 서버 에러 시 기본 정보 반환
+            if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT' || 
+                (error.response && error.response.status >= 500)) {
+                console.warn(`🔄 StudyService - API 서버 에러, 기본 사용자 정보 반환`);
+                return {
+                    id: userId,
+                    name: `사용자${userId}`,
+                    nickname: `사용자${userId}`,
+                    email: null,
+                    profileImage: null
+                };
+            }
+            
+            return null;
         }
     }
 

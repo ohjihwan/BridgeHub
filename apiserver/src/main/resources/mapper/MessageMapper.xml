@@ -32,7 +32,7 @@
                mem.nickname as sender_nickname,
                mem.profile_image as sender_profile_image
         FROM Message m
-        LEFT JOIN Member mem ON m.sender_id = mem.member_id
+        LEFT JOIN members mem ON m.sender_id = mem.id
         WHERE m.room_id = #{roomId} 
           AND m.is_deleted = false
         <if test="beforeDate != null">
@@ -47,7 +47,7 @@
                mem.nickname as sender_nickname,
                mem.profile_image as sender_profile_image
         FROM Message m
-        LEFT JOIN Member mem ON m.sender_id = mem.member_id
+        LEFT JOIN members mem ON m.sender_id = mem.id
         WHERE m.room_id = #{roomId} AND m.is_deleted = false 
         ORDER BY m.sent_at ASC
     </select>
@@ -61,7 +61,7 @@
                mem.nickname as sender_nickname,
                mem.profile_image as sender_profile_image
         FROM Message m
-        LEFT JOIN Member mem ON m.sender_id = mem.member_id
+        LEFT JOIN members mem ON m.sender_id = mem.id
         WHERE m.room_id = #{roomId} AND m.is_deleted = false 
         ORDER BY m.sent_at DESC 
         LIMIT #{limit}
