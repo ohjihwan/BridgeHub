@@ -167,4 +167,14 @@ export const reportAPI = {
     getMyReports: () => apiClient.get('/reports/my')
 };
 
+// 비밀번호 재설정 관련 API
+export const passwordResetAPI = {
+    // 비밀번호 재설정 코드 요청
+    sendResetCode: (email) => apiClient.post('/auth/forgot-password', { email }),
+    
+    // 비밀번호 재설정 완료
+    resetPassword: (username, email, resetCode, newPassword) => 
+        apiClient.post('/auth/reset-password', { username, email, resetCode, newPassword })
+};
+
 export default apiClient; 

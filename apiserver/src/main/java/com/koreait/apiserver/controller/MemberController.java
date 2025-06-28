@@ -263,6 +263,63 @@ public class MemberController {
         }
     }
 
+    // 비밀번호 재설정 코드 발송
+    @PostMapping("/api/auth/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("EMAIL_REQUIRED"));
+            }
+            
+            // 사용자 존재 여부 확인
+            MemberDTO member = memberService.getMemberByUsername(email);
+            if (member == null) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("USER_NOT_FOUND"));
+            }
+            
+            // 비밀번호 재설정 이메일 발송
+            emailService.sendPasswordResetEmail(email);
+            return ResponseEntity.ok(ApiResponse.success());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("PASSWORD_RESET_SEND_ERROR"));
+        }
+    }
+
+    // 비밀번호 재설정 완료
+    @PostMapping("/api/auth/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String username = request.get("username");
+            String email = request.get("email");
+            String resetCode = request.get("resetCode");
+            String newPassword = request.get("newPassword");
+            
+            if (username == null || username.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("USERNAME_REQUIRED"));
+            }
+            if (email == null || email.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("EMAIL_REQUIRED"));
+            }
+            if (resetCode == null || resetCode.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("RESET_CODE_REQUIRED"));
+            }
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("NEW_PASSWORD_REQUIRED"));
+            }
+            
+            // 비밀번호 재설정 처리 (사용자명과 이메일 일치 검증 포함)
+            boolean success = memberService.resetPassword(username, email, resetCode, newPassword);
+            if (success) {
+                return ResponseEntity.ok(ApiResponse.success());
+            } else {
+                return ResponseEntity.badRequest().body(ApiResponse.error("PASSWORD_RESET_FAILED"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("PASSWORD_RESET_ERROR"));
+        }
+    }
+
     // 관리자 계정 생성 (개발/테스트용 - 실제 운영에서는 제거 권장)
     @PostMapping("/api/auth/create-admin")
     public ResponseEntity<ApiResponse<String>> createAdminAccount(@RequestBody MemberDTO adminMember) {
