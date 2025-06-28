@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { validateUserToken } from './springClient.mjs';  // :contentReference[oaicite:23]{index=23}
+import { validateUserToken } from '../service/springClient.mjs'; 
 
 // Socket.IO 인증
 export default function socketAuth(socket, next) {

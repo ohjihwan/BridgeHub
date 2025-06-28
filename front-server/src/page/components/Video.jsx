@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
-import * as mediasoupClient from 'mediasoup-client';
-import api from '@/lib/api';                  
-import socketService from '../../../../socket-server/src/services/socketService';
+import * as mediasoupClient from 'mediasoup-client';                  
 
 const Video = ({ onClose, userNickname, roomId }) => {
   const localRef   = useRef(null);
