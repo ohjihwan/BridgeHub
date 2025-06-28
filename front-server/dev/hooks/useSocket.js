@@ -197,14 +197,66 @@ export const useStudySocket = (studyId, userId) => {
     useEffect(() => {
         if (!isConnected) return;
 
-        // 메시지 수신
+        // 메시지 수신 (새 메시지)
         socketService.on('new-message', (messageData) => {
-            setMessages(prev => [...prev, messageData]);
+            console.log('새 메시지 수신:', messageData);
+            
+            // 시스템 메시지인지 확인
+            const isSystemMessage = messageData.senderId === '시스템' || 
+                                    messageData.userId === '시스템' ||
+                                    messageData.senderId === 'system' ||
+                                    messageData.userId === 'system';
+            
+            const processedMessage = {
+                ...messageData,
+                type: isSystemMessage ? 'system' : undefined,
+                timestamp: messageData.timestamp || new Date().toISOString()
+            };
+            
+            setMessages(prev => {
+                // 중복 메시지 방지
+                const exists = prev.find(msg => 
+                    (msg.messageId && msg.messageId === processedMessage.messageId) ||
+                    (msg.text === processedMessage.message && 
+                     msg.senderId === processedMessage.senderId &&
+                     Math.abs(new Date(msg.timestamp || 0) - new Date(processedMessage.timestamp)) < 2000)
+                );
+                
+                if (exists) {
+                    console.log('중복 메시지 방지:', processedMessage);
+                    return prev;
+                }
+                
+                return [...prev, processedMessage];
+            });
         });
 
         // 채팅 히스토리 수신 (스터디룸 참가 시)
         socketService.on('chat-history', (historyMessages) => {
-            setMessages(historyMessages);
+            console.log('채팅 히스토리 수신:', historyMessages.length, '개 메시지');
+            
+            // 히스토리 메시지에서 시스템 메시지 구분 처리
+            const processedMessages = historyMessages.map(msg => {
+                // 시스템 메시지인지 확인
+                const isSystemMessage = msg.senderId === '시스템' || 
+                                        msg.userId === '시스템' ||
+                                        msg.senderId === 'system' ||
+                                        msg.userId === 'system';
+                
+                return {
+                    ...msg,
+                    type: isSystemMessage ? 'system' : undefined,
+                    timestamp: msg.timestamp || new Date().toISOString()
+                };
+            });
+            
+            // 타임스탬프 기준으로 정렬
+            const sortedMessages = processedMessages.sort((a, b) => 
+                new Date(a.timestamp) - new Date(b.timestamp)
+            );
+            
+            console.log('처리된 히스토리 메시지:', sortedMessages.length, '개');
+            setMessages(sortedMessages);
         });
 
         // 사용자 참가
