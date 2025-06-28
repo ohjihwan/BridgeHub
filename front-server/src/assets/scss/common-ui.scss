@@ -235,6 +235,12 @@ legend,
 		color:#fff;
 		font-size:remx(16);
 		cursor:pointer;
+
+		&:disabled {
+			border-color:$line2;
+			background-color:$line2;
+			color:$font4;
+		}
 	}
 }
 
