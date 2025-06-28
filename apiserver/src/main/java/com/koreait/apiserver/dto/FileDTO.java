@@ -23,6 +23,7 @@ public class FileDTO {
     // 추가 필드 (업로드 시 사용)
     private String downloadUrl;
     private String thumbnailUrl;  // 이미지 미리보기용
+    private String fileUrl;       // 웹에서 직접 접근 가능한 URL
     
     // 기존 필드들과의 호환성을 위한 getter/setter
     public Long getBoardId() {

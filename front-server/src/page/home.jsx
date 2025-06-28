@@ -5,10 +5,11 @@ import Header from '@common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
-import roomData from '@json/Room.json';
+import axios from 'axios';
 
 const Home = () => {
 	const navigate = useNavigate();
+	const [rooms, setRooms] = useState([]);
 	const [selectedRoom, setSelectedRoom] = useState(null);
 	const [hasStudyRoom, setHasStudyRoom] = useState(true);
 	const [studyRoom, setStudyRoom] = useState({
@@ -22,7 +23,7 @@ const Home = () => {
 	const [isClosing, setIsClosing] = useState(false);
 	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
-	
+
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
 		setShowDetail(true);
@@ -38,21 +39,20 @@ const Home = () => {
 		setShowCreateStudy(false);
 	};
 	
-	/* useEffect(() => {
-		// 나중에 백엔드 연결 후 fetch 또는 axios 사용
-		fetch('/api/my-studyroom')
-			.then(res => res.json())
-			.then(data => {
-				if (data) {
-					setHasStudyRoom(true);
-					setStudyRoom(data);
+	useEffect(() => {
+		axios.get('/api/studies')
+			.then(res => {
+				if (res.data.status === 'success' && Array.isArray(res.data.data)) {
+					setRooms(res.data.data);
 				} else {
-					setHasStudyRoom(false);
+					setRooms([]);
 				}
-			}).catch(err => {
-				console.log(err);
+			})
+			.catch(err => {
+				setRooms([]);
 			});
-	}, []); */
+	}, []);
+	
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {
@@ -140,7 +140,7 @@ const Home = () => {
 						<button type="button" className="more-box__link" onClick={() => navigate('/list')}>더보기</button>
 					</div>
 					
-					<StudyRoomList rooms={roomData} onItemClick={handleItemClick} limit={10} />
+					<StudyRoomList rooms={rooms} onItemClick={handleItemClick} limit={10} />
 				</div>
 			</div>
 		

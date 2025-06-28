@@ -1,85 +1,228 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authClient } from '@/assets/js/common-ui';
+import { authClient } from '@js/common-ui';
+import Layer from '@common/Layer';
 
 const API_BASE_URL = 'http://localhost:7100/api/auth';
 
 function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
 	const [userPw, setUserPw] = useState('');
+	const [remember, setRemember] = useState(false);
+	const [showFindPw, setShowFindPw] = useState(false);
+
+	const [findName, setFindName] = useState('');
+	const [findPhone, setFindPhone] = useState('');
+	const [findEmail, setFindEmail] = useState('');
+	const [emailVerified, setEmailVerified] = useState(false);
+	const [newPassword, setNewPassword] = useState('');
+	const [newPasswordCheck, setNewPasswordCheck] = useState('');
+
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		const savedId = localStorage.getItem('rememberId');
+		if (savedId) {
+			setUserId(savedId);
+			setRemember(true);
+		}
+	}, []);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		
-		/* try {
+		try {
 			const res = await authClient.post(`/login`, {
 				userid: userId,
 				password: userPw
 			});
-
-			if (res.data.success) {
+			if (res.data.status === 'success') {
 				const token = res.data.data.token;
-				localStorage.setItem('authorization', token);
-				await window.customAlert('로그인 성공').then(() => {
-					navigate('/home');
-				});
+				localStorage.setItem('token', token);
+
+				// 아이디 저장 여부 반영
+				if (remember) {
+					localStorage.setItem('rememberId', userId);
+				} else {
+					localStorage.removeItem('rememberId');
+				}
+
+				navigate('/home');
 			} else {
-				await window.customAlert(res.data.message || '로그인에 실패했습니다.');
+				await window.customAlert('로그인에 실패했습니다.');
 			}
 		} catch (err) {
-			await window.customAlert(err.response?.data?.message || '로그인 중 오류가 발생했습니다.');
-		} */
-		navigate('/home');
+			await window.customAlert('로그인 중 오류가 발생했습니다.');
+		}
 	};
 
-	function texttext(e) {
-		console.log("이렇게 실행");
-	}
+	const handleEmailVerification = async () => {
+		if (!findEmail) {
+			await window.customAlert('이메일을 입력하세요.');
+			return;
+		}
+
+		try {
+			await authClient.post('/send-verification', { email: findEmail });
+			await window.customAlert('인증 코드가 발송되었습니다.');
+
+			const code = await window.customPrompt('인증코드를 입력하세요.', 'XXXXXX');
+			if (!code) return;
+
+			const res = await authClient.post(`/verify-email`, { email: findEmail, code });
+			if (res.data.status === 'success') {
+				await window.customAlert('이메일 인증이 완료되었습니다.');
+				setEmailVerified(true);  // 인증 완료
+			} else {
+				await window.customAlert('인증 실패');
+			}
+		} catch (err) {
+			await window.customAlert('인증 요청 실패');
+		}
+	};
+
+	const handleFindPwRequest = async () => {
+		if (!findName.trim() || !findPhone.trim() || !findEmail.trim()) {
+			await window.customAlert('이름, 휴대폰 번호, 이메일을 모두 입력해주세요.');
+			return;
+		}
+		if (!emailVerified) {
+			await window.customAlert('이메일 인증을 먼저 완료하세요.');
+			return;
+		}
+
+		try {
+			const res = await authClient.post(`/find-password`, {
+				name: findName,
+				phone: findPhone,
+				email: findEmail
+			});
+
+			if (res.data.status === 'success') {
+				await window.customAlert('임시 비밀번호가 이메일로 발송되었습니다.');
+				setShowFindPw(false);
+			} else {
+				await window.customAlert(res.data.message || '비밀번호를 찾을 수 없습니다.');
+			}
+		} catch (err) {
+			await window.customAlert('비밀번호 찾기 중 오류가 발생했습니다.');
+		}
+	};
+	
+	const handleChangePassword = async () => {
+		if (newPassword !== newPasswordCheck) {
+			await window.customAlert('비밀번호가 일치하지 않습니다.');
+			return;
+		}
+
+		try {
+			const token = localStorage.getItem('token'); // 이미 authClient에 자동 포함되는 구조라 따로 안 붙여도 됨
+
+			const res = await authClient.put('/members/password', {
+				currentPassword: currentPassword,  // 현재 비밀번호 입력값 필요
+				newPassword: newPassword
+			});
+
+			if (res.data.status === 'success') {
+				await window.customAlert('비밀번호가 성공적으로 변경되었습니다.');
+				// 원하면 비밀번호 입력 필드 초기화
+			} else {
+				await window.customAlert(res.data.message || '비밀번호 변경에 실패했습니다.');
+			}
+		} catch (err) {
+			await window.customAlert('비밀번호 변경 중 오류가 발생했습니다.');
+		}
+	};
+
+	const isFormFilled = useMemo(() => {
+		return (
+			findPhone.trim() &&
+			findEmail.trim() &&
+			emailVerified &&
+			newPassword.trim() &&
+			newPasswordCheck.trim()
+		);
+	}, [findPhone, findEmail, emailVerified, newPassword, newPasswordCheck]);
+
 
 	return (
-		<div className="login">
-			<div className="login__container">
+		<>
+			<div className="login">
+				<div className="login__container">
 
-				<h1 className='animation-logo' aria-label="Bridge Hub">
-					<div className="animation-logo__imgmotion">
-						<div className="animation-logo__wave">
-							<i className="animation-logo__wave1"></i>
-							<i className="animation-logo__wave2"></i>
+					<h1 className='animation-logo' aria-label="Bridge Hub">
+						<div className="animation-logo__imgmotion">
+							<div className="animation-logo__wave">
+								<i className="animation-logo__wave1"></i>
+								<i className="animation-logo__wave2"></i>
+							</div>
 						</div>
-					</div>
-				</h1>
+					</h1>
 
-				<form className="login__area" onSubmit={handleSubmit}>
-					<div className="login__forms">
-						<div className="field">
-							<input className="text" type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="이메일를 입력하세요"/>
+					<form className="login__area" onSubmit={handleSubmit}>
+						<div className="login__forms">
+							<div className="field">
+								<input className="text" type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="이메일를 입력하세요"/>
+							</div>
+							<div className="field">
+								<input className="text" type="password" value={userPw} onChange={(e) => setUserPw(e.target.value)} placeholder="비밀번호를 입력하세요"/>
+							</div>
 						</div>
-						<div className="field">
-							<input className="text" type="password" value={userPw} onChange={(e) => setUserPw(e.target.value)} placeholder="비밀번호를 입력하세요"/>
+						
+						<div className="login__options">
+							<div className="find-buttons">
+								<button type="button" className='fund-button' onClick={() => setShowFindPw(true)}>비빌번호를 잊으셨나요?</button>
+							</div>
+							<div className="login__checkbox">
+								<input type="checkbox" id="remember" className='hide' checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+								<label htmlFor="remember">아이디 기억하기</label>
+							</div>
 						</div>
-					</div>
-					
-					<div className="login__options">
-						<div className="find-buttons">
-							<button type="button" className='fund-button' onClick={() => customAlert('안녕하세요! 여긴 안내창입니다.')}>아이디 찾기</button>
-							<i className='slash'>/</i>
-							<button type="button" className='fund-button' onClick={() => customConfirm('정말 비밀번호를 찾으시겠습니까?', texttext)}>비밀번호 찾기</button>
-						</div>
-						<div className="login__checkbox">
-							<input type="checkbox" id="remember" className='hide'/>
-							<label htmlFor="remember">아이디 기억하기</label>
-						</div>
-					</div>
 
-					<div className="login__buttons">
-						<button type="submit" className="login__button">로그인</button>
-						<button type="button" className="login__button login__button--signup" onClick={onSwitchToSignUp}>회원가입</button>
+						<div className="login__buttons">
+							<button type="submit" className="login__button">로그인</button>
+							<button type="button" className="login__button login__button--signup" onClick={onSwitchToSignUp}>회원가입</button>
+						</div>
+					</form>
+				</div>
+			</div>,
+			{showFindPw && (
+				<Layer isOpen={showFindPw} onClose={() => setShowFindPw(false)} header="비밀번호 찾기" footer={
+					<button className="layer__submit" onClick={handleChangePassword} disabled={!isFormFilled} >
+						비밀번호를 변경
+					</button>
+				}>
+					<label htmlFor='findId' className="label hide">이름</label>
+					<div className="field">
+						<input type="text" name="findId" id="findId" className="text" placeholder="이름을 입력하세요" value={findName} onChange={(e) => setFindName(e.target.value)} />
 					</div>
-				</form>
-			</div>
-		</div>
+					<label htmlFor='findHp' className="label hide">휴대폰 번호</label>
+					<div className="field">
+						<input type="tel" name="findHp" id="findHp" className="text" placeholder="휴대폰 번호를 입력하세요" value={findPhone} onChange={(e) => setFindPhone(e.target.value)} />
+					</div>
+					<div className="field">
+						<input type="email" className="text" name="email" value={findEmail} onChange={(e) => setFindEmail(e.target.value)} placeholder="이메일을 입력하세요"/>
+						<button type="button" className="middle-button" onClick={handleEmailVerification}>이메일인증</button>
+					</div>
+					{emailVerified && (
+						<>
+							<div className="field">
+								<input type="password" name="newPw" id="newPw" className="text"
+									placeholder="새 비밀번호를 입력하세요" value={newPassword}
+									onChange={(e) => setNewPassword(e.target.value)} />
+							</div>
+							<label htmlFor="newPwCheck" className="label hide">비밀번호 확인</label>
+							<div className="field">
+								<input type="password" name="newPwCheck" id="newPwCheck" className="text"
+									placeholder="비밀번호를 다시 입력하세요" value={newPasswordCheck}
+									onChange={(e) => setNewPasswordCheck(e.target.value)} />
+							</div>
+						</>
+					)}
+				</Layer>
+			)}
+		</>
 	);
 }
 
 export default Login; 
+

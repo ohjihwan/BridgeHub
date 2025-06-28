@@ -88,6 +88,7 @@ const Search = () => {
 					{searchKeyword ? (
 						filteredRooms.length > 0 ? (
 							<StudyRoomList
+								/* StudyRoomList rooms={rooms || []} */
 								rooms={filteredRooms}
 								onItemClick={() => {}}
 							/>

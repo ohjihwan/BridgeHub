@@ -14,6 +14,8 @@
         <result property="createdAt" column="created_at"/>
         <result property="status" column="status"/>
         <result property="adminComment" column="admin_comment"/>
+        <result property="logFileId" column="log_file_id"/>
+        <result property="logMessageIndex" column="log_message_index"/>
     </resultMap>
 
     <insert id="insertReport" parameterType="com.koreait.apiserver.entity.Report" useGeneratedKeys="true" keyProperty="reportId">

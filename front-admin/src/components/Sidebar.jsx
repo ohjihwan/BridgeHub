@@ -17,22 +17,22 @@ const Sidebar = () => {
       <div className="menu">
         <ul>
           <li>
-            <NavLink to="/" end activeClassName="active">
+            <NavLink to="/" end className={({ isActive }) => isActive ? "active" : ""}>
               대시보드
             </NavLink>
           </li>
           <li>
-            <NavLink to="/members" activeClassName="active">
+            <NavLink to="/members" className={({ isActive }) => isActive ? "active" : ""}>
               회원정보관리
             </NavLink>
           </li>
           <li>
-            <NavLink to="/reports" activeClassName="active">
+            <NavLink to="/reports" className={({ isActive }) => isActive ? "active" : ""}>
               신고관리
             </NavLink>
           </li>
           <li>
-            <NavLink to="/statistics" activeClassName="active">
+            <NavLink to="/statistics" className={({ isActive }) => isActive ? "active" : ""}>
               통계
             </NavLink>
           </li>

@@ -20,8 +20,7 @@ public class MemberDTO {
     private String profileImage;
     private String status = "ACTIVE";
     private Boolean emailVerified = false;  // 이메일 인증 상태
-    private String emailVerificationCode;  // 이메일 인증 코드
-    private LocalDateTime emailVerificationExpiresAt;  // 이메일 인증 코드 만료 시간
+    private String description;  // 사용자 자기소개
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     

@@ -19,11 +19,9 @@ const schemas = {
                 required: ["studyId", "senderId", "content", "timestamp"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
                         description: "스터디룸 ID (필수)"
                     },
                     senderId: {
-                        bsonType: "int",
                         description: "발신자 ID (필수)"
                     },
                     senderName: {
@@ -95,41 +93,28 @@ const schemas = {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["studyId", "studyTitle"],
+                required: ["studyId"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID (필수)"
                     },
                     studyTitle: {
                         bsonType: "string",
-                        description: "스터디 제목 (필수)"
+                        description: "스터디 제목"
                     },
                     currentMembers: {
                         bsonType: "array",
                         items: {
-                            bsonType: "object",
-                            properties: {
-                                userId: { bsonType: "int" },
-                                userName: { bsonType: "string" },
-                                userNickname: { bsonType: "string" },
-                                joinedAt: { bsonType: "date" },
-                                status: { enum: ["ACTIVE", "INACTIVE"] }
-                            }
+                            bsonType: "object"
                         }
                     },
                     memberCount: {
-                        bsonType: "int",
+                        bsonType: ["int", "long"],
                         description: "현재 멤버 수"
                     },
                     lastMessage: {
-                        bsonType: "object",
-                        properties: {
-                            content: { bsonType: "string" },
-                            senderId: { bsonType: "int" },
-                            senderName: { bsonType: "string" },
-                            timestamp: { bsonType: "date" }
-                        }
+                        bsonType: "object"
                     },
                     lastActivity: {
                         bsonType: "date",
@@ -158,14 +143,14 @@ const schemas = {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["studyId", "userId", "socketId", "status"],
+                required: ["studyId", "userId", "status"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID (필수)"
                     },
                     userId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "사용자 ID (필수)"
                     },
                     userName: {
@@ -178,7 +163,7 @@ const schemas = {
                     },
                     socketId: {
                         bsonType: "string",
-                        description: "Socket ID (필수)"
+                        description: "Socket ID"
                     },
                     status: {
                         enum: ["ACTIVE", "INACTIVE"],
@@ -224,22 +209,22 @@ const schemas = {
         validator: {
             $jsonSchema: {
                 bsonType: "object",
-                required: ["level", "category", "message", "timestamp"],
+                required: ["level", "message"],
                 properties: {
                     level: {
-                        enum: ["INFO", "WARN", "ERROR", "DEBUG"],
-                        description: "로그 레벨 (필수)"
+                        bsonType: "string",
+                        description: "로그 레벨"
                     },
                     category: {
-                        enum: ["SYSTEM", "MESSAGE", "STUDY", "USER", "CONNECTION"],
-                        description: "로그 카테고리 (필수)"
+                        bsonType: "string",
+                        description: "로그 카테고리"
                     },
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID"
                     },
                     userId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "사용자 ID"
                     },
                     message: {
@@ -252,7 +237,7 @@ const schemas = {
                     },
                     timestamp: {
                         bsonType: "date",
-                        description: "로그 시간 (필수)"
+                        description: "로그 시간"
                     },
                     createdAt: {
                         bsonType: "date",
@@ -278,11 +263,11 @@ const schemas = {
                 required: ["studyId", "senderId", "fileName", "fileUrl", "fileSize"],
                 properties: {
                     studyId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "스터디룸 ID (필수)"
                     },
                     senderId: {
-                        bsonType: "int",
+                        bsonType: ["int", "string"],
                         description: "업로드자 ID (필수)"
                     },
                     senderName: {
@@ -451,4 +436,17 @@ module.exports = {
     validateSchema,
     MONGODB_URI,
     DB_NAME
-}; 
+};
+
+// 스크립트로 직접 실행될 때만 초기화 실행
+if (require.main === module) {
+    initializeSchemas()
+        .then(() => {
+            console.log('✅ 스키마 초기화 성공!');
+            process.exit(0);
+        })
+        .catch((error) => {
+            console.error('❌ 스키마 초기화 실패:', error);
+            process.exit(1);
+        });
+} 

@@ -1,0 +1,963 @@
+=============================================
+TheBridgeHub API 명세서 (v1.0.0)
+=============================================
+
+기본 서버 정보:
+- 베이스 URL: http://localhost:7100
+- Content-Type: application/json
+- Authorization: Bearer {JWT_TOKEN} (인증이 필요한 API)
+
+=============================================
+1. FRONT-SERVER 용 API (@/front-server)
+=============================================
+
+-------------------------------------------
+1.1 인증 관련 API (MemberController)
+-------------------------------------------
+
+1) 이메일 인증 코드 발송
+- URL: POST /api/auth/send-verification
+- 설명: 회원가입 전 이메일 인증 코드 발송
+- Request Body:
+{
+    "email": "user@example.com"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+2) 이메일 인증 확인
+- URL: POST /api/auth/verify-email
+- 설명: 이메일 인증 코드 확인
+- Request Body:
+{
+    "email": "user@example.com",
+    "code": "123456"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+3) 회원가입
+- URL: POST /api/auth/register
+- 설명: 이메일 인증 완료 후 회원가입
+- Request Body:
+{
+    "email": "user@example.com",
+    "password": "password123",
+    "name": "홍길동",
+    "nickname": "길동이",
+    "phone": "010-1234-5678",
+    "education": "대학교",
+    "department": "컴퓨터공학과",
+    "gender": "남자",
+    "region": "서울",
+    "district": "강남구",
+    "time": "오후"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+4) 로그인
+- URL: POST /api/auth/login
+- 설명: 회원 로그인
+- Request Body:
+{
+    "username": "user@example.com",
+    "password": "password123"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiJ9...",
+        "username": "user@example.com",
+        "email": "user@example.com",
+        "emailVerified": true
+    }
+}
+
+5) 이메일 인증 상태 확인
+- URL: GET /api/auth/verify-email?email=user@example.com
+- 설명: 이메일 인증 상태 확인
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": true
+}
+
+6) 회원 정보 조회
+- URL: GET /api/members/{username}
+- 설명: 회원 정보 조회
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "id": 1,
+        "username": "user@example.com",
+        "email": "user@example.com",
+        "name": "홍길동",
+        "nickname": "길동이",
+        "phone": "010-1234-5678",
+        "education": "대학교",
+        "department": "컴퓨터공학과",
+        "gender": "남자",
+        "region": "서울",
+        "district": "강남구",
+        "time": "오후",
+        "profileImage": null,
+        "emailVerified": true,
+        "createdAt": "2024-01-01T00:00:00"
+    }
+}
+
+7) 회원 정보 수정
+- URL: PUT /api/members/{username}
+- 설명: 회원 정보 수정
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Request Body:
+{
+    "nickname": "새닉네임",
+    "phone": "010-9876-5432",
+    "education": "대학원",
+    "department": "소프트웨어학과",
+    "region": "부산",
+    "district": "해운대구",
+    "time": "저녁"
+}
+- Response: 수정된 회원 정보
+
+8) 회원 탈퇴
+- URL: DELETE /api/members/{username}
+- 설명: 회원 탈퇴
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+-------------------------------------------
+1.2 스터디룸 관련 API (StudyRoomController)
+-------------------------------------------
+
+1) 스터디룸 목록 조회
+- URL: GET /api/studies
+- 설명: 전체 스터디룸 목록 조회
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": [
+        {
+            "studyRoomId": 1,
+            "roomId": 1,
+            "bossId": 1,
+            "title": "자바 스터디",
+            "description": "자바 기초부터 심화까지",
+            "education": "대학교",
+            "department": "컴퓨터공학과",
+            "region": "서울",
+            "district": "강남구",
+            "capacity": 10,
+            "currentMembers": 3,
+            "time": "오후",
+            "thumbnail": "thumbnail.jpg",
+            "isPublic": true,
+            "createdAt": "2024-01-01T00:00:00",
+            "bossName": "홍길동",
+            "bossNickname": "길동이"
+        }
+    ]
+}
+
+2) 스터디룸 상세 조회
+- URL: GET /api/studies/{studyRoomId}
+- 설명: 특정 스터디룸 상세 정보 조회
+- Response: 스터디룸 상세 정보
+
+3) 스터디룸 생성
+- URL: POST /api/studies
+- 설명: 새 스터디룸 생성
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Request Body:
+{
+    "title": "리액트 스터디",
+    "description": "리액트 실전 프로젝트",
+    "education": "대학교",
+    "department": "컴퓨터공학과",
+    "region": "서울",
+    "district": "강남구",
+    "capacity": 8,
+    "time": "저녁",
+    "thumbnail": "react_thumbnail.jpg",
+    "isPublic": true
+}
+- Response: 생성된 스터디룸 정보
+
+4) 스터디룸 수정
+- URL: PUT /api/studies/{studyRoomId}
+- 설명: 스터디룸 정보 수정 (방장만)
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Request Body: 수정할 스터디룸 정보
+- Response: 수정된 스터디룸 정보
+
+5) 스터디룸 삭제
+- URL: DELETE /api/studies/{studyRoomId}
+- 설명: 스터디룸 삭제 (방장만)
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+6) 스터디 참가 신청
+- URL: POST /api/studies/{studyRoomId}/join
+- 설명: 스터디 참가 신청
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+7) 스터디 멤버 조회
+- URL: GET /api/studies/{studyRoomId}/members
+- 설명: 스터디룸 멤버 목록 조회
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": [
+        {
+            "id": 1,
+            "studyRoomId": 1,
+            "memberId": 1,
+            "role": "BOSS",
+            "status": "APPROVED",
+            "joinedAt": "2024-01-01T00:00:00",
+            "memberName": "홍길동",
+            "memberNickname": "길동이",
+            "memberEmail": "user@example.com"
+        }
+    ]
+}
+
+8) 참가 신청 승인/거절
+- URL: PUT /api/studies/{studyRoomId}/members/{memberId}/status?status=APPROVED
+- 설명: 참가 신청 승인/거절 (방장만)
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Parameters: status (APPROVED, REJECTED)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+9) 대기중인 멤버 조회
+- URL: GET /api/studies/{studyRoomId}/pending-members
+- 설명: 대기중인 멤버 목록 조회 (방장만)
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response: 대기중인 멤버 목록
+
+10) 스터디 탈퇴
+- URL: DELETE /api/studies/{studyRoomId}/leave
+- 설명: 스터디 탈퇴
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+11) 학과별 스터디룸 조회
+- URL: GET /api/studies/department/{department}
+- 설명: 특정 학과의 스터디룸 목록 조회
+- Response: 해당 학과 스터디룸 목록
+
+12) 지역별 스터디룸 조회
+- URL: GET /api/studies/region/{region}
+- 설명: 특정 지역의 스터디룸 목록 조회
+- Response: 해당 지역 스터디룸 목록
+
+13) 시간대별 스터디룸 조회
+- URL: GET /api/studies/time/{time}
+- 설명: 특정 시간대의 스터디룸 목록 조회
+- Response: 해당 시간대 스터디룸 목록
+
+14) 인기 스터디룸 조회
+- URL: GET /api/studies/hot?limit=6
+- 설명: 인기 스터디룸 목록 조회
+- Parameters: limit (기본값: 6)
+- Response: 인기 스터디룸 목록
+
+15) 내가 참여한 스터디룸
+- URL: GET /api/studies/my-studies
+- 설명: 내가 참여한 스터디룸 목록
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response: 참여한 스터디룸 목록
+
+16) 내가 생성한 스터디룸
+- URL: GET /api/studies/my-created
+- 설명: 내가 생성한 스터디룸 목록
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response: 생성한 스터디룸 목록
+
+-------------------------------------------
+1.3 채팅방 관련 API (ChatRoomController)
+-------------------------------------------
+
+1) 채팅방 목록 조회
+- URL: GET /api/chatrooms
+- 설명: 채팅방 목록 조회
+- Response:
+[
+    {
+        "roomId": 1,
+        "roomName": "자바 스터디 채팅방",
+        "createdAt": "2024-01-01T00:00:00",
+        "maxMembers": 10,
+        "isActive": true
+    }
+]
+
+2) 채팅방 상세 조회
+- URL: GET /api/chatrooms/{roomId}
+- 설명: 특정 채팅방 정보 조회
+- Response: 채팅방 상세 정보
+
+3) 채팅방 생성
+- URL: POST /api/chatrooms
+- 설명: 새 채팅방 생성
+- Request Body:
+{
+    "roomName": "새 채팅방",
+    "maxMembers": 15
+}
+- Response: 생성된 채팅방 정보
+
+4) 채팅방 수정
+- URL: PUT /api/chatrooms/{roomId}
+- 설명: 채팅방 정보 수정
+- Request Body: 수정할 채팅방 정보
+- Response: 수정된 채팅방 정보
+
+5) 채팅방 삭제
+- URL: DELETE /api/chatrooms/{roomId}
+- 설명: 채팅방 삭제
+- Response: 200 OK
+
+-------------------------------------------
+1.4 메시지 관련 API (MessageController)
+-------------------------------------------
+
+1) 메시지 저장
+- URL: POST /api/messages
+- 설명: 새 메시지 저장 (Socket Server에서 호출)
+- Request Body:
+{
+    "roomId": 1,
+    "senderId": 1,
+    "content": "안녕하세요!",
+    "messageType": "TEXT"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "messageId": 1,
+        "roomId": 1,
+        "senderId": 1,
+        "content": "안녕하세요!",
+        "messageType": "TEXT",
+        "sentAt": "2024-01-01T00:00:00",
+        "isDeleted": false,
+        "senderNickname": "길동이",
+        "senderName": "홍길동"
+    }
+}
+
+2) 채팅 히스토리 조회
+- URL: GET /api/messages/history/{roomId}?page=1&size=50&beforeDate=2024-01-01T00:00:00
+- 설명: 채팅 히스토리 조회 (페이징)
+- Parameters: page, size, beforeDate (선택)
+- Response: 메시지 목록
+
+3) 채팅방별 메시지 조회
+- URL: GET /api/messages/room/{roomId}
+- 설명: 특정 채팅방의 모든 메시지 조회
+- Response: 메시지 목록
+
+4) 메시지 상세 조회
+- URL: GET /api/messages/{messageId}
+- 설명: 특정 메시지 조회
+- Response: 메시지 상세 정보
+
+5) 메시지 삭제
+- URL: DELETE /api/messages/{messageId}
+- 설명: 메시지 삭제 (논리 삭제)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+6) 사용자별 메시지 조회
+- URL: GET /api/messages/user/{senderId}
+- 설명: 특정 사용자가 보낸 메시지 목록
+- Response: 메시지 목록
+
+7) 채팅방 메시지 개수
+- URL: GET /api/messages/count/{roomId}
+- 설명: 채팅방의 총 메시지 개수
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": 150
+}
+
+8) 최근 메시지 조회
+- URL: GET /api/messages/recent/{roomId}
+- 설명: 최근 메시지 조회 (스크롤 업 시 사용)
+- Response: 최근 20개 메시지
+
+-------------------------------------------
+1.5 파일 관련 API (FileController)
+-------------------------------------------
+
+1) 파일 업로드
+- URL: POST /api/files/upload
+- 설명: 파일 업로드
+- Content-Type: multipart/form-data
+- Form Data:
+  - file: (MultipartFile)
+  - studyRoomId: 1
+  - uploaderId: 1
+  - fileType: STUDY_ATTACHMENT (선택)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "fileId": 1,
+        "fileType": "STUDY_ATTACHMENT",
+        "originalFilename": "document.pdf",
+        "storedFilename": "20240101_123456_document.pdf",
+        "filePath": "/uploads/study/1/",
+        "fileSize": 1024000,
+        "mimeType": "application/pdf",
+        "uploadedAt": "2024-01-01T00:00:00"
+    }
+}
+
+2) 파일 다운로드
+- URL: GET /api/files/download/{fileId}
+- 설명: 파일 다운로드
+- Response: Binary file data
+
+3) 파일 정보 조회
+- URL: GET /api/files/info/{fileId}
+- 설명: 파일 정보 조회
+- Response: 파일 상세 정보
+
+4) 메시지별 파일 목록
+- URL: GET /api/files/message/{messageId}
+- 설명: 특정 메시지의 첨부 파일 목록
+- Response: 파일 목록
+
+5) 스터디룸별 파일 목록
+- URL: GET /api/files/studyroom/{studyRoomId}
+- 설명: 특정 스터디룸의 파일 목록
+- Response: 파일 목록
+
+6) 회원별 파일 목록
+- URL: GET /api/files/member/{memberId}
+- 설명: 특정 회원이 업로드한 파일 목록
+- Response: 파일 목록
+
+7) 파일 삭제
+- URL: DELETE /api/files/{fileId}
+- 설명: 파일 삭제 (논리적 삭제)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+8) 이미지 썸네일
+- URL: GET /api/files/thumbnail/{fileId}
+- 설명: 이미지 파일 썸네일 조회
+- Response: Binary image data
+
+-------------------------------------------
+1.6 신고 관련 API (ReportController)
+-------------------------------------------
+
+1) 신고 생성
+- URL: POST /api/reports
+- 설명: 새 신고 생성
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Request Body:
+{
+    "reportedUserId": 2,
+    "reportType": "USER",
+    "messageId": 1,
+    "roomId": 1,  
+    "studyRoomId": 1,
+    "reason": "부적절한 언어 사용"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "reportId": 1,
+        "reporterId": 1,
+        "reportedUserId": 2,
+        "reportType": "USER",
+        "reason": "부적절한 언어 사용",
+        "status": "PENDING",
+        "createdAt": "2024-01-01T00:00:00"
+    }
+}
+
+2) 채팅 로그 신고
+- URL: POST /api/reports/chat-log
+- 설명: 채팅 로그 기반 신고
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Request Body:
+{
+    "reportedUserId": 2,
+    "reportType": "MESSAGE",
+    "messageId": 1,
+    "roomId": 1,
+    "reason": "욕설 사용",
+    "logFileId": 1,
+    "logMessageIndex": 50
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+3) 내 신고 목록
+- URL: GET /api/reports/reporter/{reporterId}
+- 설명: 내가 한 신고 목록 조회
+- Response: 신고 목록
+
+-------------------------------------------
+1.7 링크 미리보기 API (LinkPreviewController)
+-------------------------------------------
+
+1) 링크 미리보기 추출
+- URL: POST /api/link-preview/extract
+- 설명: URL 메타데이터 추출
+- Request Body:
+{
+    "url": "https://example.com"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "url": "https://example.com",
+        "title": "Example Website",
+        "description": "This is an example website",
+        "image": "https://example.com/image.jpg",
+        "siteName": "Example"
+    }
+}
+
+2) URL 추출
+- URL: POST /api/link-preview/extract-urls
+- 설명: 텍스트에서 URL 추출
+- Request Body: "텍스트 내용 https://example.com 포함"
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": ["https://example.com"]
+}
+
+3) URL 유효성 검사
+- URL: POST /api/link-preview/validate
+- 설명: URL 유효성 검사
+- Request Body:
+{
+    "url": "https://example.com"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": true
+}
+
+-------------------------------------------
+1.8 시스템 상태 API (HealthController)
+-------------------------------------------
+
+1) 서버 상태 확인
+- URL: GET /api/health
+- 설명: 서버 상태 및 정보 조회
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "status": "UP",
+        "timestamp": "2024-01-01T00:00:00",
+        "service": "TheBridgeHub API Server",
+        "version": "1.0.0",
+        "port": 7100
+    }
+}
+
+2) 간단한 상태 확인
+- URL: GET /api/health/status
+- 설명: 간단한 서버 상태 확인
+- Response:
+{
+    "status": "UP",
+    "timestamp": "2024-01-01T00:00:00"
+}
+
+=============================================
+2. FRONT-ADMIN 용 API (@/front-admin)
+=============================================
+
+-------------------------------------------
+2.1 관리자 인증 API (MemberController)
+-------------------------------------------
+
+1) 관리자 권한 확인
+- URL: GET /api/auth/check-admin
+- 설명: 관리자 권한 확인 (현재는 false 반환)
+- Headers: Authorization: Bearer {JWT_TOKEN}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": false
+}
+
+2) 관리자 계정 생성
+- URL: POST /api/auth/create-admin
+- 설명: 관리자 계정 생성 (개발/테스트용)
+- Request Body:
+{
+    "email": "admin@bridgehub.com",
+    "password": "admin123",
+    "name": "관리자",
+    "nickname": "admin"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": null
+}
+
+-------------------------------------------
+2.2 관리자 신고 관리 API (AdminController)
+-------------------------------------------
+
+1) 신고 목록 조회 (페이징)
+- URL: GET /api/admin/reports?page=0&size=10
+- 설명: 관리자용 신고 목록 조회
+- Parameters: page (기본값: 0), size (기본값: 10)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "content": [
+            {
+                "reportId": 1,
+                "reporterId": 1,
+                "reportedUserId": 2,
+                "reportType": "USER",
+                "reason": "부적절한 언어 사용",
+                "status": "PENDING",
+                "createdAt": "2024-01-01T00:00:00"
+            }
+        ],
+        "totalElements": 50,
+        "totalPages": 5,
+        "currentPage": 0,
+        "size": 10
+    }
+}
+
+2) 신고 처리
+- URL: POST /api/admin/reports/{reportId}/resolve
+- 설명: 신고 처리 (관리자)
+- Request Body:
+{
+    "penaltyType": "WARNING",
+    "penalty": "경고 1회",
+    "adminNote": "욕설 사용으로 경고 처리"
+}
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "reportId": 1,
+        "status": "RESOLVED",
+        "adminComment": "욕설 사용으로 경고 처리"
+    }
+}
+
+-------------------------------------------
+2.3 관리자 회원 관리 API (AdminController)
+-------------------------------------------
+
+1) 회원 목록 조회 (페이징)
+- URL: GET /api/admin/users?page=0&size=10
+- 설명: 관리자용 회원 목록 조회
+- Parameters: page (기본값: 0), size (기본값: 10)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "content": [
+            {
+                "id": 1,
+                "username": "user@example.com",
+                "name": "홍길동",
+                "nickname": "길동이",
+                "status": "ACTIVE",
+                "emailVerified": true,
+                "createdAt": "2024-01-01T00:00:00"
+            }
+        ],
+        "totalElements": 100,
+        "totalPages": 10,
+        "currentPage": 0,
+        "size": 10
+    }
+}
+
+2) 회원 상태 변경
+- URL: PATCH /api/admin/users/{memberId}/status?status=BANNED
+- 설명: 회원 계정 상태 변경 (정지/활성화)
+- Parameters: status (ACTIVE, BANNED, DELETED)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "id": 1,
+        "username": "user@example.com",
+        "status": "BANNED"
+    }
+}
+
+-------------------------------------------
+2.4 관리자 통계 API (AdminController)
+-------------------------------------------
+
+1) 전체 통계 조회
+- URL: GET /api/admin/statistics
+- 설명: 관리자 대시보드 통계 조회
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "memberStats": {
+            "gender": {
+                "남자": 60,
+                "여자": 40
+            },
+            "education": {
+                "대학교": 70,
+                "대학원": 30
+            }
+        },
+        "reportStats": {
+            "pending": 5,
+            "resolved": 45,
+            "rejected": 10
+        },
+        "activityStats": {
+            "totalStudyRooms": 150,
+            "activeStudyRooms": 120,
+            "totalMessages": 5000
+        }
+    }
+}
+
+2) 회원 통계 조회
+- URL: GET /api/admin/statistics/members
+- 설명: 회원 통계 조회 (성별, 학력, 시간대, 전공별)
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "gender": {
+            "남자": 60,
+            "여자": 40
+        },
+        "education": {
+            "대학교": 70,
+            "대학원": 20,
+            "고등학교": 10
+        },
+        "time": {
+            "오전": 20,
+            "오후": 50,
+            "저녁": 30
+        },
+        "department": {
+            "컴퓨터공학과": 40,
+            "전자공학과": 30,
+            "기계공학과": 20,
+            "기타": 10
+        }
+    }
+}
+
+3) 신고 통계 조회
+- URL: GET /api/admin/statistics/reports
+- 설명: 신고 통계 조회
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": {
+        "byStatus": {
+            "PENDING": 10,
+            "PROCESSING": 5,
+            "RESOLVED": 80,
+            "REJECTED": 5
+        },
+        "byType": {
+            "USER": 60,
+            "MESSAGE": 30,
+            "STUDYROOM": 10
+        },
+        "monthlyReports": {
+            "2024-01": 20,
+            "2024-02": 25,
+            "2024-03": 15
+        }
+    }
+}
+
+-------------------------------------------
+2.5 일반 신고 관리 API (ReportController)
+-------------------------------------------
+
+1) 신고 목록 조회
+- URL: GET /api/reports
+- 설명: 신고 목록 조회
+- Response: 신고 목록
+
+2) 신고 상세 조회
+- URL: GET /api/reports/{reportId}
+- 설명: 특정 신고 상세 조회
+- Response: 신고 상세 정보
+
+3) 신고 상태 업데이트
+- URL: PUT /api/reports/{reportId}/status?status=RESOLVED&adminComment=처리완료
+- 설명: 신고 상태 업데이트
+- Parameters: status, adminComment (선택)
+- Response: 업데이트된 신고 정보
+
+4) 대기중인 신고 조회
+- URL: GET /api/reports/pending
+- 설명: 대기중인 신고 목록 조회
+- Response: 대기중인 신고 목록
+
+5) 채팅 증거 조회
+- URL: GET /api/reports/chat-evidence/{reportId}
+- 설명: 신고와 관련된 채팅 증거 조회
+- Response:
+{
+    "success": true,
+    "message": "SUCCESS",
+    "data": [
+        {
+            "messageId": 1,
+            "content": "신고된 메시지 내용",
+            "sentAt": "2024-01-01T00:00:00",
+            "senderNickname": "문제사용자"
+        }
+    ]
+}
+
+=============================================
+3. 공통 에러 응답 형식
+=============================================
+
+에러 발생 시 공통 응답 형식:
+{
+    "success": false,
+    "message": "ERROR_CODE",
+    "data": null,
+    "timestamp": "2024-01-01T00:00:00"
+}
+
+주요 에러 코드:
+- AUTH_ERROR: 인증 오류
+- AUTH_REQUIRED: 인증 필요
+- EMAIL_VERIFICATION_REQUIRED: 이메일 인증 필요
+- LOGIN_FAILED: 로그인 실패
+- REGISTRATION_ERROR: 회원가입 오류
+- STUDY_CREATE_ERROR: 스터디 생성 오류
+- MESSAGE_SAVE_ERROR: 메시지 저장 오류
+- FILE_UPLOAD_ERROR: 파일 업로드 오류
+- REPORT_CREATE_ERROR: 신고 생성 오류
+
+=============================================
+4. Postman 테스트 컬렉션 정보
+=============================================
+
+Postman에서 테스트할 때 사용할 환경 변수:
+- {{baseUrl}}: http://localhost:7100
+- {{token}}: JWT 토큰 (로그인 후 받은 토큰)
+
+테스트 순서 권장사항:
+1. 이메일 인증 → 회원가입 → 로그인
+2. 스터디룸 생성 → 참가 → 채팅
+3. 파일 업로드 → 다운로드
+4. 신고 생성 → 관리자 처리
+
+주요 Headers:
+- Content-Type: application/json
+- Authorization: Bearer {{token}}
+
+=============================================
+API 명세서 작성 완료
+============================================= 

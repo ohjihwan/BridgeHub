@@ -19,8 +19,8 @@ public class Message {
     private Boolean isDeleted = false;
     private Boolean isLogged = false;
     private Integer logFileId;
+    private Integer logMessageIndex;
     
     private String senderNickname;
-    private String senderName;
     private String senderProfileImage;
 } 

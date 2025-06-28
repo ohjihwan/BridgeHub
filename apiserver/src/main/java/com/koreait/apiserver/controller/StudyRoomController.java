@@ -57,14 +57,45 @@ public class StudyRoomController {
     // 스터디룸 생성
     @PostMapping
     public ResponseEntity<ApiResponse<StudyRoomDTO>> createStudyRoom(@RequestBody StudyRoomDTO studyRoomDTO, 
-                                                       @RequestHeader("Authorization") String authHeader) {
+                                                       @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        log.info("=== 스터디룸 생성 API 시작 ===");
         try {
+            // 요청 데이터 검증
+            if (studyRoomDTO == null) {
+                log.error("StudyRoomDTO가 null입니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("INVALID_REQUEST_DATA"));
+            }
+            
             log.info("스터디룸 생성 요청: {}", studyRoomDTO.getTitle());
+            log.info("요청 데이터: {}", studyRoomDTO);
+            
+            // 필수 필드 검증
+            if (studyRoomDTO.getTitle() == null || studyRoomDTO.getTitle().trim().isEmpty()) {
+                log.error("제목이 없습니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("TITLE_REQUIRED"));
+            }
+            if (studyRoomDTO.getDescription() == null || studyRoomDTO.getDescription().trim().isEmpty()) {
+                log.error("설명이 없습니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("DESCRIPTION_REQUIRED"));
+            }
+            
+            // Authorization 헤더 확인
+            if (authHeader == null || authHeader.trim().isEmpty()) {
+                log.error("Authorization 헤더가 없습니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("AUTH_REQUIRED"));
+            }
+            
             // JWT 토큰에서 사용자 ID 추출
             String token = authHeader.replace("Bearer ", "");
+            log.info("토큰: {}", token);
             Integer memberId = jwtService.extractMemberId(token);
             
             if (memberId == null) {
+                log.error("토큰에서 사용자 ID 추출 실패");
                 return ResponseEntity.badRequest()
                     .body(ApiResponse.error("AUTH_ERROR"));
             }
@@ -72,11 +103,13 @@ public class StudyRoomController {
             // 실제 로그인한 사용자의 ID를 bossId로 설정
             studyRoomDTO.setBossId(memberId);
             log.info("스터디룸 생성자 ID 설정: {}", memberId);
+            log.info("최종 DTO: {}", studyRoomDTO);
             
             StudyRoomDTO createdStudyRoom = studyRoomService.createStudyRoom(studyRoomDTO);
+            log.info("스터디룸 생성 성공: {}", createdStudyRoom);
             return ResponseEntity.ok(ApiResponse.success(createdStudyRoom));
         } catch (Exception e) {
-            log.error("스터디룸 생성 실패", e);
+            log.error("스터디룸 생성 실패 - 상세 에러: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("STUDY_CREATE_ERROR"));
         }

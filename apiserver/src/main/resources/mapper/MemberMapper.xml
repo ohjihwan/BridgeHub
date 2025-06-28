@@ -16,18 +16,16 @@
         <result property="district" column="district"/>
         <result property="time" column="time"/>
         <result property="profileImage" column="profile_image"/>
-        <result property="role" column="role"/>
         <result property="status" column="status"/>
         <result property="emailVerified" column="email_verified"/>
-        <result property="emailVerificationCode" column="email_verification_code"/>
-        <result property="emailVerificationExpiresAt" column="email_verification_expires_at"/>
+        <result property="description" column="description"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <insert id="insertMember" parameterType="com.koreait.apiserver.entity.Member" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, role, status, email_verified, email_verification_code, email_verification_expires_at, created_at, updated_at)
-        VALUES (#{userid}, #{phone}, #{nickname}, #{name}, #{password}, #{education}, #{department}, #{gender}, #{region}, #{district}, #{time}, #{profileImage}, #{role}, #{status}, #{emailVerified}, #{emailVerificationCode}, #{emailVerificationExpiresAt}, NOW(), NOW())
+        INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, status, email_verified, description, created_at, updated_at)
+        VALUES (#{userid}, #{phone}, #{nickname}, #{name}, #{password}, #{education}, #{department}, #{gender}, #{region}, #{district}, #{time}, #{profileImage}, #{status}, #{emailVerified}, #{description}, NOW(), NOW())
     </insert>
 
     <select id="findById" resultMap="MemberResultMap">
@@ -48,32 +46,30 @@
 
     <update id="updateMember" parameterType="com.koreait.apiserver.entity.Member">
         UPDATE members 
-        SET userid = #{userid}, 
-            phone = #{phone},
-            nickname = #{nickname},
-            name = #{name},
-            password = #{password}, 
-            education = #{education},
-            department = #{department},
-            gender = #{gender},
-            region = #{region},
-            district = #{district},
-            time = #{time},
-            profile_image = #{profileImage},
-            role = #{role}, 
-            status = #{status},
-            email_verified = #{emailVerified},
-            email_verification_code = #{emailVerificationCode},
-            email_verification_expires_at = #{emailVerificationExpiresAt},
+        <set>
+            <if test="userid != null">userid = #{userid},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="education != null">education = #{education},</if>
+            <if test="department != null">department = #{department},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="region != null">region = #{region},</if>
+            <if test="district != null">district = #{district},</if>
+            <if test="time != null">time = #{time},</if>
+            <if test="profileImage != null">profile_image = #{profileImage},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="emailVerified != null">email_verified = #{emailVerified},</if>
+            <if test="description != null">description = #{description},</if>
             updated_at = NOW()
+        </set>
         WHERE id = #{id}
     </update>
 
     <update id="updateEmailVerification">
         UPDATE members 
         SET email_verified = #{emailVerified}, 
-            email_verification_code = #{emailVerificationCode},
-            email_verification_expires_at = #{emailVerificationExpiresAt},
             updated_at = NOW()
         WHERE id = #{id}
     </update>
@@ -113,13 +109,7 @@
         SELECT COUNT(*) FROM members
     </select>
 
-    <update id="updateMemberRole">
-        UPDATE members 
-        SET role = #{role}, 
-            updated_at = NOW()
-        WHERE id = #{memberId}
-    </update>
-
+   
     <update id="updateMemberStatus">
         UPDATE members 
         SET status = #{status}, 

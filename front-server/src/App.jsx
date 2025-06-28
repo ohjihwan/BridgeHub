@@ -43,7 +43,11 @@ function App() {
 					<Route path="/chat" element={<Chat />} />
 					<Route path="/board" element={<BoardList />} />
 					<Route path="/board/write" element={<BoardWrite />} />
+<<<<<<< HEAD
 					<Route path="/search" element={<Search />} />
+=======
+					<Route path="search" element={<Search />} />
+>>>>>>> 5c52b7900226306cedb6aacb6b43d3d1ff2b2582
 					<Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
 				</Routes>
 			)}

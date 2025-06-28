@@ -157,15 +157,29 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageDTO> getRecentMessages(Integer roomId, int limit) {
-        List<MessageDTO> logMessages = chatLogService.getRecentMessages(roomId, limit);
-        if (!logMessages.isEmpty()) {
-            return logMessages;
+        try {
+            // 로그 파일에서 메시지 조회 시도
+            List<MessageDTO> logMessages = chatLogService.getRecentMessages(roomId, limit);
+            if (logMessages != null && !logMessages.isEmpty()) {
+                log.debug("로그 파일에서 {} 개의 메시지 조회됨", logMessages.size());
+                return logMessages;
+            }
+            
+            // 데이터베이스에서 메시지 조회
+            log.debug("데이터베이스에서 메시지 조회 시도: roomId={}, limit={}", roomId, limit);
+            List<Message> messages = messageDao.findRecentMessages(roomId, limit);
+            List<MessageDTO> result = messages.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+            
+            log.debug("데이터베이스에서 {} 개의 메시지 조회됨", result.size());
+            return result;
+            
+        } catch (Exception e) {
+            log.error("최근 메시지 조회 중 오류 발생: roomId={}, limit={}", roomId, limit, e);
+            // 에러가 발생해도 빈 리스트 반환하여 서비스 중단 방지
+            return new ArrayList<>();
         }
-        
-        return messageDao.findRecentMessages(roomId, limit)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
     }
 
     private MessageDTO convertToDTO(Message message) {
@@ -179,7 +193,6 @@ public class MessageServiceImpl implements MessageService {
         dto.setIsDeleted(message.getIsDeleted());
         
         dto.setSenderNickname(message.getSenderNickname());
-        dto.setSenderName(message.getSenderName());
         dto.setSenderProfileImage(message.getSenderProfileImage());
         
         return dto;

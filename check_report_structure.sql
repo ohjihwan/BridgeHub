@@ -1,0 +1,19 @@
+-- Report 테이블 구조 확인
+USE thebridgehub;
+
+-- 테이블 구조 확인
+DESCRIBE Report;
+
+-- 기존 데이터 확인
+SELECT * FROM Report LIMIT 5;
+
+-- 외래키 제약조건 확인
+SELECT 
+    CONSTRAINT_NAME,
+    COLUMN_NAME,
+    REFERENCED_TABLE_NAME,
+    REFERENCED_COLUMN_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+WHERE TABLE_SCHEMA = 'thebridgehub' 
+AND TABLE_NAME = 'Report' 
+AND REFERENCED_TABLE_NAME IS NOT NULL; 

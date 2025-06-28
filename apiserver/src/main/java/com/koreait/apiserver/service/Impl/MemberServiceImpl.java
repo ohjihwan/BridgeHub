@@ -28,31 +28,67 @@ public class MemberServiceImpl implements MemberService {
     public void register(MemberDTO memberDTO) {
         log.info("회원가입 시작: {}", memberDTO.getUserid());
         
+        // 필수 필드 검증
+        if (memberDTO.getUserid() == null || memberDTO.getUserid().trim().isEmpty()) {
+            throw new RuntimeException("USERID_REQUIRED");
+        }
+        if (memberDTO.getName() == null || memberDTO.getName().trim().isEmpty()) {
+            throw new RuntimeException("NAME_REQUIRED");
+        }
+        if (memberDTO.getPassword() == null || memberDTO.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("PASSWORD_REQUIRED");
+        }
+        if (memberDTO.getPhone() == null || memberDTO.getPhone().trim().isEmpty()) {
+            throw new RuntimeException("PHONE_REQUIRED");
+        }
+        if (memberDTO.getGender() == null || memberDTO.getGender().trim().isEmpty()) {
+            throw new RuntimeException("GENDER_REQUIRED");
+        }
+        if (memberDTO.getNickname() == null || memberDTO.getNickname().trim().isEmpty()) {
+            throw new RuntimeException("NICKNAME_REQUIRED");
+        }
+        
         if (memberDao.existsByUsername(memberDTO.getUsername())) {
-            throw new RuntimeException("이미 존재하는 사용자명입니다.");
+            throw new RuntimeException("USERNAME_ALREADY_EXISTS");
         }
         
         if (memberDao.existsByEmail(memberDTO.getEmail())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new RuntimeException("EMAIL_ALREADY_EXISTS");
         }
 
         Member member = new Member();
         member.setUserid(memberDTO.getUserid());
-        member.setPhone(memberDTO.getPhone());
-        member.setNickname(memberDTO.getNickname());
         member.setName(memberDTO.getName());
         member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
-        member.setEducation(memberDTO.getEducation());
-        member.setDepartment(memberDTO.getDepartment());
+        member.setPhone(memberDTO.getPhone());
         member.setGender(memberDTO.getGender());
+        member.setNickname(memberDTO.getNickname());
+        
+        // 선택적 필드는 null 체크 후 설정
+        if (memberDTO.getEducation() != null && !memberDTO.getEducation().trim().isEmpty()) {
+            member.setEducation(memberDTO.getEducation());
+        }
+        if (memberDTO.getDepartment() != null && !memberDTO.getDepartment().trim().isEmpty()) {
+            member.setDepartment(memberDTO.getDepartment());
+        }
+        if (memberDTO.getRegion() != null && !memberDTO.getRegion().trim().isEmpty()) {
         member.setRegion(memberDTO.getRegion());
+        }
+        if (memberDTO.getDistrict() != null && !memberDTO.getDistrict().trim().isEmpty()) {
         member.setDistrict(memberDTO.getDistrict());
+        }
+        if (memberDTO.getTime() != null && !memberDTO.getTime().trim().isEmpty()) {
         member.setTime(memberDTO.getTime());
+        }
+        if (memberDTO.getProfileImage() != null && !memberDTO.getProfileImage().trim().isEmpty()) {
         member.setProfileImage(memberDTO.getProfileImage());
+        }
+        if (memberDTO.getDescription() != null && !memberDTO.getDescription().trim().isEmpty()) {
+            member.setDescription(memberDTO.getDescription());
+        }
+        
         member.setStatus("ACTIVE");
         member.setEmailVerified(memberDTO.getEmailVerified());
-        member.setEmailVerificationCode(null);
-        member.setEmailVerificationExpiresAt(null);
         member.setCreatedAt(LocalDateTime.now());
         member.setUpdatedAt(LocalDateTime.now());
 
@@ -69,6 +105,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO login(String username, String password) {
+        // username은 실제로는 이메일(userid)이므로 userid로 조회
         Optional<Member> memberOpt = memberDao.findByUsername(username);
         
         if (memberOpt.isPresent() && passwordEncoder.matches(password, memberOpt.get().getPassword())) {
@@ -90,9 +127,9 @@ public class MemberServiceImpl implements MemberService {
         Optional<Member> memberOpt = memberDao.findByEmail(email);
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
-            memberDao.updateEmailVerification(member.getId(), true, null, null);
+            memberDao.updateEmailVerification(member.getId(), true);
         } else {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+            throw new RuntimeException("USER_NOT_FOUND");
         }
     }
 
@@ -109,8 +146,17 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public MemberDTO getMemberById(Long id) {
+        Optional<Member> memberOpt = memberDao.findById(id.intValue()); // Long을 Integer로 변환
+        return memberOpt.map(this::convertToDTO).orElse(null);
+    }
+
+    @Override
     @Transactional
     public MemberDTO updateMember(MemberDTO memberDTO) {
+        log.info("회원 정보 수정 시작: {}", memberDTO.getUsername());
+        log.info("수정할 데이터: {}", memberDTO);
+        
         Optional<Member> memberOpt = memberDao.findByUsername(memberDTO.getUsername());
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
@@ -118,43 +164,66 @@ public class MemberServiceImpl implements MemberService {
             // DTO에서 받은 모든 필드를 Member 엔티티에 설정
             if (memberDTO.getPassword() != null && !memberDTO.getPassword().isEmpty()) {
                 member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+                log.info("비밀번호 업데이트");
             }
             if (memberDTO.getPhone() != null) {
                 member.setPhone(memberDTO.getPhone());
+                log.info("전화번호 업데이트: {}", memberDTO.getPhone());
             }
             if (memberDTO.getNickname() != null) {
                 member.setNickname(memberDTO.getNickname());
+                log.info("닉네임 업데이트: {}", memberDTO.getNickname());
             }
             if (memberDTO.getName() != null) {
                 member.setName(memberDTO.getName());
+                log.info("이름 업데이트: {}", memberDTO.getName());
             }
             if (memberDTO.getEducation() != null) {
                 member.setEducation(memberDTO.getEducation());
+                log.info("학력 업데이트: {}", memberDTO.getEducation());
             }
             if (memberDTO.getDepartment() != null) {
                 member.setDepartment(memberDTO.getDepartment());
+                log.info("전공 업데이트: {}", memberDTO.getDepartment());
             }
             if (memberDTO.getGender() != null) {
                 member.setGender(memberDTO.getGender());
+                log.info("성별 업데이트: {}", memberDTO.getGender());
             }
             if (memberDTO.getRegion() != null) {
                 member.setRegion(memberDTO.getRegion());
+                log.info("지역 업데이트: {}", memberDTO.getRegion());
             }
             if (memberDTO.getDistrict() != null) {
                 member.setDistrict(memberDTO.getDistrict());
+                log.info("구/군 업데이트: {}", memberDTO.getDistrict());
             }
             if (memberDTO.getTime() != null) {
                 member.setTime(memberDTO.getTime());
+                log.info("시간대 업데이트: {}", memberDTO.getTime());
             }
             if (memberDTO.getProfileImage() != null) {
                 member.setProfileImage(memberDTO.getProfileImage());
+                log.info("프로필 이미지 업데이트: {}", memberDTO.getProfileImage());
+            }
+            if (memberDTO.getDescription() != null) {
+                member.setDescription(memberDTO.getDescription());
+                log.info("설명 업데이트: {}", memberDTO.getDescription());
             }
             
             member.setUpdatedAt(LocalDateTime.now());
-            memberDao.updateMember(member);
-            return convertToDTO(member);
+            
+            try {
+                memberDao.updateMember(member);
+                log.info("회원 정보 수정 완료: {}", memberDTO.getUsername());
+                return convertToDTO(member);
+            } catch (Exception e) {
+                log.error("회원 정보 수정 실패: {}", e.getMessage(), e);
+                throw new RuntimeException("MEMBER_UPDATE_ERROR");
+            }
         }
-        throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        log.error("사용자를 찾을 수 없음: {}", memberDTO.getUsername());
+        throw new RuntimeException("USER_NOT_FOUND");
     }
 
     @Override
@@ -164,7 +233,7 @@ public class MemberServiceImpl implements MemberService {
         if (memberOpt.isPresent()) {
             memberDao.deleteMember(memberOpt.get().getId());
         } else {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+            throw new RuntimeException("USER_NOT_FOUND");
         }
     }
 
@@ -192,7 +261,7 @@ public class MemberServiceImpl implements MemberService {
         try {
             Optional<Member> memberOpt = memberDao.findById(memberId);
             if (!memberOpt.isPresent()) {
-                throw new RuntimeException("회원을 찾을 수 없습니다.");
+                throw new RuntimeException("MEMBER_NOT_FOUND");
             }
 
             memberDao.updateMemberStatus(memberId, status);
@@ -204,14 +273,19 @@ public class MemberServiceImpl implements MemberService {
             
         } catch (Exception e) {
             log.error("회원 상태 변경 실패: memberId={}, status={}", memberId, status, e);
-            throw new RuntimeException("회원 상태 변경에 실패했습니다.", e);
+            throw new RuntimeException("MEMBER_STATUS_UPDATE_FAILED", e);
         }
     }
 
     private MemberDTO convertToDTO(Member member) {
+        if (member == null) {
+            return null;
+        }
+        
         MemberDTO dto = new MemberDTO();
-        dto.setUsername(member.getUsername());
-        dto.setEmail(member.getEmail());
+        dto.setId(member.getId()); // ID 필드 추가 (JWT 토큰에서 사용자 ID 추출에 필요)
+        dto.setUsername(member.getUserid()); // userid 반환
+        dto.setEmail(member.getUserid()); // userid 반환 (이메일)
         dto.setPhone(member.getPhone());
         dto.setNickname(member.getNickname());
         dto.setName(member.getName());
@@ -222,6 +296,8 @@ public class MemberServiceImpl implements MemberService {
         dto.setDistrict(member.getDistrict());
         dto.setTime(member.getTime());
         dto.setProfileImage(member.getProfileImage());
+        dto.setDescription(member.getDescription());
+        dto.setStatus(member.getStatus());
         dto.setEmailVerified(member.getEmailVerified());
         dto.setCreatedAt(member.getCreatedAt());
         dto.setUpdatedAt(member.getUpdatedAt());

@@ -44,7 +44,17 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
         if (studyRoomOpt.isPresent()) {
             StudyRoom studyRoom = studyRoomOpt.get();
-            return convertToDTO(studyRoom);
+            StudyRoomDTO dto = convertToDTO(studyRoom);
+            
+            // 현재 참가 중인 모든 멤버의 닉네임 조회
+            List<StudyRoomMember> approvedMembers = studyRoomMemberDao.selectApprovedMembers(studyRoomId);
+            List<String> memberNicknames = approvedMembers.stream()
+                    .map(StudyRoomMember::getMemberNickname)
+                    .filter(nickname -> nickname != null && !nickname.trim().isEmpty())
+                    .collect(Collectors.toList());
+            dto.setMemberNicknames(memberNicknames);
+            
+            return dto;
         }
         throw new RuntimeException("스터디룸을 찾을 수 없습니다.");
     }
@@ -91,22 +101,34 @@ public class StudyRoomServiceImpl implements StudyRoomService {
 
         studyRoomDao.insertStudyRoom(studyRoom);
         
-        // 3. 방장을 스터디 멤버로 추가 (APPROVED 상태)
-        StudyRoomMember bossMember = new StudyRoomMember();
-        bossMember.setStudyRoomId(studyRoom.getStudyRoomId());
-        bossMember.setMemberId(studyRoomDTO.getBossId());
-        bossMember.setRole(StudyRoomMember.MemberRole.BOSS);
-        bossMember.setStatus(StudyRoomMember.MemberStatus.APPROVED);
+        // 3. 방장을 스터디 멤버로 추가 (APPROVED 상태) - 중복 체크
+        StudyRoomMember existingMember = studyRoomMemberDao.selectStudyRoomMember(studyRoom.getStudyRoomId(), studyRoomDTO.getBossId());
+        if (existingMember == null) {
+            StudyRoomMember bossMember = new StudyRoomMember();
+            bossMember.setStudyRoomId(studyRoom.getStudyRoomId());
+            bossMember.setMemberId(studyRoomDTO.getBossId());
+            bossMember.setRole(StudyRoomMember.MemberRole.BOSS);
+            bossMember.setStatus(StudyRoomMember.MemberStatus.APPROVED);
+            
+            studyRoomMemberDao.insertStudyRoomMember(bossMember);
+            log.info("방장 멤버 추가 완료: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), studyRoomDTO.getBossId());
+        } else {
+            log.info("이미 존재하는 멤버 관계: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), studyRoomDTO.getBossId());
+        }
         
-        studyRoomMemberDao.insertStudyRoomMember(bossMember);
-        
-        // 4. 방장을 채팅방 멤버로도 추가
-        ChatRoomMember chatBossMember = new ChatRoomMember();
-        chatBossMember.setRoomId(chatRoom.getRoomId());
-        chatBossMember.setMemberId(studyRoomDTO.getBossId());
-        chatBossMember.setJoinedAt(LocalDateTime.now());
-        
-        chatRoomMemberDao.insertChatRoomMember(chatBossMember);
+        // 4. 방장을 채팅방 멤버로도 추가 - 중복 체크
+        try {
+            ChatRoomMember chatBossMember = new ChatRoomMember();
+            chatBossMember.setRoomId(chatRoom.getRoomId());
+            chatBossMember.setMemberId(studyRoomDTO.getBossId());
+            chatBossMember.setJoinedAt(LocalDateTime.now());
+            
+            chatRoomMemberDao.insertChatRoomMember(chatBossMember);
+            log.info("채팅방 멤버 추가 완료: roomId={}, memberId={}", chatRoom.getRoomId(), studyRoomDTO.getBossId());
+        } catch (Exception e) {
+            // 중복 키 에러는 무시 (이미 존재하는 멤버)
+            log.warn("채팅방 멤버 중복: roomId={}, memberId={}", chatRoom.getRoomId(), studyRoomDTO.getBossId());
+        }
         
         log.info("스터디룸 생성 완료: studyRoomId={}, bossId={}, chatRoomId={}", 
                 studyRoom.getStudyRoomId(), studyRoomDTO.getBossId(), chatRoom.getRoomId());
@@ -201,18 +223,35 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         
         StudyRoom studyRoom = studyRoomOpt.get();
         
-        // 2. 이미 참가한 멤버인지 확인
-        StudyRoomMember existingMember = studyRoomMemberDao.selectStudyRoomMember(studyRoomId, memberId);
-        if (existingMember != null) {
-            throw new RuntimeException("이미 참가 신청한 스터디입니다.");
+        // 2. 방장이 자신의 스터디에 참가 신청하는지 확인
+        if (studyRoom.getBossId().equals(memberId)) {
+            throw new RuntimeException("방장은 자신의 스터디에 참가 신청할 수 없습니다.");
         }
         
-        // 3. 정원 확인
+        // 3. 이미 참가한 멤버인지 확인
+        StudyRoomMember existingMember = studyRoomMemberDao.selectStudyRoomMember(studyRoomId, memberId);
+        if (existingMember != null) {
+            String statusMessage = "";
+            switch (existingMember.getStatus()) {
+                case PENDING:
+                    statusMessage = "이미 참가 신청한 스터디입니다. 승인을 기다려주세요.";
+                    break;
+                case APPROVED:
+                    statusMessage = "이미 참가 중인 스터디입니다.";
+                    break;
+                case REJECTED:
+                    statusMessage = "이전에 참가가 거절된 스터디입니다.";
+                    break;
+            }
+            throw new RuntimeException(statusMessage);
+        }
+        
+        // 4. 정원 확인
         if (studyRoom.getCurrentMembers() >= studyRoom.getCapacity()) {
             throw new RuntimeException("스터디 정원이 가득 찼습니다.");
         }
         
-        // 4. 스터디 멤버 추가 (PENDING 상태)
+        // 5. 스터디 멤버 추가 (PENDING 상태)
         StudyRoomMember member = new StudyRoomMember();
         member.setStudyRoomId(studyRoomId);
         member.setMemberId(memberId);
@@ -376,8 +415,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         dto.setIsPublic(studyRoom.getIsPublic());
         dto.setCreatedAt(studyRoom.getCreatedAt());
         
-        // 방장 정보 설정
-        dto.setBossName(studyRoom.getBossName());
+        // 방장 정보 설정 (이름 제거, 닉네임만 유지)
         dto.setBossNickname(studyRoom.getBossNickname());
         dto.setBossProfileImage(studyRoom.getBossProfileImage());
         
@@ -395,11 +433,11 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         dto.setApprovedAt(member.getApprovedAt());
         dto.setApprovedBy(member.getApprovedBy());
         
-        // 멤버 정보 설정
-        dto.setMemberName(member.getMemberName());
+        // 멤버 정보 설정 (이름 제거, 닉네임만 유지)
         dto.setMemberNickname(member.getMemberNickname());
         dto.setMemberEmail(member.getMemberEmail());
         dto.setMemberProfileImage(member.getMemberProfileImage());
+        dto.setMemberDescription(member.getMemberDescription());
         
         return dto;
     }

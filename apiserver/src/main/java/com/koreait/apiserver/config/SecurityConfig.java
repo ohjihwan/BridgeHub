@@ -86,6 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/reports/**").permitAll()
                         .requestMatchers("/api/messages/**").permitAll()
                         .requestMatchers("/api/link-preview/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()  // 정적 파일 접근 허용
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(systemTokenFilter(), UsernamePasswordAuthenticationFilter.class)
