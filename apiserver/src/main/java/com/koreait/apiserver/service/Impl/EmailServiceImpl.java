@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EmailServiceImpl implements EmailService {
 
     private final Map<String, EmailDTO> emailVerificationMap = new ConcurrentHashMap<>();
+    private final Map<String, EmailDTO> passwordResetMap = new ConcurrentHashMap<>();
     private final JavaMailSender javaMailSender;
 
     @Override
@@ -71,6 +72,56 @@ public class EmailServiceImpl implements EmailService {
     public boolean isEmailVerified(String email) {
         EmailDTO emailDTO = emailVerificationMap.get(email);
         return emailDTO != null && emailDTO.isVerified();
+    }
+
+    @Override
+    public void sendPasswordResetEmail(String email) {
+        String resetCode = generateVerificationCode();
+        EmailDTO passwordResetDTO = new EmailDTO();
+        passwordResetDTO.setEmail(email);
+        passwordResetDTO.setVerificationCode(resetCode);
+        passwordResetDTO.setVerified(false);
+        passwordResetDTO.setExpirationTime(System.currentTimeMillis() + 600000); // 10분 유효 (비밀번호 재설정은 좀 더 길게)
+
+        // 비밀번호 재설정 이메일 발송
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("bglyk83@gmail.com");
+            message.setTo(email);
+            message.setSubject("[TheBridgeHub] 비밀번호 재설정 코드");
+            message.setText("안녕하세요!\n\nTheBridgeHub 비밀번호 재설정 코드입니다.\n\n재설정 코드: " + resetCode + "\n\n이 코드는 10분간 유효합니다.\n만약 비밀번호 재설정을 요청하지 않으셨다면 이 메일을 무시해주세요.\n\n감사합니다.");
+            
+            javaMailSender.send(message);
+            
+            System.out.println("=== 비밀번호 재설정 이메일 발송 완료 ===");
+            System.out.println("이메일: " + email);
+            System.out.println("재설정 코드: " + resetCode);
+            System.out.println("====================================");
+        } catch (Exception e) {
+            System.err.println("비밀번호 재설정 이메일 발송 실패: " + e.getMessage());
+            e.printStackTrace();
+            // 이메일 발송 실패 시에도 콘솔에 출력
+            System.out.println("=== 비밀번호 재설정 코드 (콘솔 출력) ===");
+            System.out.println("이메일: " + email);
+            System.out.println("재설정 코드: " + resetCode);
+            System.out.println("====================================");
+        }
+
+        passwordResetMap.put(email, passwordResetDTO);
+    }
+
+    @Override
+    public boolean verifyPasswordResetCode(String email, String code) {
+        EmailDTO passwordResetDTO = passwordResetMap.get(email);
+        if (passwordResetDTO == null || System.currentTimeMillis() > passwordResetDTO.getExpirationTime()) {
+            return false;
+        }
+
+        if (passwordResetDTO.getVerificationCode().equals(code)) {
+            passwordResetDTO.setVerified(true);
+            return true;
+        }
+        return false;
     }
 
     private String generateVerificationCode() {

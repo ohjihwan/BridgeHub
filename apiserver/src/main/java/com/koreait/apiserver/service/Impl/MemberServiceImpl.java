@@ -3,6 +3,7 @@ package com.koreait.apiserver.service.Impl;
 import com.koreait.apiserver.dao.MemberDao;
 import com.koreait.apiserver.dto.MemberDTO;
 import com.koreait.apiserver.entity.Member;
+import com.koreait.apiserver.service.EmailService;
 import com.koreait.apiserver.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberDao memberDao;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -274,6 +276,47 @@ public class MemberServiceImpl implements MemberService {
         } catch (Exception e) {
             log.error("회원 상태 변경 실패: memberId={}, status={}", memberId, status, e);
             throw new RuntimeException("MEMBER_STATUS_UPDATE_FAILED", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean resetPassword(String username, String email, String resetCode, String newPassword) {
+        log.info("비밀번호 재설정 시작: username={}, email={}", username, email);
+        
+        try {
+            // 1. 사용자명과 이메일 일치 검증
+            Optional<Member> memberOpt = memberDao.findByUsername(username);
+            if (!memberOpt.isPresent()) {
+                log.warn("사용자를 찾을 수 없음: username={}", username);
+                return false;
+            }
+            
+            Member member = memberOpt.get();
+            if (!member.getUserid().equals(email)) {
+                log.warn("사용자명과 이메일이 일치하지 않음: username={}, email={}, userEmail={}", 
+                         username, email, member.getUserid());
+                return false;
+            }
+            
+            // 2. 재설정 코드 검증
+            if (!emailService.verifyPasswordResetCode(email, resetCode)) {
+                log.warn("비밀번호 재설정 코드 검증 실패: email={}", email);
+                return false;
+            }
+            
+            // 3. 새로운 비밀번호로 변경
+            member.setPassword(passwordEncoder.encode(newPassword));
+            member.setUpdatedAt(LocalDateTime.now());
+            
+            memberDao.updateMember(member);
+            
+            log.info("비밀번호 재설정 완료: username={}, email={}", username, email);
+            return true;
+            
+        } catch (Exception e) {
+            log.error("비밀번호 재설정 실패: username={}, email={}, error={}", username, email, e.getMessage(), e);
+            return false;
         }
     }
 
