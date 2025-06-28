@@ -2738,7 +2738,7 @@ legend,
 	top:0;
 	z-index:270;
 	transform:translateX(100%);
-	width:remx(200);
+	width:remx(220);
 	height:100vh;
 	background-color:$bg-root;
 	box-shadow:0 0 remx(10) rgba(0,0,0,0.3); 
@@ -2747,6 +2747,31 @@ legend,
 	&.slide-right {
 		transform:translateX(0);
 	}
+
+	&__title {
+		
+	}
+
+	ul {
+		display:flex;
+		flex-wrap:wrap;
+	}
+
+	&__item {
+		width:50%;
+		padding:remx(5) remx(8);
+	}
+
+	&__item--jpg { }
+	&__item--jpeg { }
+	&__item--png { }
+	&__item--gif { }
+	&__item--pdf { }
+	&__item--doc { }
+	&__item--docx { }
+	&__item--txt { }
+	&__item--zip { }
+	&__item--rar { }
 }
 // ─────────────────────────────
 // 📄 searchRoom.jsx page

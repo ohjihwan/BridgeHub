@@ -23,11 +23,16 @@ const AttachmentList = ({ isOpen, attachments, onClose }) => {
 
 	return ReactDOM.createPortal(
 		<div className={`attachment-list ${isVisible ? 'slide-right' : ''}`}>
-			<h3>첨부파일 모아보기</h3>
+			<h3 className="attachment-list__title">첨부파일 모아보기</h3>
 			<ul>
-				{attachments.map((att, idx) => (
-					<li key={idx}>{att.name}</li>
-				))}
+				{attachments.map((att, idx) => {
+					const ext = att.name.split('.').pop().toLowerCase() || '';
+					return (
+						<li key={idx} className={`attachment-list__item attachment-list__item--${ext}`}>
+							{att.name}
+						</li>
+					)
+				})}
 			</ul>
 			<button onClick={onClose}>닫기</button>
 		</div>,
