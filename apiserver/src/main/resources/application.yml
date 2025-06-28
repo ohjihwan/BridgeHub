@@ -14,7 +14,7 @@ spring:
     properties:
       mail:
         smtp:
-          auth: true
+          auth: false   # ❗️ 인증 false
           starttls:
             enable: true
           timeout: 5000
