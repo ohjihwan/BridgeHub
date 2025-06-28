@@ -397,6 +397,7 @@ legend,
 		border-radius:$form-radius;
 		background-color:$bg-root;
 		font-size:1.6rem;
+		
 		&:last-child {
 			margin-bottom:0;
 		}
@@ -406,6 +407,14 @@ legend,
 		appearance:none;
 		background:$bg-root url('@ico/ico-arrow-select.svg') no-repeat right remx(12) center / remx(8) auto;
 		font-family:'Pretendard-Regular';
+	}
+
+	.text {
+		
+		&:read-only {
+			background-color:$line2;
+			color:$font4;
+		}
 	}
 
 	.middle-button {

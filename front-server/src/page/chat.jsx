@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
@@ -11,14 +11,28 @@ import { chatAPI, userAPI } from '@dev/services/apiService';
 
 function Chat() {
 	const location = useLocation();
+	const params = useParams();
 	const studyInfo = location.state?.studyRoom || location.state;
+	
+	// URL query string에서 정보 추출
+	const urlParams = new URLSearchParams(location.search);
 	
 	// 사용자 정보 상태
 	const [currentUserId, setCurrentUserId] = useState(null);
 	const [currentUserInfo, setCurrentUserInfo] = useState(null);
 	
-	const studyId = studyInfo?.studyRoomId || studyInfo?.id;
-	const roomId = studyInfo?.roomId;
+	// URL 파라미터에서 정보를 읽어오거나 location.state에서 가져오기
+	const studyId = studyInfo?.studyRoomId || studyInfo?.id || params.studyId || params.id || urlParams.get('studyId') || urlParams.get('id');
+	const roomId = studyInfo?.roomId || params.roomId || urlParams.get('roomId');
+	
+	console.log('Chat 컴포넌트 초기화:', { 
+		studyInfo, 
+		params, 
+		urlParams: Object.fromEntries(urlParams.entries()),
+		studyId, 
+		roomId,
+		location: location.pathname + location.search
+	});
 	
 	// 실제 소켓 연동 (사용자 ID가 설정된 후에만)
 	const { 
@@ -242,10 +256,12 @@ function Chat() {
 				messageType: 'TEXT'
 			};
 
+			console.log('📤 소켓으로 메시지 전송:', messageData);
 			const success = socketSendMessage(messageData);
 			
 			if (!success) {
-				console.error('메시지 전송 실패');
+				console.error('❌ 메시지 전송 실패 - 소켓 서비스 응답:', success);
+				window.customAlert && window.customAlert('메시지 전송에 실패했습니다. 연결 상태를 확인해주세요.');
 				return;
 			}
 		}
