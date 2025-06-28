@@ -11,6 +11,7 @@ public interface MemberService {
     void verifyEmail(String username);
     boolean isEmailVerified(String username);
     MemberDTO getMemberByUsername(String username);
+    MemberDTO getMemberById(Long id); // ID 기반 조회 추가
     MemberDTO updateMember(MemberDTO member);
     void deleteMember(String username);
     

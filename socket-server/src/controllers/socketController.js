@@ -53,15 +53,7 @@ const handleJoinStudy = async (socket, studyId, userId) => {
                 memberCount: participants.length
             });
 
-            // 참가자들에게 새 참가자 알림
-            socketService.broadcastMessage(studyId, {
-                type: 'user-joined',
-                userId: userId,
-                message: `사용자 ${userId}님이 참가했습니다.`,
-                participants: participants,
-                timestamp: new Date().toISOString()
-            });
-            
+     
             // 참가한 사용자에게 성공 응답
             socket.emit('study-joined', {
                 studyId: studyId,

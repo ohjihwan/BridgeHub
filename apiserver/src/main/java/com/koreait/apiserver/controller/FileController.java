@@ -2,7 +2,10 @@ package com.koreait.apiserver.controller;
 
 import com.koreait.apiserver.dto.ApiResponse;
 import com.koreait.apiserver.dto.FileDTO;
+import com.koreait.apiserver.dto.MemberDTO;
 import com.koreait.apiserver.service.FileService;
+import com.koreait.apiserver.service.JwtService;
+import com.koreait.apiserver.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,8 +26,14 @@ public class FileController {
 
     @Autowired
     private FileService fileService;
+    
+    @Autowired
+    private JwtService jwtService;
+    
+    @Autowired
+    private MemberService memberService;
 
-    // 파일 업로드
+    // 파일 업로드 (스터디룸용)
     @PostMapping("/upload")
     public ResponseEntity<ApiResponse<FileDTO>> uploadFile(@RequestParam("file") MultipartFile file,
                                                          @RequestParam("studyRoomId") Integer studyRoomId,
@@ -39,6 +48,63 @@ public class FileController {
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("FILE_UPLOAD_ERROR"));
         }
+    }
+
+    // 프로필 이미지 업로드 (단순 업로드)
+    @PostMapping("/upload/profile")
+    public ResponseEntity<ApiResponse<FileDTO>> uploadProfileImage(@RequestParam("file") MultipartFile file,
+                                                                 @RequestParam(value = "type", required = false) String type,
+                                                                 @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            log.info("프로필 이미지 업로드 요청: fileName={}, type={}", file.getOriginalFilename(), type);
+            
+            // JWT 토큰에서 사용자 정보 추출
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("AUTHORIZATION_REQUIRED"));
+            }
+            
+            String token = authHeader.replace("Bearer ", "");
+            String username = jwtService.getUsernameFromToken(token);
+            
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("INVALID_TOKEN"));
+            }
+            
+            // 사용자 ID 조회
+            MemberDTO member = memberService.getMemberByUsername(username);
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("USER_NOT_FOUND"));
+            }
+            
+            // 이미지 파일 검증
+            if (!isImageFile(file)) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("INVALID_IMAGE_FILE"));
+            }
+            
+            // 파일 크기 검증 (5MB)
+            if (file.getSize() > 5 * 1024 * 1024) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("FILE_SIZE_EXCEEDED"));
+            }
+            
+            // 프로필 이미지용 업로드 (memberId 포함)
+            FileDTO uploadedFile = fileService.uploadProfileImage(file, type, member.getId());
+            return ResponseEntity.ok(ApiResponse.success(uploadedFile));
+        } catch (Exception e) {
+            log.error("프로필 이미지 업로드 실패: fileName={}", file.getOriginalFilename(), e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("PROFILE_IMAGE_UPLOAD_ERROR"));
+        }
+    }
+    
+    // 이미지 파일 검증 메서드
+    private boolean isImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && contentType.startsWith("image/");
     }
 
     // 파일 다운로드

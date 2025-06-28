@@ -9,12 +9,12 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const axios = require('axios');
-const socketRouter = require('./src/routers/socketRouter');
 const { Server } = require('socket.io');
 const authMiddleware = require('./src/middleware/authMiddleware');
 const jwt = require('jsonwebtoken');
 const socketService = require('./src/services/socketService');
 const mongoService = require('./src/services/mongoService');
+const ChatHandler = require('./src/socket/chatHandler');
 const { 
     handleJoinStudy, 
     handleSendMessage, 
@@ -50,6 +50,9 @@ const io = new Server(server, {
 
 // Socket.IO 인스턴스를 socketService에 전달
 socketService.setSocketIO(io);
+
+// ChatHandler 인스턴스 생성 및 초기화 (모든 소켓 이벤트 처리)
+const chatHandler = new ChatHandler(io);
 
 // 스터디별 소켓 연결 관리
 const studySockets = new Map();
@@ -105,24 +108,8 @@ app.use(cors({
 app.use(express.json());
 app.use('/test', express.static(path.join(__dirname, 'test')));
 
-// 기본 연결 로그 (socketRouter 이전에 설정)
-io.on('connection', (socket) => {
-    console.log('🔌 새로운 클라이언트 연결:', socket.id, new Date().toISOString());
-    
-    // 연결 시 초기 상태 전송
-    socket.emit('connection-established', {
-        socketId: socket.id,
-        timestamp: new Date().toISOString(),
-        user: socket.user
-    });
-
-    socket.on('disconnect', (reason) => {
-        console.log('🔌 클라이언트 연결 해제:', socket.id, '이유:', reason, new Date().toISOString());
-    });
-});
-
-// 소켓 핸들러 설정 (메인 이벤트 처리)
-socketRouter(io);
+// ChatHandler가 모든 소켓 이벤트를 처리합니다
+console.log('🚀 ChatHandler가 모든 소켓 이벤트를 처리합니다.');
 
 // 서버 에러 처리
 server.on('error', (error) => {
@@ -167,6 +154,7 @@ async function startServer() {
             console.log(`📡 API 서버 URL: ${API_BASE_URL}`);
             console.log(`🌐 CORS Origins: ${CORS_ORIGINS.join(', ')}`);
             console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? '설정됨' : '기본값 사용'}`);
+            console.log(`💬 ChatHandler가 초기화되었습니다.`);
         });
     } catch (error) {
         console.error('서버 시작 실패:', error);
