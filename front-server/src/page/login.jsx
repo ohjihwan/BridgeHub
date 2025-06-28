@@ -9,8 +9,9 @@ function Login({ onSwitchToSignUp }) {
 	const [userId, setUserId] = useState('');
 	const [userPw, setUserPw] = useState('');
 	const [remember, setRemember] = useState(false);
-
-	const [handleFindId, sethandleFindId] = useState(false);
+	const [showFindId, setShowFindId] = useState(false);
+	const [findName, setFindName] = useState('');
+	const [findPhone, setFindPhone] = useState('');
 
 	const navigate = useNavigate();
 
@@ -98,7 +99,7 @@ function Login({ onSwitchToSignUp }) {
 						
 						<div className="login__options">
 							<div className="find-buttons">
-								<button type="button" className='fund-button' onClick={() => sethandleFindId(true)}>아이디 찾기</button>
+								<button type="button" className='fund-button' onClick={() => setShowFindId(true)}>아이디 찾기</button>
 								<i className='slash'>/</i>
 								<button type="button" className='fund-button' onClick={() => customConfirm('정말 비밀번호를 찾으시겠습니까?')}>비밀번호 찾기</button>
 							</div>
@@ -115,21 +116,21 @@ function Login({ onSwitchToSignUp }) {
 					</form>
 				</div>
 			</div>,
-			{handleFindId && (
-				<Layer isOpen={handleFindId} onClose={() => sethandleFindId(false)} header="아이디 찾기" footer={
+			{showFindId && (
+				<Layer isOpen={showFindId} onClose={() => setShowFindId(false)} header="아이디 찾기" footer={
 					<button className="layer__submit" onClick={handleFindIdRequest} >아이디 찾기</button>
 				}>
 					<div className="find-my-info">
 						<div className="info-row">
-							<label htmlFor='name' className="label">이름</label>
+							<label htmlFor='findId' className="label hide">이름</label>
 							<div className="field">
-								<input type="text" name="name" id="name" className="text" placeholder="이름을 입력하세요"/>
+								<input type="text" name="findId" id="findId" className="text" placeholder="이름을 입력하세요" value={findName} onChange={(e) => setFindName(e.target.value)} />
 							</div>
 						</div>
 						<div className="info-row">
-							<label htmlFor='name' className="label">휴대폰 번호</label>
+							<label htmlFor='findHp' className="label hide">휴대폰 번호</label>
 							<div className="field">
-								<input type="tel" name="name" id="name" className="text" placeholder="휴대폰 번호를 입력하세요"/>
+								<input type="tel" name="findHp" id="findHp" className="text" placeholder="휴대폰 번호를 입력하세요" value={findPhone} onChange={(e) => setFindPhone(e.target.value)} />
 							</div>
 						</div>
 					</div>
