@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @Mapper
 public interface MemberDao {
@@ -54,4 +55,17 @@ public interface MemberDao {
     List<Member> findAllWithPaging(@Param("offset") int offset, @Param("size") int size);
     int getTotalCount();
     int updateMemberStatus(@Param("memberId") Integer memberId, @Param("status") String status);
+    
+    // 통계용
+    Map<String, Integer> countByGender();
+    Map<String, Integer> countByEducation();
+    Map<String, Integer> countByTime();
+    Map<String, Integer> countByDepartment();
+    
+    // 활동 통계용
+    Map<String, Integer> getQuarterlySignups();
+    Map<String, Integer> getQuarterlyVisitors();
+    List<Map<String, Object>> getTopActiveUsers();
+    List<Map<String, Object>> getPopularRooms();
+    Integer getTotalVisitors();
 } 

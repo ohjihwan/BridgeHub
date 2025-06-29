@@ -1,0 +1,28 @@
+{
+  "name": "bridgehub-rtc-server",
+  "version": "1.0.0",
+  "description": "BridgeHub WebRTC Server for Study Rooms",
+  "main": "src/server.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "dev": "nodemon --watch src --watch config --watch util --watch service src/server.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"Linting not configured\" && exit 0"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mediasoup": "^3.16.2",
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["webrtc", "study-room", "bridgehub", "socket.io", "mediasoup"],
+  "author": "BridgeHub Team",
+  "license": "MIT"
+}

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "start": "npm run dev",
+    "dev":   "vite --host 0.0.0.0 --port 7700",
     "build": "vite build"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
     "@mui/material": "^7.1.2",
     "@mui/x-data-grid": "^8.5.2",
     "@tanstack/react-query": "^5.80.10",
+    "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",

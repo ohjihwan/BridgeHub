@@ -123,6 +123,21 @@ public class AdminController {
         }
     }
 
+    /**
+     * 회원 삭제 (관리자)
+     */
+    @DeleteMapping("/users/{memberId}")
+    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable Integer memberId) {
+        try {
+            memberService.deleteMember(memberId);
+            return ResponseEntity.ok(ApiResponse.success("회원이 성공적으로 삭제되었습니다."));
+        } catch (Exception e) {
+            log.error("회원 삭제 실패: memberId={}", memberId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("USER_DELETE_ERROR"));
+        }
+    }
+
     // =============================================
     // 통계 API
     // =============================================
@@ -190,64 +205,15 @@ public class AdminController {
     
 
     private Map<String, Object> buildMemberStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        
-        // 성별 통계
-        Map<String, Integer> genderStats = new HashMap<>();
-        stats.put("gender", genderStats);
-        
-        // 학력 통계
-        Map<String, Integer> educationStats = new HashMap<>();
-        stats.put("education", educationStats);
-        
-        // 활동 시간대 통계
-        Map<String, Integer> timeStats = new HashMap<>();
-        stats.put("time", timeStats);
-        
-        // 전공 통계
-        Map<String, Integer> majorStats = new HashMap<>();
-        stats.put("major", majorStats);
-        
-        return stats;
+        return memberService.getMemberStatistics();
     }
 
     private Map<String, Object> buildReportStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        
-        // 최근 신고 현황
-        List<Map<String, Object>> recentReports = List.of();
-        stats.put("recentReports", recentReports);
-        
-        // 신고 타입별 통계
-        Map<String, Integer> reportTypeStats = new HashMap<>();
-        stats.put("reportTypes", reportTypeStats);
-        
-        return stats;
+        return reportService.getReportStatistics();
     }
 
     private Map<String, Object> buildActivityStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        
-        // 분기별 가입자 통계
-        Map<String, Integer> quarterlySignups = new HashMap<>();
-        stats.put("quarterlySignups", quarterlySignups);
-        
-        // 분기별 총 접속자
-        Map<String, Integer> quarterlyVisitors = new HashMap<>();
-        stats.put("quarterlyVisitors", quarterlyVisitors);
-        
-        // 활동 TOP 5 사용자
-        List<Map<String, Object>> topActiveUsers = List.of();
-        stats.put("topActiveUsers", topActiveUsers);
-        
-        // 인기 채팅방
-        List<Map<String, Object>> popularRooms = List.of();
-        stats.put("popularRooms", popularRooms);
-        
-        // 총 방문자 수
-        stats.put("totalVisitors", 0);
-        
-        return stats;
+        return memberService.getActivityStatistics();
     }
 
     

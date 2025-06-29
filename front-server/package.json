@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "vite --host 0.0.0.0 --port 7000",
     "clean": "rimraf node_modules/.vite",
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --port 7000",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

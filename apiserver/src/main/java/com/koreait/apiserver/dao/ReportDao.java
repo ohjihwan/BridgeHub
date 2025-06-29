@@ -1,10 +1,12 @@
 package com.koreait.apiserver.dao;
 
 import com.koreait.apiserver.entity.Report;
+import com.koreait.apiserver.dto.ReportDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @Mapper
 public interface ReportDao {
@@ -45,4 +47,8 @@ public interface ReportDao {
     // 관리자 기능 추가
     List<Report> findAllWithPaging(@Param("offset") int offset, @Param("size") int size);
     int getTotalCount();
+    
+    // 통계용
+    List<ReportDTO> findRecentReports(int limit);
+    Map<String, Integer> countByReportType();
 } 
