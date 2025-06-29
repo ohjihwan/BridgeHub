@@ -5,12 +5,13 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 7000,
-    allowedHosts: ['thebridgehub.org', 'localhost', '0.0.0.0'],
+    allowedHosts: ["thebridgehub.org", "localhost", "0.0.0.0"],
     proxy: {
-      '/api': {
-        target: 'http://172.31.10.210:7100',  // 또는 배포 도메인 http://api.thebridgehub.org
+      "/api": {
+        target: "http://localhost:7100", 
+        // API 서버가 같은 인스턴스에서 실행 중
         changeOrigin: true,
         secure: false,
       },
@@ -29,5 +30,5 @@ export default defineConfig({
       "@json": path.resolve(__dirname, "src/json"),
       "@dev": path.resolve(__dirname, "dev"),
     },
-  }
+  },
 });
