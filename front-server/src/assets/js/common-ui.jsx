@@ -159,6 +159,7 @@ export const getUsernameFromToken = () => {
 	}
 };
 
+// ----------- 기타 : [휴대폰번호 정규식 입력] -----------
 export const formatPhone = (value) => {
 	const onlyNumber = value.replace(/\D/g, '');
 	if (onlyNumber.length < 4) return onlyNumber;

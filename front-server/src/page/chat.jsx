@@ -8,6 +8,7 @@ import TodoList from '@components/chat/TodoListDeployment';
 import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
 import { chatAPI, userAPI } from '@dev/services/apiService';
+import AttachmentList from '@components/chat/AttachmentList';
 
 function Chat() {
 	const location = useLocation();
@@ -49,6 +50,11 @@ function Chat() {
 	const textareaRef = useRef(null);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
+	// 파일 업로드
+	const fileInputRef = useRef(null);
+	// 파일 모아보기
+	const [showAttachments, setShowAttachments] = useState(false);
+	const [attachments, setAttachments] = useState([]);
 	// 랜덤 기능
 	const isOwner = true; // 추후 socket or props로 실제 값 연결
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
@@ -98,6 +104,58 @@ function Chat() {
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
 	};
+	// 파일 업로드
+	const handleFileUpload = (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+
+		const { ampm, timeStr } = getFormattedTime();
+
+		setMessages(prev => [
+			...prev,
+			{
+				type: 'me',
+				time: timeStr,
+				ampm,
+				files: [
+					{ name: file.name, fileId: Date.now() }
+				]
+			}
+		]);
+
+		e.target.value = '';
+	};
+	// 파일 첨부 모아보기
+	const handleShowAttachments = async () => {
+		try {
+			/* const res = await userClient.get(`/api/files/studyroom/${studyRoomId}`);
+			if (res.data.success) {
+				const files = res.data.data.map(file => ({
+					name: file.originalFilename,
+					fileId: file.fileId
+				}));
+				setAttachments(files);
+				setShowAttachments(true);
+			} */
+			setAttachments([
+				{ name: '이미지샘플.jpg', fileId: 1 },
+				{ name: '사진.jpeg', fileId: 2 },
+				{ name: '그림.png', fileId: 3 },
+				{ name: '움짤.gif', fileId: 4 },
+				{ name: '문서.pdf', fileId: 5 },
+				{ name: '보고서.doc', fileId: 6 },
+				{ name: '회의록.docx', fileId: 7 },
+				{ name: '메모.txt', fileId: 8 },
+				{ name: '압축파일.zip', fileId: 9 },
+				{ name: '자료집.rar', fileId: 10 },
+				{ name: '문서.pdf', fileId: 11 },
+			]);
+			setShowAttachments(true);
+		} catch (err) {
+			console.error('파일 목록 조회 실패', err);
+		}
+	};
+	// 랜덤 게임
 	const handleAssignUser = (index) => {
 		const userName = '김사과';
 		const newTodos = [...todoList];
@@ -484,6 +542,7 @@ function Chat() {
 					e.stopPropagation();
 					handleChatSearch()
 				}}
+				onShowAttachments={handleShowAttachments}
 			/>
 			<div className={"chatroom-history"}>
 
@@ -501,13 +560,27 @@ function Chat() {
 					]);
 				}}>상대 메시지 테스트</button>
 				<button type="button" className="testButton" onClick={() => {
+					const { ampm, timeStr } = getFormattedTime();
+					setMessages(prev => [
+						...prev,
+						{
+							type: 'user',
+							time: timeStr,
+							ampm,
+							files: [
+								{ name: '샘플파일.png', fileId: Date.now() }
+							]
+						}
+					]);
+				}}>상대 파일 업로드</button>
+				{/* <button type="button" className="testButton" onClick={() => {
 						setIsTyping(true); // 입력 중 상태 on
 						// 3초 후 타이핑 종료
 						setTimeout(() => {
 							setIsTyping(false);
 						}, 3000);
 					}}
-				>타이핑 테스트</button>
+				>타이핑 테스트</button> */}
 				{/* // 테스트 목적 용도 */}
 
 				{/* 메시지 출력 영역 */}
@@ -519,7 +592,16 @@ function Chat() {
 					if (msg.type === 'me') {
 						return (
 							<div key={i} className="i-say">
-								<div className="i-say__text">{msg.text}</div>
+								<div className="i-say__text">
+									{msg.files?.length > 0 && msg.files[0] && (
+										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+											<div className={`i-say__file i-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+												<span>{msg.files[0].name}</span>
+											</div>
+										</a>
+									)}
+									{msg.text}
+								</div>
 								<time dateTime={msg.time} className="i-say__time">
 									{msg.ampm} <span>{msg.time}</span>
 								</time>
@@ -531,7 +613,16 @@ function Chat() {
 						return (
 							<div key={i} className="user-say" onClick={(e) => { e.stopPropagation(); setShowReportButtonIndex(i);}} >
 								<div className="user-say__profile"></div>
-								<div className="user-say__text">{msg.text}</div>
+								<div className="user-say__text">
+									{msg.files?.length > 0 && msg.files[0] && (
+										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+											<div className={`user-say__file user-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+												{msg.files[0].name}
+											</div>
+										</a>
+									)}
+									{msg.text}
+								</div>
 								<div className="user-say__etc">
 									<time dateTime={msg.time} className="user-say__time">
 										{msg.ampm} <span>{msg.time}</span>
@@ -580,6 +671,11 @@ function Chat() {
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
+							<button type="button" className="msg-writing__action" onClick={() => fileInputRef.current.click()}>
+								파일 업로드
+							</button>
+						</li>
+						<li>
 							<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
 								랜덤게임
 							</button>
@@ -598,6 +694,7 @@ function Chat() {
 						</li>
 					</ul>
 				</div>
+				<input type="file" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileUpload} />
 				<div className="msg-writing__inputs">
 					<div className="msg-writing__field">
 						<textarea className="msg-writing__input" placeholder="메세지 입력!" value={message} onChange={handleChange} onKeyDown={handleKeyDown} ref={textareaRef} rows={1} />
@@ -662,10 +759,12 @@ function Chat() {
 
 			{showNavigator && (
 				<div className="search-navigator">
-					<span>{currentIndex + 1} / {searchResults.length}</span>
-					<button type="button" onClick={goToPrevNavigator}>▲</button>
-					<button type="button" onClick={goToNextNavigator}>▼</button>
-					<button type="button" onClick={closeNavigator}>닫기</button>
+					<div className="search-navigator__controllers">
+						<button type="button" className="search-navigator__arr search-navigator__arr--up" onClick={goToPrevNavigator} aria-label="검색된 이전 단어 찾기"></button>
+						<span>{currentIndex + 1} / {searchResults.length}</span>
+						<button type="button" className="search-navigator__arr search-navigator__arr--down" onClick={goToNextNavigator} aria-label="검색된 다음 단어 찾기"></button>
+					</div>
+					<button type="button" className="search-navigator__close" onClick={closeNavigator} aria-label="닫기"></button>
 				</div>
 			)}
 			
@@ -681,6 +780,14 @@ function Chat() {
 				/>
 			)}
 
+			{showAttachments && (
+				<AttachmentList
+					isOpen={showAttachments}
+					attachments={attachments}
+					onClose={() => setShowAttachments(false)}
+				/>
+			)}
+
 			{showVideo && 
 				<Video onClose={() => setShowVideo(false)} />
 			}
@@ -689,3 +796,8 @@ function Chat() {
 }
 
 export default Chat;
+
+
+
+
+

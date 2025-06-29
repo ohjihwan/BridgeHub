@@ -952,8 +952,8 @@ legend,
 		content:'';
 		position:absolute;
 		top:50%;
-		width:100%;
-		height:200%;
+		width:120vw;
+		height:120vw;
 		transform:translateY(-50%);
 		animation:activeLine 2.5s infinite ease;
 	}
@@ -988,6 +988,8 @@ legend,
 	&__title {
 		color:#fff;
 		font-size:remx(24);
+		text-align:center;
+		word-break:keep-all;
 		text-shadow:0 0 remx(12) #000;
 	}
 
@@ -1660,19 +1662,6 @@ legend,
 .mypage-container {
 	padding:remx(50) $padding-x remx(100);
 
-	.edit-profile {
-		display:flex;
-		justify-content:flex-end;
-		margin:remx(20) 0;
-
-		&__edit {
-			padding-right:remx(18);
-			font-size:remx(14);
-			line-height:1;
-			background:$bg-root url('@ico/ico-edit.png') no-repeat right center / remx(14) auto;
-		}
-	}
-
 	.profile-img {
 		display:block;
 		overflow:hidden;
@@ -2046,6 +2035,38 @@ legend,
 		height:remx(18);
 		background:url('@ico/ico-srien.png') no-repeat 50% / 100% auto;
 	}
+}
+
+.i-say,
+.user-say {
+	&__file {
+		min-width:remx(150);
+		max-width:remx(100);
+		text-align:center;
+		@include ellipsis;
+
+		&::before {
+			content:'';
+			display:block;
+			width:remx(80);
+			height:remx(100);
+			margin:0 auto;
+			background-repeat:no-repeat;
+			background-size:100% auto;
+			background-position:top center;
+		}
+	}
+
+	&__file--jpg::before { background-image:url("@ico/ico-file-jpg.svg"); }
+	&__file--jpeg::before { background-image:url("@ico/ico-file-jpg.svg"); }
+	&__file--png::before { background-image:url("@ico/ico-file-png.svg"); }
+	&__file--gif::before { background-image:url("@ico/ico-file-gif.svg"); }
+	&__file--pdf::before { background-image:url("@ico/ico-file-pdf.svg"); }
+	&__file--doc::before { background-image:url("@ico/ico-file-doc.svg"); }
+	&__file--docx::before { background-image:url("@ico/ico-file-doc.svg"); }
+	&__file--txt::before { background-image:url("@ico/ico-file-txt.svg"); }
+	&__file--zip::before { background-image:url("@ico/ico-file-zip.svg"); }
+	&__file--rar::before { background-image:url("@ico/ico-file-rar.svg"); }
 }
 
 @keyframes entry-bouns{
@@ -2658,7 +2679,8 @@ legend,
 
 .search-navigator {
 	display:flex;
-	justify-content:flex-end;
+	justify-content:space-around;
+	align-items:center;
 	position:absolute;
 	right:remx(20);
 	top:remx(50);
@@ -2671,11 +2693,11 @@ legend,
 	&::before {
 		content:'';
 		position:absolute;
-		left:50%;
+		right:remx(49);
 		top:-0.6rem;
 		width:remx(12);
 		height:remx(12);
-		transform:translateX(-50%) rotate(45deg);
+		transform:rotate(45deg);
 		border-top:1px solid $line1;
 		border-left:1px solid $line1;
 		background-color:$bg-root;
@@ -2686,11 +2708,140 @@ legend,
 		position:absolute;
 		left:50%;
 		top:0rem;
-		width:remx(24);
+		width:remx(40);
 		height:remx(6);
-		transform:translateX(-50%);
 		background-color:$bg-root;
 	}
+
+	&__controllers {
+		display:flex;
+		justify-content:space-around;
+		align-items:center;
+		gap:0 remx(8);
+		min-width:remx(100);
+	}
+
+	&__arr--up {
+		position:relative;
+		width:remx(24);
+		height:remx(24);
+		background-color:$bg-root;
+
+		&::before {
+			content:'';
+			display:block;
+			width:remx(12);
+			height:remx(12);
+			margin:remx(6) 0 0 remx(6);
+			border-top:1px solid $black;
+			border-right:1px solid $black;
+			transform:rotate(-45deg);
+		}
+	}
+
+	&__arr--down {
+		position:relative;
+		width:remx(24);
+		height:remx(24);
+		background-color:$bg-root;
+
+		&::before {
+			content:'';
+			display:block;
+			width:remx(12);
+			height:remx(12);
+			margin:0 0 remx(6) remx(6);
+			border-top:1px solid $black;
+			border-right:1px solid $black;
+			transform:rotate(-225deg);
+		}
+	}
+
+	&__close {
+		width:remx(24);
+		height:remx(24);
+		background:url("@ico/ico-close.svg") no-repeat center right / 1.2rem auto;
+	}
+}
+
+.attachment-list {
+	position:fixed;
+	right:0;
+	top:0;
+	z-index:270;
+	transform:translateX(100%);
+	width:60%;
+	min-width:remx(250);
+	height:100vh;
+	background-color:$bg-root;
+	box-shadow:0 0 remx(10) rgba(0,0,0,0.3); 
+	transition:transform 0.4s ease;
+	
+	&.slide-right {
+		transform:translateX(0);
+	}
+
+	&__close {
+		position:absolute;
+		right:remx(15);
+		top:remx(15);
+		width:remx(24);
+		height:remx(24);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 1.6rem auto;
+	}
+
+	&__title {
+		height:remx(56);
+		padding:remx(15);
+	}
+
+	ul {
+		display:flex;
+		flex-wrap:wrap;
+		overflow-x:hidden;
+		overflow-y:auto;
+		height:calc(100vh - remx(56));
+		padding:remx(10) remx(7) remx(40);
+	}
+
+	&__item {
+		width:50%;
+		padding:remx(5) remx(8);
+		text-align:center;
+	}
+
+	&__down {
+		display:inline-block;
+		width:100%;
+		max-width:remx(120);
+		padding:remx(5) remx(8);
+		background-color:transparent;
+		font-size:remx(15);
+		text-align:center;
+	}
+
+	&__img {
+		display:block;
+		overflow:hidden;
+		margin:0 auto;
+		padding-top:130%;
+		background-repeat:no-repeat;
+		background-size:100% auto;
+		background-position:top center;
+	}
+
+	&__img--jpg { 
+		background-image:url("@ico/ico-file-jpg.svg"); 
+	}
+	&__img--jpeg { background-image:url("@ico/ico-file-jpg.svg"); }
+	&__img--png { background-image:url("@ico/ico-file-png.svg"); }
+	&__img--gif { background-image:url("@ico/ico-file-gif.svg"); }
+	&__img--pdf { background-image:url("@ico/ico-file-pdf.svg"); }
+	&__img--doc { background-image:url("@ico/ico-file-doc.svg"); }
+	&__img--docx { background-image:url("@ico/ico-file-doc.svg"); }
+	&__img--txt { background-image:url("@ico/ico-file-txt.svg"); }
+	&__img--zip { background-image:url("@ico/ico-file-zip.svg"); }
+	&__img--rar { background-image:url("@ico/ico-file-rar.svg"); }
 }
 // ─────────────────────────────
 // 📄 searchRoom.jsx page

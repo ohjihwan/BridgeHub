@@ -54,9 +54,18 @@ public interface FileDao {
     // 저장된 파일명으로 조회 (기존 호환성)
     Optional<File> findByStoredName(String storedName);
     
-    // 스터디룸별 파일 삭제 (기존 Board와의 호환성)
-    int deleteByBoardId(Integer boardId);
-    
-    // 스터디룸별 파일 조회 (기존 Board와의 호환성)
+    // 게시판 첨부파일 조회
     List<File> findByBoardId(Integer boardId);
+    
+    // 게시판 첨부파일 연결
+    int linkToBoardAttachment(Integer fileId, Integer boardId);
+    
+    // 게시판 첨부파일 연결 해제
+    int unlinkBoardAttachments(Integer boardId);
+    
+    // 게시판 첨부파일 조회 (BOARD_ATTACHMENT 타입만)
+    List<File> findByBoardAttachment(Integer boardId);
+    
+    // 게시판 첨부파일 개수 조회
+    int countBoardAttachments(Integer boardId);
 } 
