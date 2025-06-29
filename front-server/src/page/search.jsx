@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@common/Header';
 import StudyRoomList from '@components/StudyRoomList';
-import { studyClient } from '@js/common-ui';
+import Detail from '@components/Detail';
+import axios from 'axios';
 
 const Search = () => {
 	const location = useLocation();
@@ -10,20 +11,31 @@ const Search = () => {
 	const [searchKeyword, setSearchKeyword] = useState('');
 	const [showRecommended, setShowRecommended] = useState(true);
 	const [rooms, setRooms] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [selectedRoom, setSelectedRoom] = useState(null);
+	const [showDetail, setShowDetail] = useState(false);
+	const [isClosing, setIsClosing] = useState(false);
 
+	// 실제 API에서 스터디룸 데이터 가져오기
 	useEffect(() => {
-		studyClient.get('')
-			.then(res => {
-				if (res.data.success && Array.isArray(res.data.data)) {
-					setRooms(res.data.data);
+		const fetchRooms = async () => {
+			setLoading(true);
+			try {
+				const response = await axios.get('/api/studies');
+				if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+					setRooms(response.data.data);
 				} else {
 					setRooms([]);
 				}
-			})
-			.catch(err => {
-				console.error('스터디룸 목록 조회 실패:', err);
+			} catch (error) {
+				console.error('스터디룸 목록 조회 실패:', error);
 				setRooms([]);
-			});
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchRooms();
 	}, []);
 
 	const recommendedKeywords = useMemo(() => {
@@ -53,11 +65,31 @@ const Search = () => {
 		const trimmedKeyword = searchKeyword.trim().toLowerCase();
 		if (!trimmedKeyword) return [];
 
-		return rooms.filter(room =>
+		return rooms.filter((room) =>
 			room.title.toLowerCase().includes(trimmedKeyword) ||
 			room.region.toLowerCase().includes(trimmedKeyword)
 		);
 	}, [searchKeyword, rooms]);
+
+	const handleItemClick = (room) => {
+		setSelectedRoom({ ...room, id: room.studyRoomId });
+		setShowDetail(true);
+		setIsClosing(false);
+	};
+
+	const handleDetailClose = () => {
+		setIsClosing(true);
+	};
+
+	useEffect(() => {
+		if (isClosing) {
+			const timer = setTimeout(() => {
+				setShowDetail(false);
+				setIsClosing(false);
+			}, 400);
+			return () => clearTimeout(timer);
+		}
+	}, [isClosing]);
 
 	return (
 		<>
@@ -99,7 +131,10 @@ const Search = () => {
 				<div className="search-page__content">
 					{searchKeyword ? (
 						filteredRooms.length > 0 ? (
-							<StudyRoomList rooms={filteredRooms} onItemClick={() => {}} />
+							<StudyRoomList
+								rooms={filteredRooms}
+								onItemClick={handleItemClick}
+							/>
 						) : (
 							<p className="search-page__noresult --not-result">검색 결과가 없습니다.</p>
 						)
@@ -108,6 +143,14 @@ const Search = () => {
 					)}
 				</div>
 			</div>
+
+			{showDetail && selectedRoom && (
+				<Detail 
+					room={selectedRoom} 
+					isClosing={isClosing} 
+					onClose={handleDetailClose} 
+				/>
+			)}
 		</>
 	);
 };

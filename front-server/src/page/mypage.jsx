@@ -149,7 +149,7 @@ const MyPage = () => {
 						region: res.data.data.region || '',
 						district: res.data.data.district || '',
 						timeZone: res.data.data.time || '',
-						memo: ''
+						memo: res.data.data.memo || ''
 					};
 					setProfileData(newProfileData);
 					// editData도 초기값으로 설정
