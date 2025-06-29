@@ -29,6 +29,7 @@ CREATE TABLE members (
     time VARCHAR(20) COMMENT '선호 시간대 (오전/오후/저녁)',
     profile_image VARCHAR(500) COMMENT '프로필 이미지 경로',
     status ENUM('ACTIVE','BANNED','DELETED') DEFAULT 'ACTIVE' COMMENT '계정 상태',
+    role ENUM('USER', 'ADMIN') DEFAULT 'USER' NOT NULL COMMENT '사용자 역할 (USER: 일반사용자, ADMIN: 관리자)',
     email_verified BOOLEAN DEFAULT FALSE COMMENT '이메일 인증 여부',
     description TEXT COMMENT '사용자 자기소개 (스터디 참가 신청시 방장이 참고)',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '가입일',
@@ -177,11 +178,89 @@ CREATE TABLE Report (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='신고';
 
 -- =============================================
--- 9. 파일 테이블
+-- 9. 게시판 카테고리 테이블
+-- =============================================
+CREATE TABLE board_categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '카테고리 ID',
+    category_name VARCHAR(50) NOT NULL UNIQUE COMMENT '카테고리 이름',
+    description TEXT COMMENT '카테고리 설명',
+    sort_order INT DEFAULT 0 COMMENT '정렬 순서',
+    is_active BOOLEAN DEFAULT TRUE COMMENT '활성 상태',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성일'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='게시판 카테고리';
+
+-- =============================================
+-- 10. 게시글 테이블
+-- =============================================
+CREATE TABLE board (
+    board_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '게시글 ID',
+    category_id INT NULL COMMENT '카테고리 ID (FK)',
+    author_id INT NOT NULL COMMENT '작성자 ID (FK)',
+    title VARCHAR(255) NOT NULL COMMENT '제목',
+    content TEXT NOT NULL COMMENT '내용',
+    view_count INT DEFAULT 0 COMMENT '조회수',
+    like_count INT DEFAULT 0 COMMENT '좋아요 수',
+    comment_count INT DEFAULT 0 COMMENT '댓글 수',
+    is_notice BOOLEAN DEFAULT FALSE COMMENT '공지사항 여부',
+    is_deleted BOOLEAN DEFAULT FALSE COMMENT '삭제 여부',
+    ip_address VARCHAR(45) COMMENT '작성자 IP',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '작성일',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
+    
+    FOREIGN KEY (category_id) REFERENCES board_categories(category_id) ON DELETE SET NULL,
+    FOREIGN KEY (author_id) REFERENCES members(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='게시글';
+
+-- =============================================
+-- 11. 댓글 테이블 
+-- =============================================
+CREATE TABLE board_comments (
+    comment_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '댓글 ID',
+    board_id INT NOT NULL COMMENT '게시글 ID (FK)',
+    author_id INT NOT NULL COMMENT '작성자 ID (FK)',
+    content TEXT NOT NULL COMMENT '댓글 내용',
+    like_count INT DEFAULT 0 COMMENT '좋아요 수',
+    is_deleted BOOLEAN DEFAULT FALSE COMMENT '삭제 여부',
+    ip_address VARCHAR(45) COMMENT '작성자 IP',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '작성일',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
+    
+    FOREIGN KEY (board_id) REFERENCES board(board_id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES members(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='게시글 댓글';
+
+-- =============================================
+-- 12. 게시글 좋아요 테이블
+-- =============================================
+CREATE TABLE board_likes (
+    board_id INT NOT NULL COMMENT '게시글 ID (FK)',
+    member_id INT NOT NULL COMMENT '회원 ID (FK)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '좋아요 시간',
+    
+    PRIMARY KEY (board_id, member_id),
+    FOREIGN KEY (board_id) REFERENCES board(board_id) ON DELETE CASCADE,
+    FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='게시글 좋아요';
+
+-- =============================================
+-- 13. 댓글 좋아요 테이블
+-- =============================================
+CREATE TABLE comment_likes (
+    comment_id INT NOT NULL COMMENT '댓글 ID (FK)',
+    member_id INT NOT NULL COMMENT '회원 ID (FK)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '좋아요 시간',
+    
+    PRIMARY KEY (comment_id, member_id),
+    FOREIGN KEY (comment_id) REFERENCES board_comments(comment_id) ON DELETE CASCADE,
+    FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='댓글 좋아요';
+
+-- =============================================
+-- 14. 파일 테이블 (게시판 첨부파일 지원 확장)
 -- =============================================
 CREATE TABLE file (
     file_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '파일 ID',
-    file_type ENUM('MESSAGE', 'PROFILE', 'STUDY_THUMBNAIL', 'STUDY_ATTACHMENT') NOT NULL COMMENT '파일 유형',
+    file_type ENUM('MESSAGE', 'PROFILE', 'STUDY_THUMBNAIL', 'STUDY_ATTACHMENT', 'BOARD_ATTACHMENT', 'TEMP') NOT NULL COMMENT '파일 유형',
     original_filename VARCHAR(255) NOT NULL COMMENT '원본 파일명',
     stored_filename VARCHAR(255) NOT NULL COMMENT '저장된 파일명',
     file_path VARCHAR(500) NOT NULL COMMENT '파일 경로',
@@ -192,24 +271,23 @@ CREATE TABLE file (
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '업로드 시간',
     
     -- 파일 유형별 참조 ID들
-    message_id INT COMMENT '메시지 ID (FK) - file_type이 MESSAGE일 때',
-    member_id INT COMMENT '회원 ID (FK) - file_type이 PROFILE일 때',
-    study_room_id INT COMMENT '스터디룸 ID (FK) - file_type이 STUDY_*일 때',
+    message_id INT NULL COMMENT '메시지 ID (FK) - file_type이 MESSAGE일 때',
+    member_id INT NULL COMMENT '회원 ID (FK) - file_type이 PROFILE일 때',
+    study_room_id INT NULL COMMENT '스터디룸 ID (FK) - file_type이 STUDY_*일 때',
+    board_id INT NULL COMMENT '게시글 ID (FK) - file_type이 BOARD_ATTACHMENT일 때',
     
     FOREIGN KEY (message_id) REFERENCES Message(message_id) ON DELETE CASCADE,
     FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE,
     FOREIGN KEY (study_room_id) REFERENCES studyroom(study_room_id) ON DELETE CASCADE,
+    FOREIGN KEY (board_id) REFERENCES board(board_id) ON DELETE SET NULL,
     
-    -- 파일 유형별 제약조건
-    CONSTRAINT chk_file_references CHECK (
-        (file_type = 'MESSAGE' AND message_id IS NOT NULL AND member_id IS NULL AND study_room_id IS NULL) OR
-        (file_type = 'PROFILE' AND member_id IS NOT NULL AND message_id IS NULL AND study_room_id IS NULL) OR
-        (file_type IN ('STUDY_THUMBNAIL', 'STUDY_ATTACHMENT') AND study_room_id IS NOT NULL AND message_id IS NULL AND member_id IS NULL)
-    )
+    -- 인덱스
+    INDEX idx_file_type_board (file_type, board_id),
+    INDEX idx_file_uploaded_at (uploaded_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='파일';
 
 -- =============================================
--- 10. 트리거 생성 (스터디 멤버 자동 관리)
+-- 15. 트리거 생성 (스터디 멤버 자동 관리 + 게시판 카운트 관리)
 -- =============================================
 
 -- 스터디룸 생성 시 방장 자동 추가 트리거
@@ -267,103 +345,111 @@ BEGIN
 END//
 DELIMITER ;
 
+-- 댓글 추가 시 게시글의 댓글 수 증가
+DELIMITER //
+CREATE TRIGGER after_comment_insert
+AFTER INSERT ON board_comments
+FOR EACH ROW
+BEGIN
+    UPDATE board SET comment_count = comment_count + 1 WHERE board_id = NEW.board_id;
+END//
+DELIMITER ;
+
+-- 댓글 삭제 시 게시글의 댓글 수 감소
+DELIMITER //
+CREATE TRIGGER after_comment_delete
+AFTER DELETE ON board_comments
+FOR EACH ROW
+BEGIN
+    UPDATE board SET comment_count = comment_count - 1 WHERE board_id = OLD.board_id;
+END//
+DELIMITER ;
+
+-- 게시글 좋아요 추가 시 좋아요 수 증가
+DELIMITER //
+CREATE TRIGGER after_board_like_insert
+AFTER INSERT ON board_likes
+FOR EACH ROW
+BEGIN
+    UPDATE board SET like_count = like_count + 1 WHERE board_id = NEW.board_id;
+END//
+DELIMITER ;
+
+-- 게시글 좋아요 삭제 시 좋아요 수 감소
+DELIMITER //
+CREATE TRIGGER after_board_like_delete
+AFTER DELETE ON board_likes
+FOR EACH ROW
+BEGIN
+    UPDATE board SET like_count = like_count - 1 WHERE board_id = OLD.board_id;
+END//
+DELIMITER ;
+
+-- 댓글 좋아요 추가 시 좋아요 수 증가
+DELIMITER //
+CREATE TRIGGER after_comment_like_insert
+AFTER INSERT ON comment_likes
+FOR EACH ROW
+BEGIN
+    UPDATE board_comments SET like_count = like_count + 1 WHERE comment_id = NEW.comment_id;
+END//
+DELIMITER ;
+
+-- 댓글 좋아요 삭제 시 좋아요 수 감소
+DELIMITER //
+CREATE TRIGGER after_comment_like_delete
+AFTER DELETE ON comment_likes
+FOR EACH ROW
+BEGIN
+    UPDATE board_comments SET like_count = like_count - 1 WHERE comment_id = OLD.comment_id;
+END//
+DELIMITER ;
+
 -- =============================================
--- 11. 인덱스 생성
+-- 11. 기본 데이터 삽입
 -- =============================================
 
--- 회원 관련 인덱스
-CREATE INDEX idx_members_userid ON members(userid);
-CREATE INDEX idx_members_status ON members(status);
-CREATE INDEX idx_members_department ON members(department);
-CREATE INDEX idx_members_region ON members(region);
-CREATE INDEX idx_members_district ON members(district);
-CREATE INDEX idx_members_time ON members(time);
-CREATE INDEX idx_members_description ON members(description(100));
+-- 게시판 카테고리 기본 데이터
+INSERT INTO board_categories (category_name, description, sort_order) VALUES
+('자유게시판', '자유롭게 소통하는 공간입니다', 1),
+('질문/답변', '스터디 관련 질문과 답변', 2),
+('정보공유', '유용한 정보를 공유하는 공간', 3),
+('공지사항', '중요한 공지사항', 0);
 
--- 메시지 관련 인덱스
-CREATE INDEX idx_message_room_id ON Message(room_id);
-CREATE INDEX idx_message_sender_id ON Message(sender_id);
-CREATE INDEX idx_message_sent_at ON Message(sent_at);
-CREATE INDEX idx_message_is_logged ON Message(is_logged);
-CREATE INDEX idx_message_log_file_id ON Message(log_file_id);
 
--- 채팅 로그 파일 관련 인덱스
-CREATE INDEX idx_chat_log_room_date ON chat_log_files(room_id, log_date);
-CREATE INDEX idx_chat_log_created_at ON chat_log_files(created_at);
-CREATE INDEX idx_chat_log_is_archived ON chat_log_files(is_archived);
-
--- 채팅방 멤버 관련 인덱스
-CREATE INDEX idx_chatroom_member_room_id ON ChatRoomMember(room_id);
-CREATE INDEX idx_chatroom_member_member_id ON ChatRoomMember(member_id);
-
--- 신고 관련 인덱스
-CREATE INDEX idx_report_reporter_id ON Report(reporter_id);
-CREATE INDEX idx_report_reported_user_id ON Report(reported_user_id);
-CREATE INDEX idx_report_status ON Report(status);
-CREATE INDEX idx_report_created_at ON Report(created_at);
-CREATE INDEX idx_report_log_file_id ON Report(log_file_id);
-
--- 파일 관련 인덱스
-CREATE INDEX idx_file_message_id ON file(message_id);
-CREATE INDEX idx_file_member_id ON file(member_id);
-CREATE INDEX idx_file_study_room_id ON file(study_room_id);
-CREATE INDEX idx_file_type ON file(file_type);
-CREATE INDEX idx_file_hash ON file(file_hash);
-
--- 스터디룸 관련 인덱스
-CREATE INDEX idx_study_room_boss_id ON studyroom(boss_id);
-CREATE INDEX idx_study_room_is_public ON studyroom(is_public);
-CREATE INDEX idx_study_room_region ON studyroom(region);
-CREATE INDEX idx_study_room_district ON studyroom(district);
-CREATE INDEX idx_study_room_time ON studyroom(time);
-CREATE INDEX idx_study_room_department ON studyroom(department);
-
--- 스터디룸 멤버 관련 인덱스 (이미 테이블 생성시 포함됨)
--- CREATE INDEX idx_study_room_members_study_id ON study_room_members(study_room_id);
--- CREATE INDEX idx_study_room_members_member_id ON study_room_members(member_id);
--- CREATE INDEX idx_study_room_members_status ON study_room_members(status);
 
 -- =============================================
--- 12. 테이블 설명 및 사용 목적
+-- 12. 시스템 구조 설명
 -- =============================================
 
 /*
-테이블 구조 설명:
+🎯 TheBridgeHub 통합 시스템 구조:
 
-1. members: 회원 정보 (이메일 인증, 프로필 등)
-2. ChatRoom: 채팅방 기본 정보
-3. ChatRoomMember: 채팅방-회원 다대다 관계
-4. Message: 메시지 임시 저장 + 백업 (로그 시스템과 연동)
-5. chat_log_files: 채팅 로그 파일 메타데이터 관리
-6. studyroom: 스터디룸 정보 (채팅방과 1:1 연결)
-7. study_room_members: 스터디룸 멤버 관리 (참가 신청/승인 시스템) ⭐ 새로 추가
-8. Report: 신고 기능 (로그 파일 증거 수집 지원)
-9. file: 파일 업로드/다운로드 관리
+기존 시스템:
+1. members: 회원 정보 (JWT 인증)
+2. ChatRoom: 채팅방 기본 정보  
+3. ChatRoomMember: 채팅방 멤버 관리
+4. Message: 메시지 저장
+5. chat_log_files: 채팅 로그 관리
+6. studyroom: 스터디룸 정보
+7. study_room_members: 스터디 멤버 관리
+8. Report: 신고 기능
+9. file: 파일 관리 시스템
 
-스터디 참가 시스템 특징:
-- 스터디 참가 신청 → PENDING 상태
-- 방장이 승인/거절 → APPROVED/REJECTED 상태
-- 승인 시 채팅방에 자동 참가
-- 탈퇴 시 채팅방에서 자동 퇴장
-- 트리거로 멤버 수 자동 관리
+새로 추가된 게시판 시스템:
+10. board_categories: 게시판 카테고리
+11. board: 게시글 (자동 카운트 관리)
+12. board_comments: 댓글 시스템 (평면 구조)
+13. board_likes: 게시글 좋아요
+14. comment_likes: 댓글 좋아요
 
-채팅 로그 시스템 특징:
-- 메시지는 DB(임시) + 로그파일(영구) 이중 저장
-- 로그 파일은 날짜별로 분리 (room_1_2024-01-15.log)
-- 신고 시 로그 파일에서 증거 수집
-- 30일 후 임시 메시지 자동 정리
-- 실시간 성능 최적화 + 대용량 데이터 효율 관리
+✅ 완성된 기능들:
+- JWT 인증과 완전 연동
+- 첨부파일 업로드/다운로드
+- 심플한 댓글 시스템 (대댓글 기능 제거)
+- 좋아요 시스템 (중복 방지)
+- 조회수/댓글수/좋아요수 자동 관리
+- 트리거로 실시간 데이터 동기화
 
-연동 시스템:
-- 스터디룸 ↔ 채팅방 (1:1 연결)
-- 스터디 멤버 ↔ 채팅 멤버 (자동 동기화)
-- 스터디 참가 승인 → 채팅방 자동 참가
-- 스터디 탈퇴 → 채팅방 자동 퇴장
+🚀 바로 사용 가능한 상태입니다!
 */
-
--- =============================================
--- 13. description 컬럼 추가 (스터디 참가 신청시 참고용)
--- =============================================
-
--- description 컬럼에 대한 인덱스 추가 (검색 최적화)
-CREATE INDEX idx_members_description ON members(description(100));

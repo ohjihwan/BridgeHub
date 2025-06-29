@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 @Slf4j
 @Configuration
-@EnableScheduling
+// @EnableScheduling  // 임시 비활성화
 @RequiredArgsConstructor
 public class SchedulerConfig {
 

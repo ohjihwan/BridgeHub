@@ -10,9 +10,38 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    private String status;
+    private boolean success;
+    private String message;
     private T data;
+    private String status;
     private String errorCode;
+    
+    // 기존 호환성을 위한 생성자
+    public ApiResponse(String status, T data, String errorCode) {
+        this.status = status;
+        this.data = data;
+        this.errorCode = errorCode;
+        this.success = "success".equals(status);
+        this.message = success ? "성공" : errorCode;
+    }
+    
+    // 새로운 생성자 - boolean 기반
+    public ApiResponse(boolean success, String message) {
+        this.success = success;
+        this.message = message;
+        this.data = null;
+        this.status = success ? "success" : "error";
+        this.errorCode = success ? null : message;
+    }
+    
+    // 새로운 생성자 - boolean 기반 + 데이터
+    public ApiResponse(boolean success, String message, T data) {
+        this.success = success;
+        this.message = message;
+        this.data = data;
+        this.status = success ? "success" : "error";
+        this.errorCode = success ? null : message;
+    }
 
     // 성공 응답 - 데이터만
     public static <T> ApiResponse<T> success(T data) {
