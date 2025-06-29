@@ -14,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Slf4j
 @Service
@@ -192,6 +194,18 @@ public class ReportServiceImpl implements ReportService {
             log.error("신고 처리 실패: reportId={}", reportId, e);
             throw new RuntimeException("신고 처리에 실패했습니다.", e);
         }
+    }
+
+    @Override
+    public Map<String, Object> getReportStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        // 최근 신고 10개
+        List<ReportDTO> recentReports = reportDao.findRecentReports(10);
+        stats.put("recentReports", recentReports);
+        // 신고 타입별 통계
+        Map<String, Integer> reportTypeStats = reportDao.countByReportType();
+        stats.put("reportTypes", reportTypeStats);
+        return stats;
     }
 
     private ReportDTO convertToDTO(Report report) {

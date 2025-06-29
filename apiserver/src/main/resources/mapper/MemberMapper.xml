@@ -117,4 +117,65 @@
         WHERE id = #{memberId}
     </update>
 
+    <select id="countByGender" resultType="map">
+        SELECT gender, COUNT(*) as value FROM members GROUP BY gender
+    </select>
+    <select id="countByEducation" resultType="map">
+        SELECT education, COUNT(*) as value FROM members GROUP BY education
+    </select>
+    <select id="countByTime" resultType="map">
+        SELECT time, COUNT(*) as value FROM members GROUP BY time
+    </select>
+    <select id="countByDepartment" resultType="map">
+        SELECT department, COUNT(*) as value FROM members GROUP BY department
+    </select>
+
+    <!-- 활동 통계용 쿼리들 -->
+    <select id="getQuarterlySignups" resultType="map">
+        SELECT 
+            CONCAT('q', QUARTER(created_at)) as quarter,
+            COUNT(*) as value
+        FROM members 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
+        GROUP BY QUARTER(created_at)
+        ORDER BY quarter
+    </select>
+
+    <select id="getQuarterlyVisitors" resultType="map">
+        SELECT 
+            CONCAT('q', QUARTER(created_at)) as quarter,
+            COUNT(*) as value
+        FROM members 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
+        GROUP BY QUARTER(created_at)
+        ORDER BY quarter
+    </select>
+
+    <select id="getTopActiveUsers" resultType="map">
+        SELECT 
+            m.name,
+            COUNT(mr.id) as activity
+        FROM members m
+        LEFT JOIN messages mr ON m.id = mr.member_id
+        WHERE mr.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY m.id, m.name
+        ORDER BY activity DESC
+        LIMIT 10
+    </select>
+
+    <select id="getPopularRooms" resultType="map">
+        SELECT 
+            sr.name,
+            COUNT(srm.member_id) as count
+        FROM study_rooms sr
+        LEFT JOIN study_room_members srm ON sr.id = srm.study_room_id
+        GROUP BY sr.id, sr.name
+        ORDER BY count DESC
+        LIMIT 10
+    </select>
+
+    <select id="getTotalVisitors" resultType="int">
+        SELECT COUNT(*) FROM members
+    </select>
+
 </mapper> 

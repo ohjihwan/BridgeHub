@@ -13,8 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -318,6 +320,75 @@ public class MemberServiceImpl implements MemberService {
             log.error("비밀번호 재설정 실패: username={}, email={}, error={}", username, email, e.getMessage(), e);
             return false;
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteMember(Integer memberId) {
+        try {
+            Optional<Member> memberOpt = memberDao.findById(memberId);
+            if (!memberOpt.isPresent()) {
+                throw new RuntimeException("MEMBER_NOT_FOUND");
+            }
+
+            // 연관된 데이터 삭제 (채팅방 멤버, 스터디룸 멤버 등)
+            // chatRoomMemberDao.deleteByMemberId(memberId);
+            // studyRoomMemberDao.deleteByMemberId(memberId);
+            
+            // 회원 삭제
+            memberDao.deleteMember(memberId);
+            
+            log.info("회원 삭제 완료: memberId={}", memberId);
+            
+        } catch (Exception e) {
+            log.error("회원 삭제 실패: memberId={}", memberId, e);
+            throw new RuntimeException("MEMBER_DELETE_FAILED", e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> getMemberStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        // 성별 통계
+        Map<String, Integer> genderStats = memberDao.countByGender();
+        stats.put("gender", genderStats);
+        // 학력 통계
+        Map<String, Integer> educationStats = memberDao.countByEducation();
+        stats.put("education", educationStats);
+        // 활동 시간대 통계
+        Map<String, Integer> timeStats = memberDao.countByTime();
+        stats.put("time", timeStats);
+        // 전공 통계
+        Map<String, Integer> majorStats = memberDao.countByDepartment();
+        stats.put("major", majorStats);
+        return stats;
+    }
+
+    @Override
+    public Map<String, Object> getActivityStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+        
+        // 분기별 가입자 통계 조회
+        Map<String, Integer> quarterlySignups = memberDao.getQuarterlySignups();
+        stats.put("quarterlySignups", quarterlySignups);
+        
+        // 분기별 방문자 통계 조회
+        Map<String, Integer> quarterlyVisitors = memberDao.getQuarterlyVisitors();
+        stats.put("quarterlyVisitors", quarterlyVisitors);
+        
+        // 활동 TOP 10 사용자 조회
+        List<Map<String, Object>> topActiveUsers = memberDao.getTopActiveUsers();
+        stats.put("topActiveUsers", topActiveUsers);
+        
+        // 인기 채팅방 TOP 10 조회
+        List<Map<String, Object>> popularRooms = memberDao.getPopularRooms();
+        stats.put("popularRooms", popularRooms);
+        
+        // 총 방문자 수 조회
+        Integer totalVisitors = memberDao.getTotalVisitors();
+        stats.put("totalVisitors", totalVisitors);
+        
+        return stats;
     }
 
     private MemberDTO convertToDTO(Member member) {

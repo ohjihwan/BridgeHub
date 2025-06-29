@@ -3,6 +3,7 @@ package com.koreait.apiserver.service;
 import com.koreait.apiserver.dto.MemberDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MemberService {
     void register(MemberDTO member);
@@ -22,4 +23,9 @@ public interface MemberService {
     List<MemberDTO> getMembersWithPaging(int page, int size);
     int getTotalMembersCount();
     MemberDTO updateMemberStatus(Integer memberId, String status);
+    void deleteMember(Integer memberId); // memberId로 회원 삭제
+    
+    // 통계용
+    Map<String, Object> getMemberStatistics();
+    Map<String, Object> getActivityStatistics();
 }
