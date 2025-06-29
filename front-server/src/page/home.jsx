@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Detail from '@components/Detail';
 import CreateStudy from '@components/CreateStudy';
 import Header from '@common/Header';
-import HotRoomSwiper from '@components/HotRoomSwiper';
+import PreviewBoard from '@components/PreviewBoard';
 import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
 import { userClient, studyClient } from '@js/common-ui';
@@ -185,7 +185,7 @@ const Home = () => {
 				</div>
 
 				{/* 재사용성과 복잡도 때문에 분리 */}
-				<HotRoomSwiper onItemClick={handleItemClick} />
+				<PreviewBoard onItemClick={handleItemClick} />
 				{/* 
 					<ul className="studyroom">이 Home.jsx에 남아있는 이유
 					1. 메인 리스트이자 상세 정보 트리거 UI이기 때문

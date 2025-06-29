@@ -1,8 +1,5 @@
 import React,{ useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { createPost } from "../api/board"
-import axios from "axios"
-
 
 export default function BoardWrite() {
     const [title, setTitle] = useState('')
@@ -28,13 +25,13 @@ export default function BoardWrite() {
             formData.append('image',image)
         }
 
-        /*
+        
         try {
             await createPost({ title, content }, token)
             navigate('/board')
         }catch(e) {
             setMessage('글쓰기 실패 🤬')
-        }*/
+        }
        try{
         await axios.post('/api/posts',formData,{
                 headers:{

@@ -160,10 +160,30 @@ public class StudyRoomController {
             
             studyRoomService.joinStudyRoom(studyRoomId, memberId);
             return ResponseEntity.ok(ApiResponse.success());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("스터디 참가 신청 실패: studyRoomId={}", studyRoomId, e);
+            
+            // 구체적인 에러 메시지를 클라이언트에 전달
+            String errorMessage = e.getMessage();
+            String errorCode = "JOIN_ERROR";
+            
+            // 특정 에러에 따른 에러 코드 분류
+            if (errorMessage.contains("이미 참가 신청")) {
+                errorCode = "ALREADY_APPLIED";
+            } else if (errorMessage.contains("이미 참가 중")) {
+                errorCode = "ALREADY_MEMBER";
+            } else if (errorMessage.contains("정원이 가득")) {
+                errorCode = "ROOM_FULL";
+            } else if (errorMessage.contains("거절된 스터디")) {
+                errorCode = "PREVIOUSLY_REJECTED";
+            }
+            
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("JOIN_ERROR"));
+                .body(ApiResponse.error(errorMessage));
+        } catch (Exception e) {
+            log.error("스터디 참가 신청 시스템 오류: studyRoomId={}", studyRoomId, e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("SYSTEM_ERROR", "시스템 오류가 발생했습니다."));
         }
     }
     

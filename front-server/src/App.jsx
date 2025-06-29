@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Auth from '@page/Auth'
 import Home from '@page/home'
-import MyPage from '@page/MyPage'
+import MyPage from '@page/mypage'
 import Chat from '@page/chat'
-import BoardList from '@components/BoardList'
+import BoardList from '@page/board'
 import BoardWrite from '@components/BoardWrite'
 import List from '@page/list'
 import Search from '@page/Search'
@@ -41,6 +41,7 @@ function App() {
 					<Route path="/home" element={<Home />} />
 					<Route path="/mypage" element={<MyPage />} />
 					<Route path="/chat" element={<Chat />} />
+					<Route path="/list" element={<List />} />
 					<Route path="/board" element={<BoardList />} />
 					<Route path="/board/write" element={<BoardWrite />} />
 					<Route path="search" element={<Search />} />

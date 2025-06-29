@@ -338,7 +338,8 @@ export const useStudySocket = (studyId, userId) => {
         sendMessage,
         startTyping,
         stopTyping,
-        isConnected
+        isConnected,
+        socketService
     };
 };
 

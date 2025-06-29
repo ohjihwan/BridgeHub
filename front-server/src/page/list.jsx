@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Header from '@common/Header';
 import StudyRoomList from '@components/StudyRoomList';
 import Detail from '@components/Detail';
-import roomData from '@json/Room.json';
+import axios from 'axios';
 
 const StudyRoomPage = () => {
 	const [searchKeyword, setSearchKeyword] = useState('');
@@ -11,12 +11,36 @@ const StudyRoomPage = () => {
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
+	const [rooms, setRooms] = useState([]);
+	const [loading, setLoading] = useState(false);
+
+	// 실제 API에서 스터디룸 데이터 가져오기
+	useEffect(() => {
+		const fetchRooms = async () => {
+			setLoading(true);
+			try {
+				const response = await axios.get('/api/studies');
+				if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+					setRooms(response.data.data);
+				} else {
+					setRooms([]);
+				}
+			} catch (error) {
+				console.error('스터디룸 목록 조회 실패:', error);
+				setRooms([]);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchRooms();
+	}, []);
 
 	const filteredRooms = useMemo(() => 
-		roomData.filter((room) => 
+		rooms.filter((room) => 
 			room.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
 			room.region?.toLowerCase().includes(searchKeyword.toLowerCase())
-		), [searchKeyword]
+		), [rooms, searchKeyword]
 	);
 	const handleItemClick = async (room) => {
 		if (!room?.id) {

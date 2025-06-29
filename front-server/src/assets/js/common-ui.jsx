@@ -113,25 +113,30 @@ window.hideLoading = hideLoading;
 // ----------- axios 다중 클라이언트 -----------
 
 export const authClient = axios.create({
-	baseURL: 'http://localhost:7100/api/auth',
+	baseURL: '/api/auth',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
 export const userClient = axios.create({
-	baseURL: 'http://localhost:7100',
+	baseURL: '/',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
 export const studyClient = axios.create({
-	baseURL: 'http://localhost:7100/api/studies',
+	baseURL: '/api/studies',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
+export const boardClient = axios.create({
+    baseURL: '/api/board',  // 상대 경로 - 프록시 사용!
+    timeout: 10000,
+    headers: { 'Content-Type': 'application/json' },
+});
+
 export const getAccessToken = () => {
 	return localStorage.getItem('token');
 };
-
-[authClient, userClient, studyClient].forEach(client => {
+[authClient, userClient, studyClient, boardClient].forEach(client => {
 	client.interceptors.request.use(config => {
 		window.showLoading?.();
 		return config;
@@ -175,3 +180,31 @@ export const formatPhone = (value) => {
 export const cleanPhone = (value) => {
 	return value.replace(/-/g, '');
 };
+
+// ----------- 게시판 관련 -----------
+export const createPost = async (post) => {
+	const token = localStorage.getItem("token");
+	const res = await boardClient.post('', post, {
+		headers: { Authorization: `Bearer ${token}` },
+		withCredentials: true,
+	});
+	return res.data;
+};
+
+export const getPosts = async (page = 0, size = 10, categoryId = 1, search = "", sort = "recent") => {
+	const token = localStorage.getItem("token")
+	const params = new URLSearchParams()
+	params.append("categoryId", categoryId)
+	if (search) params.append("search", search)
+	if (sort) params.append("sort", sort)
+	params.append("page", page)
+	params.append("size", size)
+
+	const res = await boardClient.get(`?${params.toString()}`, {
+		headers: { Authorization: `Bearer ${token}` },
+		withCredentials: true,
+	})
+	console.log('boardClient baseURL:', boardClient.defaults.baseURL);
+	console.log('Full URL:', `${boardClient.defaults.baseURL}?${params.toString()}`);
+	return res.data.data.content
+}

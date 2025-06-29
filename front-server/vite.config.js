@@ -8,6 +8,7 @@ export default defineConfig({
 		host: '0.0.0.0',
 		allowedHosts: ["www.bridgehub.asia", "localhost",'0.0.0.0'],
 		port: 7000,
+		allowedHosts: ['www.bridgehub.asia'],
 		proxy: {
 			'/api': {
 				target: 'http://www.bridgehub.asia',
