@@ -6,10 +6,11 @@ export default defineConfig({
 	plugins: [react()],
 	server: {
 		host: '0.0.0.0',
+		allowedHosts: ["www.bridgehub.asia", "localhost",'0.0.0.0'],
 		port: 7000,
 		proxy: {
 			'/api': {
-				target: 'http://localhost:7100',
+				target: 'http://www.bridgehub.asia',
 				changeOrigin: true,
 				secure: false,
 				rewrite: (path) => path.replace(/^\/api/, '/api')
