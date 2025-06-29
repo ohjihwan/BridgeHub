@@ -22,9 +22,44 @@ const AttachmentList = ({ isOpen, attachments, onClose }) => {
 
 	const handleDownload = (att) => {
 		customConfirm(`'${att.name}'을 내려 받으시겠습니까?`, () => {
-			// 실제 다운로드 실행 다운로드 연결시 활성화
-			// window.open(`/api/files/download/${att.fileId}`, '_blank');
-			console.log(`'${att.name}를 다운로드 하였습니다.`)
+			console.log(`파일 다운로드 시도: ${att.name}, fileId: ${att.fileId}`);
+			
+			// 실제 다운로드 실행
+			if (att.fileId && att.fileId !== 'undefined' && att.fileId !== null) {
+				const downloadUrl = `/api/files/download/${att.fileId}`;
+				console.log(`다운로드 URL: ${downloadUrl}`);
+				
+				// 방법 1: 토큰 포함한 URL로 새 탭에서 다운로드
+				const token = localStorage.getItem('token');
+				if (token) {
+					const urlWithToken = `${downloadUrl}?Authorization=Bearer%20${encodeURIComponent(token)}`;
+					
+					// a 태그를 이용한 다운로드
+					const link = document.createElement('a');
+					link.href = downloadUrl;
+					link.download = att.name;
+					link.target = '_blank';
+					link.style.display = 'none';
+					
+					// 헤더에 토큰을 포함할 수 없으므로 간단한 방식 사용
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					
+					console.log(`✅ '${att.name}' 다운로드 링크 클릭 완료`);
+					
+					// 추가로 새 탭에서도 열기 (backup)
+					setTimeout(() => {
+						window.open(downloadUrl, '_blank');
+					}, 100);
+				} else {
+					// 토큰이 없는 경우 간단한 다운로드
+					window.open(downloadUrl, '_blank');
+				}
+			} else {
+				console.error('❌ 유효하지 않은 fileId:', att.fileId);
+				alert('파일 다운로드에 실패했습니다. (유효하지 않은 파일 ID)');
+			}
 		});
 	};
 
