@@ -12,7 +12,6 @@ class SpringClient {
       },
     });
 
-    // 요청 인터셉터
     this.apiClient.interceptors.request.use(
       (config) => {
         logger.debug(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
@@ -24,7 +23,6 @@ class SpringClient {
       }
     );
 
-    // 응답 인터셉터
     this.apiClient.interceptors.response.use(
       (response) => {
         logger.debug(`API Response: ${response.status} ${response.config.url}`);
@@ -40,18 +38,12 @@ class SpringClient {
     );
   }
 
-  /**
-   * JWT 토큰 검증 (현재 사용자 정보 조회로 검증)
-   * @param {string} token - JWT 토큰
-   * @returns {Promise<{valid: boolean, user?: object, error?: string}>}
-   */
   async validateToken(token) {
     try {
       if (!token) {
         return { valid: false, error: 'Token is required' };
       }
 
-      // /api/members/me 엔드포인트를 사용해서 토큰 검증
       const response = await this.apiClient.get('/api/members/me', {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -67,7 +59,7 @@ class SpringClient {
             email: response.data.data.email,
             name: response.data.data.name,
             nickname: response.data.data.nickname,
-            role: 'user' // 기본 역할
+            role: 'user'
           }
         };
       } else {
@@ -79,7 +71,6 @@ class SpringClient {
     } catch (error) {
       logger.error('Token validation error:', error.message);
       
-      // 401 Unauthorized인 경우 토큰이 유효하지 않음
       if (error.response?.status === 401) {
         return {
           valid: false,
@@ -87,7 +78,6 @@ class SpringClient {
         };
       }
       
-      // 네트워크 오류나 서버 오류 시 개발 환경에서는 허용
       if (process.env.NODE_ENV === 'development') {
         logger.warn('Development mode: allowing connection despite validation error');
         return {
@@ -110,11 +100,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * ID로 사용자 정보 조회
-   * @param {number} userId - 사용자 ID
-   * @returns {Promise<object|null>}
-   */
   async getUserInfo(userId) {
     try {
       const response = await this.apiClient.get(`/api/members/id/${userId}`);
@@ -128,11 +113,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 스터디룸 정보 조회
-   * @param {string} roomId - 룸 ID (스터디룸 ID)
-   * @returns {Promise<object|null>}
-   */
   async getStudyRoomInfo(roomId) {
     try {
       const response = await this.apiClient.get(`/api/studies/${roomId}`);
@@ -146,11 +126,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 채팅방 정보 조회
-   * @param {string} roomId - 채팅방 ID
-   * @returns {Promise<object|null>}
-   */
   async getChatRoomInfo(roomId) {
     try {
       const response = await this.apiClient.get(`/api/chatrooms/${roomId}`);
@@ -164,12 +139,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 스터디룸 멤버 확인
-   * @param {string} studyRoomId - 스터디룸 ID
-   * @param {number} userId - 사용자 ID
-   * @returns {Promise<boolean>}
-   */
   async isStudyRoomMember(studyRoomId, userId) {
     try {
       const response = await this.apiClient.get(`/api/studies/${studyRoomId}/members`);
@@ -186,11 +155,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 메시지 저장 (채팅 로그)
-   * @param {object} messageData - 메시지 데이터
-   * @returns {Promise<boolean>}
-   */
   async saveMessage(messageData) {
     try {
       const response = await this.apiClient.post('/api/messages', {
@@ -207,14 +171,8 @@ class SpringClient {
     }
   }
 
-  /**
-   * 서버 상태를 API에 보고 (헬스체크 활용)
-   * @param {object} stats - 서버 통계
-   * @returns {Promise<boolean>}
-   */
   async reportServerStats(stats) {
     try {
-      // 헬스체크 엔드포인트에 통계 정보를 로그로 남김
       logger.log('RTC Server Stats:', {
         activeRooms: stats.activeRooms,
         totalParticipants: stats.totalParticipants,
@@ -223,7 +181,6 @@ class SpringClient {
         timestamp: new Date().toISOString()
       });
       
-      // 실제 API 서버에 통계를 보내는 엔드포인트가 없으므로 로그만 남김
       return true;
     } catch (error) {
       logger.debug('Error reporting server stats:', error.message);
@@ -231,11 +188,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 관리자 권한 확인
-   * @param {string} token - JWT 토큰
-   * @returns {Promise<boolean>}
-   */
   async checkAdminPermission(token) {
     try {
       const response = await this.apiClient.get('/api/auth/check-admin', {
@@ -251,12 +203,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 신고 생성
-   * @param {object} reportData - 신고 데이터
-   * @param {string} token - JWT 토큰
-   * @returns {Promise<boolean>}
-   */
   async createReport(reportData, token) {
     try {
       const response = await this.apiClient.post('/api/reports', reportData, {
@@ -272,10 +218,6 @@ class SpringClient {
     }
   }
 
-  /**
-   * 서버 헬스체크
-   * @returns {Promise<boolean>}
-   */
   async healthCheck() {
     try {
       const response = await this.apiClient.get('/api/health');
@@ -287,7 +229,6 @@ class SpringClient {
   }
 }
 
-// 싱글톤 인스턴스
 let springClient;
 
 export function getSpringClient() {

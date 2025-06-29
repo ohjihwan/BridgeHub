@@ -1,12 +1,11 @@
 import express from "express";
-import { getRoomManager } from "./src/service/rtcService.mjs";
-import { status, startSession, stopSession, getRooms, getRoomInfo } from "./src/controller/rtcController.mjs";
-import * as logger from "./src/util/logger.mjs";
+import { getRoomManager } from "../service/rtcService.mjs";
+import { status, startSession, stopSession, getRooms, getRoomInfo } from "../controller/rtcController.mjs";
+import * as logger from "../util/logger.mjs";
 
 const router = express.Router();
 const roomMgr = getRoomManager();
 
-// Health check endpoint
 router.get("/health", (req, res) => {
   res.json({
     status: "OK",
@@ -18,16 +17,13 @@ router.get("/health", (req, res) => {
   });
 });
 
-// RTC Controller routes
 router.get("/status", status);
 router.post("/session/start", startSession);
 router.post("/session/stop", stopSession);
 
-// Room management routes
 router.get("/api/rooms", getRooms);
 router.get("/api/rooms/:roomId", getRoomInfo);
 
-// Get server statistics
 router.get("/api/stats", (req, res) => {
   try {
     const stats = {

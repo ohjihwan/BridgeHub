@@ -4,8 +4,8 @@ export default class Peer {
   constructor(sendTransport, recvTransport) {
     this.sendTransport = sendTransport;
     this.recvTransport = recvTransport;
-    this.producers = new Map(); // kind → producer
-    this.consumers = new Map(); // producerId → consumer
+    this.producers = new Map();
+    this.consumers = new Map();
     this.closed = false;
   }
 
@@ -125,19 +125,16 @@ export default class Peer {
     
     this.closed = true;
     
-    // Close all producers
     for (const producer of this.producers.values()) {
       producer.close();
     }
     this.producers.clear();
     
-    // Close all consumers
     for (const consumer of this.consumers.values()) {
       consumer.close();
     }
     this.consumers.clear();
     
-    // Close transports
     if (this.sendTransport) {
       this.sendTransport.close();
     }

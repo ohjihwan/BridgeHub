@@ -5,12 +5,12 @@ import { Server } from "socket.io";
 import mediasoup from "mediasoup";
 
 import router from "./router.mjs";
-import socketAuth from "./src/util/authMiddleware.mjs";
-import * as logger from "./src/util/logger.mjs";
-import { getRoomManager } from "./src/service/rtcService.mjs";
-import RoomManager from "./src/sfu/roomManager.mjs";
-import Peer from "./src/sfu/peer.mjs";
-import config, { RTC_PORT, MAX_PEERS_PER_ROOM } from "./src/config/index.mjs";
+import socketAuth from "./util/authMiddleware.mjs";
+import * as logger from "./util/logger.mjs";
+import { getRoomManager } from "./service/rtcService.mjs";
+import RoomManager from "./sfu/roomManager.mjs";
+import Peer from "./sfu/peer.mjs";
+import config, { RTC_PORT, MAX_PEERS_PER_ROOM } from "./config/index.mjs";
 
 const app = express();
 const server = http.createServer(app);
@@ -74,7 +74,6 @@ io.on("connection", (socket) => {
         dtlsParameters: transport.dtlsParameters,
       };
 
-      // Transport 이벤트 핸들링
       transport.on('dtlsstatechange', (dtlsState) => {
         if (dtlsState === 'closed') {
           transport.close();
@@ -85,7 +84,6 @@ io.on("connection", (socket) => {
         logger.debug(`Send transport closed for ${socket.id}`);
       });
 
-      // Peer에 transport 저장
       let peer = sfuRoomMgr.getPeer(socket.id);
       if (!peer) {
         peer = new Peer(transport, null);
@@ -119,7 +117,6 @@ io.on("connection", (socket) => {
         dtlsParameters: transport.dtlsParameters,
       };
 
-      // Transport 이벤트 핸들링
       transport.on('dtlsstatechange', (dtlsState) => {
         if (dtlsState === 'closed') {
           transport.close();
@@ -130,7 +127,6 @@ io.on("connection", (socket) => {
         logger.debug(`Recv transport closed for ${socket.id}`);
       });
 
-      // Peer에 transport 저장
       let peer = sfuRoomMgr.getPeer(socket.id);
       if (!peer) {
         peer = new Peer(null, transport);
@@ -150,7 +146,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Transport 연결
   socket.on("connect-transport", async ({ transportId, dtlsParameters }, callback) => {
     try {
       const peer = sfuRoomMgr.getPeer(socket.id);
@@ -179,7 +174,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Producer 생성
   socket.on("produce", async ({ kind, rtpParameters }, callback) => {
     try {
       const peer = sfuRoomMgr.getPeer(socket.id);
@@ -189,7 +183,6 @@ io.on("connection", (socket) => {
 
       const producer = await peer.produce({ kind, rtpParameters });
       
-      // 같은 룸의 다른 참가자들에게 새 producer 알림
       const roomId = sfuRoomMgr.getUserRoom(socket.id);
       if (roomId) {
         socket.to(roomId).emit("new-producer", {
@@ -207,7 +200,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Consumer 생성
   socket.on("consume", async ({ producerId, rtpCapabilities }, callback) => {
     try {
       const peer = sfuRoomMgr.getPeer(socket.id);
@@ -231,7 +223,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Consumer resume
   socket.on("resume-consumer", async ({ consumerId }, callback) => {
     try {
       const peer = sfuRoomMgr.getPeer(socket.id);
@@ -252,12 +243,10 @@ io.on("connection", (socket) => {
     }
   });
 
-  // 룸 입장
   socket.on("join-room", async ({ roomId, nickname }, callback) => {
     try {
       const { user } = socket;
       
-      // Spring API를 통한 룸 입장 가능 여부 확인
       const joinCheck = await roomMgr.canJoin(roomId, user);
       
       if (!joinCheck.canJoin) {
@@ -278,7 +267,6 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // SFU 룸 매니저에도 입장
       if (!sfuRoomMgr.canJoin(roomId)) {
         const error = { code: "ROOM_FULL", message: "Room is full" };
         if (callback) callback({ error });
@@ -286,11 +274,9 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // 두 매니저 모두에 입장 처리
       await roomMgr.join(roomId, socket);
       sfuRoomMgr.join(roomId, socket);
 
-      // 기존 참가자들의 producer 정보 전송
       const participants = sfuRoomMgr.getRoomParticipants(roomId).filter(id => id !== socket.id);
       const producers = [];
       
@@ -343,7 +329,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // 채팅 메시지 처리
   socket.on("chat-message", async (data) => {
     const { user } = socket;
     const roomId = sfuRoomMgr.getUserRoom(socket.id);
@@ -362,10 +347,8 @@ io.on("connection", (socket) => {
       authenticated: user?.authenticated || false
     };
 
-    // 룸의 모든 사용자에게 메시지 전송
     io.to(roomId).emit("chat-message", messageData);
 
-    // 인증된 사용자의 메시지는 데이터베이스에 저장
     if (user?.authenticated && user?.id) {
       try {
         await roomMgr.saveChatMessage(roomId, user.id, data.message, 'TEXT');
@@ -377,10 +360,8 @@ io.on("connection", (socket) => {
     logger.debug(`Chat message from ${user?.username || socket.id} in room ${roomId}`);
   });
 
-  // 룸 퇴장
   socket.on("leave-room", async ({ roomId }, callback) => {
     try {
-      // 두 매니저 모두에서 퇴장 처리
       await roomMgr.leave(roomId, socket);
       sfuRoomMgr.leave(roomId, socket);
       
@@ -394,11 +375,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  // 연결 해제 처리
   socket.on("disconnect", (reason) => {
     logger.log(`User disconnected: ${user?.username || socket.id} (${reason})`);
     
-    // 모든 룸에서 제거
     for (const [roomId, sockets] of sfuRoomMgr.rooms.entries()) {
       if (sockets.has(socket.id)) {
         roomMgr.leave(roomId, socket);
@@ -409,7 +388,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// 서버 시작
 server.listen(RTC_PORT, "0.0.0.0", () => {
   logger.log(`🎥 RTC server listening on port ${RTC_PORT}`);
   logger.log(`📊 Health check: http://localhost:${RTC_PORT}/health`);
@@ -418,7 +396,6 @@ server.listen(RTC_PORT, "0.0.0.0", () => {
   logger.log(`🔗 API Server: ${process.env.API_URL || "http://localhost:7100"}`);
 });
 
-// Graceful shutdown
 process.on("SIGTERM", () => {
   logger.log("🔄 RTC Server shutting down gracefully...");
   server.close(() => {

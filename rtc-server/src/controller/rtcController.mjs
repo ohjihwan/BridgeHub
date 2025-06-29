@@ -3,7 +3,6 @@ import * as logger from '../util/logger.mjs';
 
 const roomMgr = getRoomManager();
 
-// 상태 조회
 export const status = (req, res) => {
   const stats = {
     status: 'OK',
@@ -21,7 +20,6 @@ export const status = (req, res) => {
   });
 };
 
-// 세션 시작 (룸 생성)
 export const startSession = (req, res) => {
   try {
     const { roomId, maxParticipants } = req.body;
@@ -34,7 +32,6 @@ export const startSession = (req, res) => {
       });
     }
 
-    // 룸이 이미 존재하는지 확인
     if (roomMgr.rooms && roomMgr.rooms.has(roomId)) {
       return res.status(409).json({
         success: false,
@@ -64,7 +61,6 @@ export const startSession = (req, res) => {
   }
 };
 
-// 세션 종료 (룸 삭제)
 export const stopSession = (req, res) => {
   try {
     const { roomId } = req.body;
@@ -79,7 +75,6 @@ export const stopSession = (req, res) => {
 
     logger.log(`Session stop requested for room: ${roomId}`);
     
-    // 실제 룸 정리는 마지막 참가자가 나갈 때 자동으로 처리됨
     res.json({ 
       success: true, 
       message: 'SUCCESS', 
@@ -98,7 +93,6 @@ export const stopSession = (req, res) => {
   }
 };
 
-// 룸 목록 조회
 export const getRooms = (req, res) => {
   try {
     const rooms = roomMgr.getAllRooms ? roomMgr.getAllRooms() : [];
@@ -118,7 +112,6 @@ export const getRooms = (req, res) => {
   }
 };
 
-// 특정 룸 정보 조회
 export const getRoomInfo = (req, res) => {
   try {
     const { roomId } = req.params;

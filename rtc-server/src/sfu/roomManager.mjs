@@ -3,9 +3,9 @@ import * as logger from '../util/logger.mjs';
 export default class RoomManager {
   constructor(maxPeers = 10) {
     this.maxPeers = maxPeers;
-    this.rooms = new Map(); // roomId → Set<socket.id>
-    this.peers = new Map(); // socket.id → Peer instance
-    this.roomData = new Map(); // roomId → room metadata
+    this.rooms = new Map();
+    this.peers = new Map();
+    this.roomData = new Map();
   }
 
   canJoin(roomId) {
@@ -29,7 +29,6 @@ export default class RoomManager {
     this.rooms.get(roomId).add(socket.id);
     socket.join(roomId);
     
-    // 참가자 정보 저장
     const roomData = this.roomData.get(roomId);
     roomData.participants.set(socket.id, {
       socketId: socket.id,
@@ -47,13 +46,11 @@ export default class RoomManager {
     set.delete(socket.id);
     socket.leave(roomId);
     
-    // 참가자 정보 제거
     const roomData = this.roomData.get(roomId);
     if (roomData) {
       roomData.participants.delete(socket.id);
     }
     
-    // Peer 정리
     if (this.peers.has(socket.id)) {
       const peer = this.peers.get(socket.id);
       peer.close();
