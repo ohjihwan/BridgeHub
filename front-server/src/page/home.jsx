@@ -11,15 +11,8 @@ const Home = () => {
 	const navigate = useNavigate();
 	const [rooms, setRooms] = useState([]);
 	const [selectedRoom, setSelectedRoom] = useState(null);
-	const [hasStudyRoom, setHasStudyRoom] = useState(true);
-	const [studyRoom, setStudyRoom] = useState({
-		title: '내 스터디룸',
-		region: '서울',
-		time: '오후',
-		currentMembers: 4,
-		capacity: 6,
-		thumbnail: 'thumbnail-room1.jpg'
-	});
+	const [studyRoom, setStudyRoom] = useState(null);
+	const [hasStudyRoom, setHasStudyRoom] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
 	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
@@ -52,7 +45,42 @@ const Home = () => {
 				setRooms([]);
 			});
 	}, []);
-	
+
+	// 테스트용
+	const [testMode, setTestMode] = useState(false); // 테스트용 구분 상태
+	const dummyRoom = {
+		title: '임시 스터디룸 테스트 방',
+		region: '서울특별시',
+		time: '오후',
+		currentMembers: 100,
+		capacity: 100,
+		thumbnail: 'thumbnail-room8.jpg'
+	};
+	// 테스트용
+
+	useEffect(() => {
+		const fetchMyRoom = async () => {
+			try {
+				const res = await authClient.get('/members/me');
+				const myRoomId = res.data.data?.studyRoomId;
+
+				if (myRoomId) {
+					const roomRes = await studyClient.get(`/studies/${myRoomId}`);
+					setStudyRoom(roomRes.data.data);
+					setHasStudyRoom(true);
+				} else {
+					setHasStudyRoom(false);
+					setStudyRoom(null);
+				}
+			} catch (err) {
+				console.error('내 스터디룸 조회 실패:', err);
+				setHasStudyRoom(false);
+				setStudyRoom(null);
+			}
+		};
+
+		fetchMyRoom();
+	}, []);
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {
@@ -78,16 +106,21 @@ const Home = () => {
 			<div className={`main-container ${showDetail && !isClosing ? 'detail-open' : ''}`}>
 				<Header showSearch={true} onSearch={() => navigate('/search')} />
 
-				<div className="create-studyroom">
-					<button className="create-studyroom__button" onClick={openCreateStudy}>
-						스터디 개설하기
-						<span className="sub-txt">
-							나만의 스터디를 만들고<br />함께 할 팀원을 모집해보세요!
-						</span>
-					</button>
-				</div>
-				
 				<div className="studyroom-actions">
+					<div className="reenter-studyroom">
+						<Link to="/chat?test=1" className="reenter-studyroom__link" title="테스트 방으로 이동">
+							<div className="reenter-studyroom__thumbnail">
+								<img src={`/uploads/thumbnail/${dummyRoom.thumbnail}`} alt="스터디룸 썸네일" />
+							</div>
+							<h3 className="reenter-studyroom__title">{dummyRoom.title}</h3>
+							<ul className="room-info">
+								<li>{dummyRoom.region}</li>
+								<li>{dummyRoom.time}</li>
+								<li>{dummyRoom.currentMembers} / {dummyRoom.capacity}명</li>
+							</ul>
+						</Link>
+					</div>
+
 					{/* 소속된 방이 없는 경우 */}
 					{!hasStudyRoom && (
 						<div className="create-studyroom">

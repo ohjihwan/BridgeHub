@@ -23,7 +23,7 @@ function SignUp({ onSwitchToLogin, isActive }) {
 		district: '지역무관',
 		timeZone: '',
 		gender: '남자',
-		hp: '',
+		hp: ''
 	});
 
 	const handleEmailVerification = async () => {

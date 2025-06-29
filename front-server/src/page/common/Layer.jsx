@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 
-const Layer = ({ isOpen, onClose, children, header = null, footer = null }) => {
+const Layer = ({ isOpen, onClose, children, header = null, footer = null,  closeOnOverlayClick = true }) => {
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
@@ -17,7 +17,7 @@ const Layer = ({ isOpen, onClose, children, header = null, footer = null }) => {
 
 	return ReactDOM.createPortal(
 		<>
-			<div className="overlay" onClick={onClose}></div>
+			<div className="overlay" onClick={closeOnOverlayClick ? onClose : undefined}></div>
 			<div className={`layer ${isVisible ? 'slide-up' : ''}`}>
 				{header && (
 					<div className="layer__header">
