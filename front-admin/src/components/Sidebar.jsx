@@ -17,41 +17,28 @@ const Sidebar = () => {
       <div className="menu">
         <ul>
           <li>
-            <NavLink to="/" end activeClassName="active">
-              대시보드
+            <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>
+              <span className="icon">📊</span>
+              <span>대시보드</span>
             </NavLink>
           </li>
           <li>
-            <NavLink to="/members" activeClassName="active">
-              회원정보관리
+            <NavLink to="/members" className={({ isActive }) => isActive ? 'active' : ''}>
+              <span className="icon">👥</span>
+              <span>회원관리</span>
             </NavLink>
           </li>
           <li>
-            <NavLink to="/reports" activeClassName="active">
-              신고관리
+            <NavLink to="/reports" className={({ isActive }) => isActive ? 'active' : ''}>
+              <span className="icon">🚨</span>
+              <span>신고관리</span>
             </NavLink>
           </li>
           <li>
-            <NavLink to="/statistics" activeClassName="active">
-              통계
+            <NavLink to="/statistics" className={({ isActive }) => isActive ? 'active' : ''}>
+              <span className="icon">📈</span>
+              <span>통계</span>
             </NavLink>
-          </li>
-        </ul>
-        <ul className="bottom-menu">
-          <li>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                color: 'inherit',
-                font: 'inherit'
-              }}
-            >
-              Logout
-            </button>
           </li>
         </ul>
       </div>

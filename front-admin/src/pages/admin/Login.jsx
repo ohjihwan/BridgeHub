@@ -29,27 +29,20 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
       const response = await adminLogin(credentials);
       
       if (response.data.success) {
-        // 관리자 권한 확인
-        const user = response.data.data;
-        if (user.role === 'ADMIN') {
-          localStorage.setItem('adminToken', response.data.data.token);
-          localStorage.setItem('adminUser', JSON.stringify(user));
-          navigate('/admin/dashboard');
-        } else {
-          setError('관리자 권한이 없습니다.');
-        }
+        // 로그인 성공 시 대시보드로 이동
+        navigate('/admin/dashboard');
       } else {
-        setError('로그인에 실패했습니다.');
+        setError(response.data.message || '로그인에 실패했습니다.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || '로그인에 실패했습니다.');
+      setError(err.message || '로그인에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -119,6 +112,10 @@ const AdminLogin = () => {
             >
               {loading ? '로그인 중...' : '로그인'}
             </Button>
+            
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+              테스트 계정: admin / admin1234
+            </Typography>
           </Box>
         </Paper>
       </Box>
