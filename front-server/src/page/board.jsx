@@ -1,19 +1,32 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from "react-router-dom"
-
+import { getPosts } from '@js/common-ui';
 
 export default function BoardList(){
     const [posts, setPosts] = useState([])
-    const [page, setPage] = useState(1)
+    const [page, setPage] = useState(0)
     const [hasMore, setHasMore] = useState(true)
     const [loading, setLoading] = useState(false)
     const [selectedPost, setSelectedPost] = useState(null)
     const observer = useRef()
+    
+    const lastPostRef = useCallback((node) => {
+        if(loading) return;
+        if(observer.current) observer.current.disconnect()
+        observer.current = new IntersectionObserver(entiries => {
+            if(entiries[0].isIntersecting && hasMore) {
+                setPage(prev => prev + 1)
+            }
+        })
+        if (node) observer.current.observe(node)
+    }, [loading, hasMore])
+    const navigate = useNavigate()
+    
     useEffect(() => {
         const load = async () => {
             setLoading(true)
             try {
-                const data = await getPosts(page, 10)
+                const data = await getPosts(page, 10, 1);
                 if(data.length == 0) {
                     setHasMore(false)
                 }else{
@@ -29,17 +42,7 @@ export default function BoardList(){
         }
         if(hasMore) load()
     }, [page])
-    const lastPostRef = useCallback((node) => {
-        if(loading) return;
-        if(observer.current) observer.current.disconnect()
-        observer.current = new IntersectionObserver(entiries => {
-            if(entiries[0].isIntersecting && hasMore) {
-                setPage(prev => prev + 1)
-            }
-        })
-        if (node) observer.current.observe(node)
-    }, [loading, hasMore])
-    const navigate = useNavigate()
+
     return (
         <div>
             <h2>게시판</h2>
