@@ -2037,6 +2037,38 @@ legend,
 	}
 }
 
+.i-say,
+.user-say {
+	&__file {
+		min-width:remx(150);
+		max-width:remx(100);
+		text-align:center;
+		@include ellipsis;
+
+		&::before {
+			content:'';
+			display:block;
+			width:remx(80);
+			height:remx(100);
+			margin:0 auto;
+			background-repeat:no-repeat;
+			background-size:100% auto;
+			background-position:top center;
+		}
+	}
+
+	&__file--jpg::before { background-image:url("@ico/ico-file-jpg.svg"); }
+	&__file--jpeg::before { background-image:url("@ico/ico-file-jpg.svg"); }
+	&__file--png::before { background-image:url("@ico/ico-file-png.svg"); }
+	&__file--gif::before { background-image:url("@ico/ico-file-gif.svg"); }
+	&__file--pdf::before { background-image:url("@ico/ico-file-pdf.svg"); }
+	&__file--doc::before { background-image:url("@ico/ico-file-doc.svg"); }
+	&__file--docx::before { background-image:url("@ico/ico-file-doc.svg"); }
+	&__file--txt::before { background-image:url("@ico/ico-file-txt.svg"); }
+	&__file--zip::before { background-image:url("@ico/ico-file-zip.svg"); }
+	&__file--rar::before { background-image:url("@ico/ico-file-rar.svg"); }
+}
+
 @keyframes entry-bouns{
     40%{transform:scale(1.3,0.7)}
     45%{transform:scale(1.5,0.5)}

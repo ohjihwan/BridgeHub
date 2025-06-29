@@ -50,6 +50,8 @@ function Chat() {
 	const textareaRef = useRef(null);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
+	// 파일 업로드
+	const fileInputRef = useRef(null);
 	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([]);
@@ -101,6 +103,27 @@ function Chat() {
 		const newInputs = [...todoSettingInputs];
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
+	};
+	// 파일 업로드
+	const handleFileUpload = (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+
+		const { ampm, timeStr } = getFormattedTime();
+
+		setMessages(prev => [
+			...prev,
+			{
+				type: 'me',
+				time: timeStr,
+				ampm,
+				files: [
+					{ name: file.name, fileId: Date.now() }
+				]
+			}
+		]);
+
+		e.target.value = '';
 	};
 	// 파일 첨부 모아보기
 	const handleShowAttachments = async () => {
@@ -537,13 +560,27 @@ function Chat() {
 					]);
 				}}>상대 메시지 테스트</button>
 				<button type="button" className="testButton" onClick={() => {
+					const { ampm, timeStr } = getFormattedTime();
+					setMessages(prev => [
+						...prev,
+						{
+							type: 'user',
+							time: timeStr,
+							ampm,
+							files: [
+								{ name: '샘플파일.png', fileId: Date.now() }
+							]
+						}
+					]);
+				}}>상대 파일 업로드</button>
+				{/* <button type="button" className="testButton" onClick={() => {
 						setIsTyping(true); // 입력 중 상태 on
 						// 3초 후 타이핑 종료
 						setTimeout(() => {
 							setIsTyping(false);
 						}, 3000);
 					}}
-				>타이핑 테스트</button>
+				>타이핑 테스트</button> */}
 				{/* // 테스트 목적 용도 */}
 
 				{/* 메시지 출력 영역 */}
@@ -555,7 +592,16 @@ function Chat() {
 					if (msg.type === 'me') {
 						return (
 							<div key={i} className="i-say">
-								<div className="i-say__text">{msg.text}</div>
+								<div className="i-say__text">
+									{msg.files?.length > 0 && msg.files[0] && (
+										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+											<div className={`i-say__file i-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+												<span>{msg.files[0].name}</span>
+											</div>
+										</a>
+									)}
+									{msg.text}
+								</div>
 								<time dateTime={msg.time} className="i-say__time">
 									{msg.ampm} <span>{msg.time}</span>
 								</time>
@@ -567,7 +613,16 @@ function Chat() {
 						return (
 							<div key={i} className="user-say" onClick={(e) => { e.stopPropagation(); setShowReportButtonIndex(i);}} >
 								<div className="user-say__profile"></div>
-								<div className="user-say__text">{msg.text}</div>
+								<div className="user-say__text">
+									{msg.files?.length > 0 && msg.files[0] && (
+										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+											<div className={`user-say__file user-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+												{msg.files[0].name}
+											</div>
+										</a>
+									)}
+									{msg.text}
+								</div>
 								<div className="user-say__etc">
 									<time dateTime={msg.time} className="user-say__time">
 										{msg.ampm} <span>{msg.time}</span>
@@ -616,6 +671,11 @@ function Chat() {
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
+							<button type="button" className="msg-writing__action" onClick={() => fileInputRef.current.click()}>
+								파일 업로드
+							</button>
+						</li>
+						<li>
 							<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
 								랜덤게임
 							</button>
@@ -634,6 +694,7 @@ function Chat() {
 						</li>
 					</ul>
 				</div>
+				<input type="file" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileUpload} />
 				<div className="msg-writing__inputs">
 					<div className="msg-writing__field">
 						<textarea className="msg-writing__input" placeholder="메세지 입력!" value={message} onChange={handleChange} onKeyDown={handleKeyDown} ref={textareaRef} rows={1} />
