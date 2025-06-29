@@ -1,8 +1,54 @@
-import express from 'express';
-import rtcRoutes from './routes/rtcRoutes.mjs';
+import express from "express";
+import { getRoomManager } from "./src/service/rtcService.mjs";
+import { status, startSession, stopSession, getRooms, getRoomInfo } from "./src/controller/rtcController.mjs";
+import * as logger from "./src/util/logger.mjs";
 
 const router = express.Router();
+const roomMgr = getRoomManager();
 
-router.use('/api/rtc', rtcRoutes);
+// Health check endpoint
+router.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
+    service: "RTC Server",
+    timestamp: new Date().toISOString(),
+    version: "1.0.0",
+    activeRooms: roomMgr.rooms?.size || 0,
+    totalParticipants: roomMgr.rooms ? Array.from(roomMgr.rooms.values()).reduce((sum, room) => sum + room.size, 0) : 0,
+  });
+});
+
+// RTC Controller routes
+router.get("/status", status);
+router.post("/session/start", startSession);
+router.post("/session/stop", stopSession);
+
+// Room management routes
+router.get("/api/rooms", getRooms);
+router.get("/api/rooms/:roomId", getRoomInfo);
+
+// Get server statistics
+router.get("/api/stats", (req, res) => {
+  try {
+    const stats = {
+      activeRooms: roomMgr.rooms?.size || 0,
+      totalParticipants: roomMgr.rooms ? Array.from(roomMgr.rooms.values()).reduce((sum, room) => sum + room.size, 0) : 0,
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      timestamp: new Date().toISOString(),
+    };
+
+    res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    logger.error("Error getting server stats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
 
 export default router;
