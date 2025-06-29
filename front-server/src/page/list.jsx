@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Header from '@common/Header';
 import StudyRoomList from '@components/StudyRoomList';
+import ListSearch from '@components/ListSearch';
 import Detail from '@components/Detail';
 import axios from 'axios';
 
@@ -84,12 +85,11 @@ const StudyRoomPage = () => {
 			<Header showSearch={true} onSearch={() => setShowSearch(true)} />
 
 			{showSearch && (
-				<div className="search-room">
-					<div className="field">
-						<input type="text" className="text" name="name" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} placeholder="검색어 입력"/>
-					</div>
-					<button className="search-room__button" onClick={() => setShowSearch(false)} aria-label="검색 닫기"></button>
-				</div>
+				<ListSearch
+					value={searchKeyword}
+					onChange={(e) => setSearchKeyword(e.target.value)}
+					onClose={() => setShowSearch(false)}
+				/>
 			)}
 
 			<div className="studyroom-list__content">

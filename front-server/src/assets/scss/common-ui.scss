@@ -1271,8 +1271,7 @@ legend,
 	}
 
 	&__content {
-		margin-top:remx(20);
-		padding:remx(50) $padding-x;
+		padding:remx(55) $padding-x;
 		background: $bg-root;
 	}
 }
@@ -3036,6 +3035,27 @@ legend,
 				background: #e74c3c;
 			}
 		}
+	}
+}
+
+.board-list {
+	
+	&__content {
+		padding:remx(55) 0;
+	}
+
+	&__item {
+		border-bottom:1px solid $line2;
+		padding:remx(16) $padding-x;
+		margin-bottom:remx(12);
+		background-color:$bg-root;
+		cursor:pointer;
+	}
+
+	&__title {
+		color:$font1;
+		font-weight:bold;
+		font-size:remx(17);
 	}
 }
 

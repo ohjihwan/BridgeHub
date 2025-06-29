@@ -75,7 +75,7 @@ const Header = ({ isEditing = false, showSearch = true, title = '', onSearch = (
 			</div>
 
 			<h2 className="header__title">
-				{( location.pathname === '/chat' && title || location.pathname === '/search' && title )}
+				{( location.pathname === '/chat' && title || location.pathname === '/search' && title || location.pathname === '/board' && title )}
 			</h2>
 			
 			<div className="header__right" ref={menuRef}>

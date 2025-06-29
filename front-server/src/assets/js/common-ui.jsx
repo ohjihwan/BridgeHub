@@ -204,7 +204,5 @@ export const getPosts = async (page = 0, size = 10, categoryId = 1, search = "",
 		headers: { Authorization: `Bearer ${token}` },
 		withCredentials: true,
 	})
-	console.log('boardClient baseURL:', boardClient.defaults.baseURL);
-	console.log('Full URL:', `${boardClient.defaults.baseURL}?${params.toString()}`);
-	return res.data.data.content
+	return res.data.data.boards
 }
