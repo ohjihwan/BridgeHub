@@ -50,12 +50,9 @@ function Chat() {
 	const textareaRef = useRef(null);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
-	// 첨부파일 모아보기
+	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
-	const [attachments, setAttachments] = useState([ // 테스트 중
-		{ name: '파일1.pdf' }, 
-		{ name: '이미지.png' }
-	]);
+	const [attachments, setAttachments] = useState([]);
 	// 랜덤 기능
 	const isOwner = true; // 추후 socket or props로 실제 값 연결
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
@@ -105,23 +102,36 @@ function Chat() {
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
 	};
-
 	// 파일 첨부 모아보기
-	const handleFileSelect = (file) => {
-		if (!file || !file.name) {
-			console.error('유효하지 않은 파일:', file);
-			return;
+	const handleShowAttachments = async () => {
+		try {
+			/* const res = await userClient.get(`/api/files/studyroom/${studyRoomId}`);
+			if (res.data.success) {
+				const files = res.data.data.map(file => ({
+					name: file.originalFilename,
+					fileId: file.fileId
+				}));
+				setAttachments(files);
+				setShowAttachments(true);
+			} */
+			setAttachments([
+				{ name: '이미지샘플.jpg', fileId: 1 },
+				{ name: '사진.jpeg', fileId: 2 },
+				{ name: '그림.png', fileId: 3 },
+				{ name: '움짤.gif', fileId: 4 },
+				{ name: '문서.pdf', fileId: 5 },
+				{ name: '보고서.doc', fileId: 6 },
+				{ name: '회의록.docx', fileId: 7 },
+				{ name: '메모.txt', fileId: 8 },
+				{ name: '압축파일.zip', fileId: 9 },
+				{ name: '자료집.rar', fileId: 10 },
+				{ name: '문서.pdf', fileId: 11 },
+			]);
+			setShowAttachments(true);
+		} catch (err) {
+			console.error('파일 목록 조회 실패', err);
 		}
-
-		const newAttachment = {
-			name: file.name,
-			url: `/uploads/chat/${file.name}`, // 실제 업로드 경로에 맞게 수정
-			type: file.type?.includes('image') ? 'image' : 'file'
-		};
-
-		setAttachments(prev => [...prev, newAttachment]);
 	};
-
 	// 랜덤 게임
 	const handleAssignUser = (index) => {
 		const userName = '김사과';
@@ -509,7 +519,7 @@ function Chat() {
 					e.stopPropagation();
 					handleChatSearch()
 				}}
-				onShowAttachments={() => setShowAttachments(true)}
+				onShowAttachments={handleShowAttachments}
 			/>
 			<div className={"chatroom-history"}>
 

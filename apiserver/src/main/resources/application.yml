@@ -8,18 +8,18 @@ spring:
   # 이메일 설정 (Gmail)
   mail:
     host: smtp.gmail.com
-    # port: 587
-    # username: ${GMAIL_USERNAME:bglyk83@gmail.com}
-    # password: ${GMAIL_PASSWORD:ipbeaplyaqbqmdsy}
-    # properties:
-    #   mail:
-    #     smtp:
-    #       auth: true
-    #       starttls:
-    #         enable: false
-    #       timeout: 5000
-    #       connectiontimeout: 5000
-    #       writetimeout: 5000
+    port: 587
+    username: ${GMAIL_USERNAME:bglyk83@gmail.com}
+    password: ${GMAIL_PASSWORD:ipbeaplyaqbqmdsy}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: false
+          timeout: 5000
+          connectiontimeout: 5000
+          writetimeout: 5000
 
 # MyBatis 설정
 mybatis:
