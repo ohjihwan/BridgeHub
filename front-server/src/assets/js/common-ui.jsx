@@ -113,24 +113,24 @@ window.hideLoading = hideLoading;
 // ----------- axios 다중 클라이언트 -----------
 
 export const authClient = axios.create({
-	baseURL: 'http://localhost:7100/api/auth',
+	baseURL: '/api/auth',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
 export const userClient = axios.create({
-	baseURL: 'http://localhost:7100',
+	baseURL: '/',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
 export const studyClient = axios.create({
-	baseURL: 'http://localhost:7100/api/studies',
+	baseURL: '/api/studies',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
 export const boardClient = axios.create({
-	baseURL: 'http://localhost:7000/api/board',
-	timeout: 10000,
-	headers: { 'Content-Type': 'application/json' },
+    baseURL: '/api/board',  // 상대 경로 - 프록시 사용!
+    timeout: 10000,
+    headers: { 'Content-Type': 'application/json' },
 });
 
 export const getAccessToken = () => {
@@ -191,18 +191,20 @@ export const createPost = async (post) => {
 	return res.data;
 };
 
-export const getPosts = async (page = 0, size = 10, categoryId = 1, search = '', sort = 'recent') => {
-	const token = localStorage.getItem("token");
-	const params = new URLSearchParams();
-	params.append('categoryId', categoryId);
-	if (search) params.append('search', search);
-	if (sort) params.append('sort', sort);
-	params.append('page', page);
-	params.append('size', size);
+export const getPosts = async (page = 0, size = 10, categoryId = 1, search = "", sort = "recent") => {
+	const token = localStorage.getItem("token")
+	const params = new URLSearchParams()
+	params.append("categoryId", categoryId)
+	if (search) params.append("search", search)
+	if (sort) params.append("sort", sort)
+	params.append("page", page)
+	params.append("size", size)
 
 	const res = await boardClient.get(`?${params.toString()}`, {
 		headers: { Authorization: `Bearer ${token}` },
 		withCredentials: true,
-	});
-	return res.data.data.content;
-};
+	})
+	console.log('boardClient baseURL:', boardClient.defaults.baseURL);
+	console.log('Full URL:', `${boardClient.defaults.baseURL}?${params.toString()}`);
+	return res.data.data.content
+}

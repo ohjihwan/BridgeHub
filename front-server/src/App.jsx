@@ -41,6 +41,7 @@ function App() {
 					<Route path="/home" element={<Home />} />
 					<Route path="/mypage" element={<MyPage />} />
 					<Route path="/chat" element={<Chat />} />
+					<Route path="/list" element={<List />} />
 					<Route path="/board" element={<BoardList />} />
 					<Route path="/board/write" element={<BoardWrite />} />
 					<Route path="search" element={<Search />} />
