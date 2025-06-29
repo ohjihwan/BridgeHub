@@ -952,8 +952,8 @@ legend,
 		content:'';
 		position:absolute;
 		top:50%;
-		width:100%;
-		height:200%;
+		width:120vw;
+		height:120vw;
 		transform:translateY(-50%);
 		animation:activeLine 2.5s infinite ease;
 	}
@@ -2738,7 +2738,8 @@ legend,
 	top:0;
 	z-index:270;
 	transform:translateX(100%);
-	width:remx(220);
+	width:60%;
+	min-width:remx(250);
 	height:100vh;
 	background-color:$bg-root;
 	box-shadow:0 0 remx(10) rgba(0,0,0,0.3); 
@@ -2748,30 +2749,67 @@ legend,
 		transform:translateX(0);
 	}
 
+	&__close {
+		position:absolute;
+		right:remx(15);
+		top:remx(15);
+		width:remx(24);
+		height:remx(24);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 1.6rem auto;
+	}
+
 	&__title {
-		
+		height:remx(56);
+		padding:remx(15);
 	}
 
 	ul {
 		display:flex;
 		flex-wrap:wrap;
+		overflow-x:hidden;
+		overflow-y:auto;
+		height:calc(100vh - remx(56));
+		padding:remx(10) remx(7) remx(40);
 	}
 
 	&__item {
 		width:50%;
 		padding:remx(5) remx(8);
+		text-align:center;
 	}
 
-	&__item--jpg { }
-	&__item--jpeg { }
-	&__item--png { }
-	&__item--gif { }
-	&__item--pdf { }
-	&__item--doc { }
-	&__item--docx { }
-	&__item--txt { }
-	&__item--zip { }
-	&__item--rar { }
+	&__down {
+		display:inline-block;
+		width:100%;
+		max-width:remx(120);
+		padding:remx(5) remx(8);
+		background-color:transparent;
+		font-size:remx(15);
+		text-align:center;
+	}
+
+	&__img {
+		display:block;
+		overflow:hidden;
+		margin:0 auto;
+		padding-top:130%;
+		background-repeat:no-repeat;
+		background-size:100% auto;
+		background-position:top center;
+	}
+
+	&__img--jpg { 
+		background-image:url("@ico/ico-file-jpg.svg"); 
+	}
+	&__img--jpeg { background-image:url("@ico/ico-file-jpg.svg"); }
+	&__img--png { background-image:url("@ico/ico-file-png.svg"); }
+	&__img--gif { background-image:url("@ico/ico-file-gif.svg"); }
+	&__img--pdf { background-image:url("@ico/ico-file-pdf.svg"); }
+	&__img--doc { background-image:url("@ico/ico-file-doc.svg"); }
+	&__img--docx { background-image:url("@ico/ico-file-doc.svg"); }
+	&__img--txt { background-image:url("@ico/ico-file-txt.svg"); }
+	&__img--zip { background-image:url("@ico/ico-file-zip.svg"); }
+	&__img--rar { background-image:url("@ico/ico-file-rar.svg"); }
 }
 // ─────────────────────────────
 // 📄 searchRoom.jsx page
