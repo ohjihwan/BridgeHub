@@ -17,15 +17,75 @@ class SocketService {
      */
     extractUserFromToken(token) {
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return {
-                userId: payload.userId || payload.username,
-                username: payload.username,
-                memberId: payload.memberId,
-                nickname: payload.nickname
+            console.log('🔍 토큰 디코딩 시작:', { 
+                tokenLength: token?.length, 
+                tokenStart: token?.substring(0, 20) + '...' 
+            });
+
+            if (!token || typeof token !== 'string') {
+                console.error('❌ 유효하지 않은 토큰:', token);
+                return null;
+            }
+
+            // Bearer 접두사 제거
+            const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+            console.log('🧹 정리된 토큰:', { 
+                cleanTokenLength: cleanToken.length,
+                cleanTokenStart: cleanToken.substring(0, 20) + '...'
+            });
+
+            // JWT 형식 검증 (3개 부분으로 나뉘어야 함)
+            const tokenParts = cleanToken.split('.');
+            if (tokenParts.length !== 3) {
+                console.error('❌ JWT 형식이 잘못됨:', {
+                    expectedParts: 3,
+                    actualParts: tokenParts.length,
+                    parts: tokenParts.map(part => part.substring(0, 10) + '...')
+                });
+                return null;
+            }
+
+            // Base64 디코딩 전 패딩 추가
+            let payload = tokenParts[1];
+            
+            // Base64 URL 디코딩 (JWT는 base64url 인코딩 사용)
+            payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+            
+            // 패딩 추가
+            while (payload.length % 4) {
+                payload += '=';
+            }
+
+            console.log('🔧 패딩 추가된 payload:', {
+                originalLength: tokenParts[1].length,
+                paddedLength: payload.length,
+                payload: payload.substring(0, 20) + '...'
+            });
+
+            // Base64 디코딩
+            const decodedPayload = atob(payload);
+            console.log('🔓 디코딩된 payload:', decodedPayload);
+
+            // JSON 파싱
+            const parsedPayload = JSON.parse(decodedPayload);
+            console.log('📄 파싱된 payload:', parsedPayload);
+
+            const userInfo = {
+                userId: parsedPayload.userId || parsedPayload.username || parsedPayload.sub,
+                username: parsedPayload.username || parsedPayload.sub,
+                memberId: parsedPayload.memberId || parsedPayload.userId,
+                nickname: parsedPayload.nickname
             };
+
+            console.log('✅ 추출된 사용자 정보:', userInfo);
+            return userInfo;
+
         } catch (error) {
-            console.warn('토큰에서 사용자 정보 추출 실패:', error);
+            console.error('❌ 토큰에서 사용자 정보 추출 실패:', {
+                error: error.message,
+                errorType: error.constructor.name,
+                token: token?.substring(0, 50) + '...'
+            });
             return null;
         }
     }
@@ -62,8 +122,6 @@ class SocketService {
                     this.isConnected = true;
                     resolve();
                 });
-
-
 
                 // 연결 실패
                 this.socket.on('connect_error', (error) => {
