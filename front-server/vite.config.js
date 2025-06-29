@@ -7,11 +7,13 @@ export default defineConfig({
 	server: {
 		host: '0.0.0.0',
 		port: 7000,
+		allowedHosts: ['www.bridgehub.asia'],
 		proxy: {
 			'/api': {
 				target: 'http://localhost:7100',
 				changeOrigin: true,
-				secure: false
+				secure: false,
+				rewrite: (path) => path.replace(/^\/api/, '/api')
 			}
 		}
 	},
