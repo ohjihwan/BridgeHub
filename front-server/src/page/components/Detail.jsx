@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSocket } from '@dev/hooks/useSocket';
 
 const Detail = ({ room, isClosing, onClose }) => {
 	const [isActive, setIsActive] = useState(false);
@@ -23,6 +24,7 @@ const Detail = ({ room, isClosing, onClose }) => {
 	}, [isClosing]);
 
 	const navigate = useNavigate();
+	const { socketService } = useSocket(); // 소켓 서비스 접근
 
 	// JWT 토큰에서 사용자 정보 추출
 	const extractUserFromToken = (token) => {
@@ -124,13 +126,72 @@ const Detail = ({ room, isClosing, onClose }) => {
 						}
 					});
 					
-					const joinResult = await joinResponse.json();
-					
-					if (joinResult.status === 'success') {
-						alert('참여 신청이 완료되었습니다. 방장의 승인을 기다려주세요.');
-						onClose(); // 팝업 닫기
+					if (joinResponse.ok) {
+						const joinResult = await joinResponse.json();
+						
+						if (joinResult.status === 'success') {
+							// 소켓으로 방장에게 실시간 알림 전송
+							if (socketService?.isSocketConnected() && socketService.socket) {
+								socketService.socket.emit('study-join-request', {
+									studyId: room.studyRoomId || room.id,
+									applicantId: userInfo.userId,
+									applicantName: userInfo.nickname || userInfo.username || '사용자',
+									applicantProfileImage: null // 프로필 이미지가 있다면 추가
+								});
+								console.log('📨 참가 신청 알림 전송:', {
+									studyId: room.studyRoomId || room.id,
+									applicantId: userInfo.userId,
+									applicantName: userInfo.nickname || userInfo.username
+								});
+							} else {
+								console.log('⚠️ 소켓이 연결되지 않아 실시간 알림을 전송할 수 없습니다.');
+							}
+							
+							alert('참여 신청이 완료되었습니다. 방장의 승인을 기다려주세요.');
+							onClose(); // 팝업 닫기
+						} else {
+							alert(joinResult.message || '참여 신청에 실패했습니다.');
+						}
 					} else {
-						alert(joinResult.message || '참여 신청에 실패했습니다.');
+						// HTTP 상태 코드가 400, 500 등인 경우
+						try {
+							const errorResult = await joinResponse.json();
+							console.error('❌ 참가 신청 실패:', errorResult);
+							
+							// JOIN_ERROR는 이미 참가 신청한 경우로 처리하여 방장에게 알림 재전송
+							if (joinResponse.status === 400 && errorResult.errorCode === 'JOIN_ERROR') {
+								
+								console.log('🔄 JOIN_ERROR - 이미 신청한 것으로 간주하고 방장에게 알림 재전송');
+								
+								// 소켓으로 방장에게 실시간 알림 전송
+								if (socketService?.isSocketConnected() && socketService.socket) {
+									socketService.socket.emit('study-join-request', {
+										studyId: room.studyRoomId || room.id,
+										applicantId: userInfo.userId,
+										applicantName: userInfo.nickname || userInfo.username || '사용자',
+										applicantProfileImage: null
+									});
+									console.log('📨 참가 신청 재알림 전송:', {
+										studyId: room.studyRoomId || room.id,
+										applicantId: userInfo.userId,
+										applicantName: userInfo.nickname || userInfo.username
+									});
+								}
+								
+								alert('이미 참가 신청을 하셨습니다. 방장에게 알림을 다시 전송했습니다.');
+								
+							} else {
+								// 다른 에러인 경우
+								const errorMessage = errorResult.errorCode === 'ALREADY_MEMBER' ? '이미 참가 중인 스터디입니다.' :
+									errorResult.errorCode === 'ROOM_FULL' ? '스터디 정원이 가득 찼습니다.' :
+									errorResult.errorCode === 'PREVIOUSLY_REJECTED' ? '이전에 참가가 거절된 스터디입니다.' :
+									'참가 신청에 실패했습니다.';
+								alert(errorMessage);
+							}
+						} catch (parseError) {
+							console.error('❌ 에러 응답 파싱 실패:', parseError);
+							alert('참가 신청 처리 중 오류가 발생했습니다.');
+						}
 					}
 				}
 			} else {

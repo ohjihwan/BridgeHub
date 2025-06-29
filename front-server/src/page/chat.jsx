@@ -41,7 +41,8 @@ function Chat() {
 		onlineUsers, 
 		isJoined, 
 		sendMessage: socketSendMessage,
-		isConnected 
+		isConnected,
+		socketService // 소켓 서비스 직접 접근을 위해 추가
 	} = useStudySocket(studyId, currentUserId);
 
 	// 소켓 상태 디버깅
@@ -77,8 +78,8 @@ function Chat() {
 	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([]);
-	// 랜덤 기능
-	const isOwner = true; // 추후 socket or props로 실제 값 연결
+	// 랜덤 기능 - 방장 여부 확인
+	const [isOwner, setIsOwner] = useState(false);
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
 	const [spinning, setSpinning] = useState(false); // 룰렛 돌리는 중 여부
 	const [winner, setWinner] = useState(null); // 당첨자
@@ -91,6 +92,8 @@ function Chat() {
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [searchResults, setSearchResults] = useState([]); // 검색된 요소 배열
 	const [currentIndex, setCurrentIndex] = useState(0); // 현재 몇 번째 결과인지
+	// 참가 신청 알림 관련
+	const [joinRequests, setJoinRequests] = useState([]); // 참가 신청 목록
 	const [showNavigator, setShowNavigator] = useState(false); // 말풍선 표시 여부
 	// WebRTC
 	const [showVideo, setShowVideo] = useState(false);
@@ -693,6 +696,74 @@ function Chat() {
 	// 중복된 히스토리 로딩 로직 제거 (위 소켓 메시지 수신 처리에서 처리됨)
 
 	// 연결 상태 메시지 (서버에서 자동으로 전송되므로 제거)
+	
+	// 방장 여부 확인
+	useEffect(() => {
+		if (studyInfo && currentUserInfo) {
+			const isBoss = studyInfo.bossId === currentUserInfo.userId || 
+						   studyInfo.bossId === currentUserInfo.memberId;
+			setIsOwner(isBoss);
+			console.log('🏛️ 방장 여부 확인:', {
+				studyBossId: studyInfo.bossId,
+				currentUserId: currentUserInfo.userId,
+				currentMemberId: currentUserInfo.memberId,
+				isBoss: isBoss
+			});
+		}
+	}, [studyInfo, currentUserInfo]);
+
+	// 참가 신청 알림 수신 (방장만)
+	useEffect(() => {
+		console.log('🎯 참가 신청 알림 리스너 설정:', {
+			isConnected,
+			isOwner,
+			hasSocketService: !!socketService,
+			hasSocket: !!socketService?.socket,
+			socketConnected: socketService?.socket?.connected
+		});
+
+		if (!isConnected || !isOwner) {
+			console.log('⚠️ 참가 신청 알림 리스너 설정 안함:', { isConnected, isOwner });
+			return;
+		}
+
+		// 참가 신청 알림 수신
+		const handleJoinRequest = (notification) => {
+			console.log('📥 [방장] 참가 신청 알림 수신:', notification);
+			setJoinRequests(prev => {
+				const newRequests = [...prev, {
+					...notification,
+					id: Date.now() + Math.random(), // 고유 ID
+					timestamp: new Date().toISOString()
+				}];
+				console.log('📋 업데이트된 참가 신청 목록:', newRequests);
+				return newRequests;
+			});
+			
+			// 시스템 메시지로도 표시
+			addSystemMessage(`${notification.applicantName}님이 스터디 참가를 신청했습니다.`, {});
+		};
+
+		// 소켓 이벤트 리스너 등록
+		if (socketService?.socket) {
+			console.log('✅ 참가 신청 알림 리스너 등록 중...');
+			socketService.socket.on('join-request-notification', handleJoinRequest);
+			
+			// 테스트용 모든 이벤트 로깅
+			socketService.socket.onAny((eventName, ...args) => {
+				if (eventName.includes('join')) {
+					console.log('🔍 소켓 이벤트 수신:', eventName, args);
+				}
+			});
+			
+			return () => {
+				console.log('🧹 참가 신청 알림 리스너 해제');
+				socketService.socket.off('join-request-notification', handleJoinRequest);
+			};
+		} else {
+			console.warn('❌ 소켓 서비스가 없어서 알림 리스너를 등록할 수 없습니다.');
+		}
+	}, [isConnected, isOwner, addSystemMessage, socketService]);
 
 	// 스크롤 하단
 	useEffect(() => {
@@ -715,6 +786,54 @@ function Chat() {
 		};
 	}, []);
 
+	// 참가 신청 승인/거절 처리
+	const handleJoinResponse = async (request, response) => {
+		try {
+			const token = localStorage.getItem('token');
+			if (!token) {
+				alert('로그인이 필요합니다.');
+				return;
+			}
+
+			// 백엔드 API 호출
+			const apiResponse = await fetch(`/api/studies/${studyId}/members/${request.applicantId}/status?status=${response.toUpperCase()}`, {
+				method: 'PUT',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			});
+
+			const result = await apiResponse.json();
+			
+			if (result.status === 'success') {
+				// 소켓으로 신청자에게 결과 알림
+				if (socketService?.socket) {
+					socketService.socket.emit('study-join-response', {
+						studyId: studyId,
+						applicantId: request.applicantId,
+						response: response,
+						bossId: currentUserInfo.userId
+					});
+				}
+
+				// 요청 목록에서 제거
+				setJoinRequests(prev => prev.filter(req => req.id !== request.id));
+				
+				// 시스템 메시지 추가
+				const actionText = response === 'approved' ? '승인' : '거절';
+				addSystemMessage(`${request.applicantName}님의 참가 신청을 ${actionText}했습니다.`, {});
+				
+				console.log(`✅ 참가 신청 ${actionText} 완료:`, request.applicantName);
+			} else {
+				alert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
+			}
+		} catch (error) {
+			console.error('참가 신청 처리 실패:', error);
+			alert('참가 신청 처리 중 오류가 발생했습니다.');
+		}
+	};
+
 	/* 소캣테스트용 */
 	const testUsers = ['김사과', '반하나', '오렌지', '이메론', '채애리'];
 
@@ -729,6 +848,62 @@ function Chat() {
 				}}
 				onShowAttachments={handleShowAttachments}
 			/>
+
+			{/* 참가 신청 알림 (방장만 표시) */}
+			{isOwner && joinRequests.length > 0 && (
+				<div style={{
+					backgroundColor: '#e3f2fd',
+					border: '1px solid #2196f3',
+					borderRadius: '8px',
+					padding: '12px',
+					margin: '10px',
+					fontSize: '14px'
+				}}>
+					{joinRequests.map((request) => (
+						<div key={request.id} style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							marginBottom: joinRequests.length > 1 ? '8px' : '0'
+						}}>
+							<span>
+								<strong>{request.applicantName}</strong>님이 참가를 신청했습니다.
+							</span>
+							<div style={{ display: 'flex', gap: '8px' }}>
+								<button 
+									onClick={() => handleJoinResponse(request, 'approved')}
+									style={{
+										backgroundColor: '#4caf50',
+										color: 'white',
+										border: 'none',
+										borderRadius: '4px',
+										padding: '4px 12px',
+										fontSize: '12px',
+										cursor: 'pointer'
+									}}
+								>
+									승인
+								</button>
+								<button 
+									onClick={() => handleJoinResponse(request, 'rejected')}
+									style={{
+										backgroundColor: '#f44336',
+										color: 'white',
+										border: 'none',
+										borderRadius: '4px',
+										padding: '4px 12px',
+										fontSize: '12px',
+										cursor: 'pointer'
+									}}
+								>
+									거절
+								</button>
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+
 			<div className={"chatroom-history"}>
 
 				{/* 테스트 목적 용도 */}
