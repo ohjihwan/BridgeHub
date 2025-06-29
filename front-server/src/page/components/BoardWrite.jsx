@@ -28,13 +28,13 @@ export default function BoardWrite() {
             formData.append('image',image)
         }
 
-        /*
+        
         try {
             await createPost({ title, content }, token)
             navigate('/board')
         }catch(e) {
             setMessage('글쓰기 실패 🤬')
-        }*/
+        }
        try{
         await axios.post('/api/posts',formData,{
                 headers:{

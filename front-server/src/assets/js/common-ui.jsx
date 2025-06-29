@@ -127,6 +127,11 @@ export const studyClient = axios.create({
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
+export const postClient = axios.create({
+	baseURL: 'http://localhost:7000/api/posts',
+	timeout: 10000,
+	headers: { 'Content-Type': 'application/json' },
+});
 export const getAccessToken = () => {
 	return localStorage.getItem('token');
 };
@@ -174,4 +179,23 @@ export const formatPhone = (value) => {
 
 export const cleanPhone = (value) => {
 	return value.replace(/-/g, '');
+};
+
+// ----------- 게시판 관련 -----------
+export const createPost = async (post) => {
+	const token = localStorage.getItem("token");
+	const res = await postClient.post('', post, {
+		headers: { Authorization: `Bearer ${token}` },
+		withCredentials: true,
+	});
+	return res.data;
+};
+
+export const getPosts = async (page = 1, size = 10) => {
+	const token = localStorage.getItem("token");
+	const res = await postClient.get(`?page=${page}&size=${size}`, {
+		headers: { Authorization: `Bearer ${token}` },
+		withCredentials: true,
+	});
+	return res.data;
 };

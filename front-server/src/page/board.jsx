@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from "react-router-dom"
-import { getPosts } from '../api/board'
-import './BoardList.css'
+import { getPosts } from './api/board'
 
 
 export default function BoardList(){
