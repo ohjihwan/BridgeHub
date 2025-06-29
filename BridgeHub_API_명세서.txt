@@ -59,7 +59,8 @@ TheBridgeHub API 명세서 (v1.1.0)
     "gender": "남자",
     "region": "서울",
     "district": "강남구",
-    "time": "오후"
+    "time": "오후",
+    "description": "열심히 공부하는 대학생입니다."
 }
 - Response:
 {
@@ -121,6 +122,7 @@ TheBridgeHub API 명세서 (v1.1.0)
         "time": "오후",
         "profileImage": null,
         "emailVerified": true,
+        "description": "열심히 공부하는 대학생입니다.",
         "createdAt": "2024-01-01T00:00:00"
     }
 }
@@ -137,7 +139,8 @@ TheBridgeHub API 명세서 (v1.1.0)
     "department": "소프트웨어학과",
     "region": "부산",
     "district": "해운대구",
-    "time": "저녁"
+    "time": "저녁",
+    "description": "업데이트된 자기소개"
 }
 - Response: 수정된 회원 정보
 
@@ -172,7 +175,8 @@ TheBridgeHub API 명세서 (v1.1.0)
         "gender": "남자",
         "region": "서울",
         "district": "강남구",
-        "time": "오후"
+        "time": "오후",
+        "description": "열심히 공부하는 대학생입니다."
     }
 }
 
@@ -185,7 +189,11 @@ TheBridgeHub API 명세서 (v1.1.0)
     "nickname": "새닉네임",
     "phone": "010-9876-5432",
     "education": "대학원",
-    "department": "소프트웨어학과"
+    "department": "소프트웨어학과",
+    "region": "서울",
+    "district": "강남구",
+    "time": "오후",
+    "description": "업데이트된 자기소개"
 }
 - Response: 수정된 회원 정보
 

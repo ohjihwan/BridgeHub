@@ -395,7 +395,7 @@ async function validateSchema() {
         
         const db = client.db(DB_NAME);
         
-        console.log('MongoDB 스키마 검증 시작...');
+        console.log('MongoDB 스키마 검증 시작');
         
         for (const [collectionName, schema] of Object.entries(schemas)) {
             try {
