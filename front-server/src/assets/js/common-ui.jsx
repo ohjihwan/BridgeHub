@@ -122,11 +122,16 @@ export const userClient = axios.create({
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
+export const studyClient = axios.create({
+	baseURL: 'http://localhost:7100/api/studies',
+	timeout: 10000,
+	headers: { 'Content-Type': 'application/json' },
+});
 export const getAccessToken = () => {
 	return localStorage.getItem('token');
 };
 
-[authClient, userClient].forEach(client => {
+[authClient, userClient, studyClient].forEach(client => {
 	client.interceptors.request.use(config => {
 		window.showLoading?.();
 		return config;

@@ -5,6 +5,7 @@ import Header from '@common/Header';
 import HotRoomSwiper from '@components/HotRoomSwiper';
 import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
+import { userClient, studyClient } from '@js/common-ui';
 import axios from 'axios';
 
 const Home = () => {
@@ -30,8 +31,47 @@ const Home = () => {
 	};
 	const closeCreateStudy = () => {
 		setShowCreateStudy(false);
+		// 스터디룸 생성 후 내 스터디룸 정보 다시 가져오기
+		fetchMyRoom();
 	};
-	
+
+	const fetchMyRoom = async () => {
+		try {
+			const token = localStorage.getItem('token');
+			if (!token) {
+				setHasStudyRoom(false);
+				setStudyRoom(null);
+				return;
+			}
+
+			// 내가 개설한 스터디룸 조회
+			const res = await studyClient.get('/my-created', {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			console.log('🏠 내 스터디룸 API 응답:', res.data);
+
+			if (res.data.success && res.data.data && res.data.data.length > 0) {
+				// 첫 번째 스터디룸을 선택 (한 사용자는 하나만 개설 가능)
+				const studyRoomData = res.data.data[0];
+				console.log('🏠 스터디룸 데이터:', studyRoomData);
+				console.log('🏠 스터디룸 필드들:', Object.keys(studyRoomData));
+				
+				setStudyRoom(studyRoomData);
+				setHasStudyRoom(true);
+			} else {
+				setHasStudyRoom(false);
+				setStudyRoom(null);
+			}
+		} catch (err) {
+			console.error('내 스터디룸 조회 실패:', err);
+			setHasStudyRoom(false);
+			setStudyRoom(null);
+		}
+	};
+
 	useEffect(() => {
 		axios.get('/api/studies')
 			.then(res => {
@@ -59,26 +99,6 @@ const Home = () => {
 	// 테스트용
 
 	useEffect(() => {
-		const fetchMyRoom = async () => {
-			try {
-				const res = await authClient.get('/members/me');
-				const myRoomId = res.data.data?.studyRoomId;
-
-				if (myRoomId) {
-					const roomRes = await studyClient.get(`/studies/${myRoomId}`);
-					setStudyRoom(roomRes.data.data);
-					setHasStudyRoom(true);
-				} else {
-					setHasStudyRoom(false);
-					setStudyRoom(null);
-				}
-			} catch (err) {
-				console.error('내 스터디룸 조회 실패:', err);
-				setHasStudyRoom(false);
-				setStudyRoom(null);
-			}
-		};
-
 		fetchMyRoom();
 	}, []);
 	useEffect(() => {
@@ -136,7 +156,12 @@ const Home = () => {
 					{/* 소속된 방이 있는 경우 */}
 					{studyRoom && (
 						<div className="reenter-studyroom">
-							<Link to="/chat" className="reenter-studyroom__link" title="참여중인 방으로 이동">
+							<Link 
+								to="/chat" 
+								className="reenter-studyroom__link" 
+								title="참여중인 방으로 이동"
+								state={{ studyRoom: studyRoom }}
+							>
 								<div className="reenter-studyroom__thumbnail">
 									<img src={`/uploads/thumbnail/${studyRoom.thumbnail}`} alt="스터디룸 썸네일" />
 								</div>

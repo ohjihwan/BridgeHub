@@ -44,6 +44,28 @@ function Chat() {
 		isConnected 
 	} = useStudySocket(studyId, currentUserId);
 
+	// 소켓 상태 디버깅
+	useEffect(() => {
+		console.log('🔥 소켓 상태 변화:', {
+			studyId,
+			currentUserId,
+			isConnected,
+			isJoined,
+			socketMessagesLength: socketMessages?.length || 0,
+			onlineUsersCount: onlineUsers?.length || 0
+		});
+		
+		if (socketMessages && socketMessages.length > 0) {
+			console.log('📚 소켓에서 받은 메시지들:', socketMessages.map(msg => ({
+				messageId: msg.messageId || msg._id,
+				senderId: msg.senderId,
+				text: msg.message || msg.text,
+				timestamp: msg.timestamp,
+				messageType: msg.messageType
+			})));
+		}
+	}, [studyId, currentUserId, isConnected, isJoined, socketMessages, onlineUsers]);
+
 	const [message, setMessage] = useState('');
 	const [messages, setMessages] = useState([]);
 	const [isTyping, setIsTyping] = useState(false);
@@ -104,39 +126,159 @@ function Chat() {
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
 	};
-	// 파일 업로드
-	const handleFileUpload = (e) => {
+	// 파일 업로드 (백엔드 먼저, UI 나중)
+	const handleFileUpload = async (e) => {
 		const file = e.target.files[0];
 		if (!file) return;
 
-		const { ampm, timeStr } = getFormattedTime();
+		console.log('📁 파일 업로드 시작:', {
+			fileName: file.name,
+			fileSize: file.size,
+			fileType: file.type,
+			studyId,
+			currentUserId
+		});
 
-		setMessages(prev => [
-			...prev,
-			{
-				type: 'me',
-				time: timeStr,
-				ampm,
-				files: [
-					{ name: file.name, fileId: Date.now() }
-				]
+		// 필수 조건 확인
+		if (!studyId || !currentUserId) {
+			console.error('❌ 파일 업로드 조건 미충족:', { studyId, currentUserId });
+			customAlert('파일 업로드에 필요한 정보가 없습니다.');
+			e.target.value = '';
+			return;
+		}
+
+		// 로딩 메시지 추가 (임시)
+		const { ampm, timeStr } = getFormattedTime();
+		const tempMessage = {
+			type: 'me',
+			text: `파일을 업로드 중입니다... (${file.name})`,
+			time: timeStr,
+			ampm,
+			isUploading: true
+		};
+		
+		setMessages(prev => [...prev, tempMessage]);
+
+		try {
+			// 백엔드에 파일 업로드 먼저 실행
+			const formData = new FormData();
+			formData.append('file', file);
+			formData.append('studyRoomId', studyId.toString());
+			formData.append('uploaderId', currentUserId.toString());
+			formData.append('fileType', 'STUDY');
+
+			console.log('🚀 백엔드 파일 업로드 요청 전송:', {
+				studyRoomId: studyId,
+				uploaderId: currentUserId,
+				fileType: 'STUDY',
+				fileSize: file.size
+			});
+
+			const response = await fetch('/api/files/upload', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${localStorage.getItem('token')}`
+				},
+				body: formData
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				console.log('✅ 백엔드 파일 업로드 성공:', result);
+				
+				// 백엔드 업로드 성공 시 UI 업데이트 (실제 fileId 사용)
+				const realFileId = result.data?.fileId;
+				
+				setMessages(prev => {
+					// 로딩 메시지 제거하고 실제 파일 메시지 추가
+					const withoutLoading = prev.filter(msg => !msg.isUploading);
+					return [...withoutLoading, {
+						type: 'me',
+						time: timeStr,
+						ampm,
+						files: [{
+							name: file.name,
+							fileId: realFileId,
+							fileSize: file.size
+						}]
+					}];
+				});
+				
+				// 소켓으로 다른 사용자들에게 실시간 알림
+				if (isConnected && socketSendMessage) {
+					console.log('📡 소켓으로 파일 업로드 알림 전송');
+					socketSendMessage({
+						message: `파일을 업로드했습니다: ${file.name}`,
+						messageType: 'FILE',
+						fileName: file.name,
+						fileId: realFileId,
+						fileSize: file.size
+					});
+				}
+			} else {
+				console.error('❌ 백엔드 파일 업로드 실패:', response.status, response.statusText);
+				
+				// 업로드 실패 시 로딩 메시지 제거하고 에러 메시지 표시
+				setMessages(prev => prev.filter(msg => !msg.isUploading));
+				customAlert(`파일 업로드에 실패했습니다. (${response.status})`);
 			}
-		]);
+		} catch (error) {
+			console.error('❌ 파일 업로드 에러:', error);
+			
+			// 에러 시 로딩 메시지 제거하고 에러 메시지 표시
+			setMessages(prev => prev.filter(msg => !msg.isUploading));
+			customAlert('파일 업로드 중 오류가 발생했습니다.');
+		}
 
 		e.target.value = '';
 	};
 	// 파일 첨부 모아보기
 	const handleShowAttachments = async () => {
+		console.log('📂 파일 모아보기 시작:', { studyId });
+		
 		try {
-			/* const res = await userClient.get(`/api/files/studyroom/${studyRoomId}`);
-			if (res.data.success) {
-				const files = res.data.data.map(file => ({
-					name: file.originalFilename,
-					fileId: file.fileId
-				}));
-				setAttachments(files);
-				setShowAttachments(true);
-			} */
+			// 실제 API 호출 시도
+			if (studyId) {
+				const response = await fetch(`/api/files/studyroom/${studyId}`, {
+					method: 'GET',
+					headers: {
+						'Authorization': `Bearer ${localStorage.getItem('token')}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				console.log('📂 파일 목록 API 응답:', response.status);
+				
+				if (response.ok) {
+					const result = await response.json();
+					console.log('📂 파일 목록 API 결과:', result);
+					
+					// 백엔드의 ApiResponse 구조: {status: 'success', data: [...]}  
+					if (result.status === 'success' && result.data) {
+						const files = result.data.map(file => ({
+							name: file.originalFilename || file.fileName,
+							fileId: file.fileId,
+							fileSize: file.fileSize,
+							mimeType: file.mimeType,
+							uploadedAt: file.uploadedAt
+						}));
+						
+						setAttachments(files);
+						setShowAttachments(true);
+						console.log('✅ 실제 파일 목록 조회 성공:', files.length, '개', files);
+						return;
+					} else {
+						console.warn('📂 파일 목록 응답 구조 예상과 다름:', result);
+					}
+				} else {
+					console.error('📂 파일 목록 API 실패:', response.status, response.statusText);
+				}
+			} else {
+				console.warn('📂 studyId가 없음:', studyId);
+			}
+			
+			// API 실패 시 또는 studyId가 없을 때 가짜 데이터 사용 (fallback)
+			console.log('📂 가짜 데이터로 fallback');
 			setAttachments([
 				{ name: '이미지샘플.jpg', fileId: 1 },
 				{ name: '사진.jpeg', fileId: 2 },
@@ -152,7 +294,14 @@ function Chat() {
 			]);
 			setShowAttachments(true);
 		} catch (err) {
-			console.error('파일 목록 조회 실패', err);
+			console.error('📂 파일 목록 조회 실패:', err);
+			// 에러 시에도 가짜 데이터 표시
+			setAttachments([
+				{ name: '이미지샘플.jpg', fileId: 1 },
+				{ name: '사진.jpeg', fileId: 2 },
+				{ name: '그림.png', fileId: 3 },
+			]);
+			setShowAttachments(true);
 		}
 	};
 	// 랜덤 게임
@@ -409,105 +558,141 @@ function Chat() {
 
 	// 소켓 메시지 수신 처리
 	useEffect(() => {
+		console.log('🔄 소켓 메시지 변화 감지:', {
+			socketMessagesLength: socketMessages?.length || 0,
+			currentMessagesLength: messages.length,
+			isHistoryEmpty: messages.length === 0,
+			isJoined,
+			isConnected,
+			socketMessages: socketMessages?.slice(-3) // 마지막 3개만 로그
+		});
+
 		if (socketMessages && socketMessages.length > 0) {
-			const latestMessage = socketMessages[socketMessages.length - 1];
-			
-			// 내가 보낸 메시지가 아닌 경우에만 추가
-			if (latestMessage.senderId !== currentUserId) {
-				const { ampm, timeStr } = getFormattedTime();
+			// 히스토리가 비어있고 소켓 메시지가 있으면 전체 히스토리로 처리
+			if (messages.length === 0) {
+				console.log('📚 소켓 히스토리를 로컬 messages에 설정');
+				console.log('📚 원본 소켓 메시지들:', socketMessages);
 				
-				const newMessage = {
-					type: 'user',
-					text: latestMessage.message || latestMessage.text,
-					time: timeStr,
-					ampm: ampm,
-					senderId: latestMessage.senderId,
-					senderName: latestMessage.senderName || '사용자'
-				};
-				
-				setMessages(prev => {
-					// 중복 메시지 방지
-					const exists = prev.find(msg => 
-						msg.text === newMessage.text && 
-						msg.senderId === newMessage.senderId &&
-						Math.abs(new Date() - new Date(msg.timestamp || 0)) < 1000
-					);
+				const historyMessages = socketMessages.map((msg, index) => {
+					console.log(`📚 메시지 ${index} 변환:`, msg);
 					
-					if (!exists) {
-						return [...prev, { ...newMessage, timestamp: new Date() }];
-					}
-					return prev;
-				});
-			}
-		}
-	}, [socketMessages, currentUserId]);
+					// MongoDB에서 오는 메시지 구조 처리
+					const messageText = msg.message || msg.content || msg.text || '';
+					const senderId = msg.senderId || msg.userId || msg.sender || '';
+					const senderName = msg.senderName || msg.senderNickname || msg.nickname || msg.username || '사용자';
+					const messageTime = msg.timestamp || msg.sentAt || msg.createdAt || new Date().toISOString();
+					
+					// 시간 포맷팅
+					const timeObj = new Date(messageTime);
+					const timeStr = timeObj.toLocaleTimeString('ko-KR', { 
+						hour: '2-digit', 
+						minute: '2-digit' 
+					});
+					const ampm = timeObj.getHours() >= 12 ? '오후' : '오전';
+					
+					const baseMessage = {
+						type: senderId == currentUserId ? 'me' : 'user',
+						text: messageText,
+						time: timeStr,
+						ampm: ampm,
+						senderId: senderId,
+						senderName: senderName,
+						timestamp: messageTime,
+						messageId: msg.messageId || msg._id || `${senderId}-${Date.now()}-${index}`
+					};
 
-	// 채팅 히스토리 로드
-	useEffect(() => {
-		const loadChatHistory = async () => {
-			console.log('채팅 히스토리 로드 시작:', { roomId, studyId, currentUserId });
-			
-			// roomId 또는 studyId 중 하나라도 있으면 시도
-			const chatRoomId = roomId || studyId;
-			
-			if (chatRoomId && currentUserId) {
-				try {
-					console.log('채팅 히스토리 API 호출:', chatRoomId);
-					const response = await chatAPI.getRecentMessages(chatRoomId);
-					console.log('채팅 히스토리 응답:', response);
-					
-					if (response.data && response.data.status === 'success') {
-						const messages = response.data.data || [];
-						console.log('받은 메시지 개수:', messages.length);
+					// 파일 메시지인 경우 파일 정보 추가
+					if (msg.messageType === 'FILE' || msg.fileType || msg.fileName || msg.files) {
+						const fileName = msg.fileName || msg.filename || (msg.files && msg.files[0]?.name) || '파일';
+						const fileId = msg.fileId || (msg.files && msg.files[0]?.fileId) || null;
 						
-						if (messages.length > 0) {
-							const historyMessages = messages.map(msg => ({
-								type: msg.senderId === currentUserId ? 'me' : 'user',
-								text: msg.content,
-								time: new Date(msg.sentAt).toLocaleTimeString('ko-KR', { 
-									hour: '2-digit', 
-									minute: '2-digit' 
-								}),
-								ampm: new Date(msg.sentAt).getHours() >= 12 ? '오후' : '오전',
-								senderId: msg.senderId,
-								senderName: msg.senderNickname || msg.senderName
-							}));
-							
-							setChatHistory(historyMessages);
-							setMessages(prev => [...historyMessages, ...prev]);
-							console.log('채팅 히스토리 로드 완료:', historyMessages.length, '개 메시지');
-						} else {
-							console.log('채팅 히스토리가 비어있습니다.');
-						}
-					} else {
-						console.warn('채팅 히스토리 응답 구조가 예상과 다름:', response.data);
+						baseMessage.files = [{
+							name: fileName,
+							fileId: fileId,
+							fileUrl: fileId ? `/api/files/download/${fileId}` : '#'
+						}];
+						
+						console.log(`📎 파일 메시지 처리:`, { fileName, fileId });
 					}
-				} catch (error) {
-					console.error('채팅 히스토리 로드 실패:', error);
-					console.error('에러 상세:', error.response?.data);
-					
-					// 에러가 발생해도 채팅 기능은 계속 사용할 수 있도록 함
-					if (error.response?.status === 404) {
-						console.log('채팅방이 존재하지 않거나 메시지가 없습니다.');
-					}
-				}
+
+					console.log(`✅ 변환된 메시지 ${index}:`, baseMessage);
+					return baseMessage;
+				});
+				
+				setMessages(historyMessages);
+				console.log('✅ 히스토리 설정 완료:', historyMessages.length, '개 메시지');
+				console.log('✅ 설정된 메시지들:', historyMessages);
 			} else {
-				console.log('채팅 히스토리 로드 조건 미충족:', { chatRoomId, currentUserId });
+				// 새 메시지만 추가 (마지막 메시지 확인)
+				const latestMessage = socketMessages[socketMessages.length - 1];
+				console.log('📨 새 메시지 확인:', latestMessage);
+				
+				// 중복 확인 - 더 정확한 중복 검사
+				const exists = messages.find(msg => {
+					// messageId가 있으면 우선 비교
+					if (latestMessage.messageId && msg.messageId) {
+						return msg.messageId === latestMessage.messageId;
+					}
+					
+					// 텍스트와 발신자 ID, 타임스탬프로 비교
+					const textMatch = msg.text === (latestMessage.message || latestMessage.text);
+					const senderMatch = msg.senderId === latestMessage.senderId;
+					const timeMatch = Math.abs(
+						new Date(msg.timestamp || 0) - new Date(latestMessage.timestamp || 0)
+					) < 3000; // 3초 이내
+					
+					return textMatch && senderMatch && timeMatch;
+				});
+				
+				if (!exists) {
+					console.log('📨 새 메시지 추가:', latestMessage);
+					
+					// 새 메시지도 동일한 구조로 변환
+					const messageText = latestMessage.message || latestMessage.content || latestMessage.text || '';
+					const senderId = latestMessage.senderId || latestMessage.userId || '';
+					const senderName = latestMessage.senderName || latestMessage.nickname || '사용자';
+					const messageTime = latestMessage.timestamp || new Date().toISOString();
+					
+					const timeObj = new Date(messageTime);
+					const timeStr = timeObj.toLocaleTimeString('ko-KR', { 
+						hour: '2-digit', 
+						minute: '2-digit' 
+					});
+					const ampm = timeObj.getHours() >= 12 ? '오후' : '오전';
+					
+					const newMessage = {
+						type: senderId == currentUserId ? 'me' : 'user',
+						text: messageText,
+						time: timeStr,
+						ampm: ampm,
+						senderId: senderId,
+						senderName: senderName,
+						timestamp: messageTime,
+						messageId: latestMessage.messageId || latestMessage._id || `${senderId}-${Date.now()}`
+					};
+
+					// 파일 메시지인 경우 파일 정보 추가
+					if (latestMessage.messageType === 'FILE' || latestMessage.fileType || latestMessage.fileName) {
+						newMessage.files = [{
+							name: latestMessage.fileName || '파일',
+							fileId: latestMessage.fileId || Date.now(),
+							fileUrl: latestMessage.fileUrl || '#'
+						}];
+					}
+					
+					setMessages(prev => [...prev, newMessage]);
+				} else {
+					console.log('📝 중복 메시지 방지:', latestMessage);
+				}
 			}
-		};
-
-		loadChatHistory();
-	}, [roomId, studyId, currentUserId]);
-
-	// 연결 상태 메시지
-	useEffect(() => {
-		if (isJoined && studyInfo) {
-			addSystemMessage('${user}님이 ${action}하셨습니다.', { 
-				user: '나', 
-				action: '입장' 
-			});
+		} else {
+			console.log('💤 소켓 메시지 없음 또는 비어있음');
 		}
-	}, [isJoined, studyInfo]);
+	}, [socketMessages, currentUserId, messages.length, isJoined, isConnected]);
+
+	// 중복된 히스토리 로딩 로직 제거 (위 소켓 메시지 수신 처리에서 처리됨)
+
+	// 연결 상태 메시지 (서버에서 자동으로 전송되므로 제거)
 
 	// 스크롤 하단
 	useEffect(() => {

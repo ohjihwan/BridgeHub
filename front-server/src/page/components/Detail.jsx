@@ -27,7 +27,24 @@ const Detail = ({ room, isClosing, onClose }) => {
 	// JWT 토큰에서 사용자 정보 추출
 	const extractUserFromToken = (token) => {
 		try {
-			const payload = JSON.parse(atob(token.split('.')[1]));
+			if (!token) {
+				console.warn('토큰이 없습니다');
+				return null;
+			}
+
+			const parts = token.split('.');
+			if (parts.length !== 3) {
+				console.warn('잘못된 JWT 토큰 형식입니다');
+				return null;
+			}
+
+			// Base64 URL-safe 디코딩을 위한 패딩 추가
+			let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+			while (base64.length % 4) {
+				base64 += '=';
+			}
+
+			const payload = JSON.parse(atob(base64));
 			return {
 				userId: payload.userId || payload.username,
 				username: payload.username,
@@ -44,9 +61,16 @@ const Detail = ({ room, isClosing, onClose }) => {
 	const handleJoinStudy = async () => {
 		// 현재 사용자 정보 확인
 		const token = localStorage.getItem('token');
+		if (!token) {
+			alert('로그인이 필요합니다.');
+			navigate('/login');
+			return;
+		}
+
 		const userInfo = extractUserFromToken(token);
-		
 		if (!userInfo) {
+			alert('사용자 인증에 실패했습니다. 다시 로그인해주세요.');
+			navigate('/login');
 			return;
 		}
 		
@@ -87,16 +111,34 @@ const Detail = ({ room, isClosing, onClose }) => {
 							} 
 						} 
 					});
+				} else if (myMember && myMember.status === 'WAITING') {
+					// 이미 참여 신청한 상태
+					alert('이미 참여 신청을 하셨습니다. 방장의 승인을 기다려주세요.');
 				} else {
-					// 신규 사용자거나 대기 중이면 참여 신청
-					await fetch(`/api/studies/${room.studyRoomId || room.id}/join`, {
+					// 신규 사용자 - 참여 신청
+					const joinResponse = await fetch(`/api/studies/${room.studyRoomId || room.id}/join`, {
 						method: 'POST',
-						headers: { 'Authorization': `Bearer ${token}` }
+						headers: { 
+							'Authorization': `Bearer ${token}`,
+							'Content-Type': 'application/json'
+						}
 					});
+					
+					const joinResult = await joinResponse.json();
+					
+					if (joinResult.status === 'success') {
+						alert('참여 신청이 완료되었습니다. 방장의 승인을 기다려주세요.');
+						onClose(); // 팝업 닫기
+					} else {
+						alert(joinResult.message || '참여 신청에 실패했습니다.');
+					}
 				}
+			} else {
+				alert('스터디 정보를 가져오는데 실패했습니다.');
 			}
 		} catch (error) {
 			console.error('참여 처리 실패:', error);
+			alert('참여 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
 		}
 	};
 
