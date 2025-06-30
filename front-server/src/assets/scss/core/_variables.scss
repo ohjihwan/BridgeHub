@@ -1,7 +1,5 @@
-@use 'sass:color';
-
-$color-primary: #226fb8;
-$color-secondary: color.adjust($color-primary, $lightness: 10%);
+$color-primary: #007fff;
+$color-secondary: #00bfff;
 
 $bg-root: #fff;
 
@@ -26,6 +24,6 @@ $gray: #f1f1f1;
 $red: #a30b00;
 $disabled : #e6e6e6;
 $neutral :#e6dcdc;
-$navy: #314158;
+$navy: #033495;
 $black: #111;
 $green: #00ac47;

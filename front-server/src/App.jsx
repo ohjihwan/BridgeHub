@@ -10,12 +10,12 @@ import List from '@page/list'
 import Search from '@page/Search'
 
 function App() {
-	const [showIntro, setShowIntro] = useState(false);
+	const [showIntro, setShowIntro] = useState(true);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setShowIntro(false);
-		}, 5000);
+		}, 3000);
 		return () => clearTimeout(timer);
 	}, []);
 

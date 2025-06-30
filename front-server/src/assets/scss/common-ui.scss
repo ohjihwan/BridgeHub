@@ -610,7 +610,7 @@ legend,
 	width:remx(230);
 	height:remx(70);
 	margin-left:remx(70);
-	background:url('@ico/logo-text.png') no-repeat remx(-75) 50% / auto 100%;
+	background:url('@ico/logo-text.png') no-repeat remx(-90) 50% / auto 100%;
 	
 	&.--showAnimation {
 		width:remx(0);
@@ -1927,7 +1927,7 @@ legend,
 		margin:0 remx(24) 0 0;
 		padding:remx(12) remx(14);
 		border-radius:remx(15) 0 remx(15) remx(15);
-		background-color:$color-secondary;
+		background-color:$color-primary;
 		color:#fff;
 		font-size:remx(15);
 		text-align:right;
@@ -2034,7 +2034,7 @@ legend,
 
 	&__report {
 		position:absolute;
-		right:remx(35);
+		left:remx(10);
 		bottom:remx(22);
 		width:remx(18);
 		height:remx(18);
