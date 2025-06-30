@@ -6,8 +6,8 @@ const config = {
       origin: [
         "http://localhost:7000",
         "http://localhost:7700", 
-        "https://thebridgehub.org",
         "https://bridgehub.asia",
+        "https://www.bridgehub.asia",
         process.env.REACT_APP_API_URL
       ].filter(Boolean),
       methods: ["GET", "POST"],

@@ -34,7 +34,26 @@ let worker, routerMS;
 async function initMediasoup() {
   try {
     logger.log("Initializing mediasoup worker...");
-    worker = await mediasoup.createWorker(config.mediasoup.worker);
+    
+    // 환경 변수 확인
+    const rtcMinPort = parseInt(process.env.MEDIASOUP_MIN_PORT) || 40000;
+    const rtcMaxPort = parseInt(process.env.MEDIASOUP_MAX_PORT) || 49999;
+    
+    logger.log(`Mediasoup ports: ${rtcMinPort}-${rtcMaxPort}`);
+    
+    worker = await mediasoup.createWorker({
+      rtcMinPort: rtcMinPort,
+      rtcMaxPort: rtcMaxPort,
+      logLevel: process.env.MEDIASOUP_LOG_LEVEL || "warn",
+      logTags: [
+        "info",
+        "ice",
+        "dtls",
+        "rtp",
+        "srtp",
+        "rtcp",
+      ],
+    });
     
     worker.on('died', () => {
       logger.error('mediasoup worker died, exiting in 2 seconds...');
@@ -48,8 +67,20 @@ async function initMediasoup() {
     
     logger.log("Mediasoup initialized successfully");
   } catch (error) {
-    logger.error("Failed to initialize mediasoup:", error);
-    process.exit(1);
+    logger.error("Failed to initialize mediasoup:", {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      errno: error.errno
+    });
+    
+    // mediasoup 초기화 실패 시에도 서버는 계속 실행 (WebRTC 기능만 비활성화)
+    logger.warn("Mediasoup initialization failed. WebRTC features will be disabled.");
+    logger.warn("Server will continue running for chat functionality only.");
+    
+    // worker와 router를 null로 설정
+    worker = null;
+    routerMS = null;
   }
 }
 
@@ -59,8 +90,15 @@ io.on("connection", (socket) => {
   const { user } = socket;
   logger.log(`User connected: ${user?.username || socket.id} (authenticated: ${user?.authenticated || false})`);
 
-  // WebRTC Transport 생성
+  // WebRTC Transport 생성 (mediasoup이 초기화된 경우에만)
   socket.on("create-send-transport", async (callback) => {
+    if (!routerMS) {
+      logger.warn("WebRTC transport creation requested but mediasoup is not initialized");
+      if (callback) callback({ error: "WebRTC features are currently unavailable" });
+      else socket.emit("transport-error", { error: "WebRTC features are currently unavailable" });
+      return;
+    }
+
     try {
       const transport = await routerMS.createWebRtcTransport({
         ...config.mediasoup.webRtcTransport,
@@ -104,6 +142,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("create-recv-transport", async (callback) => {
+    if (!routerMS) {
+      logger.warn("WebRTC transport creation requested but mediasoup is not initialized");
+      if (callback) callback({ error: "WebRTC features are currently unavailable" });
+      else socket.emit("transport-error", { error: "WebRTC features are currently unavailable" });
+      return;
+    }
+
     try {
       const transport = await routerMS.createWebRtcTransport({
         ...config.mediasoup.webRtcTransport,

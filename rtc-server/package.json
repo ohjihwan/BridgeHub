@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.mjs",
-    "dev": "nodemon --watch src src/server.mjs",
+    "dev": "nodemon src src/server.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "echo \"Linting not configured\" && exit 0"
   },
