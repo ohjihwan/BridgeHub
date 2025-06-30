@@ -724,7 +724,7 @@ function Chat() {
 			socketConnected: socketService?.socket?.connected
 		});
 
-		if (!isConnected || !isOwner) {
+		if (!isConnected || !isOwner || !socketService?.socket) {
 			console.log('⚠️ 참가 신청 알림 리스너 설정 안함:', { isConnected, isOwner });
 			return;
 		}
@@ -735,7 +735,7 @@ function Chat() {
 			setJoinRequests(prev => {
 				const newRequests = [...prev, {
 					...notification,
-					id: Date.now() + Math.random(), // 고유 ID
+					id: Date.now() + Math.random(),
 					timestamp: new Date().toISOString()
 				}];
 				console.log('📋 업데이트된 참가 신청 목록:', newRequests);
@@ -746,26 +746,28 @@ function Chat() {
 			addSystemMessage(`${notification.applicantName}님이 스터디 참가를 신청했습니다.`, {});
 		};
 
-		// 소켓 이벤트 리스너 등록
-		if (socketService?.socket) {
-			console.log('✅ 참가 신청 알림 리스너 등록 중...');
-			socketService.socket.on('join-request-notification', handleJoinRequest);
-			
-			// 테스트용 모든 이벤트 로깅
-			socketService.socket.onAny((eventName, ...args) => {
-				if (eventName.includes('join')) {
-					console.log('🔍 소켓 이벤트 수신:', eventName, args);
+		console.log('✅ 참가 신청 알림 리스너 등록 중...');
+		socketService.socket.on('join-request-notification', handleJoinRequest);
+		
+		// 테스트용 모든 이벤트 로깅
+		socketService.socket.onAny((eventName, ...args) => {
+			if (eventName.includes('join')) {
+				console.log('🔍 소켓 이벤트 수신:', eventName, args);
+			}
+		});
+		
+		// 🔥 안전한 cleanup 함수
+		return () => {
+			console.log('🧹 참가 신청 알림 리스너 해제');
+			try {
+				if (socketService?.socket && typeof socketService.socket.off === 'function') {
+					socketService.socket.off('join-request-notification', handleJoinRequest);
 				}
-			});
-			
-			return () => {
-				console.log('🧹 참가 신청 알림 리스너 해제');
-				socketService.socket.off('join-request-notification', handleJoinRequest);
-			};
-		} else {
-			console.warn('❌ 소켓 서비스가 없어서 알림 리스너를 등록할 수 없습니다.');
-		}
-	}, [isConnected, isOwner, addSystemMessage, socketService]);
+			} catch (error) {
+				console.error('리스너 해제 중 에러 (무시):', error);
+			}
+		};
+	}, [isConnected, isOwner]);
 
 	// 스크롤 하단
 	useEffect(() => {
@@ -850,10 +852,21 @@ function Chat() {
 				}}
 				onShowAttachments={handleShowAttachments}
 				onBeforeBack={() => {
-					if (socket) {
-						socket.off();
-						socket.disconnect();
-					}
+					console.log('뒤로가기 시작');
+					
+					// 소켓 정리 시도 (실패해도 무시)
+					Promise.resolve().then(() => {
+						if (socketService?.socket?.connected) {
+							socketService.socket.disconnect();
+						}
+					}).catch(() => {
+						// 에러 무시
+					}).finally(() => {
+						// 무조건 페이지 이동
+						setTimeout(() => {
+							navigate(-1);
+						}, 0);
+					});
 				}}
 			/>
 
