@@ -12,7 +12,7 @@
 
     <insert id="insertChatRoom" parameterType="com.koreait.apiserver.entity.ChatRoom" useGeneratedKeys="true" keyProperty="roomId">
         INSERT INTO ChatRoom (room_name, created_at, max_members, is_active)
-        VALUES (#{roomName}, #{createdAt}, #{maxMembers}, #{isActive})
+        VALUES (#{roomName}, NOW(), #{maxMembers}, #{isActive})
     </insert>
 
     <select id="findById" resultMap="ChatRoomResultMap">
@@ -44,7 +44,7 @@
 
     <select id="findByBoardId" resultMap="ChatRoomResultMap">
         SELECT c.* FROM ChatRoom c
-        INNER JOIN study_rooms s ON c.room_id = s.room_id
+        INNER JOIN studyroom s ON c.room_id = s.room_id
         WHERE s.study_room_id = #{boardId}
     </select>
 
