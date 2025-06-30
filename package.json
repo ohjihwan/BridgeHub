@@ -1,19 +1,41 @@
 {
   "name": "bridgehub",
+  "version": "1.0.0",
+  "description": "BridgeHub - 스터디 매칭 플랫폼",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "workspaces": [
+    "admin-server",
+    "socket-server",
+    "front-server"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "npx concurrently \"npm run start:admin\" \"npm run start:socket\" \"npm run start:front\"",
+    "start:admin": "cd admin-server && npm start",
+    "start:socket": "cd socket-server && npm start",
+    "start:front": "cd front-server && npm run dev",
+    "dev": "npx concurrently \"npm run dev:admin\" \"npm run dev:socket\" \"npm run dev:front\"",
+    "dev:admin": "cd admin-server && npm run dev",
+    "dev:socket": "cd socket-server && npm run dev",
+    "dev:front": "cd front-server && npm run dev",
+    "install:all": "npm install && npm run install:admin && npm run install:socket && npm run install:front",
+    "install:admin": "cd admin-server && npm install",
+    "install:socket": "cd socket-server && npm install",
+    "install:front": "cd front-server && npm install",
+    "build": "cd front-server && npm run build",
+    "test": "npx concurrently \"npm run test:admin\" \"npm run test:socket\" \"npm run test:front\"",
+    "test:admin": "cd admin-server && npm test",
+    "test:socket": "cd socket-server && npm test",
+    "test:front": "cd front-server && npm test",
+    "lint": "npx concurrently \"npm run lint:admin\" \"npm run lint:socket\" \"npm run lint:front\"",
+    "lint:admin": "cd admin-server && npm run lint",
+    "lint:socket": "cd socket-server && npm run lint",
+    "lint:front": "cd front-server && npm run lint",
+    "clean": "npx rimraf node_modules && npx rimraf admin-server/node_modules && npx rimraf socket-server/node_modules && npx rimraf front-server/node_modules",
+    "clean:install": "npm run clean && npm run install:all"
   },
-  "dependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.2"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@types/react": "^19.1.2",
@@ -25,5 +47,37 @@
     "globals": "^16.0.0",
     "sass": "^1.89.1",
     "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-native-webrtc": "^124.0.5",
+    "react-router-dom": "^7.6.2",
+    "socket.io-client": "^4.8.1",
+    "swiper": "^11.2.8"
+  },
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ohjihwan/BridgeHub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ohjihwan/BridgeHub/issues"
+  },
+  "homepage": "https://github.com/ohjihwan/BridgeHub#readme",
+  "dotenv": "^16.4.1",
+  "swiper": "^11.2.8",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
