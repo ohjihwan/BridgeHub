@@ -10,7 +10,7 @@ import List from '@page/list'
 import Search from '@page/Search'
 
 function App() {
-	const [showIntro, setShowIntro] = useState(true);
+	const [showIntro, setShowIntro] = useState(false);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
