@@ -5,7 +5,7 @@ import Header from '@common/Header';
 import PreviewBoard from '@components/PreviewBoard';
 import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
-import { userClient, studyClient } from '@js/common-ui';
+import { studyClient } from '@js/common-ui';
 import axios from 'axios';
 
 const Home = () => {

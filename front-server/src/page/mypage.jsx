@@ -19,7 +19,7 @@ const MyPage = () => {
 		region: '',
 		district: '',
 		timeZone: '',
-		memo: ''
+		description: ''
 	});
 	const [editData, setEditData] = useState({
 		profileImg: '',
@@ -30,16 +30,10 @@ const MyPage = () => {
 		region: '',
 		district: '',
 		timeZone: '',
-		memo: '',
+		description: '',
 		password: '',
 		passwordConfirm: ''
 	});
-	const locationOptions = {
-		'지역무관': [],
-		'서울': ['강남구', '서초구', '송파구', '강동구', '마포구'],
-		'부산': ['해운대구', '수영구', '부산진구', '동래구', '남구'],
-		'대구': ['중구', '수성구', '달서구', '동구', '북구']
-	};
 	
 	const handleEditProfile = async () => {
 		if (isEditing) {
@@ -58,14 +52,14 @@ const MyPage = () => {
 					region: editData.region,
 					district: editData.district,
 					time: editData.timeZone,
-					memo: editData.memo
+					description: editData.description
 				};
 
 				console.log('=== 전송할 데이터 ===');
-				console.log('memo 값:', editData.memo);
+				console.log('description 값:', editData.description);
 				console.log('전체 requestBody:', requestBody);
-				console.log('memo가 포함되었나?', 'memo' in requestBody);
-				console.log('memo 값이 있나?', !!requestBody.memo);
+				console.log('description가 포함되었나?', 'description' in requestBody);
+				console.log('description 값이 있나?', !!requestBody.description);
 
 				// 비밀번호 입력이 있으면 함께 전송
 				if (editData.password) {
@@ -114,7 +108,7 @@ const MyPage = () => {
 				region: profileData.region || '',
 				district: profileData.district || '',
 				timeZone: profileData.timeZone || '',
-				memo: profileData.memo || '',
+				description: profileData.description || '',
 				profileImg: profileData.profileImg || ''
 			});
 			setIsEditing(true);
@@ -159,7 +153,7 @@ const MyPage = () => {
 						region: res.data.data.region || '',
 						district: res.data.data.district || '',
 						timeZone: res.data.data.time || '',
-						memo: res.data.data.memo || ''
+						description: res.data.data.description || ''
 					};
 					setProfileData(newProfileData);
 					// editData도 초기값으로 설정
@@ -334,7 +328,7 @@ const MyPage = () => {
 							<div className="mypage-profile__item">
 								<label htmlFor="memo" className="label">메모</label>
 								<div className="field __textarea">
-									<textarea className="textarea" id="memo" name="memo" value={editData.memo || ''} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
+									<textarea className="textarea" id="memo" name="description" value={editData.description || ''} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
 								</div>
 							</div>
 						</>
@@ -365,7 +359,7 @@ const MyPage = () => {
 							</div>
 							<div className="mypage-profile__item mypage-profile__data mypage-profile__data--textarea">
 								<span className="label">메모</span>
-								<span className="value">{profileData.memo}</span>
+								<span className="value">{profileData.description}</span>
 							</div>
 						</>
 					)}
