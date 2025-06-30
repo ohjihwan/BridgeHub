@@ -77,4 +77,12 @@
         SELECT COUNT(*) FROM Report
     </select>
 
+    <select id="findRecentReports" resultType="com.koreait.apiserver.dto.ReportDTO">
+        SELECT * FROM report ORDER BY created_at DESC LIMIT #{limit}
+    </select>
+
+    <select id="countByReportType" resultType="map">
+        SELECT reason, COUNT(*) as value FROM report GROUP BY reason
+    </select>
+
 </mapper> 

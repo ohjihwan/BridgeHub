@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 @Slf4j
 @Configuration
-@EnableScheduling
+// @EnableScheduling  // 임시 비활성화
 @RequiredArgsConstructor
 public class SchedulerConfig {
 
@@ -19,7 +19,7 @@ public class SchedulerConfig {
     @Value("${chat.log.cleanup.days:1}")
     private int cleanupDays;
 
-    @Scheduled(cron = "${chat.cleanup.cron:0 */1 * * * ?}")
+    @Scheduled(cron = "${chat.cleanup.cron:0 0 2 * * ?}")
     public void cleanupOldTempMessages() {
         try {
             log.info("Starting cleanup of old temp messages - {} days ago", cleanupDays);

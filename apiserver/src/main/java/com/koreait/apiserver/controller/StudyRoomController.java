@@ -57,14 +57,45 @@ public class StudyRoomController {
     // 스터디룸 생성
     @PostMapping
     public ResponseEntity<ApiResponse<StudyRoomDTO>> createStudyRoom(@RequestBody StudyRoomDTO studyRoomDTO, 
-                                                       @RequestHeader("Authorization") String authHeader) {
+                                                       @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        log.info("=== 스터디룸 생성 API 시작 ===");
         try {
+            // 요청 데이터 검증
+            if (studyRoomDTO == null) {
+                log.error("StudyRoomDTO가 null입니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("INVALID_REQUEST_DATA"));
+            }
+            
             log.info("스터디룸 생성 요청: {}", studyRoomDTO.getTitle());
+            log.info("요청 데이터: {}", studyRoomDTO);
+            
+            // 필수 필드 검증
+            if (studyRoomDTO.getTitle() == null || studyRoomDTO.getTitle().trim().isEmpty()) {
+                log.error("제목이 없습니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("TITLE_REQUIRED"));
+            }
+            if (studyRoomDTO.getDescription() == null || studyRoomDTO.getDescription().trim().isEmpty()) {
+                log.error("설명이 없습니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("DESCRIPTION_REQUIRED"));
+            }
+            
+            // Authorization 헤더 확인
+            if (authHeader == null || authHeader.trim().isEmpty()) {
+                log.error("Authorization 헤더가 없습니다");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("AUTH_REQUIRED"));
+            }
+            
             // JWT 토큰에서 사용자 ID 추출
             String token = authHeader.replace("Bearer ", "");
+            log.info("토큰: {}", token);
             Integer memberId = jwtService.extractMemberId(token);
             
             if (memberId == null) {
+                log.error("토큰에서 사용자 ID 추출 실패");
                 return ResponseEntity.badRequest()
                     .body(ApiResponse.error("AUTH_ERROR"));
             }
@@ -72,11 +103,13 @@ public class StudyRoomController {
             // 실제 로그인한 사용자의 ID를 bossId로 설정
             studyRoomDTO.setBossId(memberId);
             log.info("스터디룸 생성자 ID 설정: {}", memberId);
+            log.info("최종 DTO: {}", studyRoomDTO);
             
             StudyRoomDTO createdStudyRoom = studyRoomService.createStudyRoom(studyRoomDTO);
+            log.info("스터디룸 생성 성공: {}", createdStudyRoom);
             return ResponseEntity.ok(ApiResponse.success(createdStudyRoom));
         } catch (Exception e) {
-            log.error("스터디룸 생성 실패", e);
+            log.error("스터디룸 생성 실패 - 상세 에러: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("STUDY_CREATE_ERROR"));
         }
@@ -127,10 +160,30 @@ public class StudyRoomController {
             
             studyRoomService.joinStudyRoom(studyRoomId, memberId);
             return ResponseEntity.ok(ApiResponse.success());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("스터디 참가 신청 실패: studyRoomId={}", studyRoomId, e);
+            
+            // 구체적인 에러 메시지를 클라이언트에 전달
+            String errorMessage = e.getMessage();
+            String errorCode = "JOIN_ERROR";
+            
+            // 특정 에러에 따른 에러 코드 분류
+            if (errorMessage.contains("이미 참가 신청")) {
+                errorCode = "ALREADY_APPLIED";
+            } else if (errorMessage.contains("이미 참가 중")) {
+                errorCode = "ALREADY_MEMBER";
+            } else if (errorMessage.contains("정원이 가득")) {
+                errorCode = "ROOM_FULL";
+            } else if (errorMessage.contains("거절된 스터디")) {
+                errorCode = "PREVIOUSLY_REJECTED";
+            }
+            
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error("JOIN_ERROR"));
+                .body(ApiResponse.error(errorMessage));
+        } catch (Exception e) {
+            log.error("스터디 참가 신청 시스템 오류: studyRoomId={}", studyRoomId, e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("SYSTEM_ERROR", "시스템 오류가 발생했습니다."));
         }
     }
     

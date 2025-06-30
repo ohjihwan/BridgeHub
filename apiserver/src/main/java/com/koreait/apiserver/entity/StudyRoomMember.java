@@ -21,6 +21,7 @@ public class StudyRoomMember {
     private String memberNickname;
     private String memberEmail;
     private String memberProfileImage;
+    private String memberDescription;  // 멤버 자기소개
     
     public enum MemberRole {
         BOSS, MEMBER

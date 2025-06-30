@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import thumbnailList from '@json/Thumbnail';
 import { customAlert } from '@/assets/js/common-ui';
+import studyService from '@dev/services/studyService';
 
 const CreateStudy = ({ onClose }) => {
 	const navigate = useNavigate();
@@ -79,15 +80,31 @@ const CreateStudy = ({ onClose }) => {
 			return;
 		}
 
-		const studyInfo = {
-			title, department, major, city, district,
-			capacity, time, description, selectedThumbnail
-		};
+		try {
+			// 반드시 선언 먼저
+			const studyData = {
+				title: title.trim(),
+				education: department,
+				department: major,
+				region: city,
+				district: district,
+				capacity: parseInt(capacity),
+				time: time,
+				description: description.trim(),
+				thumbnail: selectedThumbnail.split('/').pop()
+			};
 
-		// 정상 콘솔 출력
-		console.log(studyInfo);
+			console.log('스터디룸 생성 요청:', studyData); // 선언 이후 사용
 
-		navigate('/chat', { state: studyInfo });
+			const createdStudy = await studyService.createStudyRoom(studyData);
+			console.log('스터디룸 생성 성공:', createdStudy);
+
+			await customAlert('스터디룸이 성공적으로 생성되었습니다!');
+			navigate('/chat', { state: { studyRoom: createdStudy, isNewStudy: true } });
+
+		} catch (error) {
+			console.error('스터디룸 생성 실패:', error);
+		}
 	};
 	/* // 콘솔 */
 

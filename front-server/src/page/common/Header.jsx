@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = () => {} }) => {
+const Header = ({ isEditing = false, showSearch = true, title = '', onSearch = () => {}, onShowAttachments = () => {} }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -24,8 +24,8 @@ const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = 
 
 	const handleLogout = () => {
 		customConfirm('로그아웃 하시겠습니까?', () => {
+			localStorage.removeItem('token');
 			setMenuOpen(false);
-			customAlert('로그아웃 되었습니다');
 			navigate('/login');
 		});
 	};
@@ -75,7 +75,7 @@ const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = 
 			</div>
 
 			<h2 className="header__title">
-				{( location.pathname === '/chat' && title || location.pathname === '/search' && title )}
+				{( location.pathname === '/chat' && title || location.pathname === '/search' && title || location.pathname === '/board' && title )}
 			</h2>
 			
 			<div className="header__right" ref={menuRef}>
@@ -99,6 +99,7 @@ const Header = ({ isEditing = false, showSearch = true, title = '' , onSearch = 
 						</li>
 						{location.pathname === '/chat' && (
 							<li className="user-menu__item">
+								<a href="/exit" onClick={(e) => { e.preventDefault(); onShowAttachments(); }}>파일 모아보기</a>
 								<a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>방신고하기</a>
 								<a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>탈퇴하기</a>
 							</li>

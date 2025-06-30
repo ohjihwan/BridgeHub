@@ -1,22 +1,24 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import CustomAlert from '@page/common/customAlert';
+import CustomAlert from '@common/customAlert';
 import axios from 'axios';
 
 // ----------- 커스텀 알럿 관련 -----------
 
-let alertRoot = null;
 let root = null;
-let confirmRoot = null;
 
 export function customAlert(message) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
 		if (!root) {
 			root = createRoot(alertRoot);
 		}
 		const handleClose = () => {
-			root.render(null); 
+			root.render(null);
 			resolve();
 		};
 		root.render(
@@ -27,30 +29,46 @@ export function customAlert(message) {
 
 export function customConfirm(message, onConfirm) {
 	return new Promise((resolve) => {
-		const rootElement = document.getElementById('confirm-root');
-		if (!confirmRoot) {
-			confirmRoot = createRoot(rootElement);
+		const alertRoot = document.getElementById('alert-root');
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
 		}
-		const handleClose = (result) => {
-			confirmRoot.render(null);
-			if (result) onConfirm?.();
-			resolve(result);
+
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
+
+		const handleClose = () => {
+			root.render(null);
+			resolve(false);
 		};
-		confirmRoot.render(
-			<CustomConfirm message={message} onClose={handleClose} />
+
+		const handleConfirm = () => {
+			root.render(null);
+			onConfirm?.();
+			resolve(true);
+		};
+
+		root.render(
+			<CustomAlert message={message} onClose={handleClose} onConfirm={handleConfirm} />
 		);
 	});
 }
 
-
 export function customPrompt(message, placeholder = '', defaultValue = '', onSubmit = null) {
 	return new Promise((resolve) => {
 		const alertRoot = document.getElementById('alert-root');
-		alertRoot.innerHTML = '';
-		const root = createRoot(alertRoot);
+		if (!alertRoot) {
+			console.error('#alert-root 요소를 찾을 수 없습니다.');
+			return;
+		}
+		if (!root) {
+			root = createRoot(alertRoot);
+		}
 
 		const handleClose = () => {
-			root.unmount();
+			root.render(null);
 			resolve(null);
 		};
 
@@ -58,7 +76,7 @@ export function customPrompt(message, placeholder = '', defaultValue = '', onSub
 			if (typeof onSubmit === 'function') {
 				onSubmit(value);
 			}
-			root.unmount();
+			root.render(null);
 			resolve(value);
 		};
 
@@ -95,17 +113,30 @@ window.hideLoading = hideLoading;
 // ----------- axios 다중 클라이언트 -----------
 
 export const authClient = axios.create({
-	baseURL: 'http://localhost:7100/api/auth',
+	baseURL: '/api/auth',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
 export const userClient = axios.create({
-	baseURL: 'http://localhost:7100',
+	baseURL: '/',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
+export const studyClient = axios.create({
+	baseURL: '/api/studies',
+	timeout: 10000,
+	headers: { 'Content-Type': 'application/json' },
+});
+export const boardClient = axios.create({
+    baseURL: '/api/board',  // 상대 경로 - 프록시 사용!
+    timeout: 10000,
+    headers: { 'Content-Type': 'application/json' },
+});
 
-[authClient, userClient].forEach(client => {
+export const getAccessToken = () => {
+	return localStorage.getItem('token');
+};
+[authClient, userClient, studyClient, boardClient].forEach(client => {
 	client.interceptors.request.use(config => {
 		window.showLoading?.();
 		return config;
@@ -137,3 +168,41 @@ export const getUsernameFromToken = () => {
 		return null;
 	}
 };
+
+// ----------- 기타 : [휴대폰번호 정규식 입력] -----------
+export const formatPhone = (value) => {
+	const onlyNumber = value.replace(/\D/g, '');
+	if (onlyNumber.length < 4) return onlyNumber;
+	if (onlyNumber.length < 8) return `${onlyNumber.slice(0, 3)}-${onlyNumber.slice(3)}`;
+	return `${onlyNumber.slice(0, 3)}-${onlyNumber.slice(3, 7)}-${onlyNumber.slice(7, 11)}`;
+};
+
+export const cleanPhone = (value) => {
+	return value.replace(/-/g, '');
+};
+
+// ----------- 게시판 관련 -----------
+export const createPost = async (post) => {
+	const token = localStorage.getItem("token");
+	const res = await boardClient.post('', post, {
+		headers: { Authorization: `Bearer ${token}` },
+		withCredentials: true,
+	});
+	return res.data;
+};
+
+export const getPosts = async (page = 0, size = 10, categoryId = 1, search = "", sort = "recent") => {
+	const token = localStorage.getItem("token")
+	const params = new URLSearchParams()
+	params.append("categoryId", categoryId)
+	if (search) params.append("search", search)
+	if (sort) params.append("sort", sort)
+	params.append("page", page)
+	params.append("size", size)
+
+	const res = await boardClient.get(`?${params.toString()}`, {
+		headers: { Authorization: `Bearer ${token}` },
+		withCredentials: true,
+	})
+	return res.data.data.boards
+}

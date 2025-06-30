@@ -25,14 +25,15 @@ public class File {
     private Integer messageId;  // file_type이 MESSAGE일 때
     private Integer memberId;   // file_type이 PROFILE일 때
     private Integer studyRoomId; // file_type이 STUDY_*일 때
+    private Integer boardId;    // file_type이 BOARD_ATTACHMENT일 때
     
-    // 기존 필드들과의 호환성을 위한 getter/setter
-    public Long getBoardId() {
-        return this.studyRoomId != null ? this.studyRoomId.longValue() : null;
+    // boardId getter/setter
+    public Integer getBoardId() {
+        return this.boardId;
     }
     
-    public void setBoardId(Long boardId) {
-        this.studyRoomId = boardId != null ? boardId.intValue() : null;
+    public void setBoardId(Integer boardId) {
+        this.boardId = boardId;
     }
     
     public String getOriginalName() {

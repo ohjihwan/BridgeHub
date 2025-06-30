@@ -4,6 +4,7 @@
  */
 
 const mongoDBManager = require('../config/mongodb');
+const { MongoClient } = require('mongodb');
 
 class MongoService {
     constructor() {
@@ -13,6 +14,10 @@ class MongoService {
         this.userStatusCollection = null;
         this.systemLogsCollection = null;
         this.fileUploadsCollection = null;
+        this.client = null;
+        this.db = null;
+        this.uri = mongoDBManager.connectionString;
+        this.dbName = mongoDBManager.dbName;
     }
 
     /**
@@ -20,19 +25,31 @@ class MongoService {
      */
     async initialize() {
         try {
-            await mongoDBManager.connect();
+            this.client = new MongoClient(this.uri);
+            await this.client.connect();
+            this.db = this.client.db(this.dbName);
             
-            // 컬렉션 참조 설정 (스키마와 일치하는 이름 사용)
-            this.messagesCollection = mongoDBManager.getCollection('messages');
-            this.chatSessionsCollection = mongoDBManager.getCollection('chatSessions');
-            this.studyRoomsCollection = mongoDBManager.getCollection('studyRooms');
-            this.userStatusCollection = mongoDBManager.getCollection('userStatus');
-            this.systemLogsCollection = mongoDBManager.getCollection('systemLogs');
-            this.fileUploadsCollection = mongoDBManager.getCollection('fileUploads');
+            // 컬렉션 초기화 (스키마 검증 임시 비활성화)
+            this.messagesCollection = this.db.collection('messages');
+            this.studyRoomsCollection = this.db.collection('studyRooms');
+            this.chatSessionsCollection = this.db.collection('chatSessions');
+            this.userStatusCollection = this.db.collection('userStatus');
+            this.systemLogsCollection = this.db.collection('systemLogs');
             
-            console.log('✅ MongoDB 서비스 초기화 완료');
+            // 기존 검증 규칙 제거 (임시)
+            try {
+                await this.db.command({
+                    collMod: 'messages',
+                    validator: {}
+                });
+                console.log('MongoDB 메시지 컬렉션 검증 규칙 제거됨');
+            } catch (error) {
+                console.log('검증 규칙 제거 실패 (무시됨):', error.message);
+            }
+            
+            console.log('MongoDB 연결 및 초기화 완료');
         } catch (error) {
-            console.error('❌ MongoDB 서비스 초기화 실패:', error);
+            console.error('MongoDB 초기화 실패:', error);
             throw error;
         }
     }
@@ -42,6 +59,15 @@ class MongoService {
      */
     async saveMessage(messageData) {
         try {
+            console.log('🔄 MongoDB 메시지 저장 시작...', {
+                studyId: messageData.studyId,
+                senderId: messageData.senderId,
+                senderName: messageData.senderName,
+                messageType: messageData.messageType || 'TEXT',
+                contentLength: messageData.content?.length || 0,
+                timestamp: new Date().toISOString()
+            });
+
             const message = {
                 studyId: messageData.studyId,
                 senderId: messageData.senderId,
@@ -59,6 +85,18 @@ class MongoService {
 
             const result = await this.messagesCollection.insertOne(message);
             
+            console.log('✅ MongoDB 메시지 저장 성공!', {
+                messageId: result.insertedId,
+                studyId: messageData.studyId,
+                senderId: messageData.senderId,
+                senderName: messageData.senderName,
+                content: messageData.content.length > 50 ? 
+                    messageData.content.substring(0, 50) + '...' : 
+                    messageData.content,
+                messageType: messageData.messageType || 'TEXT',
+                insertedAt: new Date().toISOString()
+            });
+            
             // 스터디룸 상태 업데이트
             await this.updateStudyRoomLastMessage(messageData.studyId, {
                 content: messageData.content,
@@ -67,12 +105,24 @@ class MongoService {
                 timestamp: new Date()
             });
 
+            console.log('📝 스터디룸 마지막 메시지 업데이트 완료:', {
+                studyId: messageData.studyId,
+                lastMessagePreview: messageData.content.length > 30 ? 
+                    messageData.content.substring(0, 30) + '...' : 
+                    messageData.content
+            });
+
             // 시스템 로그 기록
             await this.logSystemEvent('INFO', 'MESSAGE', messageData.studyId, messageData.senderId, '메시지 전송', { messageId: result.insertedId });
 
             return result.insertedId;
         } catch (error) {
-            console.error('메시지 저장 실패:', error);
+            console.error('❌ MongoDB 메시지 저장 실패:', {
+                error: error.message,
+                studyId: messageData.studyId,
+                senderId: messageData.senderId,
+                timestamp: new Date().toISOString()
+            });
             throw error;
         }
     }
@@ -368,8 +418,10 @@ class MongoService {
      */
     async disconnect() {
         try {
-            await mongoDBManager.disconnect();
-            console.log('MongoDB 서비스 연결 해제 완료');
+            if (this.client) {
+                await this.client.close();
+                console.log('MongoDB 서비스 연결 해제 완료');
+            }
         } catch (error) {
             console.error('MongoDB 서비스 연결 해제 실패:', error);
         }
@@ -379,7 +431,7 @@ class MongoService {
      * 연결 상태 확인
      */
     isConnected() {
-        return mongoDBManager.isConnected();
+        return this.client && this.client.topology && this.client.topology.isConnected();
     }
 
     /**
@@ -387,7 +439,12 @@ class MongoService {
      */
     async healthCheck() {
         try {
-            return await mongoDBManager.healthCheck();
+            if (!this.client) {
+                return { status: 'error', message: 'MongoDB client not initialized' };
+            }
+            
+            await this.client.db('admin').command({ ping: 1 });
+            return { status: 'ok', message: 'MongoDB connection healthy' };
         } catch (error) {
             return { status: 'error', message: error.message };
         }

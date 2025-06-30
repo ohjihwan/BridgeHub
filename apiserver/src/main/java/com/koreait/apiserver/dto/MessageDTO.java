@@ -16,7 +16,6 @@ public class MessageDTO {
     
     // 추가 필드 (Socket Server에서 사용)
     private String senderNickname;
-    private String senderName;
     
     // 발신자 정보 (JOIN 결과)
     private String senderProfileImage;

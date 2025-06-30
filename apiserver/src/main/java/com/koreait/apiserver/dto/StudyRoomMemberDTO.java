@@ -15,15 +15,12 @@ public class StudyRoomMemberDTO {
     private LocalDateTime approvedAt;
     private Integer approvedBy;
     
-    // 멤버 정보
-    private String memberName;
+    // 멤버 정보 (이름 제거, 닉네임만 유지)
     private String memberNickname;
     private String memberEmail;
     private String memberProfileImage;
+    private String memberDescription;  // 멤버 자기소개
     
     // 스터디룸 정보
     private String studyRoomTitle;
-    
-    // 승인자 정보
-    private String approverName;
 } 

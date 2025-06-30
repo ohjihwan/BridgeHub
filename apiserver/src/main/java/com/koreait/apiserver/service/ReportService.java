@@ -4,6 +4,7 @@ import com.koreait.apiserver.dto.MessageDTO;
 import com.koreait.apiserver.dto.ReportDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ReportService {
     List<ReportDTO> getReportList();
@@ -21,4 +22,7 @@ public interface ReportService {
     List<ReportDTO> getReportsWithPaging(int page, int size);
     int getTotalReportsCount();
     ReportDTO resolveReport(Integer reportId, String penaltyType, String penalty, String adminNote);
+    
+    // 통계용
+    Map<String, Object> getReportStatistics();
 } 

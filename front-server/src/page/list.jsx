@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import Header from '@common/Header';
 import StudyRoomList from '@components/StudyRoomList';
+import ListSearch from '@components/ListSearch';
 import Detail from '@components/Detail';
-import roomData from '@json/Room.json';
+import axios from 'axios';
 
 const StudyRoomPage = () => {
 	const [searchKeyword, setSearchKeyword] = useState('');
@@ -11,17 +12,49 @@ const StudyRoomPage = () => {
 	const [showDetail, setShowDetail] = useState(false);
 	const [isClosing, setIsClosing] = useState(false);
 	const [showSearch, setShowSearch] = useState(false);
+	const [rooms, setRooms] = useState([]);
+	const [loading, setLoading] = useState(false);
+
+	// 실제 API에서 스터디룸 데이터 가져오기
+	useEffect(() => {
+		const fetchRooms = async () => {
+			setLoading(true);
+			try {
+				const response = await axios.get('/api/studies');
+				if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+					setRooms(response.data.data);
+				} else {
+					setRooms([]);
+				}
+			} catch (error) {
+				console.error('스터디룸 목록 조회 실패:', error);
+				setRooms([]);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchRooms();
+	}, []);
 
 	const filteredRooms = useMemo(() => 
-		roomData.filter((room) => 
+		rooms.filter((room) => 
 			room.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
 			room.region?.toLowerCase().includes(searchKeyword.toLowerCase())
-		), [searchKeyword]
+		), [rooms, searchKeyword]
 	);
-	const handleItemClick = (room) => {
-		setSelectedRoom(room);
-		setShowDetail(true);
-		setIsClosing(false);
+	const handleItemClick = async (room) => {
+		if (!room?.id) {
+			console.warn('잘못된 방 정보');
+			return;
+		}
+		try {
+			const res = await axios.get(`/api/studies/${room.id}`);
+			setSelectedRoom(res.data);
+			setShowDetail(true);
+		} catch (err) {
+			console.error(err);
+		}
 	};
 	const handleDetailClose = () => {
 		setIsClosing(true);
@@ -52,16 +85,16 @@ const StudyRoomPage = () => {
 			<Header showSearch={true} onSearch={() => setShowSearch(true)} />
 
 			{showSearch && (
-				<div className="search-room">
-					<div className="field">
-						<input type="text" className="text" name="name" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} placeholder="검색어 입력"/>
-					</div>
-					<button className="search-room__button" onClick={() => setShowSearch(false)} aria-label="검색 닫기"></button>
-				</div>
+				<ListSearch
+					value={searchKeyword}
+					onChange={(e) => setSearchKeyword(e.target.value)}
+					onClose={() => setShowSearch(false)}
+				/>
 			)}
 
 			<div className="studyroom-list__content">
 				<StudyRoomList
+					/* StudyRoomList rooms={rooms || []} */
 					rooms={filteredRooms.slice(0, visibleCount)}
 					onItemClick={handleItemClick}
 				/>

@@ -14,7 +14,6 @@
         <result property="logFileId" column="log_file_id"/>
         <result property="logMessageIndex" column="log_message_index"/>
         <result property="senderNickname" column="sender_nickname"/>
-        <result property="senderName" column="sender_name"/>
         <result property="senderProfileImage" column="sender_profile_image"/>
     </resultMap>
 
@@ -31,10 +30,9 @@
     <select id="findChatHistory" resultMap="MessageResultMap">
         SELECT m.*, 
                mem.nickname as sender_nickname,
-               mem.name as sender_name,
                mem.profile_image as sender_profile_image
         FROM Message m
-        LEFT JOIN Member mem ON m.sender_id = mem.member_id
+        LEFT JOIN members mem ON m.sender_id = mem.id
         WHERE m.room_id = #{roomId} 
           AND m.is_deleted = false
         <if test="beforeDate != null">
@@ -47,10 +45,9 @@
     <select id="findByRoomId" resultMap="MessageResultMap">
         SELECT m.*, 
                mem.nickname as sender_nickname,
-               mem.name as sender_name,
                mem.profile_image as sender_profile_image
         FROM Message m
-        LEFT JOIN Member mem ON m.sender_id = mem.member_id
+        LEFT JOIN members mem ON m.sender_id = mem.id
         WHERE m.room_id = #{roomId} AND m.is_deleted = false 
         ORDER BY m.sent_at ASC
     </select>
@@ -62,10 +59,9 @@
     <select id="findRecentMessages" resultMap="MessageResultMap">
         SELECT m.*, 
                mem.nickname as sender_nickname,
-               mem.name as sender_name,
                mem.profile_image as sender_profile_image
         FROM Message m
-        LEFT JOIN Member mem ON m.sender_id = mem.member_id
+        LEFT JOIN members mem ON m.sender_id = mem.id
         WHERE m.room_id = #{roomId} AND m.is_deleted = false 
         ORDER BY m.sent_at DESC 
         LIMIT #{limit}

@@ -70,6 +70,58 @@ module.exports = (socket, next) => {
 
     verifyToken(token)
         .then(async (user) => {
+            // memberId가 없으면 Java 서버에서 조회
+            console.log('🔍 memberId 체크:', { 
+                hasMemberId: !!user.memberId, 
+                memberId: user.memberId, 
+                username: user.username 
+            });
+            
+            if (!user.memberId && user.username) {
+                console.log('🌐 memberId 조회 시작:', {
+                    username: user.username,
+                    apiUrl: `${API_BASE_URL}/members/${user.username}`
+                });
+                
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/members/${user.username}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        timeout: 5000
+                    });
+                    
+                    console.log('🔄 API 응답 수신:', {
+                        status: response.status,
+                        dataExists: !!response.data,
+                        responseStatus: response.data?.status,
+                        hasData: !!response.data?.data
+                    });
+                    
+                    if (response.data && response.data.status === 'success' && response.data.data) {
+                        user.memberId = response.data.data.id;
+                        console.log('✅ memberId 조회 성공:', {
+                            memberId: user.memberId,
+                            userData: response.data.data
+                        });
+                    } else {
+                        console.warn('⚠️ API 응답 형식이 예상과 다름:', response.data);
+                        user.memberId = user.username; // fallback
+                    }
+                } catch (error) {
+                    console.error('❌ memberId 조회 실패:', {
+                        error: error.message,
+                        status: error.response?.status,
+                        statusText: error.response?.statusText,
+                        responseData: error.response?.data
+                    });
+                    user.memberId = user.username; // fallback
+                }
+            } else if (user.memberId) {
+                console.log('✅ 토큰에 이미 memberId 있음:', user.memberId);
+            }
+
             console.log('사용자 인증 성공:', { 
                 userId: user.userId, 
                 username: user.username,

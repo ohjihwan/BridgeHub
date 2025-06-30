@@ -9,6 +9,9 @@ public interface FileService {
     // 파일 업로드
     FileDTO uploadFile(MultipartFile file, String fileType, Integer studyRoomId, Integer uploaderId) throws Exception;
     
+    // 프로필 이미지 업로드 (간단 버전)
+    FileDTO uploadProfileImage(MultipartFile file, String type, Integer memberId) throws Exception;
+    
     // 파일 다운로드
     byte[] downloadFile(Integer fileId) throws Exception;
     
