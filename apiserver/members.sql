@@ -427,7 +427,7 @@ INSERT INTO board_categories (category_name, description, sort_order) VALUES
 
 기존 시스템:
 1. members: 회원 정보 (JWT 인증)
-2. ChatRoom: 채팅방 기본 정보  
+2. ChatRoom: 채팅방 기본 정보
 3. ChatRoomMember: 채팅방 멤버 관리
 4. Message: 메시지 저장
 5. chat_log_files: 채팅 로그 관리

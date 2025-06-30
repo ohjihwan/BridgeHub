@@ -192,26 +192,28 @@ function Chat() {
 				// 백엔드 업로드 성공 시 UI 업데이트 (실제 fileId 사용)
 				const realFileId = result.data?.fileId;
 				
-				setMessages(prev => {
-					// 로딩 메시지 제거하고 실제 파일 메시지 추가
-					const withoutLoading = prev.filter(msg => !msg.isUploading);
-					return [...withoutLoading, {
-						type: 'me',
-						time: timeStr,
-						ampm,
-						files: [{
-							name: file.name,
-							fileId: realFileId,
-							fileSize: file.size
-						}]
-					}];
-				});
+				// setMessages(prev => {
+				//   // 로딩 메시지 제거하고 실제 파일 메시지 추가
+				//   const withoutLoading = prev.filter(msg => !msg.isUploading);
+				//   return [...withoutLoading, {
+				//     type: 'me',
+				//     time: timeStr,
+				//     ampm,
+				//     files: [{
+				//       name: file.name,
+				//       fileId: realFileId,
+				//       fileSize: file.size
+				//     }]
+				//   }];
+				// });
+				// 로딩 메시지 제거만 유지
+				setMessages(prev => prev.filter(msg => !msg.isUploading));
 				
 				// 소켓으로 다른 사용자들에게 실시간 알림
 				if (isConnected && socketSendMessage) {
 					console.log('📡 소켓으로 파일 업로드 알림 전송');
 					socketSendMessage({
-						message: `파일을 업로드했습니다: ${file.name}`,
+						message: ` ${file.name}`,
 						messageType: 'FILE',
 						fileName: file.name,
 						fileId: realFileId,
