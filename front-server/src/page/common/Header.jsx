@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const Header = ({ isEditing = false, showSearch = true, title = '', onSearch = () => {}, onShowAttachments = () => {} }) => {
+const Header = ({ isEditing = false, showSearch = true, title = '', onSearch = () => {}, onShowAttachments = () => {}, onBeforeBack = () => {} }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -11,6 +11,10 @@ const Header = ({ isEditing = false, showSearch = true, title = '', onSearch = (
 	const isHome = location.pathname === '/home';
 
 	const handleBackClick = () => {
+		if (onBeforeBack) {
+			onBeforeBack();  // 소켓 해제 등 사전 처리 실행
+		}
+		
 		if (isEditing) {
 			customConfirm('작성 중인 내용이 있습니다. 정말 뒤로 가시겠습니까?', () => navigate(-1));
 		} else {

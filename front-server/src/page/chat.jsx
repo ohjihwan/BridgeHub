@@ -849,6 +849,12 @@ function Chat() {
 					handleChatSearch()
 				}}
 				onShowAttachments={handleShowAttachments}
+				onBeforeBack={() => {
+					if (socket) {
+						socket.off();
+						socket.disconnect();
+					}
+				}}
 			/>
 
 			{/* 참가 신청 알림 (방장만 표시) */}
