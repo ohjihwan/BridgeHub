@@ -23,16 +23,16 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =============================================
 -- password123을 BCrypt로 암호화한 값: $2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a
 INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, status, email_verified, description, created_at) VALUES
-('admin@test.com', '010-1234-5678', '관리자', '김관리', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '컴퓨터공학과', '남자', '서울특별시', '강남구', '오전', 'profile1.jpg', 'ACTIVE', TRUE, '시스템 관리자입니다.', NOW() - INTERVAL 30 DAY),
-('user1@test.com', '010-2345-6789', '스터디킹', '이철수', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 재학', '경영학과', '남자', '서울특별시', '서초구', '저녁', 'profile2.jpg', 'ACTIVE', TRUE, '열심히 공부하는 대학생입니다.', NOW() - INTERVAL 25 DAY),
-('user2@test.com', '010-3456-7890', '코딩러버', '박영희', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '컴퓨터공학과', '여자', '경기도', '성남시', '오후', 'profile3.jpg', 'ACTIVE', TRUE, '개발자 꿈나무입니다.', NOW() - INTERVAL 20 DAY),
-('user3@test.com', '010-4567-8901', '수학천재', '최민수', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학원 재학', '수학과', '남자', '서울특별시', '종로구', '오전', 'profile4.jpg', 'ACTIVE', TRUE, '수학 스터디 만들어요!', NOW() - INTERVAL 15 DAY),
-('user4@test.com', '010-5678-9012', '영어마스터', '김영어', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 재학', '영어영문학과', '여자', '부산광역시', '해운대구', '저녁', 'profile5.jpg', 'ACTIVE', TRUE, 'TOEIC 990점 목표!', NOW() - INTERVAL 12 DAY),
-('user5@test.com', '010-6789-0123', '디자이너', '정민지', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '전문대 졸업', '시각디자인과', '여자', '인천광역시', '남동구', '오후', 'profile6.jpg', 'ACTIVE', TRUE, 'UI/UX 디자인 공부중', NOW() - INTERVAL 10 DAY),
-('user6@test.com', '010-7890-1234', '취준생', '강취업', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '경제학과', '남자', '대구광역시', '수성구', '오전', 'profile7.jpg', 'ACTIVE', TRUE, '취업 준비 화이팅!', NOW() - INTERVAL 8 DAY),
-('user7@test.com', '010-8901-2345', '의대생', '윤의학', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 재학', '의학과', '여자', '광주광역시', '서구', '저녁', 'profile8.jpg', 'ACTIVE', TRUE, '의대생입니다. 스터디 모집!', NOW() - INTERVAL 5 DAY),
-('user8@test.com', '010-9012-3456', '공무원준비', '송공무', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '행정학과', '남자', '대전광역시', '유성구', '오후', 'profile9.jpg', 'ACTIVE', TRUE, '9급 공무원 준비중', NOW() - INTERVAL 3 DAY),
-('user9@test.com', '010-0123-4567', '대학원생', '한연구', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학원 재학', '물리학과', '여자', '울산광역시', '남구', '오전', 'profile10.jpg', 'ACTIVE', TRUE, '물리학 연구하고 있어요', NOW() - INTERVAL 1 DAY);
+('admin@test.com', '01012345678', '관리자', '김관리', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '컴퓨터공학과', '남자', '서울특별시', '강남구', '오전', 'default-profile1.png', 'ACTIVE', TRUE, '시스템 관리자입니다.', NOW() - INTERVAL 30 DAY),
+('user1@test.com', '01023456789', '스터디킹', '이철수', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 재학', '경영학과', '남자', '서울특별시', '서초구', '저녁', 'default-profile1.png', 'ACTIVE', TRUE, '열심히 공부하는 대학생입니다.', NOW() - INTERVAL 25 DAY),
+('user2@test.com', '01034567890', '코딩러버', '박영희', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '컴퓨터공학과', '여자', '경기도', '성남시', '오후', 'default-profile1.png', 'ACTIVE', TRUE, '개발자 꿈나무입니다.', NOW() - INTERVAL 20 DAY),
+('user3@test.com', '01045678901', '수학천재', '최민수', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학원 재학', '수학과', '남자', '서울특별시', '종로구', '오전', 'default-profile1.png', 'ACTIVE', TRUE, '수학 스터디 만들어요!', NOW() - INTERVAL 15 DAY),
+('user4@test.com', '01056789012', '영어마스터', '김영어', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 재학', '영어영문학과', '여자', '부산광역시', '해운대구', '저녁', 'default-profile1.png', 'ACTIVE', TRUE, 'TOEIC 990점 목표!', NOW() - INTERVAL 12 DAY),
+('user5@test.com', '01067890123', '디자이너', '정민지', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '전문대 졸업', '시각디자인과', '여자', '인천광역시', '남동구', '오후', 'default-profile1.png', 'ACTIVE', TRUE, 'UI/UX 디자인 공부중', NOW() - INTERVAL 10 DAY),
+('user6@test.com', '01078901234', '취준생', '강취업', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '경제학과', '남자', '대구광역시', '수성구', '오전', 'default-profile1.png', 'ACTIVE', TRUE, '취업 준비 화이팅!', NOW() - INTERVAL 8 DAY),
+('user7@test.com', '01089012345', '의대생', '윤의학', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 재학', '의학과', '여자', '광주광역시', '서구', '저녁', 'default-profile1.png', 'ACTIVE', TRUE, '의대생입니다. 스터디 모집!', NOW() - INTERVAL 5 DAY),
+('user8@test.com', '01090123456', '공무원준비', '송공무', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학교 졸업', '행정학과', '남자', '대전광역시', '유성구', '오후', 'default-profile1.png', 'ACTIVE', TRUE, '9급 공무원 준비중', NOW() - INTERVAL 3 DAY),
+('user9@test.com', '01001234567', '대학원생', '한연구', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iKXIrbZbcKkCp1Xr3UpDpyQb5c4a', '대학원 재학', '물리학과', '여자', '울산광역시', '남구', '오전', 'default-profile1.png', 'ACTIVE', TRUE, '물리학 연구하고 있어요', NOW() - INTERVAL 1 DAY);
 
 -- =============================================
 -- 2. 채팅방 더미 데이터 (5개)
@@ -48,11 +48,11 @@ INSERT INTO ChatRoom (room_name, created_at, max_members, is_active) VALUES
 -- 3. 스터디룸 더미 데이터 (5개) - 회원 ID 매칭 수정
 -- =============================================
 INSERT INTO studyroom (room_id, boss_id, title, description, education, department, region, district, capacity, current_members, time, thumbnail, is_public, created_at) VALUES
-(1, 4, '컴퓨터공학 알고리즘 스터디', '코딩테스트 대비 알고리즘 문제를 함께 풀어요', '대학교 재학', '컴퓨터공학과', '서울특별시', '강남구', 8, 1, '저녁', 'thumbnail1.jpg', TRUE, NOW() - INTERVAL 20 DAY),
-(2, 5, 'TOEIC 900점 달성 스터디', '토익 고득점을 위한 집중 스터디입니다', '대학교 재학', '영어영문학과', '서울특별시', '서초구', 6, 1, '오후', 'thumbnail2.jpg', TRUE, NOW() - INTERVAL 15 DAY),
-(3, 7, '취업 면접 준비 스터디', '대기업 취업을 위한 면접 스터디', '대학교 졸업', '경제학과', '서울특별시', '종로구', 10, 1, '오전', 'thumbnail3.jpg', TRUE, NOW() - INTERVAL 12 DAY),
-(4, 4, '수학 올림피아드 스터디', '수학 문제 해결 능력 향상을 위한 스터디', '대학원 재학', '수학과', '서울특별시', '강남구', 5, 1, '저녁', 'thumbnail4.jpg', TRUE, NOW() - INTERVAL 10 DAY),
-(5, 8, '의대 MCAT 준비반', '의학전문대학원 입시 준비', '대학교 재학', '의학과', '서울특별시', '서초구', 8, 1, '오전', 'thumbnail5.jpg', TRUE, NOW() - INTERVAL 5 DAY);
+(1, 4, '컴퓨터공학 알고리즘 스터디', '코딩테스트 대비 알고리즘 문제를 함께 풀어요', '대학교 재학', '컴퓨터공학과', '서울특별시', '강남구', 8, 1, '저녁', 'thumbnail-ilr3.jpg', TRUE, NOW() - INTERVAL 20 DAY),
+(2, 5, 'TOEIC 900점 달성 스터디', '토익 고득점을 위한 집중 스터디입니다', '대학교 재학', '영어영문학과', '서울특별시', '서초구', 6, 1, '오후', 'thumbnail-ilr4.jpg', TRUE, NOW() - INTERVAL 15 DAY),
+(3, 7, '취업 면접 준비 스터디', '대기업 취업을 위한 면접 스터디', '대학교 졸업', '경제학과', '서울특별시', '종로구', 10, 1, '오전', 'thumbnail-ilr1.jpg', TRUE, NOW() - INTERVAL 12 DAY),
+(4, 4, '수학 올림피아드 스터디', '수학 문제 해결 능력 향상을 위한 스터디', '대학원 재학', '수학과', '서울특별시', '강남구', 5, 1, '저녁', 'thumbnail-ilr2.jpg', TRUE, NOW() - INTERVAL 10 DAY),
+(5, 8, '의대 MCAT 준비반', '의학전문대학원 입시 준비', '대학교 재학', '의학과', '서울특별시', '서초구', 8, 1, '오전', 'thumbnail-ilr5.jpg', TRUE, NOW() - INTERVAL 5 DAY);
 
 -- =============================================
 -- 4. 게시글 더미 데이터 (15개)
