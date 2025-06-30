@@ -100,7 +100,14 @@ const Detail = ({ room, isClosing, onClose }) => {
 			
 			if (result.status === 'success') {
 				const members = result.data;
-				const myMember = members.find(member => member.memberId === userInfo.userId);
+				console.log('members:', members);
+				console.log('userInfo:', userInfo);
+				const myMember = members.find(
+					member =>
+						String(member.memberId) === String(userInfo.memberId) ||
+						String(member.userId) === String(userInfo.userId)
+				);
+				console.log('myMember:', myMember);
 				
 				if (myMember && myMember.status === 'APPROVED') {
 					// 승인된 멤버면 바로 입장
@@ -113,9 +120,40 @@ const Detail = ({ room, isClosing, onClose }) => {
 							} 
 						} 
 					});
-				} else if (myMember && myMember.status === 'WAITING') {
-					// 이미 참여 신청한 상태
+				} else if (myMember && (myMember.status === 'WAITING' || myMember.status === 'PENDING')) {
+					console.log('myMember status:', myMember.status); // 상태값 디버깅
+					console.log('🔍 소켓 상태 확인:', {
+						hasSocketService: !!socketService,
+						isSocketConnected: socketService?.isSocketConnected(),
+						hasSocket: !!socketService?.socket,
+						socketConnected: socketService?.socket?.connected,
+						socketId: socketService?.socket?.id
+					});
+					
 					alert('이미 참여 신청을 하셨습니다. 방장의 승인을 기다려주세요.');
+					
+					if (socketService?.isSocketConnected() && socketService.socket) {
+						console.log('📤 소켓 emit 시도 중...');
+						socketService.socket.emit('study-join-request', {
+							studyId: room.studyRoomId || room.id,
+							applicantId: userInfo.userId,
+							applicantName: userInfo.nickname || userInfo.username || '사용자',
+							applicantProfileImage: null
+						});
+						console.log('📨 [재전송] 참가 신청 알림:', {
+							studyId: room.studyRoomId || room.id,
+							applicantId: userInfo.userId,
+							applicantName: userInfo.nickname || userInfo.username
+						});
+					} else {
+						console.log('❌ 소켓 연결 상태 문제:', {
+							hasSocketService: !!socketService,
+							isSocketConnected: socketService?.isSocketConnected(),
+							hasSocket: !!socketService?.socket,
+							socketConnected: socketService?.socket?.connected
+						});
+					}
+					return;
 				} else {
 					// 신규 사용자 - 참여 신청
 					const joinResponse = await fetch(`/api/studies/${room.studyRoomId || room.id}/join`, {
@@ -131,24 +169,41 @@ const Detail = ({ room, isClosing, onClose }) => {
 						
 						if (joinResult.status === 'success') {
 							// 소켓으로 방장에게 실시간 알림 전송
+							let notificationSent = false;
 							if (socketService?.isSocketConnected() && socketService.socket) {
-								socketService.socket.emit('study-join-request', {
-									studyId: room.studyRoomId || room.id,
-									applicantId: userInfo.userId,
-									applicantName: userInfo.nickname || userInfo.username || '사용자',
-									applicantProfileImage: null // 프로필 이미지가 있다면 추가
-								});
-								console.log('📨 참가 신청 알림 전송:', {
-									studyId: room.studyRoomId || room.id,
-									applicantId: userInfo.userId,
-									applicantName: userInfo.nickname || userInfo.username
-								});
+								try {
+									socketService.socket.emit('study-join-request', {
+										studyId: room.studyRoomId || room.id,
+										applicantId: userInfo.userId,
+										applicantName: userInfo.nickname || userInfo.username || '사용자',
+										applicantProfileImage: null // 프로필 이미지가 있다면 추가
+									});
+									notificationSent = true;
+									console.log('📨 참가 신청 알림 전송 성공:', {
+										studyId: room.studyRoomId || room.id,
+										applicantId: userInfo.userId,
+										applicantName: userInfo.nickname || userInfo.username,
+										socketId: socketService.socket.id,
+										socketConnected: socketService.socket.connected
+									});
+								} catch (error) {
+									console.error('❌ 참가 신청 알림 전송 실패:', error);
+									notificationSent = false;
+								}
 							} else {
 								console.log('⚠️ 소켓이 연결되지 않아 실시간 알림을 전송할 수 없습니다.');
+								notificationSent = false;
 							}
 							
-							alert('참여 신청이 완료되었습니다. 방장의 승인을 기다려주세요.');
-							onClose(); // 팝업 닫기
+							const message = notificationSent 
+								? '참여 신청이 완료되었습니다. 방장에게 실시간 알림이 전송되었습니다.'
+								: '참여 신청이 완료되었습니다. 방장의 승인을 기다려주세요.';
+							alert(message);
+							
+							// 팝업 닫기 전에 잠시 대기 (소켓 이벤트 전송 완료를 위해)
+							setTimeout(() => {
+								onClose();
+							}, 100);
 						} else {
 							alert(joinResult.message || '참여 신청에 실패했습니다.');
 						}

@@ -700,14 +700,14 @@ function Chat() {
 	// 방장 여부 확인
 	useEffect(() => {
 		if (studyInfo && currentUserInfo) {
-			const isBoss = studyInfo.bossId === currentUserInfo.userId || 
-						   studyInfo.bossId === currentUserInfo.memberId;
+			const bossId = String(studyInfo.bossId);
+			const userId = String(currentUserInfo.id);
+			const isBoss = bossId === userId;
 			setIsOwner(isBoss);
 			console.log('🏛️ 방장 여부 확인:', {
-				studyBossId: studyInfo.bossId,
-				currentUserId: currentUserInfo.userId,
-				currentMemberId: currentUserInfo.memberId,
-				isBoss: isBoss
+				bossId,
+				userId,
+				isBoss
 			});
 		}
 	}, [studyInfo, currentUserInfo]);
@@ -813,7 +813,7 @@ function Chat() {
 						studyId: studyId,
 						applicantId: request.applicantId,
 						response: response,
-						bossId: currentUserInfo.userId
+						bossId: currentUserInfo.id
 					});
 				}
 
@@ -850,6 +850,14 @@ function Chat() {
 			/>
 
 			{/* 참가 신청 알림 (방장만 표시) */}
+			{/* 디버깅용 로그 */}
+			{console.log('🔍 알림 박스 렌더링 조건 확인:', {
+				isOwner,
+				joinRequestsLength: joinRequests.length,
+				joinRequests,
+				shouldShow: isOwner && joinRequests.length > 0
+			})}
+			
 			{isOwner && joinRequests.length > 0 && (
 				<div style={{
 					backgroundColor: '#e3f2fd',

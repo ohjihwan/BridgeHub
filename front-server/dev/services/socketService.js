@@ -112,8 +112,10 @@ class SocketService {
                     transports: ['websocket', 'polling'],
                     timeout: 10000,
                     reconnection: true,
-                    reconnectionAttempts: 5,
-                    reconnectionDelay: 1000
+                    reconnectionAttempts: 10, // 재연결 시도 횟수 증가
+                    reconnectionDelay: 1000,
+                    reconnectionDelayMax: 5000, // 최대 재연결 지연 시간
+                    maxReconnectionAttempts: 10 // 최대 재연결 시도 횟수
                 });
 
                 // 연결 성공
@@ -134,7 +136,16 @@ class SocketService {
                 this.socket.on('disconnect', (reason) => {
                     console.log('소켓 연결 끊김:', reason);
                     this.isConnected = false;
-                    this.currentStudyId = null;
+                    
+                    // 자동 재연결이 활성화되어 있으므로 currentStudyId는 유지
+                    // this.currentStudyId = null; // 이 줄을 주석 처리
+                    
+                    // 재연결 시도 중임을 표시
+                    if (reason === 'io client disconnect') {
+                        console.log('사용자가 의도적으로 연결을 끊었습니다.');
+                    } else {
+                        console.log('연결이 끊어졌습니다. 자동 재연결을 시도합니다...');
+                    }
                 });
 
                 // 에러 처리
@@ -149,8 +160,20 @@ class SocketService {
                     
                     // 재연결 시 이전 스터디룸에 다시 참가
                     if (this.currentStudyId && this.currentUserId) {
+                        console.log('재연결 후 스터디룸 재참가 시도:', this.currentStudyId);
                         this.joinStudy(this.currentStudyId, this.currentUserId);
                     }
+                });
+
+                // 재연결 시도 중
+                this.socket.on('reconnect_attempt', (attemptNumber) => {
+                    console.log('소켓 재연결 시도 중:', attemptNumber);
+                });
+
+                // 재연결 실패
+                this.socket.on('reconnect_failed', () => {
+                    console.error('소켓 재연결 실패');
+                    this.isConnected = false;
                 });
 
             } catch (error) {
