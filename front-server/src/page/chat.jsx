@@ -476,12 +476,12 @@ function Chat() {
 			}
 		}
 
-		// 로컬 UI 업데이트
-		const { ampm, timeStr } = getFormattedTime();
-		setMessages(prev => [
-			...prev,
-			{ type: 'me', text: message, time: timeStr, ampm, senderId: currentUserId }
-		]);
+		// 로컬 UI 업데이트 (주석처리: 소켓 서버에서 받은 메시지만 사용)
+		// const { ampm, timeStr } = getFormattedTime();
+		// setMessages(prev => [
+		// 	...prev,
+		// 	{ type: 'me', text: message, time: timeStr, ampm, senderId: currentUserId }
+		// ]);
 		setMessage('');
 		if (textareaRef.current) textareaRef.current.style.height = 'auto';
 	};

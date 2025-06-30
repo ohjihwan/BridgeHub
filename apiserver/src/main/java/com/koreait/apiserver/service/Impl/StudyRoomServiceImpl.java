@@ -237,19 +237,23 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         // 3. 이미 참가한 멤버인지 확인
         StudyRoomMember existingMember = studyRoomMemberDao.selectStudyRoomMember(studyRoomId, memberId);
         if (existingMember != null) {
-            String statusMessage = "";
+            // String statusMessage = ""; // 원래 코드 (주석처리)
             switch (existingMember.getStatus()) {
                 case PENDING:
-                    statusMessage = "이미 참가 신청한 스터디입니다. 승인을 기다려주세요.";
+                    // statusMessage = "이미 참가 신청한 스터디입니다. 승인을 기다려주세요."; // 원래 코드 (주석처리)
+                    // PENDING 상태면 그냥 통과 (재신청 허용)
                     break;
                 case APPROVED:
-                    statusMessage = "이미 참가 중인 스터디입니다.";
+                    // statusMessage = "이미 참가 중인 스터디입니다."; // 원래 코드 (주석처리)
+                    // APPROVED 상태면 그냥 통과 (재신청 허용)
                     break;
                 case REJECTED:
-                    statusMessage = "이전에 참가가 거절된 스터디입니다.";
+                    // statusMessage = "이전에 참가가 거절된 스터디입니다."; // 원래 코드 (주석처리)
+                    // REJECTED 상태면 그냥 통과 (재신청 허용)
                     break;
             }
-            throw new RuntimeException(statusMessage);
+            // throw new RuntimeException(statusMessage); // 원래 코드 (주석처리)
+            // 모든 상태에서 재신청 허용 (에러 발생 안함)
         }
         
         // 4. 정원 확인
@@ -262,9 +266,16 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         member.setStudyRoomId(studyRoomId);
         member.setMemberId(memberId);
         member.setRole(StudyRoomMember.MemberRole.MEMBER);
-        member.setStatus(StudyRoomMember.MemberStatus.PENDING);
+        member.setStatus(StudyRoomMember.MemberStatus.APPROVED);
         
         studyRoomMemberDao.insertStudyRoomMember(member);
+        
+        // ★ APPROVED로 바로 추가 시, 채팅방 멤버에도 추가!
+        ChatRoomMember chatMember = new ChatRoomMember();
+        chatMember.setRoomId(studyRoom.getRoomId());
+        chatMember.setMemberId(memberId);
+        chatMember.setJoinedAt(LocalDateTime.now());
+        chatRoomMemberDao.insertChatRoomMember(chatMember);
         
         log.info("스터디 참가 신청 완료: studyRoomId={}, memberId={}", studyRoomId, memberId);
     }
