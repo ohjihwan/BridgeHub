@@ -1,7 +1,7 @@
 import express from "express";
-import { getRoomManager } from "../service/rtcService.mjs";
-import { status, startSession, stopSession, getRooms, getRoomInfo } from "../controller/rtcController.mjs";
-import * as logger from "../util/logger.mjs";
+import { getRoomManager } from "./service/rtcService.mjs";
+import { status, startSession, stopSession, getRooms, getRoomInfo } from "./controller/rtcController.mjs";
+import * as logger from "./util/logger.mjs";
 
 const router = express.Router();
 const roomMgr = getRoomManager();
