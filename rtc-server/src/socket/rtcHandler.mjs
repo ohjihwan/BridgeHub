@@ -28,11 +28,15 @@ export class RTCHandler {
       socket.on('getRouterRtpCapabilities', (callback) => {
         try {
           const capabilities = this.roomManager.router.rtpCapabilities
-          callback({ routerRtpCapabilities: capabilities })
+          if (typeof callback === 'function') {
+            callback({ routerRtpCapabilities: capabilities })
+          }
           logger.debug(`📡 Router RTP capabilities sent to ${socket.id}`)
         } catch (error) {
           logger.error('Get router capabilities error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 
@@ -40,10 +44,14 @@ export class RTCHandler {
       socket.on('joinRoom', async (data, callback) => {
         try {
           const result = await this.roomController.handleJoinRoom(socket, data)
-          callback(result)
+          if (typeof callback === 'function') {
+            callback(result)
+          }
         } catch (error) {
           logger.error('Join room error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 
@@ -51,10 +59,14 @@ export class RTCHandler {
       socket.on('connectTransport', async (data, callback) => {
         try {
           await this.peerController.handleConnectTransport(socket, data)
-          callback({ success: true })
+          if (typeof callback === 'function') {
+            callback({ success: true })
+          }
         } catch (error) {
           logger.error('Connect transport error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 
@@ -72,10 +84,14 @@ export class RTCHandler {
             })
           }
 
-          callback(result)
+          if (typeof callback === 'function') {
+            callback(result)
+          }
         } catch (error) {
           logger.error('Produce error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 
@@ -83,10 +99,14 @@ export class RTCHandler {
       socket.on('consume', async (data, callback) => {
         try {
           const result = await this.mediaController.handleConsume(socket, data)
-          callback(result)
+          if (typeof callback === 'function') {
+            callback(result)
+          }
         } catch (error) {
           logger.error('Consume error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 
@@ -94,10 +114,14 @@ export class RTCHandler {
       socket.on('resumeConsumer', async (data, callback) => {
         try {
           await this.mediaController.handleResumeConsumer(socket, data)
-          callback({ success: true })
+          if (typeof callback === 'function') {
+            callback({ success: true })
+          }
         } catch (error) {
           logger.error('Resume consumer error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 
@@ -105,10 +129,14 @@ export class RTCHandler {
       socket.on('leaveRoom', (callback) => {
         try {
           this.roomController.handleLeaveRoom(socket)
-          callback({ success: true })
+          if (typeof callback === 'function') {
+            callback({ success: true })
+          }
         } catch (error) {
           logger.error('Leave room error:', error)
-          callback({ error: error.message })
+          if (typeof callback === 'function') {
+            callback({ error: error.message })
+          }
         }
       })
 

@@ -1,4 +1,3 @@
-"use client"
 import { useState, useEffect, useRef } from "react"
 import { io } from "socket.io-client"
 import * as mediasoupClient from "mediasoup-client"
@@ -34,7 +33,7 @@ const Video = ({ onClose, userNickname, roomId }) => {
       setConnectionStatus("RTC 서버에 연결 중...")
 
       // RTC 소켓 연결
-      const rtcSocket = io(`${process.env.NEXT_PUBLIC_RTC_SERVER_URL || "http://localhost:7600"}`, {
+      const rtcSocket = io(`${import.meta.env.VITE_RTC_SERVER_URL || "http://localhost:7600"}`, {
         auth: {
           token: localStorage.getItem("token") || "development-token",
         },
@@ -327,37 +326,6 @@ const Video = ({ onClose, userNickname, roomId }) => {
           <div className="spinner"></div>
           <p>{connectionStatus}</p>
         </div>
-        <style jsx>{`
-          .video-rtc-loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-          }
-          .loading-spinner {
-            text-align: center;
-            color: white;
-          }
-          .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
       </div>
     )
   }
@@ -407,137 +375,6 @@ const Video = ({ onClose, userNickname, roomId }) => {
           📞 종료
         </button>
       </div>
-
-      <style jsx>{`
-        .video-rtc {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          background: #1a1a1a;
-          display: flex;
-          flex-direction: column;
-          z-index: 9999;
-        }
-
-        .video-rtc__header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 15px 20px;
-          background: #2d2d2d;
-          color: white;
-        }
-
-        .header-info h2 {
-          margin: 0;
-          font-size: 1.5rem;
-        }
-
-        .participant-count {
-          color: #4CAF50;
-          font-weight: bold;
-          margin-left: 10px;
-        }
-
-        .status {
-          color: #ffa500;
-          font-size: 0.9rem;
-          margin-left: 10px;
-        }
-
-        .close-btn {
-          background: #ff4444;
-          color: white;
-          border: none;
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-          cursor: pointer;
-          font-size: 1.2rem;
-        }
-
-        .video-rtc__main {
-          flex: 1;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          padding: 20px;
-          overflow-y: auto;
-        }
-
-        .local-video-container {
-          position: relative;
-          width: 300px;
-          height: 200px;
-        }
-
-        .local-video {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 8px;
-          background: #000;
-        }
-
-        .video-label {
-          position: absolute;
-          bottom: 8px;
-          left: 8px;
-          background: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 0.8rem;
-        }
-
-        .screen-badge {
-          background: #4CAF50;
-          margin-left: 5px;
-          padding: 2px 6px;
-          border-radius: 3px;
-          font-size: 0.7rem;
-        }
-
-        .remote-videos-container {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
-        .video-rtc__controls {
-          display: flex;
-          justify-content: center;
-          gap: 15px;
-          padding: 20px;
-          background: #2d2d2d;
-        }
-
-        .control-btn {
-          padding: 12px 20px;
-          border: none;
-          border-radius: 25px;
-          cursor: pointer;
-          font-size: 1rem;
-          transition: all 0.3s;
-        }
-
-        .control-btn.active {
-          background: #4CAF50;
-          color: white;
-        }
-
-        .control-btn.inactive {
-          background: #ff4444;
-          color: white;
-        }
-
-        .control-btn.end-call {
-          background: #ff4444;
-          color: white;
-        }
-      `}</style>
     </div>
   )
 }
