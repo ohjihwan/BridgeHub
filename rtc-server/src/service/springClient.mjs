@@ -113,16 +113,61 @@ class SpringClient {
     }
   }
 
-  async getStudyRoomInfo(roomId) {
+  async getStudy(studyId) {
     try {
-      const response = await this.apiClient.get(`/api/studies/${roomId}`);
+      const response = await this.apiClient.get(`/api/studies/${studyId}`);
       if (response.data && response.data.success) {
         return response.data.data;
       }
       return null;
     } catch (error) {
-      logger.error(`Error getting study room info for ${roomId}:`, error.message);
+      logger.error(`Error getting study info for ${studyId}:`, error.message);
       return null;
+    }
+  }
+
+  async getStudyMembers(studyId) {
+    try {
+      const response = await this.apiClient.get(`/api/studies/${studyId}/members`);
+      if (response.data && response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return [];
+    } catch (error) {
+      logger.error(`Error getting study members for ${studyId}:`, error.message);
+      return [];
+    }
+  }
+
+  async canJoinStudy(studyId, userId) {
+    try {
+      const study = await this.getStudy(studyId);
+      if (!study) {
+        return false;
+      }
+
+      const members = await this.getStudyMembers(studyId);
+      
+      // 이미 참가한 멤버인지 확인
+      const isAlreadyMember = members.some(member => 
+        member.memberId === userId || member.id === userId
+      );
+      
+      if (isAlreadyMember) {
+        logger.debug(`User ${userId} is already a member of study ${studyId}`);
+        return true;
+      }
+
+      // 정원 확인
+      if (members.length >= (study.capacity || 10)) {
+        logger.debug(`Study ${studyId} is full: ${members.length}/${study.capacity}`);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      logger.error(`Error checking study join permission:`, error.message);
+      return false;
     }
   }
 
@@ -136,22 +181,6 @@ class SpringClient {
     } catch (error) {
       logger.error(`Error getting chat room info for ${roomId}:`, error.message);
       return null;
-    }
-  }
-
-  async isStudyRoomMember(studyRoomId, userId) {
-    try {
-      const response = await this.apiClient.get(`/api/studies/${studyRoomId}/members`);
-      if (response.data && response.data.success && response.data.data) {
-        const members = response.data.data;
-        return members.some(member => 
-          member.memberId === userId && member.status === 'APPROVED'
-        );
-      }
-      return false;
-    } catch (error) {
-      logger.error(`Error checking study room membership:`, error.message);
-      return false;
     }
   }
 

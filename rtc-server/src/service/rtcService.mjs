@@ -28,11 +28,11 @@ class RoomManager {
 
     if (user?.authenticated && user?.id) {
       try {
-        const studyRoomInfo = await springClient.getStudyRoomInfo(roomId);
+        const studyRoomInfo = await springClient.getStudy(roomId);
         if (studyRoomInfo) {
-          const isMember = await springClient.isStudyRoomMember(roomId, user.id);
-          if (!isMember) {
-            logger.debug(`User ${user.id} is not a member of study room ${roomId}`);
+          const canJoin = await springClient.canJoinStudy(roomId, user.id);
+          if (!canJoin) {
+            logger.debug(`User ${user.id} cannot join study room ${roomId}`);
             return { canJoin: false, reason: 'NOT_MEMBER' };
           }
         } else {
@@ -87,7 +87,7 @@ class RoomManager {
     
     if (user?.authenticated) {
       try {
-        const studyRoomInfo = await springClient.getStudyRoomInfo(roomId);
+        const studyRoomInfo = await springClient.getStudy(roomId);
         if (studyRoomInfo) {
           roomData.roomType = 'study';
           roomData.studyRoomInfo = studyRoomInfo;
