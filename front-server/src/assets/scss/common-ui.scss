@@ -43,6 +43,17 @@ legend,
 	@extend %visually-hidden;
 }
 
+.hr {
+	display:block;
+	height:remx(8);
+	background-color:$line3;
+	margin-top:remx(30);
+	margin-bottom:remx(30);
+	margin-left:-$padding-x;
+	margin-right:-$padding-x;
+
+}
+
 .header {
 	display:flex;
 	justify-content:space-between;
@@ -685,7 +696,6 @@ legend,
 		top:0;
 		width:100%;
 		height:100vh;
-		padding:0 $padding-x;
 		overflow:hidden;
 
 		&--login {
@@ -757,6 +767,7 @@ legend,
 
 	&__area {
 		width:100%;
+		padding:0 $padding-x;
 	}
 
 	&__options{
@@ -868,6 +879,7 @@ legend,
 
 	&__area {
 		width:100%;
+		padding:0 $padding-x;
 	}
 
 	&__button {
@@ -1664,86 +1676,106 @@ legend,
 // ─────────────────────────────
 // 📄 Mypage.jsx page
 // ─────────────────────────────
-.mypage-container {
+.mypage-profile {
 	padding:remx(50) $padding-x remx(100);
 
-	.profile-img {
+	&__img {
 		display:block;
 		overflow:hidden;
 		position:relative;
-		width:remx(200);
-		height:remx(200);
+		width:remx(120);
+		height:remx(120);
 		margin:remx(50) auto 0;
 		border-radius:remx(40);
+	}
 
-		&__button {
-			display:block;
+	&__userimg {
+		display:block;
+		width:100%;
+		height:100%;
+		object-fit:cover;
+	}
+	
+	&__imgbutton {
+		display:block;
+		position:absolute;
+		left:0;
+		top:0;
+		width:100%;
+		height:100%;
+		background:rgba(0, 0, 0, 0.5);
+		cursor:pointer;
+		
+		&::after {
+			content:'';
 			position:absolute;
-			left:0;
-			top:0;
-			width:100%;
-			height:100%;
-			background:rgba(0, 0, 0, 0.5);
-			cursor:pointer;
-			
-			&::after {
-				content:'';
-				position:absolute;
-				left:50%;
-				top:50%;
-				transform:translate(-50%, -50%);
-				width:remx(35);
-				height:remx(35);
-				border-radius:50%;
-				background:$black url('@ico/ico-reset-w.png') no-repeat 50% / 2.4rem auto;
-			}
-		}
-
-		&__img {
-			display:block;
-			width:100%;
-			height:100%;
-			object-fit:cover;
+			left:50%;
+			top:50%;
+			transform:translate(-50%, -50%);
+			width:remx(35);
+			height:remx(35);
+			border-radius:50%;
+			background:$black url('@ico/ico-reset-w.png') no-repeat 50% / 2.4rem auto;
 		}
 	}
 	
-	.info-row-area {
+	&__info {
 		margin-top:remx(30);
+	}
 
-		.info-row {
-			margin-top:remx(20);
-			
-			&:first-child {
-				margin-top:0;
-			}
+	&__item {
+		margin-top:remx(20);
+		
+		&:first-child {
+			margin-top:0;
+		}
 
-			.label {
-				display:block;
-				margin-bottom:remx(6);
+		.label {
+			display:block;
+			margin-bottom:remx(6);
+			color:$font2;
+			font-weight:normal;
+		}
+	}
+	
+	&__datatitle {
+		font-size:remx(19)
+	}
+
+	&__data {
+		display:flex;
+		align-items:flex-start;
+		font-size:remx(16);
+		
+		.label {
+			flex:0 0 remx(80);
+			margin-bottom:0;
+			color:$font3;
+		}
+
+		.value {
+
+			&:empty::before {
+				content:'';
 				color:$font2;
-				font-weight:normal;
-			}
-
-			&.profile-data {
-				display:flex;
-				justify-content:space-between;
-				align-items:center;
-				padding-bottom:remx(18);
-				border-bottom:1px solid $line2;
-				
-				.label {
-					margin-bottom:0;
-				}
-
-				.value {
-
-					&:empty::before {
-						content:'비어있어요! 수정해주세요';
-						color:$font3;
-					}
-				}
 			}
 		}
+
+		&--textarea {
+			display:block;
+
+			.label {
+				margin-bottom:remx(10);
+			}
+		}
+	}
+
+	.profile-nickname {
+		transform:translateY(-1rem);
+		color:$font1;
+		font-weight:bold;
+		font-size:remx(18);
+		text-align:center;
 	}
 }
 // ─────────────────────────────
