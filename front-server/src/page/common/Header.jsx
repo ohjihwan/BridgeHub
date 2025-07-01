@@ -8,6 +8,7 @@ const Header = ({
     title = '', 
     onSearch = () => {}, 
     onShowAttachments = () => {}, 
+	onShowParticipants = () => {}, 
     onBeforeBack = () => {}, 
     onlineUsers = [], 
     studyInfo = null, 
@@ -200,7 +201,7 @@ const Header = ({
                         </li>
                         {location.pathname === '/chat' && (
                             <li className="user-menu__item">
-                                <a href="/participants" onClick={(e) => { e.preventDefault(); handleShowParticipants(); }}>참가 인원</a>
+                                <a href="/participants" onClick={(e) => { e.preventDefault(); onShowParticipants(); }}>참가 인원</a>
                                 <a href="/attachments" onClick={(e) => { e.preventDefault(); onShowAttachments(); }}>파일 모아보기</a>
                                 <a href="/report" onClick={(e) => { e.preventDefault(); handleReportRoom(); }}>방신고하기</a>
                                 <a href="/exit" onClick={(e) => { e.preventDefault(); handleExitChat(); }}>탈퇴하기</a>

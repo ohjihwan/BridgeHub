@@ -141,7 +141,7 @@ export const usersClient = axios.create({
 export const getAccessToken = () => {
 	return localStorage.getItem('token');
 };
-[authClient, commonClient, studyClient, boardClient, usersClient].forEach(client => {
+[authClient, commonClient, studyClient, boardClient].forEach(client => {
 	client.interceptors.request.use(config => {
 		window.showLoading?.();
 		return config;

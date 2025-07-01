@@ -11,6 +11,7 @@ import { chatAPI, userAPI, reportAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
 import { customAlert, customConfirm, customPrompt } from '@/assets/js/common-ui';
 import JoinSystem from '@components/chat/JoinSystem'
+import ChatMember from '@components/chat/ChatMember';
 
 function Chat() {
 	const location = useLocation();
@@ -87,6 +88,9 @@ function Chat() {
 	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([]);
+
+	// 참여 인원
+	const [showChatMember, setShowChatMember] = useState(false);
 
 	// 랜덤 기능 - 방장 여부 확인
 	const [isOwner, setIsOwner] = useState(false);
@@ -1093,6 +1097,7 @@ function Chat() {
 				studyInfo={studyInfo || null}
 				currentUserInfo={currentUserInfo || null}
 				allParticipants={getAllParticipants()}
+				onShowParticipants={() => setShowChatMember(true)}
 			/>
 
 			{/* 참가 신청 알림 (방장만 표시) */}
@@ -1450,6 +1455,13 @@ function Chat() {
 						setWinner(null);
 						setSpinning(false);
 					}}
+				/>
+			)}
+
+			{showChatMember && (
+				<ChatMember
+					isOpen={showChatMember}
+					onClose={() => setShowChatMember(false)}
 				/>
 			)}
 

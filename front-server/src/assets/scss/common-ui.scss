@@ -304,6 +304,7 @@ legend,
 
 			.alert-message {
 				padding:0 remx(30) remx(20);
+				word-break:keep-all;
 			}
 
 			.field {
@@ -2903,6 +2904,52 @@ legend,
 // ─────────────────────────────
 // 📄 ChatMember.jsx component
 // ─────────────────────────────
+.chat-member {
+	position:fixed;
+	right:0;
+	top:0;
+	z-index:270;
+	transform:translateX(100%);
+	width:60%;
+	min-width:remx(250);
+	height:100vh;
+	background-color:$bg-root;
+	box-shadow:0 0 remx(10) rgba(0,0,0,0.3); 
+	transition:transform 0.4s ease;
+	
+	&.slide-right {
+		transform:translateX(0);
+	}
+
+	&__close {
+		position:absolute;
+		right:remx(15);
+		top:remx(15);
+		width:remx(24);
+		height:remx(24);
+		background:url('@ico/ico-close.svg') no-repeat 50% / 1.6rem auto;
+	}
+
+	&__title {
+		height:remx(56);
+		padding:remx(15);
+	}
+
+	ul {
+		display:flex;
+		flex-wrap:wrap;
+		overflow-x:hidden;
+		overflow-y:auto;
+		max-height:calc(100vh - remx(56));
+		padding:remx(10) remx(7) remx(40);
+	}
+
+	&__item {
+		width:50%;
+		padding:remx(5) remx(8);
+		text-align:center;
+	}
+}
 // ─────────────────────────────
 // 📄 searchRoom.jsx page
 // ─────────────────────────────
