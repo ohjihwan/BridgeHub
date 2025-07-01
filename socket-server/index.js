@@ -21,6 +21,7 @@ const {
     handleFileUploadComplete,
     handleGetSystemStatus,
     handleForceReconnect,
+    handleKickMember,
     messageQueue,
     connectionManager
 } = require('./src/controllers/socketController');
@@ -107,6 +108,48 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/test', express.static(path.join(__dirname, 'test')));
+
+// 강퇴 API 엔드포인트
+app.post('/api/socket/kick-member', async (req, res) => {
+    try {
+        const { roomId, memberId } = req.body;
+        console.log(`강퇴 API 호출: roomId=${roomId}, memberId=${memberId}`);
+        
+        await handleKickMember(roomId, memberId);
+        
+        res.json({ 
+            success: true, 
+            message: '강퇴 처리가 완료되었습니다.' 
+        });
+    } catch (error) {
+        console.error('강퇴 API 처리 실패:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+// 스터디룸 삭제 API 엔드포인트
+app.post('/api/socket/delete-study', async (req, res) => {
+    try {
+        const { studyId, roomId } = req.body;
+        console.log(`스터디룸 삭제 API 호출: studyId=${studyId}, roomId=${roomId}`);
+        
+        await handleDeleteStudy(studyId, roomId);
+        
+        res.json({ 
+            success: true, 
+            message: '스터디룸 삭제 처리가 완료되었습니다.' 
+        });
+    } catch (error) {
+        console.error('스터디룸 삭제 API 처리 실패:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
 
 // ChatHandler가 모든 소켓 이벤트를 처리합니다
 console.log('🚀 ChatHandler가 모든 소켓 이벤트를 처리합니다.');

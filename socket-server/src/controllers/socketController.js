@@ -409,6 +409,58 @@ const handleForceReconnect = async (socket) => {
     }
 };
 
+// 강퇴된 멤버 처리
+const handleKickMember = async (roomId, memberId) => {
+    try {
+        console.log(`강퇴 처리: roomId=${roomId}, memberId=${memberId}`);
+        
+        // 강퇴된 멤버에게 강퇴 알림 전송
+        socketService.broadcastToUser(memberId, {
+            type: 'kicked',
+            roomId: roomId,
+            message: '채팅방에서 강퇴되었습니다.'
+        });
+        
+        // 채팅방에서 강퇴된 멤버 제거
+        socketService.removeUserFromRoom(roomId, memberId);
+        
+        // 강퇴된 멤버의 소켓 연결 강제 종료
+        socketService.disconnectUser(memberId);
+        
+        // 다른 멤버들에게 강퇴 알림 전송
+        socketService.broadcastMessage(roomId, {
+            type: 'system',
+            content: `사용자가 강퇴되었습니다.`,
+            kickedUserId: memberId
+        });
+        
+        console.log(`사용자 ${memberId}가 채팅방 ${roomId}에서 강퇴되었습니다.`);
+    } catch (error) {
+        console.error('강퇴 처리 실패:', error);
+    }
+};
+
+// 스터디룸 삭제 처리
+const handleDeleteStudy = async (studyId, roomId) => {
+    try {
+        console.log(`스터디룸 삭제 처리: studyId=${studyId}, roomId=${roomId}`);
+        
+        // 해당 스터디룸에 참가 중인 모든 사용자에게 삭제 알림 전송
+        socketService.broadcastMessage(studyId, {
+            type: 'study-deleted',
+            studyId: studyId,
+            message: '스터디룸이 삭제되었습니다.'
+        });
+        
+        // 해당 스터디룸에 참가 중인 모든 사용자의 소켓 연결 강제 종료
+        socketService.disconnectAllUsersFromStudy(studyId);
+        
+        console.log(`스터디룸 ${studyId}가 삭제되었습니다. 모든 참가자의 연결이 종료되었습니다.`);
+    } catch (error) {
+        console.error('스터디룸 삭제 처리 실패:', error);
+    }
+};
+
 module.exports = {
     handleJoinStudy,
     handleLeaveStudy,
@@ -416,6 +468,8 @@ module.exports = {
     handleFileUploadComplete,
     handleGetSystemStatus,
     handleForceReconnect,
+    handleKickMember,
+    handleDeleteStudy,
     messageQueue,
     connectionManager
 }; 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import profileDefault from '/uploads/profile/default-profile1.png';
 import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
-const ChatMember = ({ isVisible, onClose, studyId, roomId, currentUserInfo, isOwner }) => {
+const ChatMember = ({ isVisible, onClose, studyId, roomId, currentUserInfo, isOwner, socketService }) => {
 	const [members, setMembers] = useState([]);
 	const [loading, setLoading] = useState(false);
 
@@ -53,6 +53,35 @@ const ChatMember = ({ isVisible, onClose, studyId, roomId, currentUserInfo, isOw
 			}
 		});
 	};
+
+	// 실시간 멤버 업데이트 처리
+	useEffect(() => {
+		if (!socketService) return;
+
+		const handleMemberUpdate = () => {
+			console.log('멤버 업데이트 이벤트 수신');
+			fetchMembers(); // 참가인원 목록 갱신
+		};
+
+		// 멤버 관련 이벤트 리스너 등록
+		socketService.on('member-count', handleMemberUpdate);
+		socketService.on('user-left', handleMemberUpdate);
+		socketService.on('new-message', (message) => {
+			// 시스템 메시지인 경우 멤버 목록 갱신
+			if (message.senderId === '시스템' && 
+				(message.text.includes('퇴장') || message.text.includes('강퇴'))) {
+				handleMemberUpdate();
+			}
+		});
+
+		return () => {
+			if (socketService) {
+				socketService.off('member-count', handleMemberUpdate);
+				socketService.off('user-left', handleMemberUpdate);
+				socketService.off('new-message', handleMemberUpdate);
+			}
+		};
+	}, [socketService, roomId]);
 
 	useEffect(() => {
 		if (isVisible && roomId) {

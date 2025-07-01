@@ -92,6 +92,7 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService {
      * 채팅방 입장 권한 확인
      * - 방장: 자유롭게 입장 가능
      * - 승인된 스터디 멤버: 자유롭게 입장 가능
+     * - REJECTED 상태: 강퇴된 사용자이므로 입장 불가
      * - 첫 방문자: 방장의 허락 필요 (스터디룸에 먼저 참가 신청해야 함)
      */
     private boolean checkJoinPermission(StudyRoom studyRoom, Integer memberId) {
@@ -101,12 +102,17 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService {
             return true;
         }
         
-        // 2. 승인된 스터디 멤버인지 확인
+        // 2. 스터디 멤버 상태 확인
         try {
             StudyRoomMember studyMember = studyRoomMemberDao.selectStudyRoomMember(studyRoom.getStudyRoomId(), memberId);
-            if (studyMember != null && studyMember.getStatus() == StudyRoomMember.MemberStatus.APPROVED) {
-                log.info("승인된 스터디 멤버이므로 채팅방 입장 가능: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), memberId);
-                return true;
+            if (studyMember != null) {
+                if (studyMember.getStatus() == StudyRoomMember.MemberStatus.APPROVED) {
+                    log.info("승인된 스터디 멤버이므로 채팅방 입장 가능: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), memberId);
+                    return true;
+                } else if (studyMember.getStatus() == StudyRoomMember.MemberStatus.REJECTED) {
+                    log.warn("강퇴된 사용자이므로 채팅방 입장 불가: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), memberId);
+                    return false;
+                }
             }
         } catch (Exception e) {
             log.warn("스터디 멤버 확인 중 오류: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), memberId, e);
@@ -145,7 +151,20 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService {
         
         ChatRoomMember member = memberOpt.get();
         
-        // 2. 채팅방에서 강퇴
+        // 2. 스터디룸 정보 조회
+        Optional<StudyRoom> studyRoomOpt = studyRoomDao.findByRoomId(roomId);
+        if (studyRoomOpt.isPresent()) {
+            StudyRoom studyRoom = studyRoomOpt.get();
+            
+            // 3. 스터디룸 멤버 상태를 REJECTED로 변경 (재참가 방지)
+            StudyRoomMember studyMember = studyRoomMemberDao.selectStudyRoomMember(studyRoom.getStudyRoomId(), memberId);
+            if (studyMember != null) {
+                studyRoomMemberDao.updateMemberStatus(studyMember.getId(), StudyRoomMember.MemberStatus.REJECTED, studyRoom.getBossId());
+                log.info("스터디룸 멤버 상태를 REJECTED로 변경: studyRoomId={}, memberId={}", studyRoom.getStudyRoomId(), memberId);
+            }
+        }
+        
+        // 4. 채팅방에서 강퇴
         chatRoomMemberDao.deleteChatRoomMember(roomId, memberId);
         
         log.info("채팅방 멤버 강퇴 완료: roomId={}, memberId={}", roomId, memberId);

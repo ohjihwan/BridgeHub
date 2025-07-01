@@ -1157,6 +1157,47 @@ function Chat() {
 		}
 	}, [isOwner, studyId]);
 
+	// 강퇴 및 스터디룸 삭제 알림 처리
+	useEffect(() => {
+		if (!socketService) return;
+
+		const handleSystemMessage = (message) => {
+			console.log('시스템 메시지 수신:', message);
+			
+			if (message.type === 'kicked') {
+				customAlert('채팅방에서 강퇴되었습니다.');
+				navigate('/home'); // 홈페이지로 이동
+			} else if (message.type === 'study-deleted') {
+				customAlert('스터디룸이 삭제되었습니다.');
+				navigate('/home'); // 홈페이지로 이동
+			}
+		};
+
+		const handleKicked = (data) => {
+			console.log('강퇴 알림 수신:', data);
+			customAlert('채팅방에서 강퇴되었습니다.');
+			navigate('/home'); // 홈페이지로 이동
+		};
+
+		const handleStudyDeleted = (data) => {
+			console.log('스터디룸 삭제 알림 수신:', data);
+			customAlert('스터디룸이 삭제되었습니다.');
+			navigate('/home'); // 홈페이지로 이동
+		};
+
+		socketService.on('system-message', handleSystemMessage);
+		socketService.on('kicked', handleKicked);
+		socketService.on('study-deleted', handleStudyDeleted);
+
+		return () => {
+			if (socketService) {
+				socketService.off('system-message', handleSystemMessage);
+				socketService.off('kicked', handleKicked);
+				socketService.off('study-deleted', handleStudyDeleted);
+			}
+		};
+	}, [socketService, navigate]);
+
 	return (
 		<>
 			<Header
@@ -1577,6 +1618,7 @@ function Chat() {
 					roomId={roomId}
 					currentUserInfo={currentUserInfo}
 					isOwner={isOwner}
+					socketService={socketService}
 				/>
 			)}
 

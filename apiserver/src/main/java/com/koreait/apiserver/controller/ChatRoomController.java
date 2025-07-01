@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
     private final ChatRoomMemberService chatRoomMemberService;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     // 채팅방 목록 조회
     @GetMapping
@@ -81,7 +83,20 @@ public class ChatRoomController {
             // TODO: JWT에서 bossId 추출 로직 추가 필요
             // Integer bossId = jwtService.extractMemberId(token);
             
+            // 1. 강퇴 처리
             chatRoomMemberService.kickMember(roomId, memberId);
+            
+            // 2. 소켓 서버로 강퇴 알림 전송
+            try {
+                String socketServerUrl = "http://localhost:3001/api/socket/kick-member";
+                String requestBody = String.format("{\"roomId\":\"%d\",\"memberId\":\"%d\"}", roomId, memberId);
+                
+                restTemplate.postForObject(socketServerUrl, requestBody, String.class);
+                log.info("소켓 서버로 강퇴 알림 전송 완료: roomId={}, memberId={}", roomId, memberId);
+            } catch (Exception e) {
+                log.warn("소켓 서버 알림 전송 실패 (무시됨): roomId={}, memberId={}", roomId, memberId, e);
+            }
+            
             return ResponseEntity.ok(ApiResponse.success("멤버가 강퇴되었습니다."));
         } catch (Exception e) {
             log.error("채팅방 멤버 강퇴 실패: roomId={}, memberId={}", roomId, memberId, e);

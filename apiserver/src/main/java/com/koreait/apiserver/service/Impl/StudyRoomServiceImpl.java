@@ -71,9 +71,14 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             throw new IllegalArgumentException("스터디 정원은 2~10명 사이여야 합니다.");
         }
         
-        // 사용자별 스터디룸 개설 제한 검증
+        // 사용자별 스터디룸 개설 제한 검증 (삭제된 스터디룸 제외)
         List<StudyRoom> existingStudies = studyRoomDao.findByBossId(studyRoomDTO.getBossId());
-        if (!existingStudies.isEmpty()) {
+        // 실제 존재하는 스터디룸만 필터링 (삭제된 스터디룸 제외)
+        List<StudyRoom> activeStudies = existingStudies.stream()
+                .filter(study -> study != null && study.getStudyRoomId() != null)
+                .collect(Collectors.toList());
+        
+        if (!activeStudies.isEmpty()) {
             throw new RuntimeException("이미 스터디룸을 개설한 사용자입니다. 한 사용자는 하나의 스터디룸만 개설할 수 있습니다.");
         }
         
@@ -94,6 +99,16 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         
         // 2. 스터디룸 생성 (생성된 채팅방 ID 포함)
             log.info("스터디룸 생성 시작 - 채팅방 ID: {}", chatRoom.getRoomId());
+            
+            // room_id 중복 확인
+            Optional<StudyRoom> existingStudyRoom = studyRoomDao.findByRoomId(chatRoom.getRoomId());
+            if (existingStudyRoom.isPresent()) {
+                log.warn("이미 사용 중인 room_id 발견: {}", chatRoom.getRoomId());
+                // 기존 스터디룸 삭제
+                studyRoomDao.deleteStudyRoom(existingStudyRoom.get().getStudyRoomId());
+                log.info("기존 스터디룸 삭제 완료: studyRoomId={}", existingStudyRoom.get().getStudyRoomId());
+            }
+            
         StudyRoom studyRoom = new StudyRoom();
         studyRoom.setRoomId(chatRoom.getRoomId());  // 생성된 채팅방 ID 설정
         studyRoom.setTitle(studyRoomDTO.getTitle());
@@ -247,11 +262,8 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                 case APPROVED:
                     throw new RuntimeException("이미 참가 중인 스터디입니다.");
                 case REJECTED:
-                    // REJECTED 상태면 기존 신청을 삭제하고 새로 신청
-                    log.info("기존 REJECTED 신청 발견 - 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
-                    studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
-                    log.info("기존 REJECTED 신청 삭제 완료 후 재신청 진행: studyRoomId={}, memberId={}", studyRoomId, memberId);
-                    break;
+                    // REJECTED 상태면 강퇴된 사용자이므로 재신청 불가
+                    throw new RuntimeException("강퇴된 사용자는 재참가 신청할 수 없습니다.");
             }
         }
         
@@ -359,9 +371,46 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         
         // 2. 방장 탈퇴 시 스터디 전체 삭제
         if (member.getRole() == StudyRoomMember.MemberRole.BOSS) {
-            // 스터디룸 삭제 (채팅방도 함께 삭제됨)
-            studyRoomDao.deleteStudyRoom(studyRoomId);
-            log.info("방장 탈퇴로 인한 스터디 삭제: studyRoomId={}, memberId={}", studyRoomId, memberId);
+            // 스터디룸 정보 조회 (채팅방 ID 확인용)
+            Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
+            if (studyRoomOpt.isPresent()) {
+                StudyRoom studyRoom = studyRoomOpt.get();
+                Integer chatRoomId = studyRoom.getRoomId();
+                
+                // 1) 스터디룸 삭제
+                studyRoomDao.deleteStudyRoom(studyRoomId);
+                
+                // 2) 채팅방 멤버 삭제
+                chatRoomMemberDao.deleteByRoomId(chatRoomId);
+                
+                // 3) 채팅방 삭제
+                chatRoomDao.deleteChatRoom(chatRoomId);
+                
+                // 4) 소켓 서버로 스터디룸 삭제 알림 전송
+                try {
+                    String socketServerUrl = "http://localhost:3001/api/socket/delete-study";
+                    String requestBody = String.format("{\"studyId\":\"%d\",\"roomId\":\"%d\"}", studyRoomId, chatRoomId);
+                    
+                    // HTTP 클라이언트로 직접 요청
+                    java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+                    java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                        .uri(java.net.URI.create(socketServerUrl))
+                        .header("Content-Type", "application/json")
+                        .POST(java.net.http.HttpRequest.BodyPublishers.ofString(requestBody))
+                        .build();
+                    
+                    java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+                    log.info("소켓 서버로 스터디룸 삭제 알림 전송 완료: studyRoomId={}, chatRoomId={}, response={}", studyRoomId, chatRoomId, response.statusCode());
+                } catch (Exception e) {
+                    log.warn("소켓 서버 알림 전송 실패 (무시됨): studyRoomId={}, chatRoomId={}", studyRoomId, chatRoomId, e);
+                }
+                
+                log.info("방장 탈퇴로 인한 스터디 및 채팅방 삭제: studyRoomId={}, memberId={}, chatRoomId={}", 
+                        studyRoomId, memberId, chatRoomId);
+            } else {
+                // 스터디룸이 이미 삭제된 경우
+                log.warn("삭제할 스터디룸을 찾을 수 없음: studyRoomId={}", studyRoomId);
+            }
             return;
         }
         

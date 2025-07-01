@@ -198,6 +198,70 @@ const getStudyRoomParticipants = (studyId) => {
     return Array.from(room);
 };
 
+// 특정 사용자에게 메시지 전송
+function broadcastToUser(userId, message) {
+    if (!io) {
+        console.warn('Socket.IO 인스턴스가 초기화되지 않았습니다.');
+        return;
+    }
+
+    // 해당 사용자가 연결된 모든 소켓에 메시지 전송
+    io.sockets.sockets.forEach((socket) => {
+        if (socket.userId === userId.toString()) {
+            socket.emit('system-message', message);
+        }
+    });
+}
+
+// 채팅방에서 특정 사용자 제거
+function removeUserFromRoom(roomId, userId) {
+    if (!io) {
+        console.warn('Socket.IO 인스턴스가 초기화되지 않았습니다.');
+        return;
+    }
+
+    // 해당 사용자가 연결된 모든 소켓에서 채팅방 제거
+    io.sockets.sockets.forEach((socket) => {
+        if (socket.userId === userId.toString() && socket.currentStudyId === roomId.toString()) {
+            socket.leave(roomId.toString());
+            socket.currentStudyId = null;
+            console.log(`사용자 ${userId}를 채팅방 ${roomId}에서 제거했습니다.`);
+        }
+    });
+}
+
+// 특정 사용자의 소켓 연결 강제 종료
+function disconnectUser(userId) {
+    if (!io) {
+        console.warn('Socket.IO 인스턴스가 초기화되지 않았습니다.');
+        return;
+    }
+
+    // 해당 사용자가 연결된 모든 소켓 연결 종료
+    io.sockets.sockets.forEach((socket) => {
+        if (socket.userId === userId.toString()) {
+            socket.disconnect(true); // 강제 연결 종료
+            console.log(`사용자 ${userId}의 소켓 연결을 강제 종료했습니다.`);
+        }
+    });
+}
+
+// 특정 스터디룸의 모든 사용자 소켓 연결 강제 종료
+function disconnectAllUsersFromStudy(studyId) {
+    if (!io) {
+        console.warn('Socket.IO 인스턴스가 초기화되지 않았습니다.');
+        return;
+    }
+
+    // 해당 스터디룸에 참가 중인 모든 사용자의 소켓 연결 종료
+    io.sockets.sockets.forEach((socket) => {
+        if (socket.currentStudyId === studyId.toString()) {
+            socket.disconnect(true); // 강제 연결 종료
+            console.log(`스터디룸 ${studyId}의 사용자 ${socket.userId}의 소켓 연결을 강제 종료했습니다.`);
+        }
+    });
+}
+
 module.exports = {
     setSocketIO,
     createStudyRoom,
@@ -206,5 +270,9 @@ module.exports = {
     broadcastMessage,
     sendMessage,
     handleFileUploadComplete,
-    getStudyRoomParticipants
+    getStudyRoomParticipants,
+    broadcastToUser,
+    removeUserFromRoom,
+    disconnectUser,
+    disconnectAllUsersFromStudy
 };
