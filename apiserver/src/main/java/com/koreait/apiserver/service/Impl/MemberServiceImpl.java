@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.HashMap;
+import java.math.BigInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -349,18 +350,27 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Map<String, Object> getMemberStatistics() {
         Map<String, Object> stats = new HashMap<>();
+        
         // 성별 통계
-        Map<String, Integer> genderStats = memberDao.countByGender();
+        List<Map<String, Object>> genderList = memberDao.countByGender();
+        Map<String, Integer> genderStats = convertListToMap(genderList, "gender");
         stats.put("gender", genderStats);
+        
         // 학력 통계
-        Map<String, Integer> educationStats = memberDao.countByEducation();
+        List<Map<String, Object>> educationList = memberDao.countByEducation();
+        Map<String, Integer> educationStats = convertListToMap(educationList, "education");
         stats.put("education", educationStats);
+        
         // 활동 시간대 통계
-        Map<String, Integer> timeStats = memberDao.countByTime();
+        List<Map<String, Object>> timeList = memberDao.countByTime();
+        Map<String, Integer> timeStats = convertListToMap(timeList, "time");
         stats.put("time", timeStats);
+        
         // 전공 통계
-        Map<String, Integer> majorStats = memberDao.countByDepartment();
+        List<Map<String, Object>> majorList = memberDao.countByDepartment();
+        Map<String, Integer> majorStats = convertListToMap(majorList, "department");
         stats.put("major", majorStats);
+        
         return stats;
     }
 
@@ -368,27 +378,86 @@ public class MemberServiceImpl implements MemberService {
     public Map<String, Object> getActivityStatistics() {
         Map<String, Object> stats = new HashMap<>();
         
-        // 분기별 가입자 통계 조회
-        Map<String, Integer> quarterlySignups = memberDao.getQuarterlySignups();
-        stats.put("quarterlySignups", quarterlySignups);
+        // 일별 가입자 통계 조회
+        List<Map<String, Object>> dailySignupsList = memberDao.getQuarterlySignups();
+        log.info("일별 가입자 쿼리 결과: {}", dailySignupsList);
+        Map<String, Integer> dailySignups = convertListToMap(dailySignupsList, "quarter");
+        log.info("변환된 일별 가입자: {}", dailySignups);
+        stats.put("quarterlySignups", dailySignups);
         
-        // 분기별 방문자 통계 조회
-        Map<String, Integer> quarterlyVisitors = memberDao.getQuarterlyVisitors();
-        stats.put("quarterlyVisitors", quarterlyVisitors);
+        // 일별 방문자 통계 조회 (현재는 가입자와 동일한 데이터 사용)
+        List<Map<String, Object>> dailyVisitorsList = memberDao.getQuarterlyVisitors();
+        log.info("일별 방문자 쿼리 결과: {}", dailyVisitorsList);
+        Map<String, Integer> dailyVisitors = convertListToMap(dailyVisitorsList, "quarter");
+        log.info("변환된 일별 방문자: {}", dailyVisitors);
+        stats.put("quarterlyVisitors", dailyVisitors);
         
         // 활동 TOP 10 사용자 조회
         List<Map<String, Object>> topActiveUsers = memberDao.getTopActiveUsers();
+        log.info("활동 TOP 10 사용자: {}", topActiveUsers);
         stats.put("topActiveUsers", topActiveUsers);
         
         // 인기 채팅방 TOP 10 조회
         List<Map<String, Object>> popularRooms = memberDao.getPopularRooms();
+        log.info("인기 채팅방 TOP 10: {}", popularRooms);
         stats.put("popularRooms", popularRooms);
         
-        // 총 방문자 수 조회
+        // 기존 호환성을 위해 totalVisitors 유지 (총 회원 수)
         Integer totalVisitors = memberDao.getTotalVisitors();
+        log.info("총 방문자(회원) 수: {}", totalVisitors);
         stats.put("totalVisitors", totalVisitors);
         
+        // 실시간 접속자 통계 (새로 추가)
+        try {
+            // 현재 온라인 사용자 수 (최근 30분 내 활동한 사용자)
+            Integer currentOnlineUsers = memberDao.getCurrentOnlineUsers();
+            stats.put("currentOnlineUsers", currentOnlineUsers != null ? currentOnlineUsers : 0);
+            
+            // 활성 스터디룸 목록
+            List<Map<String, Object>> activeStudyRooms = memberDao.getActiveStudyRooms();
+            stats.put("activeStudyRooms", activeStudyRooms);
+            
+            // 총 등록 회원 수 (활성 상태만)
+            Integer totalRegisteredMembers = memberDao.getTotalRegisteredMembers();
+            stats.put("totalRegisteredMembers", totalRegisteredMembers != null ? totalRegisteredMembers : 0);
+            
+            log.info("실시간 통계 - 온라인: {}, 총 회원: {}, 활성 스터디룸: {}", 
+                    currentOnlineUsers, totalRegisteredMembers, activeStudyRooms.size());
+            
+        } catch (Exception e) {
+            log.warn("실시간 접속자 통계 조회 실패, 기본값 사용", e);
+            stats.put("currentOnlineUsers", 0);
+            stats.put("activeStudyRooms", List.of());
+            stats.put("totalRegisteredMembers", 0);
+        }
+        
+        log.info("최종 활동 통계: {}", stats);
         return stats;
+    }
+
+    /**
+     * MyBatis에서 반환된 List<Map>을 Map<String, Integer>로 변환하는 헬퍼 메서드
+     */
+    private Map<String, Integer> convertListToMap(List<Map<String, Object>> list, String keyColumn) {
+        Map<String, Integer> result = new HashMap<>();
+        for (Map<String, Object> row : list) {
+            String key = (String) row.get(keyColumn);
+            Object countObj = row.get("count");
+            Integer count = 0;
+            
+            if (countObj instanceof Long) {
+                count = ((Long) countObj).intValue();
+            } else if (countObj instanceof Integer) {
+                count = (Integer) countObj;
+            } else if (countObj instanceof BigInteger) {
+                count = ((BigInteger) countObj).intValue();
+            }
+            
+            if (key != null) {
+                result.put(key, count);
+            }
+        }
+        return result;
     }
 
     private MemberDTO convertToDTO(Member member) {
