@@ -1158,7 +1158,14 @@ function Chat() {
 							fileId: msg.fileId
 						}];
 					}
-					if (msg.type === 'system') {
+					if (msg.senderId === '시스템') {
+						console.log('🔍 시스템 메시지 렌더링:', {
+							text: msg.text,
+							message: msg.message,
+							senderId: msg.senderId,
+							userId: msg.userId,
+							type: msg.type
+						});
 						return <div key={i} className="program-msg">{msg.text}</div>;
 					}
 
