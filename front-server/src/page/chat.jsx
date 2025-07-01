@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
@@ -9,23 +9,27 @@ import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
 import { chatAPI, userAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
+import { customAlert, customConfirm, customPrompt } from '@/assets/js/common-ui';
+import JoinSystem from '@components/chat/JoinSystem'
 
 function Chat() {
 	const location = useLocation();
 	const params = useParams();
+	const navigate = useNavigate();
 	const studyInfo = location.state?.studyRoom || location.state;
-	
+		
 	// URL query string에서 정보 추출
 	const urlParams = new URLSearchParams(location.search);
-	
+		
 	// 사용자 정보 상태
 	const [currentUserId, setCurrentUserId] = useState(null);
 	const [currentUserInfo, setCurrentUserInfo] = useState(null);
-	
+		
 	// URL 파라미터에서 정보를 읽어오거나 location.state에서 가져오기
 	const studyId = studyInfo?.studyRoomId || studyInfo?.id || params.studyId || params.id || urlParams.get('studyId') || urlParams.get('id');
 	const roomId = studyInfo?.roomId || params.roomId || urlParams.get('roomId');
-	
+	const [showJoinSystem, setShowJoinSystem] = useState(false)
+
 	console.log('Chat 컴포넌트 초기화:', { 
 		studyInfo, 
 		params, 
@@ -34,7 +38,7 @@ function Chat() {
 		roomId,
 		location: location.pathname + location.search
 	});
-	
+		
 	// 실제 소켓 연동 (사용자 ID가 설정된 후에만)
 	const { 
 		messages: socketMessages, 
@@ -73,17 +77,20 @@ function Chat() {
 	const textareaRef = useRef(null);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
+
 	// 파일 업로드
 	const fileInputRef = useRef(null);
+
 	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([]);
+
 	// 랜덤 기능 - 방장 여부 확인
 	const [isOwner, setIsOwner] = useState(false);
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
 	const [spinning, setSpinning] = useState(false); // 룰렛 돌리는 중 여부
 	const [winner, setWinner] = useState(null); // 당첨자
-	// --------
+
 	// 목표 분담
 	const [showTodo, setShowTodo] = useState(false);
 	const [todoList, setTodoList] = useState([]);
@@ -92,21 +99,34 @@ function Chat() {
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [searchResults, setSearchResults] = useState([]); // 검색된 요소 배열
 	const [currentIndex, setCurrentIndex] = useState(0); // 현재 몇 번째 결과인지
+
 	// 참가 신청 알림 관련
 	const [joinRequests, setJoinRequests] = useState([]); // 참가 신청 목록
 	const [showNavigator, setShowNavigator] = useState(false); // 말풍선 표시 여부
+
 	// WebRTC
 	const [showVideo, setShowVideo] = useState(false);
+
+	// 신고하기 기능 추가
+	const [showReportLayer, setShowReportLayer] = useState(false);
+	const [reportTarget, setReportTarget] = useState(null);
+	const [showReportButtonIndex, setShowReportButtonIndex] = useState(null);
+
+	const chatEndRef = useRef(null);
+
+	// Todo 관련 함수들
 	const handleTodoSettingAddInput = () => {
 		if (todoSettingInputs.length < 10) {
 			setTodoSettingInputs([...todoSettingInputs, '']);
 		}
 	};
+
 	const handleInputChange = (e, idx) => {
 		const newInputs = [...todoSettingInputs];
 		newInputs[idx] = e.target.value;
 		setTodoSettingInputs(newInputs);
 	};
+
 	const handleTodoConfirm = () => {
 		const newTodos = todoSettingInputs
 			.filter(title => title.trim() !== '')
@@ -124,11 +144,65 @@ function Chat() {
 		setShowTodo(true);
 		setShowTodoSetting(false);
 	};
+
 	const handleTodoSettingDelete = (idx) => {
 		const newInputs = [...todoSettingInputs];
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
 	};
+
+	const handleRemoveTodoList = () => {
+		customConfirm('정말 제거하시겠습니까?').then((confirmDelete) => {
+			if (confirmDelete) {
+				setTodoList([]);
+				setShowTodo(false);
+			}
+		});
+	};
+
+	const handleAssignUser = (index) => {
+		const userName = currentUserInfo?.nickname || '나';
+		const newTodos = [...todoList];
+
+		if (selectedIndex === index) {
+			// 선택 해제
+			newTodos[index].users = newTodos[index].users.filter(user => user !== userName);
+			setSelectedIndex(null);
+			console.log("목표 선택이 취소되었습니다.");
+		} else {
+			// 다른 목표 내 이름 제거
+			newTodos.forEach(todo => {
+				todo.users = todo.users.filter(user => user !== userName);
+			});
+
+			// 새로 선택한 목표에 내 이름 추가
+			newTodos[index].users.push(userName);
+			setSelectedIndex(index);
+			console.log(`목표 ${index}번이 선택되었습니다.`);
+		}
+
+		setTodoList(newTodos);
+	};
+
+	// 시간 포맷 도우미
+	const getFormattedTime = () => {
+		const now = new Date();
+		const hours = now.getHours();
+		const minutes = now.getMinutes();
+		const ampm = hours >= 12 ? '오후' : '오전';
+		const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+		return { ampm, timeStr };
+	};
+
+	// 시스템 메시지
+	const addSystemMessage = (template, vars = {}) => {
+		const text = template.replace(/\$\{(.*?)\}/g, (_, key) => vars[key] ?? '');
+		setMessages(prev => [...prev, { 
+			type: 'system', 
+			text 
+		}]);
+	};
+
 	// 파일 업로드 (백엔드 먼저, UI 나중)
 	const handleFileUpload = async (e) => {
 		const file = e.target.files[0];
@@ -192,20 +266,6 @@ function Chat() {
 				// 백엔드 업로드 성공 시 UI 업데이트 (실제 fileId 사용)
 				const realFileId = result.data?.fileId;
 				
-				// setMessages(prev => {
-				//   // 로딩 메시지 제거하고 실제 파일 메시지 추가
-				//   const withoutLoading = prev.filter(msg => !msg.isUploading);
-				//   return [...withoutLoading, {
-				//     type: 'me',
-				//     time: timeStr,
-				//     ampm,
-				//     files: [{
-				//       name: file.name,
-				//       fileId: realFileId,
-				//       fileSize: file.size
-				//     }]
-				//   }];
-				// });
 				// 로딩 메시지 제거만 유지
 				setMessages(prev => prev.filter(msg => !msg.isUploading));
 				
@@ -237,6 +297,7 @@ function Chat() {
 
 		e.target.value = '';
 	};
+
 	// 파일 첨부 모아보기
 	const handleShowAttachments = async () => {
 		console.log('📂 파일 모아보기 시작:', { studyId });
@@ -309,35 +370,8 @@ function Chat() {
 			setShowAttachments(true);
 		}
 	};
-	// 랜덤 게임
-	const handleAssignUser = (index) => {
-		const userName = '김사과';
-		const newTodos = [...todoList];
 
-		if (selectedIndex === index) {
-			// 선택 해제
-			newTodos[index].users = newTodos[index].users.filter(user => user !== userName);
-			setSelectedIndex(null);
-			console.log("목표 선택이 취소되었습니다.");
-		} else {
-			// 다른 목표 내 이름 제거
-			newTodos.forEach(todo => {
-				todo.users = todo.users.filter(user => user !== userName);
-			});
-			// 새로 선택한 목표에 내 이름 추가
-			newTodos[index].users.push(userName);
-			setSelectedIndex(index);
-			console.log(`목표 ${index}번이 선택되었습니다.`);
-		}
-
-		setTodoList(newTodos);
-	};
-	// --------
-
-	// 신고하기 기능 추가
-	const [showReportLayer, setShowReportLayer] = useState(false);
-	const [reportTarget, setReportTarget] = useState(null);
-	const [showReportButtonIndex, setShowReportButtonIndex] = useState(null);
+	// 신고하기 함수들
 	const handleReportSubmit = () => {
 		customConfirm('신고하시겠습니까?').then((confirm) => {
 			if (confirm) {
@@ -347,8 +381,7 @@ function Chat() {
 			}
 		});
 	};
-	// --------
-	
+
 	// 검색기능
 	const removeHighlight = () => {
 		document.querySelectorAll('.highlight').forEach(el => {
@@ -359,12 +392,11 @@ function Chat() {
 			el.classList.remove('highlight-impact');
 		});
 	};
+
 	const handleChatSearch = async () => {
 		const keyword = await customPrompt('검색할 내용을 입력하세요', '');
-
 		if (keyword !== null && keyword.trim() !== '') {
 			removeHighlight();
-
 			const results = [];
 			const chatList = document.querySelectorAll('.user-say, .i-say');
 
@@ -402,6 +434,7 @@ function Chat() {
 			}
 		}
 	};
+
 	const goToNextNavigator = () => {
 		if (searchResults.length === 0) return;
 		const nextIndex = (currentIndex + 1) % searchResults.length;
@@ -409,6 +442,7 @@ function Chat() {
 		applyActiveClass(nextIndex);
 		searchResults[nextIndex].scrollIntoView({ behavior: 'smooth' });
 	};
+
 	const goToPrevNavigator = () => {
 		if (searchResults.length === 0) return;
 		const prevIndex = (currentIndex - 1 + searchResults.length) % searchResults.length;
@@ -416,12 +450,14 @@ function Chat() {
 		applyActiveClass(prevIndex);
 		searchResults[prevIndex].scrollIntoView({ behavior: 'smooth' });
 	};
+
 	const closeNavigator = () => {
 		removeHighlight();
 		setShowNavigator(false);
 		setSearchResults([]);
 		setCurrentIndex(0);
 	};
+
 	const applyActiveClass = (activeIndex) => {
 		searchResults.forEach((el, idx) => {
 			const textEl = el.querySelector('.user-say__text, .i-say__text');
@@ -433,28 +469,6 @@ function Chat() {
 				textEl.classList.remove('highlight-impact');
 			}
 		});
-	};
-	// --------
-
-	const chatEndRef = useRef(null);
-
-	// 시간 포맷 도우미
-	const getFormattedTime = () => {
-		const now = new Date();
-		const hours = now.getHours();
-		const minutes = now.getMinutes();
-		const ampm = hours >= 12 ? '오후' : '오전';
-		const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-		return { ampm, timeStr };
-	};
-
-	// 시스템 메시지
-	const addSystemMessage = (template, vars = {}) => {
-		const text = template.replace(/\$\{(.*?)\}/g, (_, key) => vars[key] ?? '');
-		setMessages(prev => [...prev, { 
-			type: 'system', 
-			text 
-		}]);
 	};
 
 	// 내가 보낼 메시지
@@ -478,17 +492,11 @@ function Chat() {
 			}
 		}
 
-		// 로컬 UI 업데이트 (주석처리: 소켓 서버에서 받은 메시지만 사용)
-		// const { ampm, timeStr } = getFormattedTime();
-		// setMessages(prev => [
-		// 	...prev,
-		// 	{ type: 'me', text: message, time: timeStr, ampm, senderId: currentUserId }
-		// ]);
 		setMessage('');
 		if (textareaRef.current) textareaRef.current.style.height = 'auto';
 	};
 
-	// '엔터'시 체팅 보냄
+	// '엔터'시 채팅 보냄
 	const handleKeyDown = (e) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
@@ -496,16 +504,7 @@ function Chat() {
 		}
 	};
 
-	const handleRemoveTodoList = () => {
-		customConfirm('정말 제거하시겠습니까?').then((confirmDelete) => {
-			if (confirmDelete) {
-				setTodoList([]);
-				setShowTodo(false);
-			}
-		});
-	};
-
-	// 체팅 입력창 높이값
+	// 채팅 입력창 높이값
 	const handleChange = (e) => {
 		const value = e.target.value;
 		setMessage(value);
@@ -516,8 +515,55 @@ function Chat() {
 		}
 	};
 
-	// WebRTC
-	
+	// 참가자 목록 생성 함수
+	const getAllParticipants = () => {
+		const participants = [];
+		
+		// 현재 사용자 추가
+		if (currentUserInfo) {
+			participants.push({
+				id: currentUserInfo.id,
+				name: currentUserInfo.nickname || currentUserInfo.name || '나',
+				isMe: true,
+				isOnline: true
+			});
+		}
+		
+		// 온라인 사용자들 추가 (중복 제거)
+		if (onlineUsers && onlineUsers.length > 0) {
+			onlineUsers.forEach(user => {
+				const isDuplicate = participants.some(p => 
+					p.id === user.id || p.id === user.userId
+				);
+				
+				if (!isDuplicate) {
+					participants.push({
+						id: user.id || user.userId,
+						name: user.nickname || user.name || user.username || `사용자${user.id}`,
+						isMe: false,
+						isOnline: true
+					});
+				}
+			});
+		}
+		
+		return participants;
+	};
+
+	// 랜덤게임용 활성 사용자 목록
+	const getActiveUsers = () => {
+		console.log('🎲 랜덤게임 사용자 목록 생성:', {
+			onlineUsers,
+			onlineUsersLength: onlineUsers?.length || 0,
+			currentUserInfo
+		});
+		
+		const participants = getAllParticipants();
+		const userNames = participants.map(p => p.name);
+		
+		console.log('🎲 최종 사용자 목록:', userNames);
+		return userNames;
+	};
 
 	// 사용자 정보 로드
 	useEffect(() => {
@@ -695,10 +741,6 @@ function Chat() {
 		}
 	}, [socketMessages, currentUserId, messages.length, isJoined, isConnected]);
 
-	// 중복된 히스토리 로딩 로직 제거 (위 소켓 메시지 수신 처리에서 처리됨)
-
-	// 연결 상태 메시지 (서버에서 자동으로 전송되므로 제거)
-	
 	// 방장 여부 확인
 	useEffect(() => {
 		if (studyInfo && currentUserInfo) {
@@ -724,7 +766,7 @@ function Chat() {
 			socketConnected: socketService?.socket?.connected
 		});
 
-		if (!isConnected || !isOwner) {
+		if (!isConnected || !isOwner || !socketService?.socket) {
 			console.log('⚠️ 참가 신청 알림 리스너 설정 안함:', { isConnected, isOwner });
 			return;
 		}
@@ -735,7 +777,7 @@ function Chat() {
 			setJoinRequests(prev => {
 				const newRequests = [...prev, {
 					...notification,
-					id: Date.now() + Math.random(), // 고유 ID
+					id: Date.now() + Math.random(),
 					timestamp: new Date().toISOString()
 				}];
 				console.log('📋 업데이트된 참가 신청 목록:', newRequests);
@@ -746,31 +788,32 @@ function Chat() {
 			addSystemMessage(`${notification.applicantName}님이 스터디 참가를 신청했습니다.`, {});
 		};
 
-		// 소켓 이벤트 리스너 등록
-		if (socketService?.socket) {
-			console.log('✅ 참가 신청 알림 리스너 등록 중...');
-			socketService.socket.on('join-request-notification', handleJoinRequest);
-			
-			// 테스트용 모든 이벤트 로깅
-			socketService.socket.onAny((eventName, ...args) => {
-				if (eventName.includes('join')) {
-					console.log('🔍 소켓 이벤트 수신:', eventName, args);
+		console.log('✅ 참가 신청 알림 리스너 등록 중...');
+		socketService.socket.on('join-request-notification', handleJoinRequest);
+		
+		// 테스트용 모든 이벤트 로깅
+		socketService.socket.onAny((eventName, ...args) => {
+			if (eventName.includes('join')) {
+				console.log('🔍 소켓 이벤트 수신:', eventName, args);
+			}
+		});
+		
+		// 🔥 안전한 cleanup 함수
+		return () => {
+			console.log('🧹 참가 신청 알림 리스너 해제');
+			try {
+				if (socketService?.socket && typeof socketService.socket.off === 'function') {
+					socketService.socket.off('join-request-notification', handleJoinRequest);
 				}
-			});
-			
-			return () => {
-				console.log('🧹 참가 신청 알림 리스너 해제');
-				socketService.socket.off('join-request-notification', handleJoinRequest);
-			};
-		} else {
-			console.warn('❌ 소켓 서비스가 없어서 알림 리스너를 등록할 수 없습니다.');
-		}
-	}, [isConnected, isOwner, addSystemMessage, socketService]);
+			} catch (error) {
+				console.error('리스너 해제 중 에러 (무시):', error);
+			}
+		};
+	}, [isConnected, isOwner]);
 
 	// 스크롤 하단
 	useEffect(() => {
 		if (!messages.length) return;
-
 		const lastMsg = messages[messages.length - 1];
 		if (lastMsg.type === 'me' && chatEndRef.current) {
 			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -805,7 +848,6 @@ function Chat() {
 					'Content-Type': 'application/json'
 				}
 			});
-
 			const result = await apiResponse.json();
 			
 			if (result.status === 'success') {
@@ -836,9 +878,6 @@ function Chat() {
 		}
 	};
 
-	/* 소캣테스트용 */
-	const testUsers = ['김사과', '반하나', '오렌지', '이메론', '채애리'];
-
 	return (
 		<>
 			<Header
@@ -849,10 +888,27 @@ function Chat() {
 					handleChatSearch()
 				}}
 				onShowAttachments={handleShowAttachments}
+				onBeforeBack={() => {
+					Promise.resolve().then(() => {
+						if (socketService?.socket?.connected) {
+							socketService.socket.disconnect();
+						}
+					}).catch(() => {
+						// 에러 무시
+					}).finally(() => {
+						// 무조건 페이지 이동
+						setTimeout(() => {
+							navigate(-1);
+						}, 0);
+					});
+				}}
+				onlineUsers={onlineUsers || []}
+				studyInfo={studyInfo || null}
+				currentUserInfo={currentUserInfo || null}
+				allParticipants={getAllParticipants()}
 			/>
 
 			{/* 참가 신청 알림 (방장만 표시) */}
-			{/* 디버깅용 로그 */}
 			{console.log('🔍 알림 박스 렌더링 조건 확인:', {
 				isOwner,
 				joinRequestsLength: joinRequests.length,
@@ -915,20 +971,11 @@ function Chat() {
 			)}
 
 			<div className={"chatroom-history"}>
-
 				{/* 테스트 목적 용도 */}
 				<button type="button" className="testButton" onClick={() => {
-					const { ampm, timeStr } = getFormattedTime();
-					setMessages(prev => [
-						...prev,
-						{
-							type: 'user',
-							text: '테스트 메시지에요',
-							time: timeStr,
-							ampm: ampm
-						}
-					]);
-				}}>상대 메시지 테스트</button>
+					setShowJoinSystem(true)
+				}}>조인 시스템창</button>
+
 				<button type="button" className="testButton" onClick={() => {
 					const { ampm, timeStr } = getFormattedTime();
 					setMessages(prev => [
@@ -943,15 +990,6 @@ function Chat() {
 						}
 					]);
 				}}>상대 파일 업로드</button>
-				{/* <button type="button" className="testButton" onClick={() => {
-						setIsTyping(true); // 입력 중 상태 on
-						// 3초 후 타이핑 종료
-						setTimeout(() => {
-							setIsTyping(false);
-						}, 3000);
-					}}
-				>타이핑 테스트</button> */}
-				{/* // 테스트 목적 용도 */}
 
 				{/* 메시지 출력 영역 */}
 				{messages.map((msg, i) => {
@@ -1046,7 +1084,14 @@ function Chat() {
 							</button>
 						</li>
 						<li>
-							<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
+							<button type="button" className="msg-writing__action" onClick={() => {
+								const users = getActiveUsers();
+								if (users.length < 2) {
+									customAlert('랜덤게임은 최소 2명 이상이 필요합니다.');
+									return;
+								}
+								setShowRoulette(true);
+							}}>
 								랜덤게임
 							</button>
 						</li>
@@ -1075,7 +1120,7 @@ function Chat() {
 
 			<Layer isOpen={showRoulette} onClose={() => setShowRoulette(false)} header="랜덤 뽑기">
 				<Roulette 
-					users={testUsers} 
+					users={getActiveUsers()} 
 					isOwner={isOwner}
 					onSpinStart={() => {
 						setSpinning(true); // 모달 띄우고
@@ -1084,7 +1129,6 @@ function Chat() {
 					onWinnerSelected={(user) => {
 						setSpinning(false); // 돌리기 종료
 						setWinner(user); // 결과 저장
-
 						addSystemMessage(`"${user}"님이 당첨되셨습니다!`, { user });
 					}}
 				/>
@@ -1119,7 +1163,6 @@ function Chat() {
 								<option value="신고4">신고4</option>
 							</select>
 						</div>
-
 						<div className="field __textarea">
 							<textarea className="textarea" placeholder="신고 내용을 적어주세요." name="description" />
 						</div>
@@ -1147,6 +1190,13 @@ function Chat() {
 						setWinner(null);
 						setSpinning(false);
 					}}
+				/>
+			)}
+
+			{showJoinSystem && (
+				<JoinSystem 
+					isOpen={showJoinSystem}
+					onClose={() => setShowJoinSystem(false)}
 				/>
 			)}
 

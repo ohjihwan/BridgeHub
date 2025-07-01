@@ -391,9 +391,9 @@ const Video = ({ onClose, userNickname, roomId }) => {
         />
       </div>
       <div className="video-rtc__controls">
-        <button onClick={startCamera}>{videoOn ? "카메라 시작" : "비디오 켜기"}</button>
-        <button onClick={toggleScreen}>{screenShared ? "공유 중지" : "화면 공유"}</button>
-        <button onClick={onClose}>종료</button>
+        <button type="button" className="video-rtc__control" onClick={startCamera}>{videoOn ? "카메라 시작" : "비디오 켜기"}</button>
+        <button type="button" className="video-rtc__control" onClick={toggleScreen}>{screenShared ? "공유 중지" : "화면 공유"}</button>
+        <button type="button" className="video-rtc__control" onClick={onClose}>종료</button>
       </div>
 
       {/* 참가자 목록 (디버깅용) */}
