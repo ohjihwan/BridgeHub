@@ -13,3 +13,16 @@ export async function getNicknameById(memberId) {
     conn.release();
   }
 }
+
+export async function getNicknameByUsername(username) {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute(
+      'SELECT nickname FROM members WHERE username = ? AND status = "ACTIVE"',
+      [username]
+    );
+    return rows.length > 0 ? rows[0].nickname : null;
+  } finally {
+    conn.release();
+  }
+}

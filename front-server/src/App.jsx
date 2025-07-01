@@ -8,6 +8,7 @@ import BoardList from '@page/board'
 import BoardWrite from '@components/BoardWrite'
 import List from '@page/list'
 import Search from '@page/Search'
+import Video from '@components/Video'
 
 function App() {
 	const [showIntro, setShowIntro] = useState(false);

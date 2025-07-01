@@ -1,78 +1,90 @@
-
-import { v4 as uuidv4 } from 'uuid'
-import dotenv from 'dotenv'
-dotenv.config()
-
-// RoomManager 클래스는 방 관리 기능을 제공합니다.
+import { v4 as uuidv4 } from 'uuid';
+import dotenv from 'dotenv';
+dotenv.config();
 
 class RoomManager {
   constructor() {
-    this.rooms = new Map() // { roomId: { peers: Map<socketId, { socket, nickname }>, createdAt } }
+    this.rooms = new Map(); // { roomId: { peers: Map<socketId, { socket, nickname }>, createdAt, host, maxPeers } }
   }
 
-    // 방 ID가 없으면 새로 생성하고, 있으면 기존 방을 반환
+  // 방 생성: 이미 있으면 false, 새로 만들면 true
   createRoom(roomId) {
-    if (!this.rooms.has(roomId)) {
-      this.rooms.set(roomId, {
-        peers: new Map(),
-        createdAt: new Date(),
-        maxPeers: parseInt(process.env.MAX_PEERS || 10)
-      })
-    }
+    if (this.rooms.has(roomId)) return false;
+
+    this.rooms.set(roomId, {
+      peers: new Map(),
+      createdAt: new Date(),
+      maxPeers: parseInt(process.env.MAX_PEERS || 10),
+      host: null
+    });
+    return true;
   }
 
-  // 방에 입장 시 소켓과 닉네임 등록
+  // 방에 소켓 입장 (닉네임 등록)
   joinRoom(roomId, socket, nickname) {
-    const room = this.rooms.get(roomId)
-    if (!room) return false
-    if (room.peers.size >= room.maxPeers) return false
+    const room = this.rooms.get(roomId);
+    if (!room) return false;
+    if (room.peers.size >= room.maxPeers) return false;
 
-    room.peers.set(socket.id, { socket, nickname })
-    return true
+    room.peers.set(socket.id, { socket, nickname });
+    return true;
   }
 
-  // 퇴장 시 소켓 제거, 아무도 없으면 방 삭제
+  // 방에서 소켓 퇴장
   leaveRoom(roomId, socketId) {
-    const room = this.rooms.get(roomId)
+    const room = this.rooms.get(roomId);
     if (room) {
-      room.peers.delete(socketId)
-      if (room.peers.size === 0) this.rooms.delete(roomId)
+      room.peers.delete(socketId);
+      if (room.peers.size === 0) {
+        this.rooms.delete(roomId); // 자동 삭제
+      }
     }
   }
 
-  // 연결된 peer의 ID + nickname 목록 반환
+  // 명시적 방 삭제 (방장이 직접 요청하는 경우)
+  deleteRoom(roomId) {
+    this.rooms.delete(roomId);
+  }
+
+  // 연결된 peer 목록 반환 (id + nickname)
   getPeers(roomId) {
-    const room = this.rooms.get(roomId)
-    if (!room) return []
-    return Array.from(room.peers.entries()).map(([id, { nickname }]) => ({ id, nickname }))
+    const room = this.rooms.get(roomId);
+    if (!room) return [];
+    return Array.from(room.peers.entries()).map(([id, { nickname }]) => ({ id, nickname }));
   }
 
-  // 특정 소켓 ID로 소켓 객체 반환
+  // 소켓 ID로 소켓 객체 가져오기
   getSocketById(roomId, socketId) {
-    const room = this.rooms.get(roomId)
-    return room?.peers.get(socketId)?.socket || null
+    const room = this.rooms.get(roomId);
+    return room?.peers.get(socketId)?.socket || null;
   }
 
-
-
+  // 닉네임만 반환
   getNicknames(roomId) {
-    const room = this.rooms.get(roomId)
-    return room ? Array.from(room.peers.values()).map(p => p.nickname) : []
+    const room = this.rooms.get(roomId);
+    return room ? Array.from(room.peers.values()).map(p => p.nickname) : [];
   }
 
+  // 방 정보 가져오기
   getRoom(roomId) {
-  return this.rooms.get(roomId)
+    return this.rooms.get(roomId);
+  }
+
+  // 호스트 지정
+  setHost(roomId, socketId) {
+    const room = this.rooms.get(roomId);
+    if (room) room.host = socketId;
+  }
+
+  // 호스트 가져오기
+  getHost(roomId) {
+    return this.rooms.get(roomId)?.host;
+  }
+
+  // 방 목록 전체 반환 (roomId만)
+  getRoomList() {
+    return Array.from(this.rooms.keys());
+  }
 }
 
-setHost(roomId, socketId) {
-  const room = this.rooms.get(roomId)
-  if (room) room.host = socketId
-}
-
-getHost(roomId) {
-  return this.rooms.get(roomId)?.host
-}
-}
-
-
-export default new RoomManager()
+export default new RoomManager();

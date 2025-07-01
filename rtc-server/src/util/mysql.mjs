@@ -1,4 +1,3 @@
-
 import mysql from 'mysql2/promise';
 
 export const pool = mysql.createPool({
@@ -8,4 +7,4 @@ export const pool = mysql.createPool({
   database: 'thebridgehub',
   waitForConnections: true,
   connectionLimit: 10,
-});
+})

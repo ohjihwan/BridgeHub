@@ -13,17 +13,28 @@ export const createRoom = (req, res) => {
 
 export const deleteRoom = (req, res) => {
   const { roomId } = req.params;
+  const room = RoomManager.getRoom(roomId);
+
+  if (!room) {
+    return res.status(404).json({ message: 'Room not found' });
+  }
+
+  room.peers.forEach(({ socket }) => {
+    socket.emit('room-deleted', { roomId });
+    socket.leave(roomId);
+  });
+
   RoomManager.deleteRoom(roomId);
-  res.status(200).json({ message: 'Room deleted' });
+  res.status(200).json({ message: 'Room deleted and peers notified' });
 };
 
 export const getRoomList = (req, res) => {
-  const roomList = RoomManager.getRoomList();
+  const roomList = Array.from(RoomManager.rooms.keys()); // or implement getRoomList()
   res.status(200).json({ rooms: roomList });
 };
 
 export const leaveRoom = (req, res) => {
   const { roomId, peerId } = req.body;
-  RoomManager.removePeer(roomId, peerId);
+  RoomManager.leaveRoom(roomId, peerId);
   res.status(200).json({ message: '사용자가 퇴장했습니다.' });
 };
