@@ -93,3 +93,6 @@ logging:
     name: logs/thebridgehub.log
     max-size: 10MB
     max-history: 30
+
+  server:
+    address: 0.0.0.0

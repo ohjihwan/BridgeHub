@@ -2,17 +2,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
-// 다른 PC 접속 시: 서버의 내부 IP 주소 그대로 사용
 const socket = io('http://192.168.0.58:7600', {
   transports: ['websocket'],
   reconnectionAttempts: 3,
   timeout: 10000
 })
 
-const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
+const Video = ({ roomId: roomIdProp, onClose }) => {
   const { roomId: roomIdParam } = useParams()
   const roomId = roomIdProp || roomIdParam
-  const safeNickname = userNickname || '익명'
   if (!roomId) return <div>방 ID가 없습니다</div>
 
   const localVideoRef = useRef(null)
@@ -44,44 +42,61 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
           console.log('📷 카메라 스트림 시작됨:', localStream.current)
         }
 
-        socket.emit('join', { roomId, nickname: safeNickname })
+        const token = localStorage.getItem('token')
+        if (!token) {
+          alert('인증 토큰이 없습니다. 로그인 후 이용해주세요.')
+          return
+        }
+
+        socket.emit('join', { roomId, token })
 
         socket.emit('createRoom', { roomId })
-        socket.emit('join', { roomId, nickname: safeNickname })
 
-        socket.on('allUsers', users => {
-          users.forEach(user => createOffer(user.socketId, user.nickname))
+        socket.on('peer-list', users => {
+          users.forEach(user => createOffer(user.id, user.nickname))
         })
 
-        socket.on('getOffer', async ({ socketId, nickname, sdp }) => {
-          const pc = createPeerConnection(socketId, nickname)
-          await pc.setRemoteDescription(new RTCSessionDescription(sdp))
-          const answer = await pc.createAnswer()
-          await pc.setLocalDescription(answer)
-          socket.emit('sendAnswer', { sdp: answer, to: socketId })
+        socket.on('peer-joined', ({ id, nickname }) => {
+          createOffer(id, nickname)
         })
 
-        socket.on('getAnswer', async ({ socketId, sdp }) => {
-          const pc = peerConnections.current[socketId]
-          if (pc) await pc.setRemoteDescription(new RTCSessionDescription(sdp))
+        socket.on('rtc-message', async msg => {
+          const { event, data, from } = JSON.parse(msg)
+          const pc = peerConnections.current[from]
+
+          switch (event) {
+            case 'offer':
+              const offerPC = createPeerConnection(from, data.nickname)
+              await offerPC.setRemoteDescription(new RTCSessionDescription(data.sdp))
+              const answer = await offerPC.createAnswer()
+              await offerPC.setLocalDescription(answer)
+              socket.emit('rtc-message', JSON.stringify({
+                roomId, event: 'answer', data: { sdp: answer }, to: from
+              }))
+              break
+
+            case 'answer':
+              if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
+              break
+
+            case 'candidate':
+              if (pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+              break
+          }
         })
 
-        socket.on('getCandidate', async ({ socketId, candidate }) => {
-          const pc = peerConnections.current[socketId]
-          if (pc) await pc.addIceCandidate(new RTCIceCandidate(candidate))
-        })
-
-        socket.on('userExit', ({ socketId }) => {
-          if (peerConnections.current[socketId]) {
-            peerConnections.current[socketId].close()
-            delete peerConnections.current[socketId]
+        socket.on('peer-left', ({ id }) => {
+          if (peerConnections.current[id]) {
+            peerConnections.current[id].close()
+            delete peerConnections.current[id]
             setPeers(prev => {
               const updated = { ...prev }
-              delete updated[socketId]
+              delete updated[id]
               return updated
             })
           }
         })
+
       } catch (err) {
         console.error('❌ 초기화 실패:', err)
       }
@@ -98,7 +113,12 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
 
       pc.onicecandidate = e => {
         if (e.candidate) {
-          socket.emit('sendCandidate', { candidate: e.candidate, to: socketId })
+          socket.emit('rtc-message', JSON.stringify({
+            roomId,
+            event: 'candidate',
+            data: { candidate: e.candidate },
+            to: socketId
+          }))
         }
       }
 
@@ -117,7 +137,12 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
       const pc = createPeerConnection(socketId, nickname)
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
-      socket.emit('sendOffer', { sdp: offer, to: socketId })
+      socket.emit('rtc-message', JSON.stringify({
+        roomId,
+        event: 'offer',
+        data: { sdp: offer, nickname },
+        to: socketId
+      }))
     }
 
     init()
@@ -125,7 +150,7 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
       socket.disconnect()
       Object.values(peerConnections.current).forEach(pc => pc.close())
     }
-  }, [roomId, safeNickname])
+  }, [roomId])
 
   const toggleVideo = () => {
     const track = localStream.current?.getVideoTracks()[0]
@@ -154,7 +179,6 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = screenStream
           await localVideoRef.current.play()
-          console.log('🖥️ 화면 공유 시작됨:', screenStream)
         }
 
         Object.values(peerConnections.current).forEach(pc => {
@@ -174,7 +198,6 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
   }
 
   const stopScreenShare = async () => {
-    console.log('🛑 화면 공유 종료')
     setIsScreenSharing(false)
     setVideoOn(true)
 
@@ -197,14 +220,7 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
       </div>
 
       <div className="video-highlight">
-        <video
-          ref={localVideoRef}
-          autoPlay
-          playsInline
-          muted
-          className="screen-video"
-        />
-        {!videoOn && <div className="nickname-overlay">{safeNickname}</div>}
+        <video ref={localVideoRef} autoPlay playsInline muted className="screen-video" />
       </div>
 
       <div className="video-grid-scroll">
@@ -230,7 +246,7 @@ const Video = ({ userNickname = '익명', roomId: roomIdProp, onClose }) => {
         <button onClick={onClose || (() => window.history.back())}>❌ 나가기</button>
       </div>
 
-      <style>{`
+      <style>{/* 스타일은 동일하게 유지 */`
         .video-container {
           padding: 1rem;
           background: #111;

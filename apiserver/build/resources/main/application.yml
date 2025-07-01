@@ -8,6 +8,11 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # MongoDB 설정 추가
+  data:
+    mongodb:
+      uri: mongodb+srv://thebridgehub:1111@cluster0.ed1m1eg.mongodb.net/thebridgehub?retryWrites=true&w=majority
+
   # JPA 설정
   jpa:
     hibernate:
@@ -23,20 +28,16 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: bglyk83@gmail.com
-    password: ipbeaplyaqbqmdsy
+    password: ipbeaplyaqbqmdsy     # 실제 앱 비밀번호
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: false
-          timeout: 5000
-          connectiontimeout: 5000
-          writetimeout: 5000
-        transport:
-          protocol: smtp
-        debug: false
-
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true      # 반드시 true
+      mail.smtp.starttls.required: true    # (권장)
+      mail.smtp.timeout: 5000
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.writetimeout: 5000
+      mail.transport.protocol: smtp
+      mail.debug: true
   # 파일 업로드 설정
   servlet:
     multipart:
@@ -92,3 +93,6 @@ logging:
     name: logs/thebridgehub.log
     max-size: 10MB
     max-history: 30
+
+  server:
+    address: 0.0.0.0

@@ -43,6 +43,6 @@ io.on('connection', (socket) => {
 
 // ✅ 서버 실행
 const PORT = process.env.PORT || 7600;
-httpServer.listen(PORT, () => {
-  console.log(`✅ RTC 서버 실행 중: http://localhost:${PORT}`);
+httpServer.listen(PORT,() => {
+  console.log(`✅ RTC 서버 실행 중: http://0.0.0.0:${PORT}`);
 });
