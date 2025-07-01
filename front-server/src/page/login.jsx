@@ -47,7 +47,7 @@ function Login({ onSwitchToSignUp }) {
 
 				navigate('/home');
 			} else {
-				await window.customAlert('로그인에 실패했습니다.');
+				await window.customAlert('아이디와 비밀번호를 확인해주세요.');
 			}
 		} catch (err) {
 			await window.customAlert('로그인 중 오류가 발생했습니다.');
