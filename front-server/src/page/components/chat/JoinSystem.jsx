@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 
-const JoinSystem = ({ isOpen, onClose, profileData }) => {
+const JoinSystem = ({ isOpen, onClose, profileData, isOwner = false, currentPendingMember = null, onComplete, onCancel }) => {
 	const [swipeDistance, setSwipeDistance] = useState(0)
 	const [isDragging, setIsDragging] = useState(false)
 	const [startX, setStartX] = useState(0)
@@ -20,8 +20,17 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 		description: "함께 공부하며 성장하고 싶습니다!",
 	}
 
-	// props로 받은 데이터가 있으면 사용하고, 없으면 기본값 사용
-	const currentProfileData = profileData || defaultProfileData
+	// 방장일 때는 참가신청자 정보 사용, 일반 사용자일 때는 기본 정보 사용
+	const currentProfileData = isOwner && currentPendingMember ? {
+		profileImg: currentPendingMember.memberProfileImage || "/uploads/profile/default-profile1.png",
+		nickname: currentPendingMember.memberNickname || "사용자",
+		education: "대학교 졸업", // 기본값
+		department: "공학계열", // 기본값
+		region: "서울특별시", // 기본값
+		district: "강남구", // 기본값
+		timeZone: "오후", // 기본값
+		description: currentPendingMember.memberDescription || "함께 공부하며 성장하고 싶습니다!",
+	} : (profileData || defaultProfileData)
 
 	useEffect(() => {
 		if (isOpen) {
@@ -77,7 +86,11 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 			setSwipeDistance(maxDistance)
 			setIsCompleted(true)
 			setTimeout(() => {
-				onClose()
+				if (isOwner && onComplete) {
+					onComplete(); // 방장일 때는 수락 처리
+				} else {
+					onClose(); // 일반 사용자일 때는 기존 동작
+				}
 			}, 500)
 		} else {
 			setSwipeDistance(0)
@@ -106,7 +119,11 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 			setSwipeDistance(maxDistance)
 			setIsCompleted(true)
 			setTimeout(() => {
-				onClose()
+				if (isOwner && onComplete) {
+					onComplete(); // 방장일 때는 수락 처리
+				} else {
+					onClose(); // 일반 사용자일 때는 기존 동작
+				}
 			}, 500)
 		} else {
 			setSwipeDistance(0)
@@ -127,14 +144,18 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 	useEffect(() => {
 		const handleKeyDown = (e) => {
 			if (e.key === "Escape") {
-				onClose()
+				if (isOwner && onCancel) {
+					onCancel(); // 방장일 때는 거절 처리
+				} else {
+					onClose(); // 일반 사용자일 때는 기존 동작
+				}
 			}
 		}
 		if (isOpen) {
 			document.addEventListener("keydown", handleKeyDown)
 			return () => document.removeEventListener("keydown", handleKeyDown)
 		}
-	}, [isOpen, onClose])
+	}, [isOpen, onClose, isOwner, onCancel])
 
 	useEffect(() => {
 		if (isOpen) {
@@ -149,6 +170,19 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 	const maxDistance = sliderWidth - 60
 	const progress = maxDistance > 0 ? swipeDistance / maxDistance : 0
 
+	// 방장일 때와 일반 사용자일 때 다른 텍스트 표시
+	const titleText = isOwner 
+		? `${currentProfileData?.nickname || "사용자"}님이\n참여를 요청했습니다`
+		: `${currentProfileData?.nickname || "사용자"}님이\n참여를 요청했습니다`;
+
+	const descriptionText = isOwner
+		? "함께하시려면\n아래 슬라이더를 밀어주세요."
+		: "함께하시려면\n아래 슬라이더를 밀어주세요.";
+
+	const sliderText = isOwner
+		? (isCompleted ? "수락 완료!" : "밀어서 수락하기")
+		: (isCompleted ? "완료!" : "밀어서 함께하기");
+
 	return (
 		<div className="join-system">
 			<div className="join-system__modal" onClick={(e) => e.stopPropagation()}>
@@ -162,6 +196,7 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 					</div>
 
 					<div className="join-system__profile-info">
+						<div className="join-system__profile-nickname">{currentProfileData?.nickname || "사용자"}</div>
 
 						<div className="join-system__profile-details">
 							{currentProfileData?.education && (
@@ -232,7 +267,7 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 						}}
 					/>
 					<div className={`join-system__text ${isCompleted ? "join-system__text--completed" : ""}`}>
-						{isCompleted ? "완료!" : "밀어서 함께하기"}
+						{isCompleted ? (isOwner ? "수락 완료!" : "완료!") : (isOwner ? "밀어서 수락하기" : "밀어서 함께하기")}
 					</div>
 					<div
 						className={`join-system__handle ${isDragging ? "join-system__handle--dragging" : ""}`}
@@ -250,7 +285,17 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 				</div>
 
 				<div className="join-system__buttons">
-					<button className="join-system__cancel" onClick={onClose} aria-label="닫기"></button>
+					<button 
+						className="join-system__cancel" 
+						onClick={() => {
+							if (isOwner && onCancel) {
+								onCancel(); // 방장일 때는 거절 처리
+							} else {
+								onClose(); // 일반 사용자일 때는 기존 동작
+							}
+						}} 
+						aria-label="닫기"
+					></button>
 				</div>
 			</div>
 		</div>

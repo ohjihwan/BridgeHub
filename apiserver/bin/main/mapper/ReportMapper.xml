@@ -9,15 +9,17 @@
         <result property="reportType" column="report_type"/>
         <result property="messageId" column="message_id"/>
         <result property="roomId" column="room_id"/>
-        <result property="studyRoomId" column="studyRoom_id"/>
+        <result property="studyRoomId" column="study_room_id"/>
         <result property="reason" column="reason"/>
         <result property="createdAt" column="created_at"/>
         <result property="status" column="status"/>
         <result property="adminComment" column="admin_comment"/>
+        <result property="logFileId" column="log_file_id"/>
+        <result property="logMessageIndex" column="log_message_index"/>
     </resultMap>
 
     <insert id="insertReport" parameterType="com.koreait.apiserver.entity.Report" useGeneratedKeys="true" keyProperty="reportId">
-        INSERT INTO Report (reporter_id, reported_user_id, report_type, message_id, room_id, studyRoom_id, reason, created_at, status)
+        INSERT INTO Report (reporter_id, reported_user_id, report_type, message_id, room_id, study_room_id, reason, created_at, status)
         VALUES (#{reporterId}, #{reportedUserId}, #{reportType}, #{messageId}, #{roomId}, #{studyRoomId}, #{reason}, NOW(), #{status})
     </insert>
 
@@ -73,6 +75,14 @@
 
     <select id="getTotalCount" resultType="int">
         SELECT COUNT(*) FROM Report
+    </select>
+
+    <select id="findRecentReports" resultType="com.koreait.apiserver.dto.ReportDTO">
+        SELECT * FROM report ORDER BY created_at DESC LIMIT #{limit}
+    </select>
+
+    <select id="countByReportType" resultType="map">
+        SELECT reason, COUNT(*) as value FROM report GROUP BY reason
     </select>
 
 </mapper> 

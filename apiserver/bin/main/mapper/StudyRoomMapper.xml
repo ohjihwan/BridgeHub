@@ -18,7 +18,6 @@
         <result property="thumbnail" column="thumbnail"/>
         <result property="isPublic" column="is_public"/>
         <result property="createdAt" column="created_at"/>
-        <result property="bossName" column="boss_name"/>
         <result property="bossNickname" column="boss_nickname"/>
         <result property="bossProfileImage" column="boss_profile_image"/>
     </resultMap>
@@ -36,14 +35,21 @@
     </insert>
 
     <select id="findById" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         WHERE sr.study_room_id = #{studyRoomId}
     </select>
 
+    <select id="findByRoomId" resultMap="StudyRoomResultMap">
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        FROM studyroom sr
+        LEFT JOIN members m ON sr.boss_id = m.id
+        WHERE sr.room_id = #{roomId}
+    </select>
+
     <select id="findAll" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         ORDER BY sr.created_at DESC
@@ -51,7 +57,7 @@
     </select>
 
     <select id="findByBossId" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         WHERE sr.boss_id = #{bossId}
@@ -59,7 +65,7 @@
     </select>
 
     <select id="findByDepartment" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         WHERE sr.department = #{department}
@@ -67,7 +73,7 @@
     </select>
 
     <select id="findByRegion" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         WHERE sr.region = #{region}
@@ -75,7 +81,7 @@
     </select>
 
     <select id="findByTime" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         WHERE sr.time = #{time}
@@ -119,7 +125,7 @@
     </select>
 
     <select id="findByUsername" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         INNER JOIN members m ON sr.boss_id = m.id
         WHERE m.userid = #{username}
@@ -134,7 +140,7 @@
     
     <!-- 인기 스터디룸 조회 (현재 멤버 수가 많고 최근 생성된 순으로) -->
     <select id="findHotStudyRooms" resultMap="StudyRoomResultMap">
-        SELECT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         WHERE sr.is_public = true
@@ -147,7 +153,7 @@
     
     <!-- 회원이 참여한 스터디룸 조회 (방장이거나 멤버로 참여한 스터디룸) -->
     <select id="findByMemberId" resultMap="StudyRoomResultMap">
-        SELECT DISTINCT sr.*, m.name as boss_name, m.nickname as boss_nickname, m.profile_image as boss_profile_image
+        SELECT DISTINCT sr.*, m.nickname as boss_nickname, m.profile_image as boss_profile_image
         FROM studyroom sr
         LEFT JOIN members m ON sr.boss_id = m.id
         LEFT JOIN study_room_members srm ON sr.study_room_id = srm.study_room_id
