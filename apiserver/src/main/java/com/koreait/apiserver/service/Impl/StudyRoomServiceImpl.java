@@ -66,48 +66,48 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         log.info("요청 DTO: {}", studyRoomDTO);
         
         try {
-            // 정원 제한 검증
-            if (studyRoomDTO.getCapacity() == null || studyRoomDTO.getCapacity() < 2 || studyRoomDTO.getCapacity() > 10) {
-                throw new IllegalArgumentException("스터디 정원은 2~10명 사이여야 합니다.");
-            }
-            
-            // 사용자별 스터디룸 개설 제한 검증
-            List<StudyRoom> existingStudies = studyRoomDao.findByBossId(studyRoomDTO.getBossId());
-            if (!existingStudies.isEmpty()) {
-                throw new RuntimeException("이미 스터디룸을 개설한 사용자입니다. 한 사용자는 하나의 스터디룸만 개설할 수 있습니다.");
-            }
-            
-            // 1. 먼저 채팅방 생성
+        // 정원 제한 검증
+        if (studyRoomDTO.getCapacity() == null || studyRoomDTO.getCapacity() < 2 || studyRoomDTO.getCapacity() > 10) {
+            throw new IllegalArgumentException("스터디 정원은 2~10명 사이여야 합니다.");
+        }
+        
+        // 사용자별 스터디룸 개설 제한 검증
+        List<StudyRoom> existingStudies = studyRoomDao.findByBossId(studyRoomDTO.getBossId());
+        if (!existingStudies.isEmpty()) {
+            throw new RuntimeException("이미 스터디룸을 개설한 사용자입니다. 한 사용자는 하나의 스터디룸만 개설할 수 있습니다.");
+        }
+        
+        // 1. 먼저 채팅방 생성
             log.info("채팅방 생성 시작");
-            ChatRoom chatRoom = new ChatRoom();
-            chatRoom.setRoomName(studyRoomDTO.getTitle() + " 채팅방");
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.setRoomName(studyRoomDTO.getTitle() + " 채팅방");
             // createdAt은 Mapper에서 NOW()로 자동 설정
-            chatRoom.setMaxMembers(studyRoomDTO.getCapacity());
-            chatRoom.setIsActive(true);
-            
+        chatRoom.setMaxMembers(studyRoomDTO.getCapacity());
+        chatRoom.setIsActive(true);
+        
             int chatRoomResult = chatRoomDao.insertChatRoom(chatRoom);
             log.info("채팅방 생성 결과: {}, 생성된 ID: {}", chatRoomResult, chatRoom.getRoomId());
             
             if (chatRoomResult <= 0 || chatRoom.getRoomId() == null) {
                 throw new RuntimeException("채팅방 생성에 실패했습니다.");
             }
-            
-            // 2. 스터디룸 생성 (생성된 채팅방 ID 포함)
+        
+        // 2. 스터디룸 생성 (생성된 채팅방 ID 포함)
             log.info("스터디룸 생성 시작 - 채팅방 ID: {}", chatRoom.getRoomId());
-            StudyRoom studyRoom = new StudyRoom();
-            studyRoom.setRoomId(chatRoom.getRoomId());  // 생성된 채팅방 ID 설정
-            studyRoom.setTitle(studyRoomDTO.getTitle());
-            studyRoom.setDescription(studyRoomDTO.getDescription());
-            studyRoom.setBossId(studyRoomDTO.getBossId());
-            studyRoom.setEducation(studyRoomDTO.getEducation());
-            studyRoom.setDepartment(studyRoomDTO.getDepartment());
-            studyRoom.setRegion(studyRoomDTO.getRegion());
-            studyRoom.setDistrict(studyRoomDTO.getDistrict());
-            studyRoom.setCapacity(studyRoomDTO.getCapacity());
-            studyRoom.setCurrentMembers(1); // 방장 포함
-            studyRoom.setTime(studyRoomDTO.getTime());
-            studyRoom.setThumbnail(studyRoomDTO.getThumbnail());
-            studyRoom.setIsPublic(studyRoomDTO.getIsPublic());
+        StudyRoom studyRoom = new StudyRoom();
+        studyRoom.setRoomId(chatRoom.getRoomId());  // 생성된 채팅방 ID 설정
+        studyRoom.setTitle(studyRoomDTO.getTitle());
+        studyRoom.setDescription(studyRoomDTO.getDescription());
+        studyRoom.setBossId(studyRoomDTO.getBossId());
+        studyRoom.setEducation(studyRoomDTO.getEducation());
+        studyRoom.setDepartment(studyRoomDTO.getDepartment());
+        studyRoom.setRegion(studyRoomDTO.getRegion());
+        studyRoom.setDistrict(studyRoomDTO.getDistrict());
+        studyRoom.setCapacity(studyRoomDTO.getCapacity());
+        studyRoom.setCurrentMembers(1); // 방장 포함
+        studyRoom.setTime(studyRoomDTO.getTime());
+        studyRoom.setThumbnail(studyRoomDTO.getThumbnail());
+        studyRoom.setIsPublic(studyRoomDTO.getIsPublic());
             
             int studyRoomResult = studyRoomDao.insertStudyRoom(studyRoom);
             log.info("스터디룸 생성 결과: {}, 생성된 ID: {}", studyRoomResult, studyRoom.getStudyRoomId());
@@ -122,19 +122,19 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             chatRoomMember.setRoomId(chatRoom.getRoomId());
             chatRoomMember.setMemberId(studyRoomDTO.getBossId());
             chatRoomMember.setIsAdmin(true);
-            
+        
             int memberResult = chatRoomMemberDao.insertChatRoomMember(chatRoomMember);
             log.info("채팅방 멤버 추가 결과: {}", memberResult);
             
             if (memberResult <= 0) {
                 throw new RuntimeException("채팅방 멤버 추가에 실패했습니다.");
             }
-            
-            log.info("스터디룸 생성 완료: studyRoomId={}, bossId={}, chatRoomId={}", 
-                    studyRoom.getStudyRoomId(), studyRoomDTO.getBossId(), chatRoom.getRoomId());
-            
+        
+        log.info("스터디룸 생성 완료: studyRoomId={}, bossId={}, chatRoomId={}", 
+                studyRoom.getStudyRoomId(), studyRoomDTO.getBossId(), chatRoom.getRoomId());
+        
             // 트리거에 의해 study_room_members에 방장이 자동으로 추가됨
-            return convertToDTO(studyRoom);
+        return convertToDTO(studyRoom);
             
         } catch (Exception e) {
             log.error("스터디룸 생성 중 오류 발생: {}", e.getMessage(), e);
@@ -251,7 +251,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                     // statusMessage = "이전에 참가가 거절된 스터디입니다."; // 원래 코드 (주석처리)
                     // REJECTED 상태면 그냥 통과 (재신청 허용)
                     break;
-            }
+        }
             // throw new RuntimeException(statusMessage); // 원래 코드 (주석처리)
             // 모든 상태에서 재신청 허용 (에러 발생 안함)
         }

@@ -46,11 +46,10 @@ public class BoardController {
         }
     }
 
-    // ============ 게시글 CRUD ============
-
-    /**
-     * 게시글 목록 조회 (페이징, 검색, 정렬)
-     */
+    
+    
+     // 게시글 목록 조회 (페이징, 검색, 정렬)
+     
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getBoardList(
             @RequestParam(value = "categoryId", required = false) Integer categoryId,
@@ -70,9 +69,9 @@ public class BoardController {
         }
     }
 
-    /**
-     * 게시글 상세 조회
-     */
+  
+   // 게시글 상세 조회
+     
     @GetMapping("/{boardId}")
     public ResponseEntity<ApiResponse<BoardDTO>> getBoardDetail(
             @PathVariable Integer boardId,
@@ -93,9 +92,9 @@ public class BoardController {
         }
     }
 
-    /**
-     * 게시글 작성
-     */
+    
+    // 게시글 작성
+    
     @PostMapping
     public ResponseEntity<ApiResponse<Integer>> createBoard(
             @RequestBody BoardDTO boardDTO,
@@ -119,9 +118,9 @@ public class BoardController {
         }
     }
 
-    /**
-     * 게시글 수정
-     */
+    
+     // 게시글 수정
+     
     @PutMapping("/{boardId}")
     public ResponseEntity<ApiResponse<Void>> updateBoard(
             @PathVariable Integer boardId,

@@ -14,7 +14,7 @@ public class StudyRoom {
     private Integer roomId;  // ChatRoom과 연결
     private Integer bossId;  // 방장 ID
     private String title;
-    private String description;  // content를 description으로 변경
+    private String description;  
     private String education;
     private String department;
     private String region;
