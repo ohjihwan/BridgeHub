@@ -9,7 +9,7 @@
         <result property="reportType" column="report_type"/>
         <result property="messageId" column="message_id"/>
         <result property="roomId" column="room_id"/>
-        <result property="studyRoomId" column="studyRoom_id"/>
+        <result property="studyRoomId" column="study_room_id"/>
         <result property="reason" column="reason"/>
         <result property="createdAt" column="created_at"/>
         <result property="status" column="status"/>
@@ -19,7 +19,7 @@
     </resultMap>
 
     <insert id="insertReport" parameterType="com.koreait.apiserver.entity.Report" useGeneratedKeys="true" keyProperty="reportId">
-        INSERT INTO Report (reporter_id, reported_user_id, report_type, message_id, room_id, studyRoom_id, reason, created_at, status)
+        INSERT INTO Report (reporter_id, reported_user_id, report_type, message_id, room_id, study_room_id, reason, created_at, status)
         VALUES (#{reporterId}, #{reportedUserId}, #{reportType}, #{messageId}, #{roomId}, #{studyRoomId}, #{reason}, NOW(), #{status})
     </insert>
 
