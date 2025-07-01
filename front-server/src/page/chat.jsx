@@ -917,7 +917,7 @@ function Chat() {
 		try {
 			const token = localStorage.getItem('token');
 			if (!token) {
-				alert('로그인이 필요합니다.');
+				customAlert('로그인이 필요합니다.');
 				return;
 			}
 
@@ -951,11 +951,11 @@ function Chat() {
 				
 				console.log(`✅ 참가 신청 ${actionText} 완료:`, request.applicantName);
 			} else {
-				alert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
+				customAlert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
 			}
 		} catch (error) {
 			console.error('참가 신청 처리 실패:', error);
-			alert('참가 신청 처리 중 오류가 발생했습니다.');
+			customAlert('참가 신청 처리 중 오류가 발생했습니다.');
 		}
 	};
 

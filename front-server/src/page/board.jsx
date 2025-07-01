@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import Header from "@common/Header"
 import ListSearch from "@components/ListSearch"
+import { customAlert } from '@/assets/js/common-ui';
 
 function Board() {
     const [showSearch, setShowSearch] = useState(false)
@@ -129,13 +130,13 @@ function Board() {
     // 댓글 작성
     const submitComment = async () => {
         if (!newComment.trim()) {
-            alert("댓글을 입력해주세요.")
+            customAlert("댓글을 입력해주세요.")
             return
         }
 
         const token = localStorage.getItem("token")
         if (!token) {
-            alert("로그인이 필요합니다.")
+            customAlert("로그인이 필요합니다.")
             return
         }
 
@@ -207,7 +208,7 @@ function Board() {
         try {
             const token = localStorage.getItem("token")
             if (!token) {
-                alert("로그인이 필요합니다.")
+                customAlert("로그인이 필요합니다.")
                 return
             }
 

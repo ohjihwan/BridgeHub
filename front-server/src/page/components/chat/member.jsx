@@ -1,6 +1,5 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
-import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
 const AttachmentList = ({ isOpen, attachments, onClose }) => {
 	const [isVisible, setIsVisible] = useState(false);

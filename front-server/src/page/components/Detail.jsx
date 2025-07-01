@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '@dev/hooks/useSocket';
+import { customAlert } from '@/assets/js/common-ui';
 
 const Detail = ({ room, isClosing, onClose }) => {
 	const [isActive, setIsActive] = useState(false);
@@ -64,14 +65,14 @@ const Detail = ({ room, isClosing, onClose }) => {
 		// 현재 사용자 정보 확인
 		const token = localStorage.getItem('token');
 		if (!token) {
-			alert('로그인이 필요합니다.');
+			customAlert('로그인이 필요합니다.');
 			navigate('/login');
 			return;
 		}
 
 		const userInfo = extractUserFromToken(token);
 		if (!userInfo) {
-			alert('사용자 인증에 실패했습니다. 다시 로그인해주세요.');
+			customAlert('사용자 인증에 실패했습니다. 다시 로그인해주세요.');
 			navigate('/login');
 			return;
 		}
@@ -184,7 +185,7 @@ const Detail = ({ room, isClosing, onClose }) => {
 							// const message = notificationSent 
 							// 	? '참여 신청이 완료되었습니다. 방장에게 실시간 알림이 전송되었습니다.'
 							// 	: '참여 신청이 완료되었습니다. 방장의 승인을 기다려주세요.';
-							// alert(message);
+							// customAlert(message);
 							// 팝업 닫기 전에 잠시 대기 (소켓 이벤트 전송 완료를 위해)
 							// setTimeout(() => {
 							// 	onClose();
@@ -201,7 +202,7 @@ const Detail = ({ room, isClosing, onClose }) => {
 							});
 							return;
 						} else {
-							alert(joinResult.message || '참여 신청에 실패했습니다.');
+							customAlert(joinResult.message || '참여 신청에 실패했습니다.');
 						}
 					} else {
 						// HTTP 상태 코드가 400, 500 등인 경우
@@ -224,27 +225,27 @@ const Detail = ({ room, isClosing, onClose }) => {
 							// 			applicantName: userInfo.nickname || userInfo.username
 							// 		});
 							// 	}
-							// 	alert('이미 참가 신청을 하셨습니다. 방장에게 알림을 다시 전송했습니다.');
+							// 	customAlert('이미 참가 신청을 하셨습니다. 방장에게 알림을 다시 전송했습니다.');
 							// }
 							// else {
 							// 	const errorMessage = errorResult.errorCode === 'ALREADY_MEMBER' ? '이미 참가 중인 스터디입니다.' :
 							// 		errorResult.errorCode === 'ROOM_FULL' ? '스터디 정원이 가득 찼습니다.' :
 							// 		errorResult.errorCode === 'PREVIOUSLY_REJECTED' ? '이전에 참가가 거절된 스터디입니다.' :
 							// 		'참가 신청에 실패했습니다.';
-							// 	alert(errorMessage);
+							// 	customAlert(errorMessage);
 							// }
 						} catch (parseError) {
 							console.error('❌ 에러 응답 파싱 실패:', parseError);
-							alert('참가 신청 처리 중 오류가 발생했습니다.');
+							customAlert('참가 신청 처리 중 오류가 발생했습니다.');
 						}
 					}
 				}
 			} else {
-				alert('스터디 정보를 가져오는데 실패했습니다.');
+				customAlert('스터디 정보를 가져오는데 실패했습니다.');
 			}
 		} catch (error) {
 			console.error('참여 처리 실패:', error);
-			alert('참여 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+			customAlert('참여 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
 		}
 	};
 

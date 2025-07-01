@@ -2855,7 +2855,7 @@ legend,
 		flex-wrap:wrap;
 		overflow-x:hidden;
 		overflow-y:auto;
-		height:calc(100vh - remx(56));
+		max-height:calc(100vh - remx(56));
 		padding:remx(10) remx(7) remx(40);
 	}
 
@@ -3336,11 +3336,11 @@ legend,
 		background-color: white;
 		border-radius: 20px 20px 0 0 ;
 		padding:remx(40) $padding-x remx(20);
+		transition:transform 0.4s ease;
 		text-align: center;
 
 		&.join-system__modal--active {
 			transform:translateY(0);
-			transition:transform 0.4s;
 		}
 	}
 
