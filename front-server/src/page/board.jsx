@@ -15,7 +15,6 @@ function Board() {
     const [loading, setLoading] = useState(false)
     const [selectedPost, setSelectedPost] = useState(null)
     const [showDetail, setShowDetail] = useState(false)
-
     
     // 댓글 관련 state
     const [comments, setComments] = useState([])
@@ -23,8 +22,6 @@ function Board() {
     const [commentLoading, setCommentLoading] = useState(false)
 
     const navigate = useNavigate()
-
-
 
     // 게시글 목록 가져오기
     const fetchPosts = async (page = 0, reset = false) => {
@@ -308,7 +305,14 @@ function Board() {
 
     return (
         <>
-            <Header showSearch={true} title="자유게시판" onSearch={() => setShowSearch(true)} />
+            <Header
+                onBeforeBack={() => {
+                    navigate('/home')
+                }}
+                showSearch={true} 
+                title="자유게시판" 
+                onSearch={() => setShowSearch(true)} 
+            />
             <div className="board-list">
                 {showSearch && (
                     <ListSearch 
