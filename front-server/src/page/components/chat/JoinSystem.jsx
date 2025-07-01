@@ -10,7 +10,7 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 
 	// 기본값 설정 (props가 없을 때만 사용)
 	const defaultProfileData = {
-		profileImg: "",
+		profileImg: "/uploads/profile/default-profile1.png",
 		nickname: "김사과",
 		education: "대학교 졸업",
 		department: "공학계열",
@@ -162,7 +162,6 @@ const JoinSystem = ({ isOpen, onClose, profileData }) => {
 					</div>
 
 					<div className="join-system__profile-info">
-						<div className="join-system__profile-nickname">{currentProfileData?.nickname || "사용자"}</div>
 
 						<div className="join-system__profile-details">
 							{currentProfileData?.education && (

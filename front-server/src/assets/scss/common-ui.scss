@@ -3387,8 +3387,8 @@ legend,
 		width:100%;
 		transform:translateY(100%);
 		background-color: white;
-		border-radius: 20px 20px 0 0 ;
-		padding:remx(40) $padding-x remx(20);
+		border-radius: remx(20) remx(20) 0 0 ;
+		padding:remx(60) $padding-x remx(20);
 		transition:transform 0.4s ease;
 		text-align: center;
 
@@ -3398,8 +3398,8 @@ legend,
 	}
 
 	&__title {
-		margin-bottom: 30px;
-		font-size: 24px;
+		margin:remx(20) 0 remx(10);
+		font-size: remx(24);
 		color: #333;
 	}
 
@@ -3408,7 +3408,7 @@ legend,
 	}
 
 	&__description {
-		margin-bottom: 40px;
+		margin-bottom: remx(20);
 		color: #666;
 		line-height: 1.6;
 	}
@@ -3417,7 +3417,7 @@ legend,
 		position: relative;
 		height: 60px;
 		background-color: #f0f0f0;
-		border-radius: 30px;
+		border-radius: remx(30);
 		margin: 0 auto;
 		overflow: hidden;
 	}
@@ -3432,7 +3432,7 @@ legend,
 		left: 0;
 		top: 0;
 		height: 100%;
-		border-radius: 30px;
+		border-radius: remx(30);
 	}
 
 	&__progress--completed {
@@ -3444,9 +3444,9 @@ legend,
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		font-size: 16px;
+		font-size: remx(16);
 		font-weight: bold;
-		color: #666;
+		color: $font3;
 		pointer-events: none;
 		transition: color 0.3s ease;
 	}
@@ -3477,9 +3477,9 @@ legend,
 	}
 
 	&__percentage{
-		margin-top: 20px;
-		font-size: 14px;
-		color: #999;
+		margin-top: remx(20);
+		font-size: remx(14);
+		color: $font4;
 	}
 
 	&__cancel{
@@ -3491,6 +3491,58 @@ legend,
 		height:remx(24);
 		background:url('@ico/ico-close.svg') no-repeat 50% / 100% auto;
 		cursor:pointer;
+	}
+
+	&__profile {
+		padding:remx(16);
+		border-radius:remx(20);
+		background-color:$gray;
+	}
+
+	&__profile-img {
+		overflow:hidden;
+		width:remx(80);
+		height:remx(80);
+		margin:0 auto remx(15);
+		border-radius:50%;
+		border:3px solid $color-primary;
+		object-fit:cover;
+	}
+
+	&__profile-nickname {
+		color:$font2;
+		margin-bottom:remx(15);
+		font-weight:bold;
+		font-size:remx(20)
+	}
+
+	&__profile-item {
+		display:flex;
+		margin-bottom:remx(8);
+		font-size:remx(14);
+	}
+
+	&__profile-label {
+		min-width:remx(50);
+		margin-right:remx(8);
+		color:$font3;
+		font-weight:bold;
+		text-align:left;
+	}
+
+	&__profile-value {
+		text-align:left;
+	}
+
+	&__profile-item--description {
+		flex-wrap:wrap;
+
+		.join-system__profile-value {
+			flex:1;
+			overflow-y:auto;
+			overflow-x:hidden;
+			height:remx(54);
+		}
 	}
 }
 
