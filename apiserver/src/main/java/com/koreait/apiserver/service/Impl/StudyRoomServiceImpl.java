@@ -234,26 +234,23 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             throw new RuntimeException("방장은 자신의 스터디에 참가 신청할 수 없습니다.");
         }
         
-        // 3. 이미 참가한 멤버인지 확인
+        // 3. 이미 참가한 멤버인지 확인 및 재신청 처리
         StudyRoomMember existingMember = studyRoomMemberDao.selectStudyRoomMember(studyRoomId, memberId);
         if (existingMember != null) {
-            // String statusMessage = ""; // 원래 코드 (주석처리)
             switch (existingMember.getStatus()) {
                 case PENDING:
-                    // statusMessage = "이미 참가 신청한 스터디입니다. 승인을 기다려주세요."; // 원래 코드 (주석처리)
-                    // PENDING 상태면 그냥 통과 (재신청 허용)
+                    // PENDING 상태면 기존 신청을 삭제하고 새로 신청
+                    studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
+                    log.info("기존 PENDING 신청 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
                     break;
                 case APPROVED:
-                    // statusMessage = "이미 참가 중인 스터디입니다."; // 원래 코드 (주석처리)
-                    // APPROVED 상태면 그냥 통과 (재신청 허용)
-                    break;
+                    throw new RuntimeException("이미 참가 중인 스터디입니다.");
                 case REJECTED:
-                    // statusMessage = "이전에 참가가 거절된 스터디입니다."; // 원래 코드 (주석처리)
-                    // REJECTED 상태면 그냥 통과 (재신청 허용)
+                    // REJECTED 상태면 기존 신청을 삭제하고 새로 신청
+                    studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
+                    log.info("기존 REJECTED 신청 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
                     break;
-        }
-            // throw new RuntimeException(statusMessage); // 원래 코드 (주석처리)
-            // 모든 상태에서 재신청 허용 (에러 발생 안함)
+            }
         }
         
         // 4. 정원 확인
@@ -261,23 +258,18 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             throw new RuntimeException("스터디 정원이 가득 찼습니다.");
         }
         
-        // 5. 스터디 멤버 추가 (PENDING 상태)
+        // 5. 스터디 멤버 추가 (PENDING 상태로 변경)
         StudyRoomMember member = new StudyRoomMember();
         member.setStudyRoomId(studyRoomId);
         member.setMemberId(memberId);
         member.setRole(StudyRoomMember.MemberRole.MEMBER);
-        member.setStatus(StudyRoomMember.MemberStatus.APPROVED);
+        member.setStatus(StudyRoomMember.MemberStatus.PENDING); // APPROVED → PENDING으로 변경
         
         studyRoomMemberDao.insertStudyRoomMember(member);
         
-        // ★ APPROVED로 바로 추가 시, 채팅방 멤버에도 추가!
-        ChatRoomMember chatMember = new ChatRoomMember();
-        chatMember.setRoomId(studyRoom.getRoomId());
-        chatMember.setMemberId(memberId);
-        chatMember.setJoinedAt(LocalDateTime.now());
-        chatRoomMemberDao.insertChatRoomMember(chatMember);
+        // ★ PENDING 상태이므로 채팅방 자동 추가 제거 (승인 시에만 추가)
         
-        log.info("스터디 참가 신청 완료: studyRoomId={}, memberId={}", studyRoomId, memberId);
+        log.info("스터디 참가 신청 완료 (PENDING): studyRoomId={}, memberId={}", studyRoomId, memberId);
     }
     
     @Override

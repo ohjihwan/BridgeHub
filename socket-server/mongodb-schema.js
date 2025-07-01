@@ -43,6 +43,7 @@ const schemas = {
                     fileInfo: {
                         bsonType: "object",
                         properties: {
+                            fileId: { bsonType: ["int", "string"] },
                             fileName: { bsonType: "string" },
                             fileUrl: { bsonType: "string" },
                             fileSize: { bsonType: "int" },

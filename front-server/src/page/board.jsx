@@ -14,7 +14,7 @@ function Board() {
     const [loading, setLoading] = useState(false)
     const [selectedPost, setSelectedPost] = useState(null)
     const [showDetail, setShowDetail] = useState(false)
-    const [loadingContent, setLoadingContent] = useState(new Set())
+
     
     // 댓글 관련 state
     const [comments, setComments] = useState([])
@@ -23,36 +23,7 @@ function Board() {
 
     const navigate = useNavigate()
 
-    // 개별 게시글의 content 가져오기
-    const fetchPostContent = async (boardId) => {
-        if (loadingContent.has(boardId)) return null
-        setLoadingContent((prev) => new Set([...prev, boardId]))
-        
-        try {
-            const token = localStorage.getItem("token")
-            const response = await fetch(`/api/board/${boardId}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-                credentials: "include",
-            })
-            
-            if (response.ok) {
-                const result = await response.json()
-                if (result.success && result.data) {
-                    console.log(`📋 게시글 ${boardId} content 가져옴:`, result.data.content)
-                    return result.data.content
-                }
-            }
-        } catch (error) {
-            console.error(`게시글 ${boardId} content 조회 에러:`, error)
-        } finally {
-            setLoadingContent((prev) => {
-                const newSet = new Set(prev)
-                newSet.delete(boardId)
-                return newSet
-            })
-        }
-        return null
-    }
+
 
     // 게시글 목록 가져오기
     const fetchPosts = async (page = 0, reset = false) => {
@@ -81,27 +52,26 @@ function Board() {
                     const newPosts = result.data.boards || []
                     console.log("📋 게시글 목록 가져옴:", newPosts.length, "개")
 
-                    // 각 게시글의 content를 개별적으로 가져오기
-                    const postsWithContent = await Promise.all(
-                        newPosts.map(async (post) => {
-                            const content = await fetchPostContent(post.boardId)
-                            return {
-                                ...post,
-                                content: content || "내용을 불러오는 중...",
-                            }
-                        }),
-                    )
+                    // 백엔드에서 contentPreview를 제공하므로 개별 조회 제거
+                    const postsWithPreview = newPosts.map(post => ({
+                        ...post,
+                        contentPreview: post.content ? 
+                            (post.content.length > 150 ? 
+                                post.content.substring(0, 150) + "..." : 
+                                post.content) : 
+                            "내용이 없습니다."
+                    }))
 
                     if (reset) {
-                        setPosts(postsWithContent)
+                        setPosts(postsWithPreview)
                     } else {
-                        setPosts((prev) => [...prev, ...postsWithContent])
+                        setPosts((prev) => [...prev, ...postsWithPreview])
                     }
 
                     setTotalPages(result.data.totalPages || 0)
                     setCurrentPage(result.data.currentPage || 0)
                     setTotalElements(result.data.totalElements || 0)
-                    console.log(`✅ 게시글 ${postsWithContent.length}개 로드 완료 (content 포함)`)
+                    console.log(`✅ 게시글 ${postsWithPreview.length}개 로드 완료`)
                 }
             } else {
                 console.error("❌ API 응답 실패:", response.status)
@@ -359,6 +329,9 @@ function Board() {
                                     <div className="board-list__infos">
                                         <span className="board-list__likes">❤ {post.likeCount}</span>
                                         <span className="board-list__comments">💬 {post.commentCount}</span>
+                                        {post.attachmentCount > 0 && (
+                                            <span className="board-list__attachments">📎 {post.attachmentCount}</span>
+                                        )}
                                         <span className="board-list__date">{formatMMDD(post.createdAt)}</span>
                                         <span className="board-list__name">{post.authorNickname}</span>
                                     </div>
@@ -367,14 +340,7 @@ function Board() {
                         </>
                     ) : (
                         !loading && (
-                            <div style={{
-                                textAlign: "center",
-                                color: "#6c757d",
-                                padding: "60px 20px",
-                                backgroundColor: "#f8f9fa",
-                                borderRadius: "8px",
-                                margin: "20px 0",
-                            }}>
+                            <div className="board-empty">
                                 {searchKeyword.trim() 
                                     ? `"${searchKeyword}"에 대한 검색 결과가 없습니다.`
                                     : "게시글이 없습니다."
@@ -408,6 +374,32 @@ function Board() {
                                 {selectedPost.content || "내용이 없습니다."}
                             </div>
 
+                            {/* 첨부파일 섹션 */}
+                            {selectedPost.attachments && selectedPost.attachments.length > 0 && (
+                                <div className="board-view__attachments">
+                                    <h4 className="board-view__attachments-title">첨부파일</h4>
+                                    <div className="board-view__attachments-list">
+                                        {selectedPost.attachments.map((file) => (
+                                            <div key={file.fileId} className="board-view__attachment-item">
+                                                <a 
+                                                    href={`/api/files/download/${file.fileId}`}
+                                                    className="board-view__attachment-link"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <span className="board-view__attachment-name">
+                                                        {file.originalFilename}
+                                                    </span>
+                                                    <span className="board-view__attachment-size">
+                                                        ({(file.fileSize / 1024).toFixed(1)} KB)
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="board-view__buttons">
                                 <button 
                                     type="button" 
@@ -422,35 +414,17 @@ function Board() {
                             <div className="board-view__comments">
                                 
                                 {/* 댓글 작성 */}
-                                <div className="comment-write" style={{ marginBottom: '20px' }}>
+                                <div className="comment-write">
                                     <textarea
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
                                         placeholder="댓글을 입력하세요..."
-                                        style={{
-                                            width: '100%',
-                                            minHeight: '80px',
-                                            padding: '12px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '8px',
-                                            resize: 'vertical',
-                                            fontSize: '14px'
-                                        }}
+                                        className="comment-write__textarea"
                                     />
                                     <button
                                         onClick={submitComment}
                                         disabled={commentLoading || !newComment.trim()}
-                                        style={{
-                                            marginTop: '8px',
-                                            padding: '8px 16px',
-                                            backgroundColor: '#007bff',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                            opacity: commentLoading || !newComment.trim() ? 0.6 : 1
-                                        }}
+                                        className="comment-write__button"
                                     >
                                         {commentLoading ? '작성 중...' : '댓글 작성'}
                                     </button>
@@ -460,55 +434,32 @@ function Board() {
                                 <div className="comment-list">
                                     {comments.length > 0 ? (
                                         comments.map((comment) => (
-                                            <div key={comment.commentId} style={{
-                                                padding: '12px 0',
-                                                borderBottom: '1px solid #eee'
-                                            }}>
-                                                <div style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    marginBottom: '8px'
-                                                }}>
-                                                    <div style={{ fontSize: '14px', color: '#666' }}>
-                                                        <span style={{ fontWeight: 'bold', color: '#333' }}>
+                                            <div key={comment.commentId} className="comment-item">
+                                                <div className="comment-item__header">
+                                                    <div className="comment-item__info">
+                                                        <span className="comment-item__author">
                                                             {comment.authorNickname}
                                                         </span>
-                                                        <span style={{ marginLeft: '8px' }}>
+                                                        <span className="comment-item__date">
                                                             {formatMMDD(comment.createdAt)}
                                                         </span>
                                                     </div>
                                                     {comment.isAuthor && (
                                                         <button
                                                             onClick={() => deleteComment(comment.commentId)}
-                                                            style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                color: '#dc3545',
-                                                                cursor: 'pointer',
-                                                                fontSize: '12px'
-                                                            }}
+                                                            className="comment-item__delete"
                                                         >
                                                             삭제
                                                         </button>
                                                     )}
                                                 </div>
-                                                <div style={{
-                                                    whiteSpace: 'pre-wrap',
-                                                    lineHeight: '1.4',
-                                                    fontSize: '14px'
-                                                }}>
+                                                <div className="comment-item__content">
                                                     {comment.content}
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div style={{
-                                            textAlign: 'center',
-                                            color: '#999',
-                                            padding: '20px 0',
-                                            fontSize: '14px'
-                                        }}>
+                                        <div className="comment-empty">
                                             첫 번째 댓글을 작성해보세요!
                                         </div>
                                     )}

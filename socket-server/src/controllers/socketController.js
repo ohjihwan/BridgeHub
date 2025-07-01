@@ -138,7 +138,7 @@ const handleLeaveStudy = async (socket, studyId) => {
 // 메시지 전송 (MongoDB 연동)
 const handleSendMessage = async (socket, data) => {
     try {
-        const { studyId, userId, message, fileType, fileUrl, fileName } = data;
+        const { studyId, userId, message, fileType, fileUrl, fileName, fileId } = data;
         
         console.log('📨 메시지 전송 요청 수신:', {
             studyId: studyId,
@@ -148,6 +148,8 @@ const handleSendMessage = async (socket, data) => {
             messageLength: message?.length || 0,
             messagePreview: message?.length > 50 ? message.substring(0, 50) + '...' : message,
             fileType: fileType || 'none',
+            fileId: fileId,
+            fileName: fileName,
             timestamp: new Date().toISOString()
         });
         
@@ -202,7 +204,9 @@ const handleSendMessage = async (socket, data) => {
             userId: userId,
             messageType: hasLinks ? 'LINK' : (fileType ? 'FILE' : 'TEXT'),
             hasLinks: hasLinks,
-            linkPreviewCount: linkPreviews.length
+            linkPreviewCount: linkPreviews.length,
+            fileId: fileId,
+            fileName: fileName
         });
         
         socketService.broadcastMessage(studyId, {
@@ -213,6 +217,7 @@ const handleSendMessage = async (socket, data) => {
             fileType,
             fileUrl,
             fileName,
+            fileId,
             hasLinks,
             linkPreviews,
             messageType: hasLinks ? 'LINK' : (fileType ? 'FILE' : 'TEXT'),
@@ -345,6 +350,8 @@ const handleFileUploadComplete = async (socket, data) => {
             userId,
             content: `사용자 ${userId}님이 파일을 공유했습니다: ${fileInfo.originalFilename}`,
             fileInfo: fileInfo,
+            fileId: fileInfo.fileId,
+            fileName: fileInfo.originalFilename,
             timestamp: new Date().toISOString()
         });
         

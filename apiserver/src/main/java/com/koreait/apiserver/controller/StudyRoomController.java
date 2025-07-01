@@ -165,18 +165,6 @@ public class StudyRoomController {
             
             // 구체적인 에러 메시지를 클라이언트에 전달
             String errorMessage = e.getMessage();
-            String errorCode = "JOIN_ERROR";
-            
-            // 특정 에러에 따른 에러 코드 분류
-            if (errorMessage.contains("이미 참가 신청")) {
-                errorCode = "ALREADY_APPLIED";
-            } else if (errorMessage.contains("이미 참가 중")) {
-                errorCode = "ALREADY_MEMBER";
-            } else if (errorMessage.contains("정원이 가득")) {
-                errorCode = "ROOM_FULL";
-            } else if (errorMessage.contains("거절된 스터디")) {
-                errorCode = "PREVIOUSLY_REJECTED";
-            }
             
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error(errorMessage));

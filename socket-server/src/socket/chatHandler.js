@@ -262,15 +262,19 @@ class ChatHandler {
             // 메시지 전송
             socket.on('send-message', async (data) => {
                 try {
-                    const { studyId, userId, message, fileType, fileUrl, fileName } = data;
+                    const { studyId, userId, message, fileType, fileUrl, fileName, fileId, messageType } = data;
                     console.log(`💬 ChatHandler - 메시지 수신:`, {
                         studyId: studyId,
                         userId: userId,
                         messageLength: message?.length || 0,
                         messagePreview: message?.length > 40 ? message.substring(0, 40) + '...' : message,
                         fileType: fileType || 'none',
+                        fileId: fileId,
+                        fileName: fileName,
+                        messageType: data.messageType,
                         timestamp: new Date().toISOString()
                     });
+                    console.log(`🔍 전체 데이터 확인:`, data);
                     
                     // 메시지 전송 시 타이핑 상태 자동 해제
                     this.stopTyping(socket, studyId, userId);
@@ -288,7 +292,9 @@ class ChatHandler {
                             timestamp,
                             fileType,
                             fileUrl,
-                            fileName
+                            fileName,
+                            fileId,
+                            messageType: messageType || (fileType ? 'FILE' : 'TEXT')
                         };
                         
                         // 메모리에 메시지 저장
@@ -320,7 +326,8 @@ class ChatHandler {
                                     fileName: fileName,
                                     fileUrl: fileUrl,
                                     fileSize: 0,
-                                    mimeType: fileType
+                                    mimeType: fileType,
+                                    fileId: fileId
                                 } : null,
                                 linkPreviews: null
                             });

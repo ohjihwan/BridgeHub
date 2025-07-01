@@ -29,6 +29,7 @@
             b.category_id,
             bc.category_name,
             b.title,
+            b.content,
             b.view_count,
             b.like_count,
             b.comment_count,

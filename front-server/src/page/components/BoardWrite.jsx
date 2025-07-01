@@ -18,17 +18,14 @@ export default function BoardWrite() {
     setMessage("등록 중...") // 로딩 메시지
 
     try {
-      // 이미지가 있는 경우 FormData 사용
+      // 이미지가 있는 경우 먼저 이미지 업로드
+      let attachmentIds = []
       if (image) {
         const formData = new FormData()
-        const post = { title, content }
-        const blob = new Blob([JSON.stringify(post)], { type: "application/json" })
-        formData.append("post", blob)
-        formData.append("image", image)
-
-        // boardClient 사용 (common-ui.jsx와 일치)
+        formData.append("file", image)
+        
         const token = localStorage.getItem("token")
-        const response = await fetch("/api/board", {
+        const uploadResponse = await fetch("/api/files/upload/board", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -37,12 +34,33 @@ export default function BoardWrite() {
           body: formData,
         })
 
-        if (!response.ok) {
-          throw new Error("서버 응답 오류")
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json()
+          if (uploadResult.success) {
+            attachmentIds.push(uploadResult.data.fileId)
+          }
         }
-      } else {
-        // 이미지가 없는 경우 JSON으로 전송
-        await createPost({ title, content })
+      }
+
+      // 게시글 작성 (JSON으로 전송)
+      const token = localStorage.getItem("token")
+      const response = await fetch("/api/board", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          title: title,
+          content: content,
+          categoryId: 1, // 기본 카테고리
+          attachmentIds: attachmentIds
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("서버 응답 오류")
       }
 
       setMessage("글이 성공적으로 등록되었습니다! 🎉")

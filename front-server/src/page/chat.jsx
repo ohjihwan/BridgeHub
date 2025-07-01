@@ -43,8 +43,11 @@ function Chat() {
 	const { 
 		messages: socketMessages, 
 		onlineUsers, 
+		typingUsers,
 		isJoined, 
 		sendMessage: socketSendMessage,
+		startTyping,
+		stopTyping,
 		isConnected,
 		socketService // 소켓 서비스 직접 접근을 위해 추가
 	} = useStudySocket(studyId, currentUserId);
@@ -113,6 +116,8 @@ function Chat() {
 	const [showReportButtonIndex, setShowReportButtonIndex] = useState(null);
 
 	const chatEndRef = useRef(null);
+
+	const [fileInfoCache, setFileInfoCache] = useState(new Map());
 
 	// Todo 관련 함수들
 	const handleTodoSettingAddInput = () => {
@@ -194,6 +199,14 @@ function Chat() {
 		return { ampm, timeStr };
 	};
 
+	// 이미지 파일인지 확인하는 함수
+	const isImageFile = (fileName) => {
+		if (!fileName) return false;
+		const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+		const extension = fileName.split('.').pop().toLowerCase();
+		return imageExtensions.includes(extension);
+	};
+
 	// 시스템 메시지
 	const addSystemMessage = (template, vars = {}) => {
 		const text = template.replace(/\$\{(.*?)\}/g, (_, key) => vars[key] ?? '');
@@ -262,23 +275,71 @@ function Chat() {
 			if (response.ok) {
 				const result = await response.json();
 				console.log('✅ 백엔드 파일 업로드 성공:', result);
+				console.log('🔍 백엔드 응답 구조 확인:', {
+					success: result.success,
+					status: result.status,
+					data: result.data,
+					fileId: result.data?.fileId,
+					fileIdType: typeof result.data?.fileId
+				});
 				
 				// 백엔드 업로드 성공 시 UI 업데이트 (실제 fileId 사용)
 				const realFileId = result.data?.fileId;
+
+				// fileId가 없으면 경고 출력
+				if (!realFileId) {
+					console.error('❌ 업로드 결과에 fileId가 없습니다:', result.data);
+					customAlert('파일 업로드에 실패했습니다. (fileId 없음)');
+					return;
+				}
+				
+				// fileId가 정수가 아닌 경우 경고 출력
+				if (!Number.isInteger(realFileId)) {
+					console.error('❌ fileId가 정수가 아닙니다:', realFileId, typeof realFileId);
+					customAlert('파일 업로드에 실패했습니다. (잘못된 fileId)');
+					return;
+				}
+
+				// 파일 정보 조회 (업로드 완료 후)
+				console.log('🔍 파일 정보 조회 시작:', realFileId);
+				const fileInfo = await getFileInfo(realFileId);
+				
+				if (!fileInfo) {
+					console.error('❌ 파일 정보 조회 실패:', realFileId);
+					customAlert('파일 업로드에 실패했습니다. (파일 정보 조회 실패)');
+					return;
+				}
+
+				console.log('✅ 파일 정보 조회 성공:', fileInfo);
 				
 				// 로딩 메시지 제거만 유지
 				setMessages(prev => prev.filter(msg => !msg.isUploading));
 				
-				// 소켓으로 다른 사용자들에게 실시간 알림
+				// 소켓으로 다른 사용자들에게 실시간 알림 (확인된 파일 정보와 함께)
 				if (isConnected && socketSendMessage) {
 					console.log('📡 소켓으로 파일 업로드 알림 전송');
-					socketSendMessage({
-						message: ` ${file.name}`,
+					
+					// 이미지 파일인지 확인하여 적절한 메시지 설정
+					const isImage = isImageFile(fileInfo.originalFilename);
+					const messageText = isImage ? '이미지를 업로드했습니다' : '파일을 업로드했습니다';
+					
+					const socketData = {
+						message: messageText,
 						messageType: 'FILE',
-						fileName: file.name,
-						fileId: realFileId,
-						fileSize: file.size
-					});
+						fileName: fileInfo.originalFilename,
+						fileId: fileInfo.fileId,
+						fileSize: fileInfo.fileSize,
+						isImage: isImage,
+						fileType: 'FILE'  // ChatHandler에서 기대하는 필드
+					};
+					
+					console.log('🔍 소켓 전송 데이터 확인:', socketData);
+					console.log('🔍 fileId 타입 확인:', typeof fileInfo.fileId, fileInfo.fileId);
+					console.log('🔍 fileId가 정수인지 확인:', Number.isInteger(fileInfo.fileId), fileInfo.fileId);
+					console.log('🔍 studyId 확인:', studyId);
+					console.log('🔍 currentUserId 확인:', currentUserId);
+					
+					socketSendMessage(socketData);
 				}
 			} else {
 				console.error('❌ 백엔드 파일 업로드 실패:', response.status, response.statusText);
@@ -475,6 +536,9 @@ function Chat() {
 	const handleSend = () => {
 		if (!message.trim()) return;
 
+		// 타이핑 중지
+		stopTyping();
+
 		// 실제 소켓으로 메시지 전송
 		if (isConnected && studyId) {
 			const messageData = {
@@ -508,6 +572,16 @@ function Chat() {
 	const handleChange = (e) => {
 		const value = e.target.value;
 		setMessage(value);
+		
+		// 타이핑 이벤트 처리
+		if (value.trim() === '') {
+			// 입력이 비어있으면 타이핑 중지
+			stopTyping();
+		} else {
+			// 입력이 있으면 타이핑 시작
+			startTyping();
+		}
+		
 		const textarea = textareaRef.current;
 		if (textarea) {
 			textarea.style.height = 'auto';
@@ -677,6 +751,8 @@ function Chat() {
 				// 새 메시지만 추가 (마지막 메시지 확인)
 				const latestMessage = socketMessages[socketMessages.length - 1];
 				console.log('📨 새 메시지 확인:', latestMessage);
+				console.log('🔍 fileId 확인:', latestMessage.fileId, typeof latestMessage.fileId);
+				console.log('🔍 fileName 확인:', latestMessage.fileName);
 				
 				// 중복 확인 - 더 정확한 중복 검사
 				const exists = messages.find(msg => {
@@ -722,11 +798,17 @@ function Chat() {
 						messageId: latestMessage.messageId || latestMessage._id || `${senderId}-${Date.now()}`
 					};
 
-					// 파일 메시지인 경우 파일 정보 추가
-					if (latestMessage.messageType === 'FILE' || latestMessage.fileType || latestMessage.fileName) {
+					// 파일 메시지인 경우 파일 정보 추가 (fileId가 있을 때만)
+					if ((latestMessage.messageType === 'FILE' || latestMessage.fileType || latestMessage.fileName) && latestMessage.fileId) {
+						console.log('🔍 파일 메시지 처리:', {
+							fileName: latestMessage.fileName,
+							fileId: latestMessage.fileId,
+							fileIdType: typeof latestMessage.fileId
+						});
+						
 						newMessage.files = [{
 							name: latestMessage.fileName || '파일',
-							fileId: latestMessage.fileId || Date.now(),
+							fileId: latestMessage.fileId,
 							fileUrl: latestMessage.fileUrl || '#'
 						}];
 					}
@@ -878,6 +960,67 @@ function Chat() {
 		}
 	};
 
+	// 메시지 파싱 보정 함수 추가
+	const parseMessages = (msgs) => {
+		return msgs.map(msg => {
+			// 이미 files 정보가 있으면 그대로
+			if (msg.files && msg.files.length > 0) return msg;
+			
+			// 파일 메시지인데 files 정보가 없는 경우 생성
+			if ((msg.messageType === 'FILE' || msg.fileId || msg.fileName) && !msg.files && msg.fileId) {
+				console.log('🔍 파일 메시지 files 배열 생성:', {
+					fileName: msg.fileName,
+					fileId: msg.fileId,
+					messageType: msg.messageType
+				});
+				msg.files = [{ 
+					name: msg.fileName || '파일', 
+					fileId: msg.fileId
+				}];
+			}
+			
+			return msg;
+		});
+	};
+
+	// messages를 setMessages 할 때 파싱 보정 적용
+	useEffect(() => {
+		setMessages(prevMsgs => parseMessages(prevMsgs));
+	}, [socketMessages]);
+
+	// 파일 정보 조회 함수 (캐시 포함)
+	const getFileInfo = async (fileId) => {
+		// 캐시 확인
+		if (fileInfoCache.has(fileId)) {
+			return fileInfoCache.get(fileId);
+		}
+
+		try {
+			const response = await fetch(`/api/files/info/${fileId}`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${localStorage.getItem('token')}`,
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				if (result.status === 'success' && result.data) {
+					console.log('✅ 파일 정보 조회 성공:', result.data);
+					// 캐시에 저장
+					setFileInfoCache(prev => new Map(prev).set(fileId, result.data));
+					return result.data;
+				}
+			}
+			console.warn('⚠️ 파일 정보 조회 실패:', response.status);
+			return null;
+		} catch (error) {
+			console.error('❌ 파일 정보 조회 에러:', error);
+			return null;
+		}
+	};
+
 	return (
 		<>
 			<Header
@@ -971,28 +1114,27 @@ function Chat() {
 			)}
 
 			<div className={"chatroom-history"}>
-				{/* 테스트 목적 용도 */}
-				<button type="button" className="testButton" onClick={() => {
-					setShowJoinSystem(true)
-				}}>조인 시스템창</button>
-
-				<button type="button" className="testButton" onClick={() => {
-					const { ampm, timeStr } = getFormattedTime();
-					setMessages(prev => [
-						...prev,
-						{
-							type: 'user',
-							time: timeStr,
-							ampm,
-							files: [
-								{ name: '샘플파일.png', fileId: Date.now() }
-							]
-						}
-					]);
-				}}>상대 파일 업로드</button>
 
 				{/* 메시지 출력 영역 */}
 				{messages.map((msg, i) => {
+					console.log('채팅 메시지 구조:', msg);
+					if (msg.files && msg.files.length > 0) {
+						console.log('🔍 files 배열 확인:', msg.files);
+						console.log('🔍 files[0].fileId 확인:', msg.files[0].fileId, typeof msg.files[0].fileId);
+					}
+					
+					// 파일 메시지인데 files가 없는 경우 생성
+					if ((msg.messageType === 'FILE' || msg.fileId || msg.fileName) && !msg.files && msg.fileId) {
+						console.log('🔍 파일 메시지 files 배열 생성:', {
+							fileName: msg.fileName,
+							fileId: msg.fileId,
+							messageType: msg.messageType
+						});
+						msg.files = [{ 
+							name: msg.fileName || '파일', 
+							fileId: msg.fileId
+						}];
+					}
 					if (msg.type === 'system') {
 						return <div key={i} className="program-msg">{msg.text}</div>;
 					}
@@ -1002,13 +1144,35 @@ function Chat() {
 							<div key={i} className="i-say">
 								<div className="i-say__text">
 									{msg.files?.length > 0 && msg.files[0] && (
-										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
-											<div className={`i-say__file i-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
-												<span>{msg.files[0].name}</span>
-											</div>
-										</a>
+										<>
+											{/* 이미지 파일인 경우 미리보기 표시 */}
+											{isImageFile(msg.files[0].name) ? (
+												<div className="image-preview">
+													<img 
+														src={`/api/files/download/${msg.files[0].fileId}`} 
+														alt={msg.files[0].name}
+														className="chat-image-preview"
+														onClick={() => window.open(`/api/files/download/${msg.files[0].fileId}`, '_blank')}
+													/>
+													<div className="image-filename">
+														{msg.files[0].name}
+													</div>
+												</div>
+											) : (
+												/* 일반 파일인 경우 기존 방식 */
+												<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+													<div className={`i-say__file i-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+														<span>{msg.files[0].name}</span>
+													</div>
+												</a>
+											)}
+										</>
 									)}
-									{msg.text}
+									{/* 파일 메시지인 경우 텍스트 중복 방지 */}
+									{msg.files?.length > 0 ? 
+										(msg.text !== msg.files[0].name ? msg.text : '') : 
+										msg.text
+									}
 								</div>
 								<time dateTime={msg.time} className="i-say__time">
 									{msg.ampm} <span>{msg.time}</span>
@@ -1023,13 +1187,38 @@ function Chat() {
 								<div className="user-say__profile"></div>
 								<div className="user-say__text">
 									{msg.files?.length > 0 && msg.files[0] && (
-										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
-											<div className={`user-say__file user-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
-												{msg.files[0].name}
-											</div>
-										</a>
+										<>
+											{/* 이미지 파일인 경우 미리보기 표시 */}
+											{isImageFile(msg.files[0].name) ? (
+												<div className="image-preview">
+													<img 
+														src={`/api/files/download/${msg.files[0].fileId}`} 
+														alt={msg.files[0].name}
+														className="chat-image-preview"
+														onClick={(e) => {
+															e.stopPropagation();
+															window.open(`/api/files/download/${msg.files[0].fileId}`, '_blank');
+														}}
+													/>
+													<div className="image-filename">
+														{msg.files[0].name}
+													</div>
+												</div>
+											) : (
+												/* 일반 파일인 경우 기존 방식 */
+												<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+													<div className={`user-say__file user-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+														{msg.files[0].name}
+													</div>
+												</a>
+											)}
+										</>
 									)}
-									{msg.text}
+									{/* 파일 메시지인 경우 텍스트 중복 방지 */}
+									{msg.files?.length > 0 ? 
+										(msg.text !== msg.files[0].name ? msg.text : '') : 
+										msg.text
+									}
 								</div>
 								<div className="user-say__etc">
 									<time dateTime={msg.time} className="user-say__time">
@@ -1056,8 +1245,8 @@ function Chat() {
 				)}
 
 				{/* 입력 중 표시 */}
-				{isTyping && (
-					<div className="user-say" onClick={() => setShowReportLayer(true)}>
+				{typingUsers && typingUsers.length > 0 && (
+					<div className="user-say">
 						<div className="user-say__profile"></div>
 						<div className="user-say__text">
 							<div className="user-say__writing">
