@@ -2,188 +2,212 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebRTC 대기실</title>
     <style>
       * {
-        margin: 0;
-        padding: 0;
         box-sizing: border-box;
       }
-
+      
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
         padding: 20px;
-        color: #333;
+        background: #2f3349;
+        min-height: 100vh;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
       }
-
+      
       .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding-top: 40px;
+        max-width: 500px;
+        width: 100%;
       }
-
+      
       h1 {
         text-align: center;
-        color: white;
-        font-size: 2.5rem;
-        font-weight: 700;
         margin-bottom: 40px;
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 300;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        letter-spacing: -0.025em;
       }
-
-      .card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      
+      .section {
+        margin-bottom: 30px;
+        padding: 32px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       }
-
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      
+      .section h3 {
+        color: #ffffff;
+        margin-top: 0;
+        margin-bottom: 24px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-align: center;
       }
-
-      .input-group {
-        margin-bottom: 20px;
-      }
-
+      
       label {
         display: block;
-        font-weight: 600;
-        color: #374151;
         margin-bottom: 8px;
-        font-size: 0.95rem;
+        color: #dcddde;
+        font-weight: 500;
+        font-size: 14px;
       }
-
-      input[type="text"] {
-        width: 100%;
-        padding: 15px 20px;
-        border: 2px solid #e5e7eb;
+      
+      input {
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
         border-radius: 12px;
         font-size: 16px;
+        width: 100%;
         transition: all 0.3s ease;
-        background: #f9fafb;
-        font-family: inherit;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        backdrop-filter: blur(10px);
       }
-
-      input[type="text"]:focus {
+      
+      input::placeholder {
+        color: #b9bbbe;
+      }
+      
+      input:focus {
         outline: none;
-        border-color: #667eea;
-        background: white;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #5865f2;
+        box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
+        background: rgba(255, 255, 255, 0.15);
       }
-
-      .btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+      
+      button {
+        padding: 16px 32px;
         border: none;
-        padding: 15px 30px;
         border-radius: 12px;
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        font-family: inherit;
-        position: relative;
-        overflow: hidden;
+        background: #5865f2;
+        color: white;
+        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+        width: 100%;
+        margin-bottom: 12px;
       }
-
-      .btn:hover {
+      
+      button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5);
+        background: #4752c4;
       }
-
-      .btn:active {
+      
+      button:active {
         transform: translateY(0);
       }
-
-      .btn-primary {
-        width: 100%;
-        margin-top: 10px;
+      
+      .create-room-container {
+        text-align: center;
       }
-
-      .btn-secondary {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        padding: 10px 20px;
-        font-size: 14px;
-        min-width: 80px;
+      
+      .nickname-container {
+        text-align: center;
       }
-
-      .btn-secondary:hover {
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-      }
-
-      .section-title {
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .section-title::before {
-        content: "🏠";
-        font-size: 1.2rem;
-      }
-
-      .room-list {
+      
+      #room-list {
         list-style: none;
+        padding: 0;
+        margin: 0;
       }
-
-      .room-item {
-        background: #f8fafc;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
+      
+      #room-list li {
+        margin-bottom: 12px;
         padding: 20px;
-        margin-bottom: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         display: flex;
         justify-content: space-between;
         align-items: center;
         transition: all 0.3s ease;
       }
-
-      .room-item:hover {
-        background: #f1f5f9;
-        border-color: #cbd5e1;
-        transform: translateX(5px);
+      
+      #room-list li:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(88, 101, 242, 0.2);
+        border-color: #5865f2;
+        background: rgba(255, 255, 255, 0.15);
       }
-
+      
+      #room-list li button {
+        margin: 0;
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 80px;
+        width: auto;
+        margin-bottom: 0;
+      }
+      
       .room-name {
+        color: #ffffff;
         font-weight: 500;
-        color: #475569;
-        font-size: 1rem;
+        flex: 1;
+        font-size: 15px;
       }
-
+      
+      .room-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .room-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #b9bbbe;
+        font-size: 13px;
+      }
+      
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #3ba55c;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
       .empty-state {
         text-align: center;
         padding: 40px 20px;
-        color: #64748b;
+        color: #72767d;
+        font-style: italic;
       }
-
+      
       .empty-state::before {
-        content: "🔍";
+        content: "🏠";
         font-size: 3rem;
         display: block;
-        margin-bottom: 15px;
+        margin-bottom: 16px;
+        opacity: 0.5;
       }
-
-      .nickname-section::before {
-        content: "👤";
-        margin-right: 10px;
-      }
-
-      @media (max-width: 640px) {
-        .container {
-          padding-top: 20px;
+      
+      /* 반응형 디자인 */
+      @media (max-width: 600px) {
+        body {
+          padding: 15px;
         }
         
         h1 {
@@ -191,22 +215,39 @@
           margin-bottom: 30px;
         }
         
-        .card {
-          padding: 20px;
+        .section {
+          padding: 24px;
           margin-bottom: 20px;
         }
         
-        .room-item {
-          flex-direction: column;
-          gap: 15px;
-          text-align: center;
+        input {
+          padding: 14px;
+          font-size: 16px;
         }
         
-        .btn-secondary {
+        button {
+          padding: 14px 24px;
+          font-size: 15px;
+        }
+        
+        #room-list li {
+          flex-direction: column;
+          gap: 12px;
+          text-align: center;
+          padding: 16px;
+        }
+        
+        #room-list li button {
+          width: 100%;
+        }
+        
+        .room-info {
+          flex-direction: column;
+          gap: 8px;
           width: 100%;
         }
       }
-
+      
       /* 로딩 애니메이션 */
       .loading {
         display: inline-block;
@@ -217,57 +258,31 @@
         border-top-color: #fff;
         animation: spin 1s ease-in-out infinite;
       }
-
+      
       @keyframes spin {
         to { transform: rotate(360deg); }
-      }
-
-      /* 입력 애니메이션 */
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(30px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .card {
-        animation: fadeInUp 0.6s ease-out;
-      }
-
-      .card:nth-child(2) {
-        animation-delay: 0.1s;
-      }
-
-      .card:nth-child(3) {
-        animation-delay: 0.2s;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>🎥 WebRTC 대기실</h1>
+      <h1>WebRTC 대기실</h1>
       
-      <div class="card">
-        <div class="section-title nickname-section">사용자 정보</div>
-        <div class="input-group">
-          <label for="nickname">닉네임</label>
-          <input id="nickname" type="text" placeholder="멋진 닉네임을 입력해주세요" />
+      <div class="section">
+        <div class="nickname-container">
+          <label for="nickname">닉네임:</label>
+          <input id="nickname" type="text" placeholder="닉네임을 입력하세요" />
+          <div class="create-room-container">
+            <button onclick="createRoom()">새 방 만들기</button>
+          </div>
         </div>
-        <button class="btn btn-primary" onclick="createRoom()">
-          새 방 만들기
-        </button>
       </div>
-
-      <div class="card">
-        <div class="section-title">참여 가능한 방</div>
-        <ul id="room-list" class="room-list">
+      
+      <div class="section">
+        <h3>🏠 참여 가능한 방</h3>
+        <ul id="room-list">
           <li class="empty-state">
             <div>아직 생성된 방이 없습니다</div>
-            <small>새 방을 만들어 화상통화를 시작해보세요!</small>
           </li>
         </ul>
       </div>
@@ -284,62 +299,83 @@
 
       function createRoom() {
         const nickname = getNickname();
-        if (!nickname) {
-          alert("닉네임을 입력해주세요! 😊");
-          document.getElementById("nickname").focus();
-          return;
-        }
-
+        if (!nickname) return alert("닉네임을 입력하세요.");
+        
         const roomId = "room-" + Date.now();
         socket.emit("create-room", roomId);
-        location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
+        
+        // 버튼에 로딩 표시
+        const button = event.target;
+        const originalText = button.textContent;
+        button.innerHTML = '<span class="loading"></span> 방 생성 중...';
+        button.disabled = true;
+        
+        // ✅ emit 후 0.5초 뒤에 강제로 room-list 다시 요청
+        setTimeout(() => {
+          socket.emit("get-room-list");
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 500);
+        
+        setTimeout(() => {
+          location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
+        }, 600);
       }
 
       socket.on("room-list", (rooms) => {
+        roomList.innerHTML = "";
+        
         if (rooms.length === 0) {
-          roomList.innerHTML = `
-            <li class="empty-state">
-              <div>아직 생성된 방이 없습니다</div>
-              <small>새 방을 만들어 화상통화를 시작해보세요!</small>
-            </li>
-          `;
+          const emptyLi = document.createElement("li");
+          emptyLi.className = "empty-state";
+          emptyLi.innerHTML = "<div>아직 생성된 방이 없습니다</div>";
+          roomList.appendChild(emptyLi);
           return;
         }
-
-        roomList.innerHTML = "";
-        rooms.forEach((roomId, index) => {
+        
+        rooms.forEach((roomId) => {
           const li = document.createElement("li");
-          li.className = "room-item";
-          li.style.animationDelay = `${index * 0.1}s`;
+          
+          const roomInfo = document.createElement("div");
+          roomInfo.className = "room-info";
           
           const roomName = document.createElement("div");
           roomName.className = "room-name";
           roomName.textContent = roomId;
           
+          const roomStatus = document.createElement("div");
+          roomStatus.className = "room-status";
+          roomStatus.innerHTML = '<div class="status-dot"></div> 활성';
+          
           const btn = document.createElement("button");
-          btn.className = "btn btn-secondary";
-          btn.textContent = "입장하기";
+          btn.innerText = "입장";
           btn.onclick = () => {
             const nickname = getNickname();
-            if (!nickname) {
-              alert("닉네임을 입력해주세요! 😊");
-              document.getElementById("nickname").focus();
-              return;
-            }
-            location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
+            if (!nickname) return alert("닉네임을 입력하세요.");
+            
+            btn.innerHTML = '<span class="loading"></span> 입장 중...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+              location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
+            }, 300);
           };
-
-          li.appendChild(roomName);
+          
+          roomInfo.appendChild(roomName);
+          roomInfo.appendChild(roomStatus);
+          
+          li.appendChild(roomInfo);
           li.appendChild(btn);
           roomList.appendChild(li);
         });
       });
 
-      // 엔터키로 방 만들기
-      document.getElementById("nickname").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          createRoom();
-        }
+      // ✅ 서버에 직접 요청하는 커스텀 이벤트
+      socket.emit("get-room-list");
+      
+      // Enter 키로 방 생성
+      document.getElementById("nickname").addEventListener("keyup", (e) => {
+        if (e.key === "Enter") createRoom();
       });
     </script>
   </body>

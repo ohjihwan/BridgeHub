@@ -47,6 +47,10 @@ io.on("connection", (socket) => {
     );
   });
 
+   socket.on("get-room-list", () => {
+    socket.emit("room-list", Array.from(activeRooms));
+  });
+
   socket.on("rtc-message", (data) => {
     const parsed = JSON.parse(data);
     const room = parsed.roomId;
