@@ -219,9 +219,35 @@ public class ReportServiceImpl implements ReportService {
         List<ReportDTO> recentReports = reportDao.findRecentReports(10);
         stats.put("recentReports", recentReports);
         // 신고 타입별 통계
-        Map<String, Integer> reportTypeStats = reportDao.countByReportType();
+        List<Map<String, Object>> reportTypeList = reportDao.countByReportType();
+        Map<String, Integer> reportTypeStats = convertListToMap(reportTypeList, "report_type");
         stats.put("reportTypes", reportTypeStats);
         return stats;
+    }
+
+    /**
+     * MyBatis에서 반환된 List<Map>을 Map<String, Integer>로 변환하는 헬퍼 메서드
+     */
+    private Map<String, Integer> convertListToMap(List<Map<String, Object>> list, String keyColumn) {
+        Map<String, Integer> result = new HashMap<>();
+        for (Map<String, Object> row : list) {
+            String key = (String) row.get(keyColumn);
+            Object countObj = row.get("count");
+            Integer count = 0;
+            
+            if (countObj instanceof Long) {
+                count = ((Long) countObj).intValue();
+            } else if (countObj instanceof Integer) {
+                count = (Integer) countObj;
+            } else if (countObj instanceof java.math.BigInteger) {
+                count = ((java.math.BigInteger) countObj).intValue();
+            }
+            
+            if (key != null) {
+                result.put(key, count);
+            }
+        }
+        return result;
     }
 
     private ReportDTO convertToDTO(Report report) {

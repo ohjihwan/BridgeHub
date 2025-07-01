@@ -57,15 +57,20 @@ public interface MemberDao {
     int updateMemberStatus(@Param("memberId") Integer memberId, @Param("status") String status);
     
     // 통계용
-    Map<String, Integer> countByGender();
-    Map<String, Integer> countByEducation();
-    Map<String, Integer> countByTime();
-    Map<String, Integer> countByDepartment();
+    List<Map<String, Object>> countByGender();
+    List<Map<String, Object>> countByEducation();
+    List<Map<String, Object>> countByTime();
+    List<Map<String, Object>> countByDepartment();
     
     // 활동 통계용
-    Map<String, Integer> getQuarterlySignups();
-    Map<String, Integer> getQuarterlyVisitors();
+    List<Map<String, Object>> getQuarterlySignups();
+    List<Map<String, Object>> getQuarterlyVisitors();
     List<Map<String, Object>> getTopActiveUsers();
     List<Map<String, Object>> getPopularRooms();
     Integer getTotalVisitors();
+    
+    // 실시간 접속자 통계용 (새로 추가)
+    Integer getCurrentOnlineUsers();
+    List<Map<String, Object>> getActiveStudyRooms();
+    Integer getTotalRegisteredMembers();
 } 

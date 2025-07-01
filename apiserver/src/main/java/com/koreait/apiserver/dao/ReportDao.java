@@ -50,5 +50,5 @@ public interface ReportDao {
     
     // 통계용
     List<ReportDTO> findRecentReports(int limit);
-    Map<String, Integer> countByReportType();
+    List<Map<String, Object>> countByReportType();
 } 
