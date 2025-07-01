@@ -1370,9 +1370,9 @@ function Chat() {
 							</button>
 						</li>
 						<li>
-						<button type="button" onClick={() => setShowJoinSystem(true)}>
-							시스템 참여하기
-						</button>
+							<button type="button" onClick={() => setShowJoinSystem(true)} className="msg-writing__action">
+								신청받기
+							</button>
 						</li>
 						<li>
 							<button type="button" className="msg-writing__action" onClick={() => {
