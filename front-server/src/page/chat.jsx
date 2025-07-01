@@ -5,7 +5,6 @@ import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
 import ResultModal from '@components/chat/ResultModal';
 import TodoList from '@components/chat/TodoListDeployment';
-import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
 import { chatAPI, userAPI, reportAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
@@ -219,6 +218,15 @@ function Chat() {
 			text 
 		}]);
 	};
+
+	const handleStartVideo = () => {
+		const finalRoomId = roomId || studyId || `room-${Date.now()}`
+	navigate(`/video/${finalRoomId}`, {
+		state: {
+		userNickname: currentUserInfo?.nickname || '익명'
+		}
+	})
+	}
 
 	// 파일 업로드 (백엔드 먼저, UI 나중)
 	const handleFileUpload = async (e) => {
@@ -941,17 +949,6 @@ function Chat() {
 		};
 	}, [isConnected, isOwner]);
 
-	// WebRTC
-	const handleStartVideo = () => {
-		const finalRoomId = roomId || studyId || `room-${Date.now()}`
-	navigate(`/video/${finalRoomId}`, {
-		state: {
-		userNickname: currentUserInfo?.nickname || '참가자'
-		}
-	})
-	}
-
-
 	// 스크롤 하단
 	useEffect(() => {
 		if (!messages.length) return;
@@ -1080,8 +1077,6 @@ function Chat() {
 		}
 	};
 
-
-
 	return (
 		<>
 			<Header
@@ -1112,24 +1107,22 @@ function Chat() {
 				allParticipants={getAllParticipants()}
 				onShowParticipants={() => setShowChatMember(true)}
 			/>
-				<button
-				onClick={handleStartVideo}
-				style={{
-				position: 'fixed',
-				bottom: '20px',
-				left: '20px',
-				zIndex: 9999,
-				backgroundColor: '#2196f3',
-				color: 'white',
-				border: 'none',
-				padding: '10px 16px',
-				borderRadius: '20px',
-				fontSize: '14px',
-				cursor: 'pointer'
-				}}
-			>
-				📷 화상 회의 시작
-			</button>
+			<button
+			onClick={handleStartVideo}
+			style={{
+			position: 'fixed',
+			bottom: '20px',
+			left: '20px',
+			zIndex: 9999,
+			backgroundColor: '#2196f3',
+			color: 'white',
+			border: 'none',
+			padding: '10px 16px',
+			borderRadius: '20px',
+			fontSize: '14px',
+			cursor: 'pointer'
+			}}>📷 화상 회의 시작</button>
+
 
 			{/* 참가 신청 알림 (방장만 표시) */}
 			{console.log('🔍 알림 박스 렌더링 조건 확인:', {
