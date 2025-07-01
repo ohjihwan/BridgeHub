@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 export const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'liberty',
+  password: '1234',
   database: 'thebridgehub',
   waitForConnections: true,
   connectionLimit: 10,
