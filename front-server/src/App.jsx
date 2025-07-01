@@ -46,6 +46,7 @@ function App() {
 					<Route path="/board" element={<BoardList />} />
 					<Route path="/board/write" element={<BoardWrite />} />
 					<Route path="search" element={<Search />} />
+					<Route path="/video/:roomId" element={<Video />} />
 					<Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
 				</Routes>
 			)}
