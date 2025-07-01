@@ -267,15 +267,24 @@ public class MemberController {
     @PostMapping("/api/auth/forgot-password")
     public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody Map<String, String> request) {
         try {
+            String name = request.get("name");
+            String phone = request.get("phone");
             String email = request.get("email");
+            
+            if (name == null || name.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("NAME_REQUIRED"));
+            }
+            if (phone == null || phone.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("PHONE_REQUIRED"));
+            }
             if (email == null || email.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(ApiResponse.error("EMAIL_REQUIRED"));
             }
             
-            // 사용자 존재 여부 확인
-            MemberDTO member = memberService.getMemberByUsername(email);
-            if (member == null) {
-                return ResponseEntity.badRequest().body(ApiResponse.error("USER_NOT_FOUND"));
+            // 사용자 정보 검증 (이름, 전화번호, 이메일 모두 일치하는지 확인)
+            boolean isValidUser = memberService.validateUserInfo(name, phone, email);
+            if (!isValidUser) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("USER_INFO_MISMATCH"));
             }
             
             // 비밀번호 재설정 이메일 발송

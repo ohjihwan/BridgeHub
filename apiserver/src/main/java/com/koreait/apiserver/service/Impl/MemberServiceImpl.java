@@ -481,4 +481,34 @@ public class MemberServiceImpl implements MemberService {
         dto.setUpdatedAt(member.getUpdatedAt());
         return dto;
     }
+
+    @Override
+    public boolean validateUserInfo(String name, String phone, String email) {
+        log.info("사용자 정보 검증 시작: name={}, phone={}, email={}", name, phone, email);
+        
+        try {
+            // 이메일로 사용자 조회
+            Optional<Member> memberOpt = memberDao.findByUsername(email);
+            if (!memberOpt.isPresent()) {
+                log.warn("사용자를 찾을 수 없음: email={}", email);
+                return false;
+            }
+            
+            Member member = memberOpt.get();
+            
+            // 이름, 전화번호, 이메일 모두 일치하는지 확인
+            boolean nameMatch = member.getName().equals(name);
+            boolean phoneMatch = member.getPhone().equals(phone);
+            boolean emailMatch = member.getUserid().equals(email);
+            
+            log.info("검증 결과 - 이름: {}, 전화번호: {}, 이메일: {}", nameMatch, phoneMatch, emailMatch);
+            
+            return nameMatch && phoneMatch && emailMatch;
+            
+        } catch (Exception e) {
+            log.error("사용자 정보 검증 실패: name={}, phone={}, email={}, error={}", 
+                     name, phone, email, e.getMessage(), e);
+            return false;
+        }
+    }
 }

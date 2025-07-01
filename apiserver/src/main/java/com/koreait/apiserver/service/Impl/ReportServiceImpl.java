@@ -68,16 +68,17 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public void createReportFromChatLog(ReportDTO reportDTO) {
         try {
-            // MongoDB에서 메시지 존재 여부 확인
+            // MongoDB에서 메시지 존재 여부 확인 (선택적 검증)
             String mongoMessageId = reportDTO.getMessageId() != null ? reportDTO.getMessageId().toString() : null;
             
             if (mongoMessageId != null) {
                 boolean messageExists = mongoMessageService.existsMessageById(mongoMessageId);
                 if (!messageExists) {
-                    log.error("MongoDB에서 메시지를 찾을 수 없음: messageId={}", mongoMessageId);
-                    throw new RuntimeException("신고 대상 메시지를 찾을 수 없습니다.");
+                    log.warn("MongoDB에서 메시지를 찾을 수 없음: messageId={} (신고는 계속 진행)", mongoMessageId);
+                    // 메시지가 없어도 신고는 계속 진행 (메시지가 삭제되었을 수 있음)
+                } else {
+                    log.info("MongoDB 메시지 검증 성공: messageId={}", mongoMessageId);
                 }
-                log.info("MongoDB 메시지 검증 성공: messageId={}", mongoMessageId);
             }
             
             Report report = new Report();
