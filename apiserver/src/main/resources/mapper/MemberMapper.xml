@@ -137,8 +137,8 @@
             COUNT(*) as value
         FROM members
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
-        GROUP BY QUARTER(created_at)
-        ORDER BY QUARTER(created_at)
+        GROUP BY quarter
+        ORDER BY quarter
     </select>
 
     <select id="getQuarterlyVisitors" resultType="map">
@@ -147,8 +147,8 @@
             COUNT(*) as value
         FROM members
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
-        GROUP BY QUARTER(created_at)
-        ORDER BY QUARTER(created_at)
+        GROUP BY quarter
+        ORDER BY quarter
     </select>
 
     <select id="getTopActiveUsers" resultType="map">
