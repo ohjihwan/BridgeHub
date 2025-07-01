@@ -132,6 +132,11 @@ export const boardClient = axios.create({
     timeout: 10000,
     headers: { 'Content-Type': 'application/json' },
 });
+export const usersClient = axios.create({
+    baseURL: '/api/members',
+    timeout: 10000,
+    headers: { 'Content-Type': 'application/json' },
+});
 
 export const getAccessToken = () => {
 	return localStorage.getItem('token');

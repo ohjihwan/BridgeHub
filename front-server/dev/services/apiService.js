@@ -163,8 +163,17 @@ export const reportAPI = {
     // 신고 접수
     createReport: (reportData) => apiClient.post('/reports', reportData),
     
+    // 채팅 로그 신고 접수
+    createChatReport: (reportData) => apiClient.post('/reports/chat-log', reportData),
+    
     // 내 신고 목록 조회
-    getMyReports: () => apiClient.get('/reports/my')
+    getMyReports: () => apiClient.get('/reports/my'),
+    
+    // 신고 상세 조회
+    getReport: (reportId) => apiClient.get(`/reports/${reportId}`),
+    
+    // 채팅 증거 조회
+    getChatEvidence: (reportId) => apiClient.get(`/reports/chat-evidence/${reportId}`)
 };
 
 // 비밀번호 재설정 관련 API
