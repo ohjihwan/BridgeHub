@@ -168,22 +168,31 @@ export default function Statistics() {
     fetchStatistics()
       .then(res => {
         console.log('통계 API 응답:', res);
-        const data = res.data;
-        console.log('파싱된 데이터:', data);
-        setStats(data);
+        const apiResponse = res.data;
+        console.log('파싱된 API 응답:', apiResponse);
+        
+        // API 응답 구조 확인: { success: true, data: { memberStats: {...} } }
+        const actualData = apiResponse.data || apiResponse;
+        console.log('실제 통계 데이터:', actualData);
+        
+        // 데이터베이스 값과 프론트엔드 기대값 매핑
+        const mappedData = mapStatisticsData(actualData);
+        console.log('매핑된 데이터:', mappedData);
+        
+        setStats(mappedData);
         
         // 첫 번째 차트를 기본 선택
-        if (data.memberStats && Object.keys(data.memberStats).length > 0) {
-          const firstChartKey = Object.keys(data.memberStats)[0];
+        if (mappedData.memberStats && Object.keys(mappedData.memberStats).length > 0) {
+          const firstChartKey = Object.keys(mappedData.memberStats)[0];
           console.log('첫 번째 차트 키:', firstChartKey);
           setSelectedChart({
             id: firstChartKey,
             title: getChartTitle(firstChartKey),
-            data: buildChartData(firstChartKey, data.memberStats[firstChartKey]),
-            legend: getChartLegend(firstChartKey, data.memberStats[firstChartKey])
+            data: buildChartData(firstChartKey, mappedData.memberStats[firstChartKey]),
+            legend: getChartLegend(firstChartKey, mappedData.memberStats[firstChartKey])
           });
         } else {
-          console.log('memberStats가 없거나 비어있음:', data.memberStats);
+          console.log('memberStats가 없거나 비어있음:', mappedData.memberStats);
         }
       })
       .catch(err => {
@@ -245,22 +254,98 @@ export default function Statistics() {
   const buildBarData = () => {
     if (!stats?.activityStats?.quarterlySignups) return null;
     
-    const quarters = Object.keys(stats.activityStats.quarterlySignups);
+    const dates = Object.keys(stats.activityStats.quarterlySignups).sort();
+    // 날짜 형식을 간단하게 표시 (MM-DD)
+    const formattedLabels = dates.map(date => {
+      const d = new Date(date);
+      return `${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+    });
+    
     return {
-      labels: quarters,
+      labels: formattedLabels,
       datasets: [
         {
-          label: '신규 가입자 수',
-          data: quarters.map(q => stats.activityStats.quarterlySignups[q]),
-          backgroundColor: '#0043AC'
-        },
-        {
-          label: '총 접속자 수',
-          data: quarters.map(q => stats.activityStats.quarterlyVisitors[q]),
-          backgroundColor: '#FF9F40'
+          label: '일별 신규가입자',
+          data: dates.map(d => stats.activityStats.quarterlySignups[d]),
+          backgroundColor: '#6a6cff'
         }
       ]
     };
+  };
+
+  // 데이터베이스 값을 프론트엔드 기대값으로 매핑하는 함수
+  const mapStatisticsData = (data) => {
+    const mappedData = { ...data };
+    
+    if (data.memberStats) {
+      const memberStats = {};
+      
+      // 성별 데이터 매핑
+      if (data.memberStats.gender) {
+        memberStats.gender = {};
+        Object.entries(data.memberStats.gender).forEach(([key, value]) => {
+          if (key === '남자' || key === '남성') {
+            memberStats.gender['남성'] = value;
+          } else if (key === '여자' || key === '여성') {
+            memberStats.gender['여성'] = value;
+          } else {
+            memberStats.gender[key] = value;
+          }
+        });
+      }
+      
+      // 학력 데이터 매핑 (그대로 사용)
+      if (data.memberStats.education) {
+        memberStats.education = { ...data.memberStats.education };
+      }
+      
+      // 시간대 데이터 매핑
+      if (data.memberStats.time) {
+        memberStats.time = {};
+        Object.entries(data.memberStats.time).forEach(([key, value]) => {
+          if (key === '오전' || key === '새벽') {
+            memberStats.time['06:00~12:00'] = (memberStats.time['06:00~12:00'] || 0) + value;
+          } else if (key === '오후' || key === '낮') {
+            memberStats.time['12:00~18:00'] = (memberStats.time['12:00~18:00'] || 0) + value;
+          } else if (key === '저녁' || key === '밤') {
+            memberStats.time['18:00~24:00'] = (memberStats.time['18:00~24:00'] || 0) + value;
+          } else {
+            // 기존 시간대 형식이면 그대로 사용
+            memberStats.time[key] = value;
+          }
+        });
+      }
+      
+      // 전공 데이터 매핑
+      if (data.memberStats.major) {
+        memberStats.major = {};
+        Object.entries(data.memberStats.major).forEach(([key, value]) => {
+          // 데이터베이스의 개별 전공을 그룹화
+          if (key === '인문' || key === '사회' || key === '문학' || key === '역사' || key === '철학') {
+            memberStats.major['인문•사회'] = (memberStats.major['인문•사회'] || 0) + value;
+          } else if (key === '경영' || key === '경제' || key === '회계' || key === '금융') {
+            memberStats.major['상경'] = (memberStats.major['상경'] || 0) + value;
+          } else if (key === '수학' || key === '물리' || key === '화학' || key === '생물' || key === '지구과학') {
+            memberStats.major['자연'] = (memberStats.major['자연'] || 0) + value;
+          } else if (key === '컴퓨터' || key === '전자' || key === '기계' || key === '건축' || key === '토목') {
+            memberStats.major['공학'] = (memberStats.major['공학'] || 0) + value;
+          } else if (key === '음악' || key === '미술' || key === '체육' || key === '디자인') {
+            memberStats.major['예체능'] = (memberStats.major['예체능'] || 0) + value;
+          } else if (key === '의학' || key === '치의학' || key === '한의학' || key === '약학') {
+            memberStats.major['의학'] = (memberStats.major['의학'] || 0) + value;
+          } else if (key === '법학') {
+            memberStats.major['법학'] = (memberStats.major['법학'] || 0) + value;
+          } else {
+            // 기타 또는 융합 전공
+            memberStats.major['융합'] = (memberStats.major['융합'] || 0) + value;
+          }
+        });
+      }
+      
+      mappedData.memberStats = memberStats;
+    }
+    
+    return mappedData;
   };
 
   if (loading) return (
@@ -351,6 +436,47 @@ export default function Statistics() {
       {/* 메인 그리드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'start' }}>
         
+        {/* 핵심 지표 요약 카드들 */}
+        <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '20px' }}>
+          {/* 총 회원 수 */}
+          <Card>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>총 회원 수</h4>
+            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
+              {stats.activityStats?.totalRegisteredMembers || stats.activityStats?.totalVisitors || 
+               (stats.memberStats ? Object.values(stats.memberStats.gender || {}).reduce((a, b) => a + b, 0) : 0)}명
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>플랫폼 가입 회원</p>
+          </Card>
+          
+          {/* 현재 접속자 수 */}
+          <Card>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>현재 접속자</h4>
+            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#10b981' }}>
+              {stats.activityStats?.currentOnlineUsers || 0}명
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>30분 내 활동</p>
+          </Card>
+          
+          {/* 총 가입자 수 */}
+          <Card>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>총 가입자 수</h4>
+            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#6a6cff' }}>
+              {stats.activityStats?.totalRegisteredMembers || stats.activityStats?.totalVisitors || 
+               (stats.memberStats ? Object.values(stats.memberStats.gender || {}).reduce((a, b) => a + b, 0) : 0)}명
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>전체 등록 회원</p>
+          </Card>
+          
+          {/* 활성 스터디룸 */}
+          <Card>
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>활성 스터디룸</h4>
+            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>
+              {stats.activityStats?.activeStudyRooms?.length || 0}개
+            </p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>사용자 참여 중</p>
+          </Card>
+        </div>
+        
         {/* 선택된 차트 상세 */}
         {selectedChart && (
           <Card style={{ gridColumn: 'span 1' }}>
@@ -361,10 +487,13 @@ export default function Statistics() {
           </Card>
         )}
         
-        {/* 방문자 수 바 차트 */}
+        {/* 일별 신규가입자 수 바 차트 */}
         {barData && (
           <Card style={{ gridColumn: 'span 2' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#555' }}>방문자 수</h3>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#555' }}>일별 신규가입자 수</h3>
+            <p style={{ margin: '0 0 15px 0', fontSize: '12px', color: '#888' }}>
+              최근 30일간 일별 가입자 추이
+            </p>
             <div style={{ height: '300px' }}>
               <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false }} />
             </div>
@@ -393,6 +522,65 @@ export default function Statistics() {
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{room.name}</span>
                 <span style={{ fontWeight: 'bold', color: '#6a6cff' }}>{room.count}명</span>
+              </div>
+            )}
+          />
+        )}
+        
+        {/* 실시간 접속자 정보 (새로 추가) */}
+        {stats.activityStats && (
+          <div style={{ 
+            background: '#fff', 
+            padding: '20px', 
+            borderRadius: '8px', 
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)' 
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#555' }}>실시간 현황</h3>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#666' }}>🟢 현재 접속자</span>
+                <span style={{ fontWeight: 'bold', color: '#00C851', fontSize: '18px' }}>
+                  {stats.activityStats.currentOnlineUsers || 0}명
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: '#666' }}>👥 총 회원 수</span>
+                <span style={{ fontWeight: 'bold', color: '#2196F3', fontSize: '18px' }}>
+                  {stats.activityStats.totalRegisteredMembers || stats.activityStats.totalVisitors || 0}명
+                </span>
+              </div>
+              {stats.activityStats.activeStudyRooms && stats.activityStats.activeStudyRooms.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#666' }}>📚 활성 스터디룸</span>
+                  <span style={{ fontWeight: 'bold', color: '#FF6900', fontSize: '18px' }}>
+                    {stats.activityStats.activeStudyRooms.length}개
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* 활성 스터디룸 목록 */}
+        {stats.activityStats?.activeStudyRooms && stats.activityStats.activeStudyRooms.length > 0 && (
+          <ListCard 
+            title="현재 활성 스터디룸"
+            items={stats.activityStats.activeStudyRooms}
+            renderItem={room => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontWeight: '500' }}>{room.roomTitle}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ 
+                    background: '#e3f2fd', 
+                    color: '#1976d2', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px', 
+                    fontSize: '12px' 
+                  }}>
+                    {room.currentUsers}/{room.maxCapacity}
+                  </span>
+                  <span style={{ color: '#666', fontSize: '14px' }}>👥</span>
+                </div>
               </div>
             )}
           />

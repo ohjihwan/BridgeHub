@@ -122,6 +122,11 @@ function Chat() {
 
 	const [fileInfoCache, setFileInfoCache] = useState(new Map());
 
+	// 참가신청 관련 상태
+	const [pendingMembers, setPendingMembers] = useState([]);
+	const [currentPendingMember, setCurrentPendingMember] = useState(null);
+	const [hasPendingRequests, setHasPendingRequests] = useState(false);
+
 	// Todo 관련 함수들
 	const handleTodoSettingAddInput = () => {
 		if (todoSettingInputs.length < 10) {
@@ -912,17 +917,11 @@ function Chat() {
 		// 참가 신청 알림 수신
 		const handleJoinRequest = (notification) => {
 			console.log('📥 [방장] 참가 신청 알림 수신:', notification);
-			setJoinRequests(prev => {
-				const newRequests = [...prev, {
-					...notification,
-					id: Date.now() + Math.random(),
-					timestamp: new Date().toISOString()
-				}];
-				console.log('📋 업데이트된 참가 신청 목록:', newRequests);
-				return newRequests;
-			});
 			
-			// 시스템 메시지로도 표시
+			// 대기중인 신청 상태 업데이트 (신청받기 버튼 표시용)
+			setHasPendingRequests(true);
+			
+			// 시스템 메시지로 표시
 			addSystemMessage(`${notification.applicantName}님이 스터디 참가를 신청했습니다.`, {});
 		};
 
@@ -968,53 +967,6 @@ function Chat() {
 			document.removeEventListener('click', handleClickOutside);
 		};
 	}, []);
-
-	// 참가 신청 승인/거절 처리
-	const handleJoinResponse = async (request, response) => {
-		try {
-			const token = localStorage.getItem('token');
-			if (!token) {
-				customAlert('로그인이 필요합니다.');
-				return;
-			}
-
-			// 백엔드 API 호출
-			const apiResponse = await fetch(`/api/studies/${studyId}/members/${request.applicantId}/status?status=${response.toUpperCase()}`, {
-				method: 'PUT',
-				headers: {
-					'Authorization': `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			});
-			const result = await apiResponse.json();
-			
-			if (result.status === 'success') {
-				// 소켓으로 신청자에게 결과 알림
-				if (socketService?.socket) {
-					socketService.socket.emit('study-join-response', {
-						studyId: studyId,
-						applicantId: request.applicantId,
-						response: response,
-						bossId: currentUserInfo.id
-					});
-				}
-
-				// 요청 목록에서 제거
-				setJoinRequests(prev => prev.filter(req => req.id !== request.id));
-				
-				// 시스템 메시지 추가
-				const actionText = response === 'approved' ? '승인' : '거절';
-				addSystemMessage(`${request.applicantName}님의 참가 신청을 ${actionText}했습니다.`, {});
-				
-				console.log(`✅ 참가 신청 ${actionText} 완료:`, request.applicantName);
-			} else {
-				customAlert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
-			}
-		} catch (error) {
-			console.error('참가 신청 처리 실패:', error);
-			customAlert('참가 신청 처리 중 오류가 발생했습니다.');
-		}
-	};
 
 	// 메시지 파싱 보정 함수 추가
 	const parseMessages = (msgs) => {
@@ -1077,6 +1029,175 @@ function Chat() {
 		}
 	};
 
+<<<<<<< HEAD
+=======
+	// 탈퇴하기 기능 (방장/일반 유저 분기)
+	const handleLeave = async () => {
+		try {
+			const token = localStorage.getItem('token');
+			if (isOwner) {
+				// 방장: 스터디 전체 삭제
+				await fetch(`/api/studies/${studyId}`, {
+					method: 'DELETE',
+					headers: { 'Authorization': `Bearer ${token}` }
+				});
+				customAlert('스터디가 삭제되었습니다.');
+				navigate('/home'); // 홈페이지로 이동 (로그인 상태 유지)
+			} else {
+				// 일반 유저: 멤버에서 삭제
+				await fetch(`/api/studies/${studyId}/leave`, {
+					method: 'DELETE',
+					headers: { 'Authorization': `Bearer ${token}` }
+				});
+				customAlert('탈퇴가 완료되었습니다.');
+				navigate('/home'); // 홈페이지로 이동 (로그인 상태 유지)
+			}
+		} catch (e) {
+			customAlert('탈퇴 처리 중 오류가 발생했습니다.');
+		}
+	};
+
+	// 대기중인 멤버 조회 함수
+	const fetchPendingMembers = async () => {
+		try {
+			const token = localStorage.getItem('token');
+			if (!token || !studyId) return;
+			console.log('🔍 대기중인 멤버 조회 시작:', studyId);
+			const res = await fetch(`/api/studies/${studyId}/pending-members`, {
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+			const result = await res.json();
+			console.log('📋 대기중인 멤버 조회 결과:', result);
+			if (result.status === 'success') {
+				console.log('✅ 대기중인 멤버 데이터:', result.data);
+				setPendingMembers(result.data);
+				setHasPendingRequests(result.data && result.data.length > 0);
+			}
+		} catch (e) {
+			console.error('❌ 대기중인 멤버 조회 실패:', e);
+		}
+	};
+
+	// 참가신청 수락 처리
+	const handleApprove = async (memberId) => {
+		try {
+			const token = localStorage.getItem('token');
+			await fetch(`/api/studies/${studyId}/members/${memberId}/status?status=APPROVED`, {
+				method: 'PUT',
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+			customAlert('승인 완료');
+			fetchPendingMembers(); // 목록 갱신
+		} catch (e) {
+			customAlert('승인 실패');
+		}
+	};
+
+	// 참가신청 거절 처리
+	const handleReject = async (memberId) => {
+		try {
+			const token = localStorage.getItem('token');
+			await fetch(`/api/studies/${studyId}/members/${memberId}/status?status=REJECTED`, {
+				method: 'PUT',
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+			customAlert('거절 완료');
+			fetchPendingMembers(); // 목록 갱신
+		} catch (e) {
+			customAlert('거절 실패');
+		}
+	};
+
+	// 신청받기 버튼 클릭 처리
+	const handleShowJoinRequests = async () => {
+		if (!isOwner) {
+			customAlert('방장만 참가신청을 관리할 수 있습니다.');
+			return;
+		}
+		
+		console.log('🔍 신청받기 버튼 클릭 - 대기중인 멤버 조회 시작');
+		await fetchPendingMembers();
+		console.log('📋 조회된 대기중인 멤버:', pendingMembers);
+		
+		if (pendingMembers.length === 0) {
+			customAlert('대기 중인 참가 신청이 없습니다.');
+			setHasPendingRequests(false);
+			return;
+		}
+		
+		// 첫 번째 신청자 정보로 JoinSystem 열기
+		console.log('✅ 첫 번째 신청자 정보:', pendingMembers[0]);
+		setCurrentPendingMember(pendingMembers[0]);
+		setShowJoinSystem(true);
+	};
+
+	// JoinSystem에서 슬라이더 완료 시 (수락)
+	const handleJoinSystemComplete = () => {
+		if (currentPendingMember) {
+			handleApprove(currentPendingMember.memberId);
+		}
+		setShowJoinSystem(false);
+		setCurrentPendingMember(null);
+	};
+
+	// JoinSystem에서 X 버튼 클릭 시 (거절)
+	const handleJoinSystemCancel = () => {
+		if (currentPendingMember) {
+			handleReject(currentPendingMember.memberId);
+		}
+		setShowJoinSystem(false);
+		setCurrentPendingMember(null);
+	};
+
+	// 방장일 때 대기중인 신청 확인
+	useEffect(() => {
+		if (isOwner && studyId) {
+			fetchPendingMembers();
+		}
+	}, [isOwner, studyId]);
+
+	// 강퇴 및 스터디룸 삭제 알림 처리
+	useEffect(() => {
+		if (!socketService) return;
+
+		const handleSystemMessage = (message) => {
+			console.log('시스템 메시지 수신:', message);
+			
+			if (message.type === 'kicked') {
+				customAlert('채팅방에서 강퇴되었습니다.');
+				navigate('/home'); // 홈페이지로 이동
+			} else if (message.type === 'study-deleted') {
+				customAlert('스터디룸이 삭제되었습니다.');
+				navigate('/home'); // 홈페이지로 이동
+			}
+		};
+
+		const handleKicked = (data) => {
+			console.log('강퇴 알림 수신:', data);
+			customAlert('채팅방에서 강퇴되었습니다.');
+			navigate('/home'); // 홈페이지로 이동
+		};
+
+		const handleStudyDeleted = (data) => {
+			console.log('스터디룸 삭제 알림 수신:', data);
+			customAlert('스터디룸이 삭제되었습니다.');
+			navigate('/home'); // 홈페이지로 이동
+		};
+
+		socketService.on('system-message', handleSystemMessage);
+		socketService.on('kicked', handleKicked);
+		socketService.on('study-deleted', handleStudyDeleted);
+
+		return () => {
+			if (socketService) {
+				socketService.off('system-message', handleSystemMessage);
+				socketService.off('kicked', handleKicked);
+				socketService.off('study-deleted', handleStudyDeleted);
+			}
+		};
+	}, [socketService, navigate]);
+
+>>>>>>> ca0cb047cfd8e92141c823bf422b73ed69f13c09
 	return (
 		<>
 			<Header
@@ -1095,12 +1216,13 @@ function Chat() {
 					}).catch(() => {
 						// 에러 무시
 					}).finally(() => {
-						// 무조건 페이지 이동
+						// 홈페이지로 이동 (로그인 상태 유지)
 						setTimeout(() => {
-							navigate(-1);
+							navigate('/home');
 						}, 0);
 					});
 				}}
+				onLeave={handleLeave} // 탈퇴 함수 연동
 				onlineUsers={onlineUsers || []}
 				studyInfo={studyInfo || null}
 				currentUserInfo={currentUserInfo || null}
@@ -1124,7 +1246,8 @@ function Chat() {
 			}}>📷 화상 회의 시작</button>
 
 
-			{/* 참가 신청 알림 (방장만 표시) */}
+			{/* 참가 신청 알림 (방장만 표시) - 중복 기능으로 주석처리 */}
+			{/*
 			{console.log('🔍 알림 박스 렌더링 조건 확인:', {
 				isOwner,
 				joinRequestsLength: joinRequests.length,
@@ -1185,6 +1308,7 @@ function Chat() {
 					))}
 				</div>
 			)}
+			*/}
 
 			<div className={"chatroom-history"}>
 
@@ -1354,7 +1478,7 @@ function Chat() {
 			<div className="msg-writing">
 				<div className="msg-writing__box">
 					<div className="msg-writing__services">
-						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => setShowVideo(true)}></button>
+						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={handleStartVideo}></button>
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
@@ -1362,11 +1486,13 @@ function Chat() {
 								파일 업로드
 							</button>
 						</li>
-						<li>
-						<button type="button" onClick={() => setShowJoinSystem(true)}>
-							시스템 참여하기
-						</button>
-						</li>
+						{isOwner && hasPendingRequests && (
+							<li>
+								<button type="button" onClick={handleShowJoinRequests} className="msg-writing__action">
+									신청받기
+								</button>
+							</li>
+						)}
 						<li>
 							<button type="button" className="msg-writing__action" onClick={() => {
 								const users = getActiveUsers();
@@ -1484,8 +1610,13 @@ function Chat() {
 
 			{showChatMember && (
 				<ChatMember
-					isOpen={showChatMember}
+					isVisible={showChatMember}
 					onClose={() => setShowChatMember(false)}
+					studyId={studyId}
+					roomId={roomId}
+					currentUserInfo={currentUserInfo}
+					isOwner={isOwner}
+					socketService={socketService}
 				/>
 			)}
 
@@ -1493,6 +1624,10 @@ function Chat() {
 				<JoinSystem 
 					isOpen={showJoinSystem}
 					onClose={() => setShowJoinSystem(false)}
+					isOwner={isOwner}
+					currentPendingMember={currentPendingMember}
+					onComplete={handleJoinSystemComplete}
+					onCancel={handleJoinSystemCancel}
 				/>
 			)}
 

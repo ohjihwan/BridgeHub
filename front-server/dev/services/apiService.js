@@ -179,7 +179,7 @@ export const reportAPI = {
 // 비밀번호 재설정 관련 API
 export const passwordResetAPI = {
     // 비밀번호 재설정 코드 요청
-    sendResetCode: (email) => apiClient.post('/auth/forgot-password', { email }),
+    sendResetCode: (name, phone, email) => apiClient.post('/auth/forgot-password', { name, phone, email }),
     
     // 비밀번호 재설정 완료
     resetPassword: (username, email, resetCode, newPassword) => 

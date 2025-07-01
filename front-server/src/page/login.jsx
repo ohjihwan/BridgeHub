@@ -55,15 +55,24 @@ function Login({ onSwitchToSignUp }) {
 	};
 
 	const handleEmailVerification = async () => {
-		if (!findEmail.trim()) {
-			await window.customAlert('이메일을 입력하세요.');
+		if (!findName.trim() || !findPhone.trim() || !findEmail.trim()) {
+			await window.customAlert('이름, 휴대폰 번호, 이메일을 모두 입력하세요.');
 			return;
 		}
 
 		try {
-			console.log('비밀번호 재설정 코드 요청 이메일:', findEmail);
+			console.log('비밀번호 재설정 코드 요청:', {
+				name: findName,
+				phone: cleanPhone(findPhone),
+				email: findEmail
+			});
+			
 			// authClient의 baseURL이 이미 '/api/auth'이므로 '/forgot-password'만 사용
-			await authClient.post('/forgot-password', { email: findEmail });
+			await authClient.post('/forgot-password', { 
+				name: findName,
+				phone: cleanPhone(findPhone),
+				email: findEmail 
+			});
 			await window.customAlert('비밀번호 재설정 코드가 발송되었습니다.');
 
 			const code = await window.customPrompt('재설정 코드를 입력하세요.', 'XXXXXX');
@@ -75,8 +84,19 @@ function Login({ onSwitchToSignUp }) {
 			await window.customAlert('재설정 코드가 확인되었습니다. 새 비밀번호를 입력하세요.');
 		} catch (err) {
 			console.log(err.response?.data);
-			const errorMessage = err.response?.data?.errorCode === 'USER_NOT_FOUND' ? 
-				'등록되지 않은 이메일입니다.' : '재설정 코드 발송에 실패했습니다.';
+			const errorCode = err.response?.data?.errorCode;
+			let errorMessage = '재설정 코드 발송에 실패했습니다.';
+			
+			if (errorCode === 'NAME_REQUIRED') {
+				errorMessage = '이름을 입력하세요.';
+			} else if (errorCode === 'PHONE_REQUIRED') {
+				errorMessage = '휴대폰 번호를 입력하세요.';
+			} else if (errorCode === 'EMAIL_REQUIRED') {
+				errorMessage = '이메일을 입력하세요.';
+			} else if (errorCode === 'USER_INFO_MISMATCH') {
+				errorMessage = '입력한 정보가 등록된 정보와 일치하지 않습니다.';
+			}
+			
 			await window.customAlert(errorMessage);
 		}
 	};
@@ -145,6 +165,8 @@ function Login({ onSwitchToSignUp }) {
 				await window.customAlert('비밀번호가 성공적으로 변경되었습니다.');
 				// 폼 초기화 및 모달 닫기
 				setShowFindPw(false);
+				setFindName('');
+				setFindPhone('');
 				setFindEmail('');
 				setNewPassword('');
 				setNewPasswordCheck('');
@@ -167,19 +189,21 @@ function Login({ onSwitchToSignUp }) {
 	};
 
 	const isFormFilled = useMemo(() => {
-		// 이메일 인증 전: 이메일만 필요
+		// 이메일 인증 전: 이름, 전화번호, 이메일 모두 필요
 		if (!emailVerified) {
-			return findEmail.trim();
+			return findName.trim() && findPhone.trim() && findEmail.trim();
 		}
 		// 이메일 인증 후: 새 비밀번호 입력 필요
 		return (
+			findName.trim() &&
+			findPhone.trim() &&
 			findEmail.trim() &&
 			emailVerified &&
 			resetCode.trim() &&
 			newPassword.trim() &&
 			newPasswordCheck.trim()
 		);
-	}, [findEmail, emailVerified, resetCode, newPassword, newPasswordCheck]);
+	}, [findName, findPhone, findEmail, emailVerified, resetCode, newPassword, newPasswordCheck]);
 
 
 	return (

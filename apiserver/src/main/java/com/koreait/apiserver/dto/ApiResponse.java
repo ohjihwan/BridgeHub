@@ -62,4 +62,9 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String errorCode, T data) {
         return new ApiResponse<>("error", data, errorCode);
     }
+
+    // 성공 응답 - 메시지와 데이터
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(true, message, data);
+    }
 } 

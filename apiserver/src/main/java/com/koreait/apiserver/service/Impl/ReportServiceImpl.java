@@ -68,16 +68,17 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public void createReportFromChatLog(ReportDTO reportDTO) {
         try {
-            // MongoDB에서 메시지 존재 여부 확인
+            // MongoDB에서 메시지 존재 여부 확인 (선택적 검증)
             String mongoMessageId = reportDTO.getMessageId() != null ? reportDTO.getMessageId().toString() : null;
             
             if (mongoMessageId != null) {
                 boolean messageExists = mongoMessageService.existsMessageById(mongoMessageId);
                 if (!messageExists) {
-                    log.error("MongoDB에서 메시지를 찾을 수 없음: messageId={}", mongoMessageId);
-                    throw new RuntimeException("신고 대상 메시지를 찾을 수 없습니다.");
+                    log.warn("MongoDB에서 메시지를 찾을 수 없음: messageId={} (신고는 계속 진행)", mongoMessageId);
+                    // 메시지가 없어도 신고는 계속 진행 (메시지가 삭제되었을 수 있음)
+                } else {
+                    log.info("MongoDB 메시지 검증 성공: messageId={}", mongoMessageId);
                 }
-                log.info("MongoDB 메시지 검증 성공: messageId={}", mongoMessageId);
             }
             
             Report report = new Report();
@@ -219,9 +220,35 @@ public class ReportServiceImpl implements ReportService {
         List<ReportDTO> recentReports = reportDao.findRecentReports(10);
         stats.put("recentReports", recentReports);
         // 신고 타입별 통계
-        Map<String, Integer> reportTypeStats = reportDao.countByReportType();
+        List<Map<String, Object>> reportTypeList = reportDao.countByReportType();
+        Map<String, Integer> reportTypeStats = convertListToMap(reportTypeList, "report_type");
         stats.put("reportTypes", reportTypeStats);
         return stats;
+    }
+
+    /**
+     * MyBatis에서 반환된 List<Map>을 Map<String, Integer>로 변환하는 헬퍼 메서드
+     */
+    private Map<String, Integer> convertListToMap(List<Map<String, Object>> list, String keyColumn) {
+        Map<String, Integer> result = new HashMap<>();
+        for (Map<String, Object> row : list) {
+            String key = (String) row.get(keyColumn);
+            Object countObj = row.get("count");
+            Integer count = 0;
+            
+            if (countObj instanceof Long) {
+                count = ((Long) countObj).intValue();
+            } else if (countObj instanceof Integer) {
+                count = (Integer) countObj;
+            } else if (countObj instanceof java.math.BigInteger) {
+                count = ((java.math.BigInteger) countObj).intValue();
+            }
+            
+            if (key != null) {
+                result.put(key, count);
+            }
+        }
+        return result;
     }
 
     private ReportDTO convertToDTO(Report report) {

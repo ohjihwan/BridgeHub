@@ -11,4 +11,5 @@ public interface ChatRoomMemberService {
     void joinChatRoom(Integer roomId, Integer memberId);
     void leaveChatRoom(Integer roomId, Integer memberId);
     boolean isMemberOfChatRoom(Integer roomId, Integer memberId);
+    void kickMember(Integer roomId, Integer memberId);
 } 

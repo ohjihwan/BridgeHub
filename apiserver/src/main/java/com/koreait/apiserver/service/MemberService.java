@@ -18,6 +18,7 @@ public interface MemberService {
     
     // 비밀번호 재설정 관련 메서드 추가
     boolean resetPassword(String username, String email, String resetCode, String newPassword);
+    boolean validateUserInfo(String name, String phone, String email);
     
     // 관리자 기능 추가
     List<MemberDTO> getMembersWithPaging(int page, int size);

@@ -3,9 +3,11 @@ package com.koreait.apiserver.controller;
 import com.koreait.apiserver.dto.ApiResponse;
 import com.koreait.apiserver.dto.StudyRoomDTO;
 import com.koreait.apiserver.dto.StudyRoomMemberDTO;
+import com.koreait.apiserver.entity.StudyRoom;
 import com.koreait.apiserver.service.StudyRoomService;
 import com.koreait.apiserver.service.JwtService;
 import com.koreait.apiserver.service.MemberService;
+import com.koreait.apiserver.dao.StudyRoomDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ public class StudyRoomController {
     private final JwtService jwtService;
     @Autowired
     private final MemberService memberService;
+    @Autowired
+    private final StudyRoomDao studyRoomDao;
 
     // 스터디룸 목록 조회
     @GetMapping
@@ -110,6 +114,7 @@ public class StudyRoomController {
             return ResponseEntity.ok(ApiResponse.success(createdStudyRoom));
         } catch (Exception e) {
             log.error("스터디룸 생성 실패 - 상세 에러: {}", e.getMessage(), e);
+            log.error("스택 트레이스:", e);
             return ResponseEntity.badRequest()
                 .body(ApiResponse.error("STUDY_CREATE_ERROR"));
         }
@@ -143,6 +148,45 @@ public class StudyRoomController {
             log.error("스터디룸 삭제 실패: {}", studyRoomId, e);
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("STUDY_DELETE_ERROR"));
+        }
+    }
+
+    // 임시: 사용자의 모든 스터디룸 삭제 (디버깅용)
+    @DeleteMapping("/cleanup")
+    public ResponseEntity<ApiResponse<String>> cleanupUserStudyRooms(
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            log.info("=== 사용자 스터디룸 정리 시작 ===");
+            String token = authHeader.replace("Bearer ", "");
+            Integer memberId = jwtService.extractMemberId(token);
+            
+            if (memberId == null) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("AUTH_ERROR"));
+            }
+            
+            log.info("사용자 ID: {}", memberId);
+            
+            // 해당 사용자가 방장인 스터디룸 조회
+            List<StudyRoom> existingStudies = studyRoomDao.findByBossId(memberId);
+            log.info("기존 스터디룸 수: {}", existingStudies.size());
+            
+            int deletedCount = 0;
+            for (StudyRoom study : existingStudies) {
+                log.info("스터디룸 삭제 중: studyRoomId={}, title={}", study.getStudyRoomId(), study.getTitle());
+                
+                // 스터디룸 삭제 (채팅방도 함께 삭제됨)
+                studyRoomService.deleteStudyRoom(study.getStudyRoomId());
+                deletedCount++;
+            }
+            
+            log.info("삭제 완료: {}개 스터디룸 삭제됨", deletedCount);
+            return ResponseEntity.ok(ApiResponse.success("정리 완료: " + deletedCount + "개 스터디룸 삭제됨"));
+            
+        } catch (Exception e) {
+            log.error("스터디룸 정리 실패: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("CLEANUP_ERROR"));
         }
     }
 
