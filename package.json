@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "start": "npx concurrently \"npm run start:admin\" \"npm run start:socket\" \"npm run start:front\" \"npm run start:rtc\"",
-    "start:admin": "cd front-admin && npm dev",
+    "start:admin": "cd front-admin && npm run dev",
     "start:socket": "cd socket-server && npm start",
     "start:front": "cd front-server && npm run dev",
     "start:rtc": "cd rtc-server && npm run dev",
@@ -59,6 +59,7 @@
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
+    "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",

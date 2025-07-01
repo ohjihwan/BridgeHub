@@ -5,7 +5,7 @@ import Header from '@common/Header';
 import PreviewBoard from '@components/PreviewBoard';
 import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
-import { userClient, studyClient } from '@js/common-ui';
+import { studyClient } from '@js/common-ui';
 import axios from 'axios';
 
 const Home = () => {
@@ -86,18 +86,6 @@ const Home = () => {
 			});
 	}, []);
 
-	// 테스트용
-	const [testMode, setTestMode] = useState(false); // 테스트용 구분 상태
-	const dummyRoom = {
-		title: '임시 스터디룸 테스트 방',
-		region: '서울특별시',
-		time: '오후',
-		currentMembers: 100,
-		capacity: 100,
-		thumbnail: 'thumbnail-room8.jpg'
-	};
-	// 테스트용
-
 	useEffect(() => {
 		fetchMyRoom();
 	}, []);
@@ -127,20 +115,6 @@ const Home = () => {
 				<Header showSearch={true} onSearch={() => navigate('/search')} />
 
 				<div className="studyroom-actions">
-					<div className="reenter-studyroom">
-						<Link to="/chat?test=1" className="reenter-studyroom__link" title="테스트 방으로 이동">
-							<div className="reenter-studyroom__thumbnail">
-								<img src={`/uploads/thumbnail/${dummyRoom.thumbnail}`} alt="스터디룸 썸네일" />
-							</div>
-							<h3 className="reenter-studyroom__title">{dummyRoom.title}</h3>
-							<ul className="room-info">
-								<li>{dummyRoom.region}</li>
-								<li>{dummyRoom.time}</li>
-								<li>{dummyRoom.currentMembers} / {dummyRoom.capacity}명</li>
-							</ul>
-						</Link>
-					</div>
-
 					{/* 소속된 방이 없는 경우 */}
 					{!hasStudyRoom && (
 						<div className="create-studyroom">

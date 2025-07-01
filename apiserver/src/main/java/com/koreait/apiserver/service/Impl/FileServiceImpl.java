@@ -104,6 +104,13 @@ public class FileServiceImpl implements FileService {
             fileDTO.setThumbnailUrl("/api/files/thumbnail/" + fileEntity.getFileId());
         }
 
+        // 디버깅 로그 추가
+        System.out.println("=== 파일 업로드 완료 ===");
+        System.out.println("fileId: " + fileEntity.getFileId());
+        System.out.println("fileName: " + originalFilename);
+        System.out.println("fileDTO.fileId: " + fileDTO.getFileId());
+        System.out.println("========================");
+
         return fileDTO;
     }
 
@@ -174,6 +181,61 @@ public class FileServiceImpl implements FileService {
         
         System.out.println("생성된 파일 URL: " + fileUrl);
         System.out.println("=== 파일 저장 디버깅 끝 ===");
+
+        return fileDTO;
+    }
+
+    @Override
+    public FileDTO uploadBoardFile(MultipartFile multipartFile, Integer memberId) throws Exception {
+        // 파일 검증
+        if (multipartFile.isEmpty()) {
+            throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+        }
+
+        String originalFilename = multipartFile.getOriginalFilename();
+        if (!isAllowedFileType(originalFilename)) {
+            throw new IllegalArgumentException("허용되지 않는 파일 타입입니다.");
+        }
+
+        if (!isValidFileSize(multipartFile.getSize())) {
+            throw new IllegalArgumentException("파일 크기가 너무 큽니다. (최대 " + (maxFileSize / 1024 / 1024) + "MB)");
+        }
+
+        // 파일 저장 경로 생성
+        String storedFilename = generateStoredFilename(originalFilename);
+        String relativePath = getRelativePath("BOARD_ATTACHMENT", storedFilename);
+        Path fullPath = Paths.get(uploadPath, relativePath);
+
+        // 디렉토리 생성
+        Files.createDirectories(fullPath.getParent());
+
+        // 파일 저장
+        Files.copy(multipartFile.getInputStream(), fullPath);
+
+        // 파일 해시 생성
+        String fileHash = generateFileHash(multipartFile.getBytes());
+
+        // DB에 파일 정보 저장
+        File fileEntity = new File();
+        fileEntity.setFileType("BOARD_ATTACHMENT");
+        fileEntity.setOriginalFilename(originalFilename);
+        fileEntity.setStoredFilename(storedFilename);
+        fileEntity.setFilePath(relativePath);
+        fileEntity.setFileSize(multipartFile.getSize());
+        fileEntity.setMimeType(multipartFile.getContentType());
+        fileEntity.setFileHash(fileHash);
+        fileEntity.setUploadedAt(LocalDateTime.now());
+        fileEntity.setMemberId(memberId); // 업로더 ID 설정
+
+        fileDao.insertFile(fileEntity);
+
+        // DTO로 변환하여 반환
+        FileDTO fileDTO = convertToDTO(fileEntity);
+        fileDTO.setDownloadUrl("/api/files/download/" + fileEntity.getFileId());
+        
+        if (isImageFile(originalFilename)) {
+            fileDTO.setThumbnailUrl("/api/files/thumbnail/" + fileEntity.getFileId());
+        }
 
         return fileDTO;
     }

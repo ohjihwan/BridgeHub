@@ -5,6 +5,7 @@ import com.koreait.apiserver.dto.MessageDTO;
 import com.koreait.apiserver.dto.ReportDTO;
 import com.koreait.apiserver.entity.Report;
 import com.koreait.apiserver.service.ChatLogService;
+import com.koreait.apiserver.service.MongoMessageService;
 import com.koreait.apiserver.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportDao reportDao;
     private final ChatLogService chatLogService;
+    private final MongoMessageService mongoMessageService;
 
     @Override
     public List<ReportDTO> getReportList() {
@@ -66,10 +68,24 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public void createReportFromChatLog(ReportDTO reportDTO) {
         try {
+            // MongoDB에서 메시지 존재 여부 확인
+            String mongoMessageId = reportDTO.getMessageId() != null ? reportDTO.getMessageId().toString() : null;
+            
+            if (mongoMessageId != null) {
+                boolean messageExists = mongoMessageService.existsMessageById(mongoMessageId);
+                if (!messageExists) {
+                    log.error("MongoDB에서 메시지를 찾을 수 없음: messageId={}", mongoMessageId);
+                    throw new RuntimeException("신고 대상 메시지를 찾을 수 없습니다.");
+                }
+                log.info("MongoDB 메시지 검증 성공: messageId={}", mongoMessageId);
+            }
+            
             Report report = new Report();
             report.setReporterId(reportDTO.getReporterId());
             report.setReportedUserId(reportDTO.getReportedUserId());
             report.setReportType(reportDTO.getReportType());
+            // MongoDB 메시지 ID는 MySQL message 테이블에 없으므로 NULL로 설정
+            report.setMessageId(null);
             report.setRoomId(reportDTO.getRoomId());
             report.setStudyRoomId(reportDTO.getStudyRoomId());
             report.setReason(reportDTO.getReason());
@@ -83,8 +99,8 @@ public class ReportServiceImpl implements ReportService {
 
             reportDao.insertReport(report);
             
-            log.info("채팅 로그 기반 신고 생성 완료: reportId={}, roomId={}", 
-                    report.getReportId(), report.getRoomId());
+            log.info("채팅 로그 기반 신고 생성 완료: reportId={}, roomId={}, mongoMessageId={}", 
+                    report.getReportId(), report.getRoomId(), mongoMessageId);
                     
         } catch (Exception e) {
             log.error("채팅 로그 신고 생성 실패", e);

@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
-import { customConfirm } from '@/assets/js/common-ui';
+import { customAlert, customConfirm } from '@/assets/js/common-ui';
 
 const AttachmentList = ({ isOpen, attachments, onClose }) => {
 	const [isVisible, setIsVisible] = useState(false);
@@ -58,7 +58,7 @@ const AttachmentList = ({ isOpen, attachments, onClose }) => {
 				}
 			} else {
 				console.error('❌ 유효하지 않은 fileId:', att.fileId);
-				alert('파일 다운로드에 실패했습니다. (유효하지 않은 파일 ID)');
+				customAlert('파일 다운로드에 실패했습니다. (유효하지 않은 파일 ID)');
 			}
 		});
 	};

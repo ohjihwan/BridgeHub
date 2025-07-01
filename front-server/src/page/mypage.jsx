@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './common/Header';
 import profileDefault from '/uploads/profile/default-profile1.png';
-import { userClient, getUsernameFromToken } from '@js/common-ui';
+import { commonClient, getUsernameFromToken, formatPhone, cleanPhone } from '@js/common-ui';
+import subjects from '@json/subject';
+import regionData from '@json/region';
 
 const MyPage = () => {
 	const navigate = useNavigate();
 	const [isEditing, setIsEditing] = useState(false);
+	const [findPhone, setFindPhone] = useState('');
 	const [profileData, setProfileData] = useState({
 		profileImg: '',
 		nickname: '',
@@ -16,7 +19,7 @@ const MyPage = () => {
 		region: '',
 		district: '',
 		timeZone: '',
-		memo: ''
+		description: ''
 	});
 	const [editData, setEditData] = useState({
 		profileImg: '',
@@ -27,16 +30,10 @@ const MyPage = () => {
 		region: '',
 		district: '',
 		timeZone: '',
-		memo: '',
+		description: '',
 		password: '',
 		passwordConfirm: ''
 	});
-	const locationOptions = {
-		'지역무관': [],
-		'서울': ['강남구', '서초구', '송파구', '강동구', '마포구'],
-		'부산': ['해운대구', '수영구', '부산진구', '동래구', '남구'],
-		'대구': ['중구', '수성구', '달서구', '동구', '북구']
-	};
 	
 	const handleEditProfile = async () => {
 		if (isEditing) {
@@ -54,8 +51,15 @@ const MyPage = () => {
 					department: editData.department,
 					region: editData.region,
 					district: editData.district,
-					time: editData.timeZone
+					time: editData.timeZone,
+					description: editData.description
 				};
+
+				console.log('=== 전송할 데이터 ===');
+				console.log('description 값:', editData.description);
+				console.log('전체 requestBody:', requestBody);
+				console.log('description가 포함되었나?', 'description' in requestBody);
+				console.log('description 값이 있나?', !!requestBody.description);
 
 				// 비밀번호 입력이 있으면 함께 전송
 				if (editData.password) {
@@ -67,7 +71,7 @@ const MyPage = () => {
 					requestBody.profileImage = editData.profileImg;
 				}
 
-				const res = await userClient.put(`/api/members/${username}`, requestBody, {
+				const res = await commonClient.put(`/api/members/${username}`, requestBody, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('token')}`,
 						'Content-Type': 'application/json'
@@ -104,7 +108,7 @@ const MyPage = () => {
 				region: profileData.region || '',
 				district: profileData.district || '',
 				timeZone: profileData.timeZone || '',
-				memo: profileData.memo || '',
+				description: profileData.description || '',
 				profileImg: profileData.profileImg || ''
 			});
 			setIsEditing(true);
@@ -113,9 +117,9 @@ const MyPage = () => {
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
-		setEditData(prev => ({
+		setEditData((prev) => ({
 			...prev,
-			[name]: value
+			[name]: name === "hp" ? cleanPhone(value) : value,  // 하이픈 제거 상태로 저장
 		}));
 	};
 
@@ -131,7 +135,7 @@ const MyPage = () => {
 
 		const fetchProfile = async () => {
 			try {
-				const res = await userClient.get(`/api/members/${username}`, {
+				const res = await commonClient.get(`/api/members/${username}`, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('token')}`,
 					},
@@ -149,7 +153,7 @@ const MyPage = () => {
 						region: res.data.data.region || '',
 						district: res.data.data.district || '',
 						timeZone: res.data.data.time || '',
-						memo: res.data.data.memo || ''
+						description: res.data.data.description || ''
 					};
 					setProfileData(newProfileData);
 					// editData도 초기값으로 설정
@@ -169,162 +173,204 @@ const MyPage = () => {
 	}, []);
 
 	return (
-		<div className="mypage-container">
+		<>
 			{isEditing ? (
-				<Header isEditing={true} showSearch={false} />
+				<Header title="프로필 설정" isEditing={true} showSearch={false} />
 			) : (
-				<Header showSearch={false} />
+				<Header title="프로필 설정" showSearch={false} />
 			)}
-
-			<div className="profile-img">
-				{isEditing ? (
-					<>
-						<button type="button" className='profile-img__button' onClick={() => document.getElementById('profileImgInput').click()}>
-							<span className='hide'>프로필 변경하기</span>
-						</button>
-						<input type="file" id="profileImgInput" accept="image/*" style={{ display: 'none' }}
-							onChange={(e) => {
-								const file = e.target.files[0];
-								if (file) {
-									const reader = new FileReader();
-									reader.onloadend = () => {
-										setEditData(prev => ({
-											...prev,
-											profileImg: reader.result
-										}));
-									};
-									reader.readAsDataURL(file);
-								}
-							}}
-						/>
-						<img src={editData.profileImg || profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
-					</>
-				) : (
-					<img src={profileData.profileImg || profileDefault} className='profile-img__img' alt="나의 프로필 이미지"/>
-				)}
-			</div>
-			
-			<div className="info-row-area">
-				{isEditing ? (
-					<>
-						<div className="info-row">
-							<label htmlFor='nickname' className="label">닉네임</label>
-							<div className="field">
-								<input type="text" name="nickname" id="nickname" value={editData.nickname || ''} className="text" placeholder="별명을 입력하세요" onChange={handleInputChange}/>
-							</div>
-						</div>
-						<div className="info-row">
-							<label htmlFor='password' className="label">비밀번호</label>
-							<div className="field">
-								<input type="password" name="password" id="password" value={editData.password || ''} className="text" placeholder="비밀번호를 입력하세요" onChange={handleInputChange}/>
-							</div>
-							<div className="field">
-								<input type="password" name="passwordConfirm" value={editData.passwordConfirm || ''} className="text" placeholder="비밀번호를 다시 입력하세요" onChange={handleInputChange}/>
-							</div>
-						</div>
-						<div className="info-row">
-							<label htmlFor='hp' className="label">휴대폰번호</label>
-															<div className="field">
-									<input type="tel" name="hp" id="hp" value={editData.hp || ''} className="text" placeholder="휴대폰번호를 입력하세요" onChange={handleInputChange}/>
-								</div>
-						</div>
-						<div className="info-row info-row--major">
-							<h4 className="label">전공</h4>
-							<div className="half-field">
+			<div className="mypage-profile">
+				<div className="mypage-profile__img">
+					{isEditing ? (
+						<>
+							<button type="button" className='mypage-profile__imgbutton' onClick={() => document.getElementById('profileImgInput').click()}>
+								<span className='hide'>프로필 변경하기</span>
+							</button>
+							<input type="file" id="profileImgInput" accept="image/*" style={{ display: 'none' }}
+								onChange={(e) => {
+									const file = e.target.files[0];
+									if (file) {
+										const reader = new FileReader();
+										reader.onloadend = () => {
+											setEditData(prev => ({
+												...prev,
+												profileImg: reader.result
+											}));
+										};
+										reader.readAsDataURL(file);
+									}
+								}}
+							/>
+							<img src={editData.profileImg || profileDefault} className='mypage-profile__userimg' alt="나의 프로필 이미지"/>
+						</>
+					) : (
+						<img src={profileData.profileImg || profileDefault} className='mypage-profile__userimg' alt="나의 프로필 이미지"/>
+					)}
+				</div>
+				
+				<div className="mypage-profile__info">
+					{isEditing ? (
+						<>
+							<div className="mypage-profile__item">
+								<label htmlFor='nickname' className="label">닉네임</label>
 								<div className="field">
-									<select className="select" name="education" value={editData.education || ''} onChange={handleInputChange}>
-										<option value="">학력</option>
-										<option value="고졸">고졸</option>
-										<option value="대학교">대학교</option>
-										<option value="대학원">대학원</option>
-									</select>
+									<input type="text" name="nickname" id="nickname" value={editData.nickname || ''} className="text" placeholder="별명을 입력하세요" onChange={handleInputChange}/>
+								</div>
+							</div>
+							<div className="mypage-profile__item">
+								<label htmlFor='password' className="label">비밀번호</label>
+								<div className="field">
+									<input type="password" name="password" id="password" value={editData.password || ''} className="text" placeholder="비밀번호를 입력하세요" onChange={handleInputChange}/>
 								</div>
 								<div className="field">
-									<select className="select" name="department" value={editData.department || ''} onChange={handleInputChange}>
-										<option value="">학과/학부 선택</option>
-										<option value="컴퓨터공학과">컴퓨터공학과</option>
-										<option value="소프트웨어학과">소프트웨어학과</option>
-										<option value="정보통신공학과">정보통신공학과</option>
-									</select>
+									<input type="password" name="passwordConfirm" value={editData.passwordConfirm || ''} className="text" placeholder="비밀번호를 다시 입력하세요" onChange={handleInputChange}/>
 								</div>
 							</div>
-						</div>
-						<div className="info-row info-row--location">
-							<h4 className="label">지역</h4>
-							<div className="half-field">
+							<div className="mypage-profile__item">
+								<label htmlFor='hp' className="label">휴대폰번호</label>
 								<div className="field">
-									<select className="select" name="region" value={editData.region || ''} onChange={handleInputChange}>
-										<option value="지역무관">지역무관</option>
-										<option value="서울">서울</option>
-										<option value="대구">대구</option>
-										<option value="부산">부산</option>
-									</select>
+									<input type="tel" name="hp" id="hp" value={formatPhone(editData.hp || '')} className="text" maxLength={13} placeholder="휴대폰번호를 입력하세요" onChange={handleInputChange}/>
 								</div>
-								{editData.region && editData.region !== '지역무관' && (
+							</div>
+							<div className="mypage-profile__item">
+								<h4 className="label">전공</h4>
+								<div className="half-field">
 									<div className="field">
-										<select className="select" name="district" value={editData.district || ''} onChange={handleInputChange}>
-											<option value="">세부 지역 선택</option>
-											{locationOptions[editData.region]?.map(sub => (
-												<option key={sub} value={sub}>{sub}</option>
+										<select 
+											className="select" 
+											name="education" 
+											value={editData.education || ''} 
+											onChange={handleInputChange}
+										>
+											<option value="">학력</option>
+											{subjects["학력"].map((education) => (
+												<option key={education} value={education}>
+													{education}
+												</option>
 											))}
 										</select>
 									</div>
-								)}
+									
+									<div className="field">
+										<select 
+											className="select" 
+											name="department" 
+											value={editData.department || ''} 
+											onChange={handleInputChange}
+										>
+											<option value="">계열 선택</option>
+											{subjects["계열"].map((department) => (
+												<option key={department} value={department}>
+													{department}
+												</option>
+											))}
+										</select>
+									</div>
+								</div>
 							</div>
-						</div>
-						<div className="info-row">
-							<span className="label">시간대</span>
-							<div className="field">
-								<select className="select" name="timeZone" value={editData.timeZone || ''} onChange={handleInputChange}>
-									<option value="">선호 시간대 선택</option>
-									<option value="오전">오전 (06:00-12:00)</option>
-									<option value="오후">오후 (12:00-18:00)</option>
-									<option value="야간">저녁 (18:00-24:00)</option>
-								</select>
+							<div className="mypage-profile__item">
+								<h4 className="label">지역</h4>
+								<div className="half-field">
+									<div className="field">
+										<select
+											className="select"
+											name="region"
+											value={editData.region}
+											onChange={(e) => {
+												const { value } = e.target;
+												setEditData((prev) => ({
+													...prev,
+													region: value,
+													// 지역무관이 아니고 해당 지역에 구가 있으면 첫 번째 구 자동 선택
+													district: value !== '지역무관' && regionData[value]?.length > 0 
+														? regionData[value][0] 
+														: ''
+												}));
+											}}
+										>
+											<option value="지역무관">지역무관</option>
+											{Object.keys(regionData).map((region) => (
+												<option key={region} value={region}>
+													{region}
+												</option>
+											))}
+										</select>
+									</div>
+									{editData.region !== '지역무관' && regionData[editData.region]?.length > 0 && (
+										<div className="field">
+											<select
+												className="select"
+												name="district"
+												value={editData.district}
+												onChange={handleInputChange}
+											>
+												{regionData[editData.region].map((district) => (
+													<option key={district} value={district}>
+														{district}
+													</option>
+												))}
+											</select>
+										</div>
+									)}
+								</div>
 							</div>
-						</div>
-						<div className="info-row">
-							<label htmlFor="memo" className="label">메모</label>
-							<div className="field __textarea">
-								<textarea className="textarea" id="memo" name="memo" value={editData.memo || ''} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
+							<div className="mypage-profile__item">
+								<span className="label">시간대</span>
+								<div className="field">
+									<select className="select" name="timeZone" value={editData.timeZone || ''} onChange={handleInputChange}>
+										<option value="">선호 시간대 선택</option>
+										<option value="오전">오전 (06:00-12:00)</option>
+										<option value="오후">오후 (12:00-18:00)</option>
+										<option value="야간">저녁 (18:00-24:00)</option>
+									</select>
+								</div>
 							</div>
-						</div>
-					</>
-				) : (
-					<>
-						<div className="info-row profile-data">
-							<span className="label">닉네임</span>
-							<span className="value">{profileData.nickname}</span>
-						</div>
-						<div className="info-row profile-data">
-							<span className="label">휴대폰번호</span>
-							<span className="value">{profileData.hp}</span>
-						</div>
-						<div className="info-row profile-data">
-							<span className="label">전공</span>
-							<span className="value">{profileData.education && profileData.department ? `${profileData.education} ${profileData.department}` : profileData.education || profileData.department}</span>
-						</div>
-						<div className="info-row profile-data">
-							<span className="label">지역</span>
-							<span className="value">{profileData.region === '지역무관' ? '지역무관' : `${profileData.region} ${profileData.district}`}</span>
-						</div>
-						<div className="info-row profile-data">
-							<span className="label">시간대</span>
-							<span className="value">{profileData.timeZone}</span>
-						</div>
-						<div className="info-row profile-data">
-							<span className="label">메모</span>
-							<span className="value">{profileData.memo}</span>
-						</div>
-					</>
-				)}
+							<div className="mypage-profile__item">
+								<label htmlFor="memo" className="label">메모</label>
+								<div className="field __textarea">
+									<textarea className="textarea" id="memo" name="description" value={editData.description || ''} onChange={handleInputChange} placeholder="경력, 이력, 메모 등 자유롭게 작성하세요" />
+								</div>
+							</div>
+						</>
+					) : (
+						<>
+							<div className="profile-nickname">
+								<span className="label hide">닉네임</span>
+								<span className="value">{profileData.nickname}</span>
+							</div>
+
+							<hr className="hr" />
+							<h3 className="mypage-profile__datatitle">기본 정보</h3>
+							<div className="mypage-profile__item mypage-profile__data">
+								<span className="label">휴대폰번호</span>
+								<span className="value">{profileData.hp}</span>
+							</div>
+							<div className="mypage-profile__item mypage-profile__data">
+								<span className="label">전공</span>
+								<span className="value">{profileData.education && profileData.department ? `${profileData.education} ${profileData.department}` : profileData.education || profileData.department}</span>
+							</div>
+							<div className="mypage-profile__item mypage-profile__data">
+								<span className="label">지역</span>
+								<span className="value">{profileData.region === '지역무관' ? '지역무관' : `${profileData.region} ${profileData.district}`}</span>
+							</div>
+							<div className="mypage-profile__item mypage-profile__data">
+								<span className="label">시간대</span>
+								<span className="value">{profileData.timeZone}</span>
+							</div>
+							<div className="mypage-profile__item mypage-profile__data mypage-profile__data--textarea">
+								<span className="label">메모</span>
+								<span className="value">{profileData.description}</span>
+							</div>
+						</>
+					)}
+				</div>
+				<div className="fixed">
+					<button type="button" className="button button-primary" onClick={handleEditProfile}>
+						{isEditing ? '수정 완료' : '프로필 수정'}
+					</button>
+				</div>
 			</div>
-			<div className="fixed">
-				<button type="button" className="button button-primary" onClick={handleEditProfile}>
-					{isEditing ? '수정 완료' : '프로필 수정'}
-				</button>
-			</div>
-		</div>
+		</>
 	);
 };
 

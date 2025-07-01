@@ -117,7 +117,7 @@ export const authClient = axios.create({
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
 });
-export const userClient = axios.create({
+export const commonClient = axios.create({
 	baseURL: '/',
 	timeout: 10000,
 	headers: { 'Content-Type': 'application/json' },
@@ -128,7 +128,12 @@ export const studyClient = axios.create({
 	headers: { 'Content-Type': 'application/json' },
 });
 export const boardClient = axios.create({
-    baseURL: '/api/board',  // 상대 경로 - 프록시 사용!
+    baseURL: '/api/board',
+    timeout: 10000,
+    headers: { 'Content-Type': 'application/json' },
+});
+export const usersClient = axios.create({
+    baseURL: '/api/members',
     timeout: 10000,
     headers: { 'Content-Type': 'application/json' },
 });
@@ -136,7 +141,7 @@ export const boardClient = axios.create({
 export const getAccessToken = () => {
 	return localStorage.getItem('token');
 };
-[authClient, userClient, studyClient, boardClient].forEach(client => {
+[authClient, commonClient, studyClient, boardClient].forEach(client => {
 	client.interceptors.request.use(config => {
 		window.showLoading?.();
 		return config;

@@ -42,7 +42,12 @@ public class FileController {
         try {
             log.info("파일 업로드 요청: studyRoomId={}, uploaderId={}, fileType={}", studyRoomId, uploaderId, fileType);
             FileDTO uploadedFile = fileService.uploadFile(file, fileType, studyRoomId, uploaderId);
+            log.info("파일 업로드 응답: fileId={}, fileName={}", uploadedFile.getFileId(), uploadedFile.getOriginalFilename());
             return ResponseEntity.ok(ApiResponse.success(uploadedFile));
+        } catch (IllegalArgumentException e) {
+            log.warn("파일 업로드 검증 실패: studyRoomId={}, uploaderId={}, error={}", studyRoomId, uploaderId, e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(ApiResponse.<FileDTO>error("FILE_VALIDATION_ERROR"));
         } catch (Exception e) {
             log.error("파일 업로드 실패: studyRoomId={}, uploaderId={}", studyRoomId, uploaderId, e);
             return ResponseEntity.internalServerError()
@@ -237,6 +242,50 @@ public class FileController {
     @GetMapping("/status")
     public ResponseEntity<ApiResponse<Void>> getFileServiceStatus() {
         return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    // 게시판용 파일 업로드
+    @PostMapping("/upload/board")
+    public ResponseEntity<ApiResponse<FileDTO>> uploadBoardFile(@RequestParam("file") MultipartFile file,
+                                                              @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            log.info("게시판 파일 업로드 요청: fileName={}", file.getOriginalFilename());
+            
+            // JWT 토큰에서 사용자 정보 추출
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("AUTHORIZATION_REQUIRED"));
+            }
+            
+            String token = authHeader.replace("Bearer ", "");
+            String username = jwtService.getUsernameFromToken(token);
+            
+            if (username == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("INVALID_TOKEN"));
+            }
+            
+            // 사용자 ID 조회
+            MemberDTO member = memberService.getMemberByUsername(username);
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("USER_NOT_FOUND"));
+            }
+            
+            // 파일 크기 검증 (10MB)
+            if (file.getSize() > 10 * 1024 * 1024) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("FILE_SIZE_EXCEEDED"));
+            }
+            
+            // 게시판용 파일 업로드
+            FileDTO uploadedFile = fileService.uploadBoardFile(file, member.getId());
+            return ResponseEntity.ok(ApiResponse.success(uploadedFile));
+        } catch (Exception e) {
+            log.error("게시판 파일 업로드 실패: fileName={}", file.getOriginalFilename(), e);
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("BOARD_FILE_UPLOAD_ERROR"));
+        }
     }
 }
 

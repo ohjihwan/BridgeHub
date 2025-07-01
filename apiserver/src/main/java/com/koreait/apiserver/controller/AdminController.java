@@ -138,13 +138,11 @@ public class AdminController {
         }
     }
 
-    // =============================================
-    // 통계 API
-    // =============================================
+   
 
-    /**
-     * 관리자 대시보드 통계 조회
-     */
+   
+    // 관리자 대시보드 통계 조회
+    
     @GetMapping("/statistics")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getStatistics() {
         try {
@@ -170,9 +168,9 @@ public class AdminController {
         }
     }
 
-    /**
-     * 회원 통계 조회 (성별, 학력, 활동시간대, 전공별)
-     */
+    
+     // 회원 통계 조회 (성별, 학력, 활동시간대, 전공별)
+     
     @GetMapping("/statistics/members")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getMemberStatisticsApi() {
         try {
@@ -185,9 +183,9 @@ public class AdminController {
         }
     }
 
-    /**
-     * 신고 통계 조회
-     */
+    
+     // 신고 통계 조회
+    
     @GetMapping("/statistics/reports")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getReportStatisticsApi() {
         try {

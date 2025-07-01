@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
@@ -7,25 +7,30 @@ import ResultModal from '@components/chat/ResultModal';
 import TodoList from '@components/chat/TodoListDeployment';
 import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
-import { chatAPI, userAPI } from '@dev/services/apiService';
+import { chatAPI, userAPI, reportAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
+import { customAlert, customConfirm, customPrompt } from '@/assets/js/common-ui';
+import JoinSystem from '@components/chat/JoinSystem'
+import ChatMember from '@components/chat/ChatMember';
 
 function Chat() {
 	const location = useLocation();
 	const params = useParams();
+	const navigate = useNavigate();
 	const studyInfo = location.state?.studyRoom || location.state;
-	
+		
 	// URL query string에서 정보 추출
 	const urlParams = new URLSearchParams(location.search);
-	
+		
 	// 사용자 정보 상태
 	const [currentUserId, setCurrentUserId] = useState(null);
 	const [currentUserInfo, setCurrentUserInfo] = useState(null);
-	
+		
 	// URL 파라미터에서 정보를 읽어오거나 location.state에서 가져오기
 	const studyId = studyInfo?.studyRoomId || studyInfo?.id || params.studyId || params.id || urlParams.get('studyId') || urlParams.get('id');
 	const roomId = studyInfo?.roomId || params.roomId || urlParams.get('roomId');
-	
+	const [showJoinSystem, setShowJoinSystem] = useState(false)
+
 	console.log('Chat 컴포넌트 초기화:', { 
 		studyInfo, 
 		params, 
@@ -34,13 +39,16 @@ function Chat() {
 		roomId,
 		location: location.pathname + location.search
 	});
-	
+		
 	// 실제 소켓 연동 (사용자 ID가 설정된 후에만)
 	const { 
 		messages: socketMessages, 
 		onlineUsers, 
+		typingUsers,
 		isJoined, 
 		sendMessage: socketSendMessage,
+		startTyping,
+		stopTyping,
 		isConnected,
 		socketService // 소켓 서비스 직접 접근을 위해 추가
 	} = useStudySocket(studyId, currentUserId);
@@ -73,17 +81,23 @@ function Chat() {
 	const textareaRef = useRef(null);
 	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
+
 	// 파일 업로드
 	const fileInputRef = useRef(null);
+
 	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([]);
+
+	// 참여 인원
+	const [showChatMember, setShowChatMember] = useState(false);
+
 	// 랜덤 기능 - 방장 여부 확인
 	const [isOwner, setIsOwner] = useState(false);
 	const [showResult, setShowResult] = useState(false); // 모달 띄울지 여부
 	const [spinning, setSpinning] = useState(false); // 룰렛 돌리는 중 여부
 	const [winner, setWinner] = useState(null); // 당첨자
-	// --------
+
 	// 목표 분담
 	const [showTodo, setShowTodo] = useState(false);
 	const [todoList, setTodoList] = useState([]);
@@ -92,21 +106,36 @@ function Chat() {
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [searchResults, setSearchResults] = useState([]); // 검색된 요소 배열
 	const [currentIndex, setCurrentIndex] = useState(0); // 현재 몇 번째 결과인지
+
 	// 참가 신청 알림 관련
 	const [joinRequests, setJoinRequests] = useState([]); // 참가 신청 목록
 	const [showNavigator, setShowNavigator] = useState(false); // 말풍선 표시 여부
+
 	// WebRTC
 	const [showVideo, setShowVideo] = useState(false);
+
+	// 신고하기 기능 추가
+	const [showReportLayer, setShowReportLayer] = useState(false);
+	const [reportTarget, setReportTarget] = useState(null);
+	const [showReportButtonIndex, setShowReportButtonIndex] = useState(null);
+
+	const chatEndRef = useRef(null);
+
+	const [fileInfoCache, setFileInfoCache] = useState(new Map());
+
+	// Todo 관련 함수들
 	const handleTodoSettingAddInput = () => {
 		if (todoSettingInputs.length < 10) {
 			setTodoSettingInputs([...todoSettingInputs, '']);
 		}
 	};
+
 	const handleInputChange = (e, idx) => {
 		const newInputs = [...todoSettingInputs];
 		newInputs[idx] = e.target.value;
 		setTodoSettingInputs(newInputs);
 	};
+
 	const handleTodoConfirm = () => {
 		const newTodos = todoSettingInputs
 			.filter(title => title.trim() !== '')
@@ -124,11 +153,73 @@ function Chat() {
 		setShowTodo(true);
 		setShowTodoSetting(false);
 	};
+
 	const handleTodoSettingDelete = (idx) => {
 		const newInputs = [...todoSettingInputs];
 		newInputs.splice(idx, 1);
 		setTodoSettingInputs(newInputs);
 	};
+
+	const handleRemoveTodoList = () => {
+		customConfirm('정말 제거하시겠습니까?').then((confirmDelete) => {
+			if (confirmDelete) {
+				setTodoList([]);
+				setShowTodo(false);
+			}
+		});
+	};
+
+	const handleAssignUser = (index) => {
+		const userName = currentUserInfo?.nickname || '나';
+		const newTodos = [...todoList];
+
+		if (selectedIndex === index) {
+			// 선택 해제
+			newTodos[index].users = newTodos[index].users.filter(user => user !== userName);
+			setSelectedIndex(null);
+			console.log("목표 선택이 취소되었습니다.");
+		} else {
+			// 다른 목표 내 이름 제거
+			newTodos.forEach(todo => {
+				todo.users = todo.users.filter(user => user !== userName);
+			});
+
+			// 새로 선택한 목표에 내 이름 추가
+			newTodos[index].users.push(userName);
+			setSelectedIndex(index);
+			console.log(`목표 ${index}번이 선택되었습니다.`);
+		}
+
+		setTodoList(newTodos);
+	};
+
+	// 시간 포맷 도우미
+	const getFormattedTime = () => {
+		const now = new Date();
+		const hours = now.getHours();
+		const minutes = now.getMinutes();
+		const ampm = hours >= 12 ? '오후' : '오전';
+		const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+		return { ampm, timeStr };
+	};
+
+	// 이미지 파일인지 확인하는 함수
+	const isImageFile = (fileName) => {
+		if (!fileName) return false;
+		const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+		const extension = fileName.split('.').pop().toLowerCase();
+		return imageExtensions.includes(extension);
+	};
+
+	// 시스템 메시지
+	const addSystemMessage = (template, vars = {}) => {
+		const text = template.replace(/\$\{(.*?)\}/g, (_, key) => vars[key] ?? '');
+		setMessages(prev => [...prev, { 
+			type: 'system', 
+			text 
+		}]);
+	};
+
 	// 파일 업로드 (백엔드 먼저, UI 나중)
 	const handleFileUpload = async (e) => {
 		const file = e.target.files[0];
@@ -188,37 +279,71 @@ function Chat() {
 			if (response.ok) {
 				const result = await response.json();
 				console.log('✅ 백엔드 파일 업로드 성공:', result);
+				console.log('🔍 백엔드 응답 구조 확인:', {
+					success: result.success,
+					status: result.status,
+					data: result.data,
+					fileId: result.data?.fileId,
+					fileIdType: typeof result.data?.fileId
+				});
 				
 				// 백엔드 업로드 성공 시 UI 업데이트 (실제 fileId 사용)
 				const realFileId = result.data?.fileId;
+
+				// fileId가 없으면 경고 출력
+				if (!realFileId) {
+					console.error('❌ 업로드 결과에 fileId가 없습니다:', result.data);
+					customAlert('파일 업로드에 실패했습니다. (fileId 없음)');
+					return;
+				}
 				
-				// setMessages(prev => {
-				//   // 로딩 메시지 제거하고 실제 파일 메시지 추가
-				//   const withoutLoading = prev.filter(msg => !msg.isUploading);
-				//   return [...withoutLoading, {
-				//     type: 'me',
-				//     time: timeStr,
-				//     ampm,
-				//     files: [{
-				//       name: file.name,
-				//       fileId: realFileId,
-				//       fileSize: file.size
-				//     }]
-				//   }];
-				// });
+				// fileId가 정수가 아닌 경우 경고 출력
+				if (!Number.isInteger(realFileId)) {
+					console.error('❌ fileId가 정수가 아닙니다:', realFileId, typeof realFileId);
+					customAlert('파일 업로드에 실패했습니다. (잘못된 fileId)');
+					return;
+				}
+
+				// 파일 정보 조회 (업로드 완료 후)
+				console.log('🔍 파일 정보 조회 시작:', realFileId);
+				const fileInfo = await getFileInfo(realFileId);
+				
+				if (!fileInfo) {
+					console.error('❌ 파일 정보 조회 실패:', realFileId);
+					customAlert('파일 업로드에 실패했습니다. (파일 정보 조회 실패)');
+					return;
+				}
+
+				console.log('✅ 파일 정보 조회 성공:', fileInfo);
+				
 				// 로딩 메시지 제거만 유지
 				setMessages(prev => prev.filter(msg => !msg.isUploading));
 				
-				// 소켓으로 다른 사용자들에게 실시간 알림
+				// 소켓으로 다른 사용자들에게 실시간 알림 (확인된 파일 정보와 함께)
 				if (isConnected && socketSendMessage) {
 					console.log('📡 소켓으로 파일 업로드 알림 전송');
-					socketSendMessage({
-						message: ` ${file.name}`,
+					
+					// 이미지 파일인지 확인하여 적절한 메시지 설정
+					const isImage = isImageFile(fileInfo.originalFilename);
+					const messageText = isImage ? '이미지를 업로드했습니다' : '파일을 업로드했습니다';
+					
+					const socketData = {
+						message: messageText,
 						messageType: 'FILE',
-						fileName: file.name,
-						fileId: realFileId,
-						fileSize: file.size
-					});
+						fileName: fileInfo.originalFilename,
+						fileId: fileInfo.fileId,
+						fileSize: fileInfo.fileSize,
+						isImage: isImage,
+						fileType: 'FILE'  // ChatHandler에서 기대하는 필드
+					};
+					
+					console.log('🔍 소켓 전송 데이터 확인:', socketData);
+					console.log('🔍 fileId 타입 확인:', typeof fileInfo.fileId, fileInfo.fileId);
+					console.log('🔍 fileId가 정수인지 확인:', Number.isInteger(fileInfo.fileId), fileInfo.fileId);
+					console.log('🔍 studyId 확인:', studyId);
+					console.log('🔍 currentUserId 확인:', currentUserId);
+					
+					socketSendMessage(socketData);
 				}
 			} else {
 				console.error('❌ 백엔드 파일 업로드 실패:', response.status, response.statusText);
@@ -237,6 +362,7 @@ function Chat() {
 
 		e.target.value = '';
 	};
+
 	// 파일 첨부 모아보기
 	const handleShowAttachments = async () => {
 		console.log('📂 파일 모아보기 시작:', { studyId });
@@ -309,46 +435,49 @@ function Chat() {
 			setShowAttachments(true);
 		}
 	};
-	// 랜덤 게임
-	const handleAssignUser = (index) => {
-		const userName = '김사과';
-		const newTodos = [...todoList];
 
-		if (selectedIndex === index) {
-			// 선택 해제
-			newTodos[index].users = newTodos[index].users.filter(user => user !== userName);
-			setSelectedIndex(null);
-			console.log("목표 선택이 취소되었습니다.");
-		} else {
-			// 다른 목표 내 이름 제거
-			newTodos.forEach(todo => {
-				todo.users = todo.users.filter(user => user !== userName);
-			});
-			// 새로 선택한 목표에 내 이름 추가
-			newTodos[index].users.push(userName);
-			setSelectedIndex(index);
-			console.log(`목표 ${index}번이 선택되었습니다.`);
+	// 신고하기 함수들
+	const handleReportSubmit = async () => {
+		if (!reportTarget) {
+			customAlert('신고할 메시지를 선택해주세요.');
+			return;
 		}
 
-		setTodoList(newTodos);
-	};
-	// --------
+		const formData = new FormData(document.querySelector('.layer__content form'));
+		const reportType = formData.get('reportType');
+		const description = formData.get('description');
 
-	// 신고하기 기능 추가
-	const [showReportLayer, setShowReportLayer] = useState(false);
-	const [reportTarget, setReportTarget] = useState(null);
-	const [showReportButtonIndex, setShowReportButtonIndex] = useState(null);
-	const handleReportSubmit = () => {
-		customConfirm('신고하시겠습니까?').then((confirm) => {
-			if (confirm) {
-				// 실제 신고 로직
-				customAlert('신고가 접수되었습니다.');
-				setShowReportLayer(false);
-			}
-		});
+		if (!reportType || !description.trim()) {
+			customAlert('신고 유형과 내용을 모두 입력해주세요.');
+			return;
+		}
+
+		try {
+			const reportData = {
+				reportType: reportType,
+				reason: description.trim(),
+				reportedUserId: parseInt(reportTarget.senderId || reportTarget.userId),
+				messageId: parseInt(reportTarget.messageId || reportTarget._id),
+				roomId: parseInt(studyId),
+				studyRoomId: parseInt(studyId),
+				messageContent: reportTarget.message || reportTarget.text
+			};
+
+			console.log('🚨 신고 데이터:', reportData);
+			console.log('🚨 신고 데이터 JSON:', JSON.stringify(reportData, null, 2));
+
+			await reportAPI.createChatReport(reportData);
+			
+			customAlert('신고가 접수되었습니다.');
+			setShowReportLayer(false);
+			setReportTarget(null);
+		} catch (error) {
+			console.error('신고 접수 실패:', error);
+			console.error('에러 응답:', error.response?.data);
+			customAlert('신고 접수에 실패했습니다. 다시 시도해주세요.');
+		}
 	};
-	// --------
-	
+
 	// 검색기능
 	const removeHighlight = () => {
 		document.querySelectorAll('.highlight').forEach(el => {
@@ -359,12 +488,11 @@ function Chat() {
 			el.classList.remove('highlight-impact');
 		});
 	};
+
 	const handleChatSearch = async () => {
 		const keyword = await customPrompt('검색할 내용을 입력하세요', '');
-
 		if (keyword !== null && keyword.trim() !== '') {
 			removeHighlight();
-
 			const results = [];
 			const chatList = document.querySelectorAll('.user-say, .i-say');
 
@@ -402,6 +530,7 @@ function Chat() {
 			}
 		}
 	};
+
 	const goToNextNavigator = () => {
 		if (searchResults.length === 0) return;
 		const nextIndex = (currentIndex + 1) % searchResults.length;
@@ -409,6 +538,7 @@ function Chat() {
 		applyActiveClass(nextIndex);
 		searchResults[nextIndex].scrollIntoView({ behavior: 'smooth' });
 	};
+
 	const goToPrevNavigator = () => {
 		if (searchResults.length === 0) return;
 		const prevIndex = (currentIndex - 1 + searchResults.length) % searchResults.length;
@@ -416,12 +546,14 @@ function Chat() {
 		applyActiveClass(prevIndex);
 		searchResults[prevIndex].scrollIntoView({ behavior: 'smooth' });
 	};
+
 	const closeNavigator = () => {
 		removeHighlight();
 		setShowNavigator(false);
 		setSearchResults([]);
 		setCurrentIndex(0);
 	};
+
 	const applyActiveClass = (activeIndex) => {
 		searchResults.forEach((el, idx) => {
 			const textEl = el.querySelector('.user-say__text, .i-say__text');
@@ -434,32 +566,13 @@ function Chat() {
 			}
 		});
 	};
-	// --------
-
-	const chatEndRef = useRef(null);
-
-	// 시간 포맷 도우미
-	const getFormattedTime = () => {
-		const now = new Date();
-		const hours = now.getHours();
-		const minutes = now.getMinutes();
-		const ampm = hours >= 12 ? '오후' : '오전';
-		const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-		return { ampm, timeStr };
-	};
-
-	// 시스템 메시지
-	const addSystemMessage = (template, vars = {}) => {
-		const text = template.replace(/\$\{(.*?)\}/g, (_, key) => vars[key] ?? '');
-		setMessages(prev => [...prev, { 
-			type: 'system', 
-			text 
-		}]);
-	};
 
 	// 내가 보낼 메시지
 	const handleSend = () => {
 		if (!message.trim()) return;
+
+		// 타이핑 중지
+		stopTyping();
 
 		// 실제 소켓으로 메시지 전송
 		if (isConnected && studyId) {
@@ -478,17 +591,11 @@ function Chat() {
 			}
 		}
 
-		// 로컬 UI 업데이트 (주석처리: 소켓 서버에서 받은 메시지만 사용)
-		// const { ampm, timeStr } = getFormattedTime();
-		// setMessages(prev => [
-		// 	...prev,
-		// 	{ type: 'me', text: message, time: timeStr, ampm, senderId: currentUserId }
-		// ]);
 		setMessage('');
 		if (textareaRef.current) textareaRef.current.style.height = 'auto';
 	};
 
-	// '엔터'시 체팅 보냄
+	// '엔터'시 채팅 보냄
 	const handleKeyDown = (e) => {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
@@ -496,19 +603,20 @@ function Chat() {
 		}
 	};
 
-	const handleRemoveTodoList = () => {
-		customConfirm('정말 제거하시겠습니까?').then((confirmDelete) => {
-			if (confirmDelete) {
-				setTodoList([]);
-				setShowTodo(false);
-			}
-		});
-	};
-
-	// 체팅 입력창 높이값
+	// 채팅 입력창 높이값
 	const handleChange = (e) => {
 		const value = e.target.value;
 		setMessage(value);
+		
+		// 타이핑 이벤트 처리
+		if (value.trim() === '') {
+			// 입력이 비어있으면 타이핑 중지
+			stopTyping();
+		} else {
+			// 입력이 있으면 타이핑 시작
+			startTyping();
+		}
+		
 		const textarea = textareaRef.current;
 		if (textarea) {
 			textarea.style.height = 'auto';
@@ -516,8 +624,55 @@ function Chat() {
 		}
 	};
 
-	// WebRTC
-	
+	// 참가자 목록 생성 함수
+	const getAllParticipants = () => {
+		const participants = [];
+		
+		// 현재 사용자 추가
+		if (currentUserInfo) {
+			participants.push({
+				id: currentUserInfo.id,
+				name: currentUserInfo.nickname || currentUserInfo.name || '나',
+				isMe: true,
+				isOnline: true
+			});
+		}
+		
+		// 온라인 사용자들 추가 (중복 제거)
+		if (onlineUsers && onlineUsers.length > 0) {
+			onlineUsers.forEach(user => {
+				const isDuplicate = participants.some(p => 
+					p.id === user.id || p.id === user.userId
+				);
+				
+				if (!isDuplicate) {
+					participants.push({
+						id: user.id || user.userId,
+						name: user.nickname || user.name || user.username || `사용자${user.id}`,
+						isMe: false,
+						isOnline: true
+					});
+				}
+			});
+		}
+		
+		return participants;
+	};
+
+	// 랜덤게임용 활성 사용자 목록
+	const getActiveUsers = () => {
+		console.log('🎲 랜덤게임 사용자 목록 생성:', {
+			onlineUsers,
+			onlineUsersLength: onlineUsers?.length || 0,
+			currentUserInfo
+		});
+		
+		const participants = getAllParticipants();
+		const userNames = participants.map(p => p.name);
+		
+		console.log('🎲 최종 사용자 목록:', userNames);
+		return userNames;
+	};
 
 	// 사용자 정보 로드
 	useEffect(() => {
@@ -606,18 +761,18 @@ function Chat() {
 						messageId: msg.messageId || msg._id || `${senderId}-${Date.now()}-${index}`
 					};
 
-					// 파일 메시지인 경우 파일 정보 추가
-					if (msg.messageType === 'FILE' || msg.fileType || msg.fileName || msg.files) {
-						const fileName = msg.fileName || msg.filename || (msg.files && msg.files[0]?.name) || '파일';
-						const fileId = msg.fileId || (msg.files && msg.files[0]?.fileId) || null;
-						
+					// 히스토리 메시지 파싱 시 파일 메시지 변환
+					if (
+						msg.messageType === 'FILE' &&
+						msg.fileInfo &&
+						msg.fileInfo.fileId &&
+						msg.fileInfo.fileName
+					) {
 						baseMessage.files = [{
-							name: fileName,
-							fileId: fileId,
-							fileUrl: fileId ? `/api/files/download/${fileId}` : '#'
+							name: msg.fileInfo.fileName,
+							fileId: msg.fileInfo.fileId,
+							fileUrl: msg.fileInfo.fileUrl || `/api/files/download/${msg.fileInfo.fileId}`
 						}];
-						
-						console.log(`📎 파일 메시지 처리:`, { fileName, fileId });
 					}
 
 					console.log(`✅ 변환된 메시지 ${index}:`, baseMessage);
@@ -631,6 +786,8 @@ function Chat() {
 				// 새 메시지만 추가 (마지막 메시지 확인)
 				const latestMessage = socketMessages[socketMessages.length - 1];
 				console.log('📨 새 메시지 확인:', latestMessage);
+				console.log('🔍 fileId 확인:', latestMessage.fileId, typeof latestMessage.fileId);
+				console.log('🔍 fileName 확인:', latestMessage.fileName);
 				
 				// 중복 확인 - 더 정확한 중복 검사
 				const exists = messages.find(msg => {
@@ -676,13 +833,32 @@ function Chat() {
 						messageId: latestMessage.messageId || latestMessage._id || `${senderId}-${Date.now()}`
 					};
 
-					// 파일 메시지인 경우 파일 정보 추가
-					if (latestMessage.messageType === 'FILE' || latestMessage.fileType || latestMessage.fileName) {
+					// 파일 메시지 변환 (소켓에서 받은 메시지)
+					if (
+						latestMessage.messageType === 'FILE' &&
+						latestMessage.fileId &&
+						latestMessage.fileName
+					) {
 						newMessage.files = [{
-							name: latestMessage.fileName || '파일',
-							fileId: latestMessage.fileId || Date.now(),
-							fileUrl: latestMessage.fileUrl || '#'
+							name: latestMessage.fileName,
+							fileId: latestMessage.fileId,
+							fileUrl: `/api/files/download/${latestMessage.fileId}`
 						}];
+						console.log('🔧 파일 메시지 변환 완료:', newMessage.files);
+					}
+					// 히스토리 메시지 파싱 시 파일 메시지 변환 (fallback)
+					else if (
+						latestMessage.messageType === 'FILE' &&
+						latestMessage.fileInfo &&
+						latestMessage.fileInfo.fileId &&
+						latestMessage.fileInfo.fileName
+					) {
+						newMessage.files = [{
+							name: latestMessage.fileInfo.fileName,
+							fileId: latestMessage.fileInfo.fileId,
+							fileUrl: latestMessage.fileInfo.fileUrl || `/api/files/download/${latestMessage.fileInfo.fileId}`
+						}];
+						console.log('🔧 히스토리 파일 메시지 변환 완료:', newMessage.files);
 					}
 					
 					setMessages(prev => [...prev, newMessage]);
@@ -695,10 +871,6 @@ function Chat() {
 		}
 	}, [socketMessages, currentUserId, messages.length, isJoined, isConnected]);
 
-	// 중복된 히스토리 로딩 로직 제거 (위 소켓 메시지 수신 처리에서 처리됨)
-
-	// 연결 상태 메시지 (서버에서 자동으로 전송되므로 제거)
-	
 	// 방장 여부 확인
 	useEffect(() => {
 		if (studyInfo && currentUserInfo) {
@@ -724,7 +896,7 @@ function Chat() {
 			socketConnected: socketService?.socket?.connected
 		});
 
-		if (!isConnected || !isOwner) {
+		if (!isConnected || !isOwner || !socketService?.socket) {
 			console.log('⚠️ 참가 신청 알림 리스너 설정 안함:', { isConnected, isOwner });
 			return;
 		}
@@ -735,7 +907,7 @@ function Chat() {
 			setJoinRequests(prev => {
 				const newRequests = [...prev, {
 					...notification,
-					id: Date.now() + Math.random(), // 고유 ID
+					id: Date.now() + Math.random(),
 					timestamp: new Date().toISOString()
 				}];
 				console.log('📋 업데이트된 참가 신청 목록:', newRequests);
@@ -746,31 +918,32 @@ function Chat() {
 			addSystemMessage(`${notification.applicantName}님이 스터디 참가를 신청했습니다.`, {});
 		};
 
-		// 소켓 이벤트 리스너 등록
-		if (socketService?.socket) {
-			console.log('✅ 참가 신청 알림 리스너 등록 중...');
-			socketService.socket.on('join-request-notification', handleJoinRequest);
-			
-			// 테스트용 모든 이벤트 로깅
-			socketService.socket.onAny((eventName, ...args) => {
-				if (eventName.includes('join')) {
-					console.log('🔍 소켓 이벤트 수신:', eventName, args);
+		console.log('✅ 참가 신청 알림 리스너 등록 중...');
+		socketService.socket.on('join-request-notification', handleJoinRequest);
+		
+		// 테스트용 모든 이벤트 로깅
+		socketService.socket.onAny((eventName, ...args) => {
+			if (eventName.includes('join')) {
+				console.log('🔍 소켓 이벤트 수신:', eventName, args);
+			}
+		});
+		
+		// 🔥 안전한 cleanup 함수
+		return () => {
+			console.log('🧹 참가 신청 알림 리스너 해제');
+			try {
+				if (socketService?.socket && typeof socketService.socket.off === 'function') {
+					socketService.socket.off('join-request-notification', handleJoinRequest);
 				}
-			});
-			
-			return () => {
-				console.log('🧹 참가 신청 알림 리스너 해제');
-				socketService.socket.off('join-request-notification', handleJoinRequest);
-			};
-		} else {
-			console.warn('❌ 소켓 서비스가 없어서 알림 리스너를 등록할 수 없습니다.');
-		}
-	}, [isConnected, isOwner, addSystemMessage, socketService]);
+			} catch (error) {
+				console.error('리스너 해제 중 에러 (무시):', error);
+			}
+		};
+	}, [isConnected, isOwner]);
 
 	// 스크롤 하단
 	useEffect(() => {
 		if (!messages.length) return;
-
 		const lastMsg = messages[messages.length - 1];
 		if (lastMsg.type === 'me' && chatEndRef.current) {
 			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -793,7 +966,7 @@ function Chat() {
 		try {
 			const token = localStorage.getItem('token');
 			if (!token) {
-				alert('로그인이 필요합니다.');
+				customAlert('로그인이 필요합니다.');
 				return;
 			}
 
@@ -805,7 +978,6 @@ function Chat() {
 					'Content-Type': 'application/json'
 				}
 			});
-
 			const result = await apiResponse.json();
 			
 			if (result.status === 'success') {
@@ -828,16 +1000,74 @@ function Chat() {
 				
 				console.log(`✅ 참가 신청 ${actionText} 완료:`, request.applicantName);
 			} else {
-				alert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
+				customAlert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
 			}
 		} catch (error) {
 			console.error('참가 신청 처리 실패:', error);
-			alert('참가 신청 처리 중 오류가 발생했습니다.');
+			customAlert('참가 신청 처리 중 오류가 발생했습니다.');
 		}
 	};
 
-	/* 소캣테스트용 */
-	const testUsers = ['김사과', '반하나', '오렌지', '이메론', '채애리'];
+	// 메시지 파싱 보정 함수 추가
+	const parseMessages = (msgs) => {
+		return msgs.map(msg => {
+			// 이미 files 정보가 있으면 그대로 사용
+			if (msg.files && msg.files.length > 0) return msg;
+			
+			// 파일 메시지인데 files 정보가 없는 경우에만 생성 (fallback)
+			if ((msg.messageType === 'FILE' || msg.fileId || msg.fileName) && !msg.files && msg.fileId) {
+				console.log('🔍 파일 메시지 files 배열 fallback 생성:', {
+					fileName: msg.fileName,
+					fileId: msg.fileId,
+					messageType: msg.messageType
+				});
+				msg.files = [{ 
+					name: msg.fileName || '파일', 
+					fileId: msg.fileId
+				}];
+			}
+			
+			return msg;
+		});
+	};
+
+	// messages를 setMessages 할 때 파싱 보정 적용
+	useEffect(() => {
+		setMessages(prevMsgs => parseMessages(prevMsgs));
+	}, [socketMessages]);
+
+	// 파일 정보 조회 함수 (캐시 포함)
+	const getFileInfo = async (fileId) => {
+		// 캐시 확인
+		if (fileInfoCache.has(fileId)) {
+			return fileInfoCache.get(fileId);
+		}
+
+		try {
+			const response = await fetch(`/api/files/info/${fileId}`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${localStorage.getItem('token')}`,
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				if (result.status === 'success' && result.data) {
+					console.log('✅ 파일 정보 조회 성공:', result.data);
+					// 캐시에 저장
+					setFileInfoCache(prev => new Map(prev).set(fileId, result.data));
+					return result.data;
+				}
+			}
+			console.warn('⚠️ 파일 정보 조회 실패:', response.status);
+			return null;
+		} catch (error) {
+			console.error('❌ 파일 정보 조회 에러:', error);
+			return null;
+		}
+	};
 
 	return (
 		<>
@@ -849,10 +1079,28 @@ function Chat() {
 					handleChatSearch()
 				}}
 				onShowAttachments={handleShowAttachments}
+				onBeforeBack={() => {
+					Promise.resolve().then(() => {
+						if (socketService?.socket?.connected) {
+							socketService.socket.disconnect();
+						}
+					}).catch(() => {
+						// 에러 무시
+					}).finally(() => {
+						// 무조건 페이지 이동
+						setTimeout(() => {
+							navigate(-1);
+						}, 0);
+					});
+				}}
+				onlineUsers={onlineUsers || []}
+				studyInfo={studyInfo || null}
+				currentUserInfo={currentUserInfo || null}
+				allParticipants={getAllParticipants()}
+				onShowParticipants={() => setShowChatMember(true)}
 			/>
 
 			{/* 참가 신청 알림 (방장만 표시) */}
-			{/* 디버깅용 로그 */}
 			{console.log('🔍 알림 박스 렌더링 조건 확인:', {
 				isOwner,
 				joinRequestsLength: joinRequests.length,
@@ -916,46 +1164,44 @@ function Chat() {
 
 			<div className={"chatroom-history"}>
 
-				{/* 테스트 목적 용도 */}
-				<button type="button" className="testButton" onClick={() => {
-					const { ampm, timeStr } = getFormattedTime();
-					setMessages(prev => [
-						...prev,
-						{
-							type: 'user',
-							text: '테스트 메시지에요',
-							time: timeStr,
-							ampm: ampm
-						}
-					]);
-				}}>상대 메시지 테스트</button>
-				<button type="button" className="testButton" onClick={() => {
-					const { ampm, timeStr } = getFormattedTime();
-					setMessages(prev => [
-						...prev,
-						{
-							type: 'user',
-							time: timeStr,
-							ampm,
-							files: [
-								{ name: '샘플파일.png', fileId: Date.now() }
-							]
-						}
-					]);
-				}}>상대 파일 업로드</button>
-				{/* <button type="button" className="testButton" onClick={() => {
-						setIsTyping(true); // 입력 중 상태 on
-						// 3초 후 타이핑 종료
-						setTimeout(() => {
-							setIsTyping(false);
-						}, 3000);
-					}}
-				>타이핑 테스트</button> */}
-				{/* // 테스트 목적 용도 */}
-
 				{/* 메시지 출력 영역 */}
 				{messages.map((msg, i) => {
-					if (msg.type === 'system') {
+					console.log('📨 새 메시지 확인:', {
+						type: msg.type,
+						messageType: msg.messageType,
+						fileId: msg.fileId,
+						fileName: msg.fileName,
+						hasFiles: !!msg.files,
+						filesLength: msg.files?.length || 0,
+						text: msg.text,
+						senderId: msg.senderId
+					});
+					
+					if (msg.files && msg.files.length > 0) {
+						console.log('🔍 files 배열 확인:', msg.files);
+						console.log('🔍 files[0].fileId 확인:', msg.files[0].fileId, typeof msg.files[0].fileId);
+					}
+					
+					// 파일 메시지인데 files가 없는 경우 fallback 생성
+					if ((msg.messageType === 'FILE' || msg.fileId || msg.fileName) && !msg.files && msg.fileId) {
+						console.log('🔍 파일 메시지 files 배열 fallback 생성:', {
+							fileName: msg.fileName,
+							fileId: msg.fileId,
+							messageType: msg.messageType
+						});
+						msg.files = [{ 
+							name: msg.fileName || '파일', 
+							fileId: msg.fileId
+						}];
+					}
+					if (msg.senderId === '시스템') {
+						console.log('🔍 시스템 메시지 렌더링:', {
+							text: msg.text,
+							message: msg.message,
+							senderId: msg.senderId,
+							userId: msg.userId,
+							type: msg.type
+						});
 						return <div key={i} className="program-msg">{msg.text}</div>;
 					}
 
@@ -964,13 +1210,35 @@ function Chat() {
 							<div key={i} className="i-say">
 								<div className="i-say__text">
 									{msg.files?.length > 0 && msg.files[0] && (
-										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
-											<div className={`i-say__file i-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
-												<span>{msg.files[0].name}</span>
-											</div>
-										</a>
+										<>
+											{/* 이미지 파일인 경우 미리보기 표시 */}
+											{isImageFile(msg.files[0].name) ? (
+												<div className="image-preview">
+													<img 
+														src={`/api/files/download/${msg.files[0].fileId}`} 
+														alt={msg.files[0].name}
+														className="chat-image-preview"
+														onClick={() => window.open(`/api/files/download/${msg.files[0].fileId}`, '_blank')}
+													/>
+													<div className="image-filename">
+														{msg.files[0].name}
+													</div>
+												</div>
+											) : (
+												/* 일반 파일인 경우 기존 방식 */
+												<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+													<div className={`i-say__file i-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+														<span>{msg.files[0].name}</span>
+													</div>
+												</a>
+											)}
+										</>
 									)}
-									{msg.text}
+									{/* 파일 메시지인 경우 텍스트 중복 방지 */}
+									{msg.files?.length > 0 ? 
+										(msg.text !== msg.files[0].name ? msg.text : '') : 
+										msg.text
+									}
 								</div>
 								<time dateTime={msg.time} className="i-say__time">
 									{msg.ampm} <span>{msg.time}</span>
@@ -985,13 +1253,38 @@ function Chat() {
 								<div className="user-say__profile"></div>
 								<div className="user-say__text">
 									{msg.files?.length > 0 && msg.files[0] && (
-										<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
-											<div className={`user-say__file user-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
-												{msg.files[0].name}
-											</div>
-										</a>
+										<>
+											{/* 이미지 파일인 경우 미리보기 표시 */}
+											{isImageFile(msg.files[0].name) ? (
+												<div className="image-preview">
+													<img 
+														src={`/api/files/download/${msg.files[0].fileId}`} 
+														alt={msg.files[0].name}
+														className="chat-image-preview"
+														onClick={(e) => {
+															e.stopPropagation();
+															window.open(`/api/files/download/${msg.files[0].fileId}`, '_blank');
+														}}
+													/>
+													<div className="image-filename">
+														{msg.files[0].name}
+													</div>
+												</div>
+											) : (
+												/* 일반 파일인 경우 기존 방식 */
+												<a href={`/api/files/download/${msg.files[0].fileId}`} target="_blank" rel="noreferrer">
+													<div className={`user-say__file user-say__file--${msg.files[0].name.split('.').pop().toLowerCase()}`}>
+														{msg.files[0].name}
+													</div>
+												</a>
+											)}
+										</>
 									)}
-									{msg.text}
+									{/* 파일 메시지인 경우 텍스트 중복 방지 */}
+									{msg.files?.length > 0 ? 
+										(msg.text !== msg.files[0].name ? msg.text : '') : 
+										msg.text
+									}
 								</div>
 								<div className="user-say__etc">
 									<time dateTime={msg.time} className="user-say__time">
@@ -1018,8 +1311,8 @@ function Chat() {
 				)}
 
 				{/* 입력 중 표시 */}
-				{isTyping && (
-					<div className="user-say" onClick={() => setShowReportLayer(true)}>
+				{typingUsers && typingUsers.length > 0 && (
+					<div className="user-say">
 						<div className="user-say__profile"></div>
 						<div className="user-say__text">
 							<div className="user-say__writing">
@@ -1046,7 +1339,19 @@ function Chat() {
 							</button>
 						</li>
 						<li>
-							<button type="button" className="msg-writing__action" onClick={() => setShowRoulette(true)}>
+						<button type="button" onClick={() => setShowJoinSystem(true)}>
+							시스템 참여하기
+						</button>
+						</li>
+						<li>
+							<button type="button" className="msg-writing__action" onClick={() => {
+								const users = getActiveUsers();
+								if (users.length < 2) {
+									customAlert('랜덤게임은 최소 2명 이상이 필요합니다.');
+									return;
+								}
+								setShowRoulette(true);
+							}}>
 								랜덤게임
 							</button>
 						</li>
@@ -1075,7 +1380,7 @@ function Chat() {
 
 			<Layer isOpen={showRoulette} onClose={() => setShowRoulette(false)} header="랜덤 뽑기">
 				<Roulette 
-					users={testUsers} 
+					users={getActiveUsers()} 
 					isOwner={isOwner}
 					onSpinStart={() => {
 						setSpinning(true); // 모달 띄우고
@@ -1084,7 +1389,6 @@ function Chat() {
 					onWinnerSelected={(user) => {
 						setSpinning(false); // 돌리기 종료
 						setWinner(user); // 결과 저장
-
 						addSystemMessage(`"${user}"님이 당첨되셨습니다!`, { user });
 					}}
 				/>
@@ -1111,18 +1415,22 @@ function Chat() {
 					<button className="layer__submit" onClick={handleReportSubmit} >신고하기</button>
 				}>
 					<div className="report-layer">
-						<div className="field">
-							<select className="select" name="report-type">
-								<option value="신고1">신고1</option>
-								<option value="신고2">신고2</option>
-								<option value="신고3">신고3</option>
-								<option value="신고4">신고4</option>
-							</select>
-						</div>
-
-						<div className="field __textarea">
-							<textarea className="textarea" placeholder="신고 내용을 적어주세요." name="description" />
-						</div>
+						<form>
+							<div className="field">
+								<select className="select" name="reportType">
+									<option value="">신고 유형을 선택하세요</option>
+									<option value="스팸/광고">스팸/광고</option>
+									<option value="욕설/비방">욕설/비방</option>
+									<option value="음란물">음란물</option>
+									<option value="폭력/위협">폭력/위협</option>
+									<option value="사기/기만">사기/기만</option>
+									<option value="기타">기타</option>
+								</select>
+							</div>
+							<div className="field __textarea">
+								<textarea className="textarea" placeholder="신고 내용을 상세히 적어주세요." name="description" />
+							</div>
+						</form>
 					</div>
 				</Layer>
 			)}
@@ -1147,6 +1455,20 @@ function Chat() {
 						setWinner(null);
 						setSpinning(false);
 					}}
+				/>
+			)}
+
+			{showChatMember && (
+				<ChatMember
+					isOpen={showChatMember}
+					onClose={() => setShowChatMember(false)}
+				/>
+			)}
+
+			{showJoinSystem && (
+				<JoinSystem 
+					isOpen={showJoinSystem}
+					onClose={() => setShowJoinSystem(false)}
 				/>
 			)}
 

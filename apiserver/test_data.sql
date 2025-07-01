@@ -48,11 +48,41 @@ INSERT INTO ChatRoom (room_name, created_at, max_members, is_active) VALUES
 -- 3. 스터디룸 더미 데이터 (5개) - 회원 ID 매칭 수정
 -- =============================================
 INSERT INTO studyroom (room_id, boss_id, title, description, education, department, region, district, capacity, current_members, time, thumbnail, is_public, created_at) VALUES
-(1, 4, '컴퓨터공학 알고리즘 스터디', '코딩테스트 대비 알고리즘 문제를 함께 풀어요', '대학교 재학', '컴퓨터공학과', '서울특별시', '강남구', 8, 1, '저녁', 'thumbnail-ilr3.jpg', TRUE, NOW() - INTERVAL 20 DAY),
-(2, 5, 'TOEIC 900점 달성 스터디', '토익 고득점을 위한 집중 스터디입니다', '대학교 재학', '영어영문학과', '서울특별시', '서초구', 6, 1, '오후', 'thumbnail-ilr4.jpg', TRUE, NOW() - INTERVAL 15 DAY),
-(3, 7, '취업 면접 준비 스터디', '대기업 취업을 위한 면접 스터디', '대학교 졸업', '경제학과', '서울특별시', '종로구', 10, 1, '오전', 'thumbnail-ilr1.jpg', TRUE, NOW() - INTERVAL 12 DAY),
-(4, 4, '수학 올림피아드 스터디', '수학 문제 해결 능력 향상을 위한 스터디', '대학원 재학', '수학과', '서울특별시', '강남구', 5, 1, '저녁', 'thumbnail-ilr2.jpg', TRUE, NOW() - INTERVAL 10 DAY),
-(5, 8, '의대 MCAT 준비반', '의학전문대학원 입시 준비', '대학교 재학', '의학과', '서울특별시', '서초구', 8, 1, '오전', 'thumbnail-ilr5.jpg', TRUE, NOW() - INTERVAL 5 DAY);
+(1, 1, '컴퓨터공학 알고리즘 스터디', '코딩테스트 대비 알고리즘 문제를 함께 풀어요', '대학교 재학', '컴퓨터공학과', '서울특별시', '강남구', 8, 1, '저녁', 'thumbnail-ape1.jpg', TRUE, NOW() - INTERVAL 35 DAY),
+(2, 2, 'TOEIC 900점 달성 스터디', '토익 고득점을 위한 집중 스터디입니다', '대학교 재학', '영어영문학과', '서울특별시', '서초구', 6, 1, '오후', 'thumbnail-ape2.jpg', TRUE, NOW() - INTERVAL 34 DAY),
+(3, 3, '취업 면접 준비 스터디', '대기업 취업을 위한 면접 스터디', '대학교 졸업', '경제학과', '서울특별시', '종로구', 10, 1, '오전', 'thumbnail-ape3.jpg', TRUE, NOW() - INTERVAL 33 DAY),
+(4, 4, '수학 올림피아드 스터디', '수학 문제 해결 능력 향상을 위한 스터디', '대학원 재학', '수학과', '서울특별시', '강남구', 5, 1, '저녁', 'thumbnail-ape4.jpg', TRUE, NOW() - INTERVAL 32 DAY),
+(5, 5, '의대 MCAT 준비반', '의학전문대학원 입시 준비', '대학교 재학', '의학과', '서울특별시', '서초구', 8, 1, '오전', 'thumbnail-chr1.jpg', TRUE, NOW() - INTERVAL 31 DAY),
+(6, 6, '프론트엔드 스터디', 'React, Vue 등 최신 프론트엔드 기술 학습', '대학교 재학', '컴퓨터공학과', '서울특별시', '마포구', 8, 1, '저녁', 'thumbnail-eng1.jpg', TRUE, NOW() - INTERVAL 30 DAY),
+(7, 7, '국가고시 준비반', '공무원 시험 대비를 위한 스터디입니다', '대학교 졸업', '행정학과', '서울특별시', '중구', 10, 1, '오전', 'thumbnail-eng2.jpg', TRUE, NOW() - INTERVAL 29 DAY),
+(8, 8, '공기업 NCS 스터디', 'NCS 기반 직무능력 평가 대비', '대학교 졸업', '경영학과', '서울특별시', '송파구', 7, 1, '오후', 'thumbnail-eng3.jpg', TRUE, NOW() - INTERVAL 28 DAY),
+(9, 9, '기초 일본어 스터디', '일본어 회화와 문법 기초를 다집니다', '무관', '일본어과', '서울특별시', '동작구', 6, 1, '저녁', 'thumbnail-eng4.jpg', TRUE, NOW() - INTERVAL 27 DAY),
+(10, 10, 'Python 데이터 분석', 'Python으로 데이터 분석 기초부터 실습까지', '대학교 재학', '통계학과', '서울특별시', '관악구', 9, 1, '오전', 'thumbnail-ilr1.jpg', TRUE, NOW() - INTERVAL 26 DAY),
+(11, 11, '디자인 포트폴리오 스터디', '그래픽 디자인 포트폴리오 제작을 함께', '대학교 재학', '디자인학과', '서울특별시', '강서구', 5, 1, '오후', 'thumbnail-ilr2.jpg', TRUE, NOW() - INTERVAL 25 DAY),
+(12, 12, '빅데이터 기반 AI 스터디', 'AI와 빅데이터 이론 및 실습', '대학교 졸업', '컴퓨터공학과', '서울특별시', '성동구', 10, 1, '저녁', 'thumbnail-ilr3.jpg', TRUE, NOW() - INTERVAL 24 DAY),
+(13, 13, '회계 자격증 스터디', '회계 기초부터 자격증 취득까지', '대학교 재학', '경영학과', '서울특별시', '영등포구', 8, 1, '오후', 'thumbnail-ilr4.jpg', TRUE, NOW() - INTERVAL 23 DAY),
+(14, 14, '기초 헬스케어 스터디', '운동과 건강관리에 대해 함께 공부합니다', '무관', '체육학과', '서울특별시', '노원구', 6, 1, '오전', 'thumbnail-ilr5.jpg', TRUE, NOW() - INTERVAL 22 DAY),
+(15, 15, '중국어 HSK 스터디', 'HSK 고득점 대비 스터디', '대학교 재학', '중어중문학과', '서울특별시', '구로구', 7, 1, '저녁', 'thumbnail-med1.jpg', TRUE, NOW() - INTERVAL 21 DAY),
+(16, 16, '영상편집 스터디', 'Premiere Pro, After Effects 기초 실습', '무관', '디자인학과', '서울특별시', '강남구', 8, 1, '오후', 'thumbnail-med2.jpg', TRUE, NOW() - INTERVAL 20 DAY),
+(17, 17, '논술 대비 스터디', '대학 입시 논술을 함께 준비합니다', '고등학교 재학', '국어국문학과', '서울특별시', '서대문구', 10, 1, '오전', 'thumbnail-med3.jpg', TRUE, NOW() - INTERVAL 19 DAY),
+(18, 18, '취업 영어 인터뷰 스터디', '취업 영어 인터뷰를 대비하는 실전 스터디', '대학교 졸업', '영어영문학과', '서울특별시', '중랑구', 5, 1, '저녁', 'thumbnail-med4.jpg', TRUE, NOW() - INTERVAL 18 DAY),
+(19, 19, '블록체인 기술 스터디', '블록체인 이론과 실습 학습', '대학교 재학', '컴퓨터공학과', '서울특별시', '성북구', 9, 1, '오후', 'thumbnail-room1.jpg', TRUE, NOW() - INTERVAL 17 DAY),
+(20, 20, '의학 논문 읽기 스터디', '영문 의학 논문을 함께 읽고 해석', '대학교 재학', '의학과', '서울특별시', '은평구', 6, 1, '오전', 'thumbnail-room2.jpg', TRUE, NOW() - INTERVAL 16 DAY),
+(21, 21, '로스쿨 대비 스터디', '법학 기초부터 로스쿨 입시 대비', '대학교 졸업', '법학과', '서울특별시', '강동구', 7, 1, '저녁', 'thumbnail-room3.jpg', TRUE, NOW() - INTERVAL 15 DAY),
+(22, 22, '초보 개발자 스터디', 'HTML, CSS, JS 기초부터 실습까지', '무관', '컴퓨터공학과', '서울특별시', '용산구', 10, 1, '오후', 'thumbnail-room4.jpg', TRUE, NOW() - INTERVAL 14 DAY),
+(23, 23, '사회복지사 준비반', '사회복지사 자격증 대비 스터디', '대학교 재학', '사회복지학과', '서울특별시', '광진구', 5, 1, '오전', 'thumbnail-room5.jpg', TRUE, NOW() - INTERVAL 13 DAY),
+(24, 24, '데이터 사이언스 심화 스터디', '머신러닝, 딥러닝 실습', '대학교 졸업', '통계학과', '서울특별시', '도봉구', 8, 1, '저녁', 'thumbnail-room6.jpg', TRUE, NOW() - INTERVAL 12 DAY),
+(25, 25, '디지털 마케팅 스터디', '온라인 마케팅 실습과 사례 학습', '대학교 재학', '경영학과', '서울특별시', '금천구', 9, 1, '오후', 'thumbnail-room7.jpg', TRUE, NOW() - INTERVAL 11 DAY),
+(26, 26, '소프트웨어 공모전 준비반', '소프트웨어 공모전 대비 실습', '대학교 재학', '컴퓨터공학과', '서울특별시', '서초구', 7, 1, '오전', 'thumbnail-room8.jpg', TRUE, NOW() - INTERVAL 10 DAY),
+(27, 27, '패션 포트폴리오 스터디', '의류 디자인 포트폴리오 준비', '대학교 재학', '디자인학과', '서울특별시', '강남구', 6, 1, '저녁', 'thumbnail-ape1.jpg', TRUE, NOW() - INTERVAL 9 DAY),
+(28, 28, '바리스타 자격증 스터디', '커피 이론과 실습을 통한 자격증 준비', '무관', '외식산업학과', '서울특별시', '서대문구', 5, 1, '오후', 'thumbnail-ape2.jpg', TRUE, NOW() - INTERVAL 8 DAY),
+(29, 29, '교사 임용고시 스터디', '중등교사 임용 대비', '대학교 졸업', '교육학과', '서울특별시', '강북구', 8, 1, '오전', 'thumbnail-ape3.jpg', TRUE, NOW() - INTERVAL 7 DAY),
+(30, 30, 'IT 자격증 스터디', '정보처리기사, 컴활 자격증 대비', '대학교 재학', '컴퓨터공학과', '서울특별시', '중구', 10, 1, '저녁', 'thumbnail-ape4.jpg', TRUE, NOW() - INTERVAL 6 DAY),
+(31, 31, '창업 아이디어 스터디', '창업 아이디어 구체화 및 발표 준비', '대학교 재학', '경영학과', '서울특별시', '관악구', 7, 1, '오후', 'thumbnail-chr1.jpg', TRUE, NOW() - INTERVAL 5 DAY),
+(32, 32, '면접 실전 스터디', '모의 면접을 통한 실전 대비', '대학교 졸업', '경영학과', '서울특별시', '성동구', 9, 1, '오전', 'thumbnail-eng1.jpg', TRUE, NOW() - INTERVAL 4 DAY),
+(33, 33, '초등학생 학습 지도 스터디', '초등학생 학습법 연구', '대학교 재학', '교육학과', '서울특별시', '송파구', 6, 1, '저녁', 'thumbnail-eng2.jpg', TRUE, NOW() - INTERVAL 3 DAY),
+(34, 34, '자격증 단기 완성반', '단기 집중 자격증 스터디', '무관', '무관', '서울특별시', '양천구', 8, 1, '오후', 'thumbnail-eng3.jpg', TRUE, NOW() - INTERVAL 2 DAY),
+(35, 35, '스터디 리더십 워크샵', '스터디 리더를 위한 리더십 교육', '무관', '무관', '서울특별시', '강남구', 7, 1, '오전', 'thumbnail-eng4.jpg', TRUE, NOW() - INTERVAL 1 DAY);
 
 -- =============================================
 -- 4. 게시글 더미 데이터 (15개)

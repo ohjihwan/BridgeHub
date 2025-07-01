@@ -199,34 +199,118 @@ export const useStudySocket = (studyId, userId) => {
 
         // 메시지 수신 (새 메시지)
         socketService.on('new-message', (messageData) => {
-            console.log('새 메시지 수신:', messageData);
+            console.log('📥 새 메시지 수신:', {
+                messageId: messageData.messageId,
+                senderId: messageData.senderId,
+                messageType: messageData.messageType,
+                fileId: messageData.fileId,
+                fileName: messageData.fileName,
+                message: messageData.message?.substring(0, 50) + (messageData.message?.length > 50 ? '...' : ''),
+                text: messageData.text?.substring(0, 50) + (messageData.text?.length > 50 ? '...' : ''),
+                timestamp: messageData.timestamp,
+                currentUserId: userId,
+                isSystemMessage: messageData.senderId === '시스템' || messageData.userId === '시스템' || messageData.senderId === 'system' || messageData.userId === 'system'
+            });
+            console.log('🔍 수신된 메시지 fileId 확인:', messageData.fileId, typeof messageData.fileId);
             
-            // 시스템 메시지인지 확인
+            // 시스템 메시지인지 확인 (입장/퇴장 메시지)
             const isSystemMessage = messageData.senderId === '시스템' || 
                                     messageData.userId === '시스템' ||
                                     messageData.senderId === 'system' ||
                                     messageData.userId === 'system';
             
+            console.log('🔍 시스템 메시지 확인:', {
+                senderId: messageData.senderId,
+                userId: messageData.userId,
+                isSystemMessage: isSystemMessage,
+                message: messageData.message
+            });
+            
+            // 파일 메시지인 경우 files 배열 생성
+            let files = null;
+            if (messageData.messageType === 'FILE' && messageData.fileId && messageData.fileName) {
+                files = [{
+                    name: messageData.fileName,
+                    fileId: messageData.fileId,
+                    size: messageData.fileSize || 0,
+                    type: messageData.fileType || 'application/octet-stream'
+                }];
+            }
+            
+            // 메시지 타입 결정 (me/user)
+            let messageType = undefined;
+            if (!isSystemMessage) {
+                messageType = messageData.senderId === userId ? 'me' : 'user';
+                console.log('🔍 메시지 타입 결정:', {
+                    senderId: messageData.senderId,
+                    currentUserId: userId,
+                    isEqual: messageData.senderId === userId,
+                    messageType: messageType
+                });
+            }
+            
             const processedMessage = {
                 ...messageData,
-                type: isSystemMessage ? 'system' : undefined,
-                timestamp: messageData.timestamp || new Date().toISOString()
+                type: isSystemMessage ? 'system' : messageType,
+                text: messageData.message || messageData.text,  // text 필드 통일
+                message: messageData.message || messageData.text,  // message 필드도 유지
+                timestamp: messageData.timestamp || new Date().toISOString(),
+                fileId: messageData.fileId,  // 명시적으로 fileId 포함
+                fileName: messageData.fileName,  // 명시적으로 fileName 포함
+                files: files  // files 배열 추가
             };
             
+            console.log('🔧 처리된 메시지:', {
+                type: processedMessage.type,
+                messageType: processedMessage.messageType,
+                fileId: processedMessage.fileId,
+                fileName: processedMessage.fileName,
+                files: processedMessage.files,
+                text: processedMessage.text,
+                senderId: processedMessage.senderId,
+                currentUserId: userId
+            });
+            
             setMessages(prev => {
-                // 중복 메시지 방지
-                const exists = prev.find(msg => 
-                    (msg.messageId && msg.messageId === processedMessage.messageId) ||
-                    (msg.text === processedMessage.message && 
-                     msg.senderId === processedMessage.senderId &&
-                     Math.abs(new Date(msg.timestamp || 0) - new Date(processedMessage.timestamp)) < 2000)
-                );
+                // 중복 메시지 방지 (강화된 로직)
+                const exists = prev.find(msg => {
+                    // 1. 메시지 ID가 같은 경우
+                    if (msg.messageId && msg.messageId === processedMessage.messageId) {
+                        console.log('중복 메시지 방지 - 메시지 ID 동일:', processedMessage.messageId);
+                        return true;
+                    }
+                    
+                    // 2. 파일 메시지의 경우 파일명과 발신자가 같은 경우
+                    if (processedMessage.messageType === 'FILE' && msg.messageType === 'FILE') {
+                        const currentFileName = processedMessage.fileName || processedMessage.files?.[0]?.name;
+                        const existingFileName = msg.fileName || msg.files?.[0]?.name;
+                        if (currentFileName && existingFileName && 
+                            currentFileName === existingFileName && 
+                            processedMessage.senderId === msg.senderId) {
+                            console.log('중복 메시지 방지 - 파일 메시지 동일:', currentFileName);
+                            return true;
+                        }
+                    }
+                    
+                    // 3. 일반 텍스트 메시지의 경우 (파일 메시지가 아닌 경우만)
+                    if (processedMessage.messageType !== 'FILE' && 
+                        msg.messageType !== 'FILE' &&
+                        msg.text === processedMessage.message && 
+                        msg.senderId === processedMessage.senderId &&
+                        Math.abs(new Date(msg.timestamp || 0) - new Date(processedMessage.timestamp)) < 2000) {
+                        console.log('중복 메시지 방지 - 텍스트 메시지 동일:', processedMessage.message);
+                        return true;
+                    }
+                    
+                    return false;
+                });
                 
                 if (exists) {
-                    console.log('중복 메시지 방지:', processedMessage);
+                    console.log('중복 메시지 방지됨:', processedMessage);
                     return prev;
                 }
                 
+                console.log('새 메시지 추가:', processedMessage);
                 return [...prev, processedMessage];
             });
         });
@@ -235,7 +319,7 @@ export const useStudySocket = (studyId, userId) => {
         socketService.on('chat-history', (historyMessages) => {
             console.log('채팅 히스토리 수신:', historyMessages.length, '개 메시지');
             
-            // 히스토리 메시지에서 시스템 메시지 구분 처리
+            // 히스토리 메시지에서 시스템 메시지 구분 처리 및 파일 정보 포함
             const processedMessages = historyMessages.map(msg => {
                 // 시스템 메시지인지 확인
                 const isSystemMessage = msg.senderId === '시스템' || 
@@ -243,10 +327,33 @@ export const useStudySocket = (studyId, userId) => {
                                         msg.senderId === 'system' ||
                                         msg.userId === 'system';
                 
+                // 파일 메시지인 경우 files 배열 생성
+                let files = null;
+                if (msg.messageType === 'FILE' && msg.fileId && msg.fileName) {
+                    files = [{
+                        name: msg.fileName,
+                        fileId: msg.fileId,
+                        size: msg.fileSize || 0,
+                        type: msg.fileType || 'application/octet-stream'
+                    }];
+                }
+                
+                // 메시지 타입 결정 (me/user)
+                let messageType = undefined;
+                if (!isSystemMessage) {
+                    messageType = msg.senderId === userId ? 'me' : 'user';
+                }
+                
                 return {
                     ...msg,
-                    type: isSystemMessage ? 'system' : undefined,
-                    timestamp: msg.timestamp || new Date().toISOString()
+                    type: isSystemMessage ? 'system' : messageType,
+                    text: msg.message || msg.text,  // text 필드 통일
+                    message: msg.message || msg.text,  // message 필드도 유지
+                    timestamp: msg.timestamp || new Date().toISOString(),
+                    fileId: msg.fileId,  // 명시적으로 fileId 포함
+                    fileName: msg.fileName,  // 명시적으로 fileName 포함
+                    messageType: msg.messageType,  // 메시지 타입 포함
+                    files: files  // files 배열 추가
                 };
             });
             
@@ -256,6 +363,7 @@ export const useStudySocket = (studyId, userId) => {
             );
             
             console.log('처리된 히스토리 메시지:', sortedMessages.length, '개');
+            console.log('🔍 히스토리 파일 메시지 확인:', sortedMessages.filter(msg => msg.messageType === 'FILE'));
             setMessages(sortedMessages);
         });
 
