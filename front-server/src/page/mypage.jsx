@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './common/Header';
 import profileDefault from '/uploads/profile/default-profile1.png';
-import { userClient, getUsernameFromToken, formatPhone, cleanPhone } from '@js/common-ui';
+import { commonClient, getUsernameFromToken, formatPhone, cleanPhone } from '@js/common-ui';
 import subjects from '@json/subject';
 import regionData from '@json/region';
 
@@ -71,7 +71,7 @@ const MyPage = () => {
 					requestBody.profileImage = editData.profileImg;
 				}
 
-				const res = await userClient.put(`/api/members/${username}`, requestBody, {
+				const res = await commonClient.put(`/api/members/${username}`, requestBody, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('token')}`,
 						'Content-Type': 'application/json'
@@ -135,7 +135,7 @@ const MyPage = () => {
 
 		const fetchProfile = async () => {
 			try {
-				const res = await userClient.get(`/api/members/${username}`, {
+				const res = await commonClient.get(`/api/members/${username}`, {
 					headers: {
 						Authorization: `Bearer ${localStorage.getItem('token')}`,
 					},
