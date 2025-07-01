@@ -726,18 +726,18 @@ function Chat() {
 						messageId: msg.messageId || msg._id || `${senderId}-${Date.now()}-${index}`
 					};
 
-					// 파일 메시지인 경우 파일 정보 추가
-					if (msg.messageType === 'FILE' || msg.fileType || msg.fileName || msg.files) {
-						const fileName = msg.fileName || msg.filename || (msg.files && msg.files[0]?.name) || '파일';
-						const fileId = msg.fileId || (msg.files && msg.files[0]?.fileId) || null;
-						
+					// 히스토리 메시지 파싱 시 파일 메시지 변환
+					if (
+						msg.messageType === 'FILE' &&
+						msg.fileInfo &&
+						msg.fileInfo.fileId &&
+						msg.fileInfo.fileName
+					) {
 						baseMessage.files = [{
-							name: fileName,
-							fileId: fileId,
-							fileUrl: fileId ? `/api/files/download/${fileId}` : '#'
+							name: msg.fileInfo.fileName,
+							fileId: msg.fileInfo.fileId,
+							fileUrl: msg.fileInfo.fileUrl || `/api/files/download/${msg.fileInfo.fileId}`
 						}];
-						
-						console.log(`📎 파일 메시지 처리:`, { fileName, fileId });
 					}
 
 					console.log(`✅ 변환된 메시지 ${index}:`, baseMessage);
@@ -798,18 +798,17 @@ function Chat() {
 						messageId: latestMessage.messageId || latestMessage._id || `${senderId}-${Date.now()}`
 					};
 
-					// 파일 메시지인 경우 파일 정보 추가 (fileId가 있을 때만)
-					if ((latestMessage.messageType === 'FILE' || latestMessage.fileType || latestMessage.fileName) && latestMessage.fileId) {
-						console.log('🔍 파일 메시지 처리:', {
-							fileName: latestMessage.fileName,
-							fileId: latestMessage.fileId,
-							fileIdType: typeof latestMessage.fileId
-						});
-						
+					// 히스토리 메시지 파싱 시 파일 메시지 변환
+					if (
+						latestMessage.messageType === 'FILE' &&
+						latestMessage.fileInfo &&
+						latestMessage.fileInfo.fileId &&
+						latestMessage.fileInfo.fileName
+					) {
 						newMessage.files = [{
-							name: latestMessage.fileName || '파일',
-							fileId: latestMessage.fileId,
-							fileUrl: latestMessage.fileUrl || '#'
+							name: latestMessage.fileInfo.fileName,
+							fileId: latestMessage.fileInfo.fileId,
+							fileUrl: latestMessage.fileInfo.fileUrl || `/api/files/download/${latestMessage.fileInfo.fileId}`
 						}];
 					}
 					
