@@ -135,6 +135,23 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService {
     }
 
     @Override
+    @Transactional
+    public void kickMember(Integer roomId, Integer memberId) {
+        // 1. 멤버 확인
+        Optional<ChatRoomMember> memberOpt = chatRoomMemberDao.findByRoomIdAndMemberId(roomId, memberId);
+        if (!memberOpt.isPresent()) {
+            throw new RuntimeException("채팅방에 참가하지 않은 사용자입니다.");
+        }
+        
+        ChatRoomMember member = memberOpt.get();
+        
+        // 2. 채팅방에서 강퇴
+        chatRoomMemberDao.deleteChatRoomMember(roomId, memberId);
+        
+        log.info("채팅방 멤버 강퇴 완료: roomId={}, memberId={}", roomId, memberId);
+    }
+
+    @Override
     public boolean isMemberOfChatRoom(Integer roomId, Integer memberId) {
         Optional<ChatRoomMember> memberOpt = chatRoomMemberDao.findByRoomIdAndMemberId(roomId, memberId);
         return memberOpt.isPresent();
@@ -147,8 +164,10 @@ public class ChatRoomMemberServiceImpl implements ChatRoomMemberService {
         dto.setJoinedAt(member.getJoinedAt());
         dto.setIsAdmin(member.getIsAdmin());
         
-        // TODO: 멤버 정보 (이름, 닉네임, 프로필 이미지) 조회 추가
-        // 현재는 기본 정보만 설정
+        // 멤버 정보 설정 (JOIN 쿼리에서 가져온 정보)
+        dto.setMemberName(member.getMemberName());
+        dto.setMemberNickname(member.getMemberNickname());
+        dto.setMemberProfileImage(member.getMemberProfileImage());
         
         return dto;
     }

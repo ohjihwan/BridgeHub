@@ -1571,8 +1571,12 @@ function Chat() {
 
 			{showChatMember && (
 				<ChatMember
-					isOpen={showChatMember}
+					isVisible={showChatMember}
 					onClose={() => setShowChatMember(false)}
+					studyId={studyId}
+					roomId={roomId}
+					currentUserInfo={currentUserInfo}
+					isOwner={isOwner}
 				/>
 			)}
 

@@ -7,6 +7,9 @@
         <id property="memberId" column="member_id"/>
         <result property="joinedAt" column="joined_at"/>
         <result property="isAdmin" column="is_admin"/>
+        <result property="memberName" column="member_name"/>
+        <result property="memberNickname" column="member_nickname"/>
+        <result property="memberProfileImage" column="member_profile_image"/>
     </resultMap>
 
     <insert id="insertChatRoomMember" parameterType="com.koreait.apiserver.entity.ChatRoomMember">
@@ -15,7 +18,15 @@
     </insert>
 
     <select id="findByRoomId" resultMap="ChatRoomMemberResultMap">
-        SELECT * FROM ChatRoomMember WHERE room_id = #{roomId}
+        SELECT 
+            crm.*,
+            m.name as member_name,
+            m.nickname as member_nickname,
+            m.profile_image as member_profile_image
+        FROM ChatRoomMember crm
+        LEFT JOIN members m ON crm.member_id = m.id
+        WHERE crm.room_id = #{roomId}
+        ORDER BY crm.joined_at ASC
     </select>
 
     <select id="findByMemberId" resultMap="ChatRoomMemberResultMap">
@@ -23,7 +34,14 @@
     </select>
 
     <select id="findByRoomIdAndMemberId" resultMap="ChatRoomMemberResultMap">
-        SELECT * FROM ChatRoomMember WHERE room_id = #{roomId} AND member_id = #{memberId}
+        SELECT 
+            crm.*,
+            m.name as member_name,
+            m.nickname as member_nickname,
+            m.profile_image as member_profile_image
+        FROM ChatRoomMember crm
+        LEFT JOIN members m ON crm.member_id = m.id
+        WHERE crm.room_id = #{roomId} AND crm.member_id = #{memberId}
     </select>
 
     <select id="findAdminsByRoomId" resultMap="ChatRoomMemberResultMap">

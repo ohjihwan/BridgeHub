@@ -365,9 +365,8 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             return;
         }
         
-        // 3. 일반 멤버 탈퇴 시 PENDING 상태로 변경 (재참가 가능) 및 인원수 차감
-        // updateMemberStatus 호출하지 않고 직접 처리 (중복 차감 방지)
-        studyRoomMemberDao.updateMemberStatus(member.getId(), StudyRoomMember.MemberStatus.PENDING, null);
+        // 3. 일반 멤버 탈퇴 시 완전히 삭제 (재참가 시 새로 신청하도록)
+        studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
         studyRoomDao.decrementCurrentMembers(studyRoomId); // 탈퇴 시 인원수 차감
         
         // 채팅방에서도 제거

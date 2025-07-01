@@ -14,4 +14,9 @@ public class ChatRoomMember {
     private Integer memberId;  // Member와 연결
     private LocalDateTime joinedAt;
     private Boolean isAdmin = false;
+    
+    // 조인된 멤버 정보
+    private String memberName;
+    private String memberNickname;
+    private String memberProfileImage;
 } 
