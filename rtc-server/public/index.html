@@ -1,0 +1,85 @@
+<!-- ✅ public/index.html -->
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebRTC 대기실</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      input,
+      button {
+        padding: 8px;
+        margin: 5px;
+      }
+      .section {
+        margin-bottom: 30px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        max-width: 500px;
+      }
+      #room-list li {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebRTC 대기실</h1>
+
+    <div class="section">
+      <label for="nickname">닉네임:</label>
+      <input id="nickname" type="text" placeholder="닉네임 입력" />
+
+      <div style="margin-top: 10px">
+        <button onclick="createRoom()">방 만들기</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>참여 가능한 방</h3>
+      <ul id="room-list"></ul>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const roomList = document.getElementById("room-list");
+
+      function getNickname() {
+        return document.getElementById("nickname").value.trim();
+      }
+
+      function createRoom() {
+        const nickname = getNickname();
+        if (!nickname) return alert("닉네임을 입력하세요.");
+        const roomId = "room-" + Date.now();
+        socket.emit("create-room", roomId);
+        location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(
+          nickname
+        )}`;
+      }
+
+      socket.on("room-list", (rooms) => {
+        roomList.innerHTML = "";
+        rooms.forEach((roomId) => {
+          const li = document.createElement("li");
+          const btn = document.createElement("button");
+          btn.innerText = "입장";
+          btn.onclick = () => {
+            const nickname = getNickname();
+            if (!nickname) return alert("닉네임을 입력하세요.");
+            location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(
+              nickname
+            )}`;
+          };
+          li.innerHTML = `${roomId} `;
+          li.appendChild(btn);
+          roomList.appendChild(li);
+        });
+      });
+    </script>
+  </body>
+</html>

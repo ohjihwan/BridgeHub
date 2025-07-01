@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebRTC 채팅방</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .video-wrapper {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 10px;
+      }
+      .video-container {
+        text-align: center;
+      }
+      video {
+        background-color: black;
+        border-radius: 10px;
+      }
+      #chat-box {
+        width: 100%;
+        max-width: 980px;
+        height: 200px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+      }
+      #chat-input {
+        width: 80%;
+        padding: 8px;
+      }
+      #status-text {
+        margin-top: 5px;
+        font-size: 0.9em;
+        color: gray;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="title">P2P 연결 중...</h1>
+
+    <div style="margin-bottom: 10px">
+      <button id="toggle-camera" onclick="toggleCamera()">카메라 끄기</button>
+      <button id="toggle-mic" onclick="toggleMic()">마이크 끄기</button>
+      <button onclick="leaveRoom()">방 나가기</button>
+    </div>
+
+    <div class="video-wrapper">
+      <div class="video-container">
+        <div>나</div>
+        <video
+          id="myFace"
+          playsinline
+          autoplay
+          width="480"
+          height="360"
+        ></video>
+      </div>
+      <div class="video-container">
+        <div>상대</div>
+        <video
+          id="peerVideo"
+          playsinline
+          autoplay
+          width="480"
+          height="360"
+        ></video>
+        <div id="status-text">상대방 카메라/마이크 상태</div>
+      </div>
+    </div>
+
+    <h3>채팅</h3>
+    <div id="chat-box"></div>
+    <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." />
+    <button onclick="sendChat()">전송</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      const urlParams = new URLSearchParams(location.search);
+      const room = urlParams.get("room");
+      const nickname = urlParams.get("name");
+
+      if (!room || !nickname) {
+        alert("잘못된 접근입니다.");
+        location.href = "/";
+      }
+
+      document.getElementById(
+        "title"
+      ).innerText = `방: ${room} | 닉네임: ${nickname}`;
+
+      const myFace = document.getElementById("myFace");
+      const peerVideo = document.getElementById("peerVideo");
+      const chatBox = document.getElementById("chat-box");
+      const chatInput = document.getElementById("chat-input");
+      const statusText = document.getElementById("status-text");
+
+      let myStream;
+      let myPeerConnection;
+      const socket = io();
+
+      socket.emit("join", { roomId: room, nickname });
+
+      socket.on("room-full", () => {
+        alert("입장 인원 초과");
+        location.href = "/";
+      });
+
+      socket.on("rtc-message", async (message) => {
+        const content = JSON.parse(message);
+        if (content.event === "offer") {
+          await initConnection();
+          await myPeerConnection.setRemoteDescription(content.data);
+          await getMedia();
+          myStream
+            .getTracks()
+            .forEach((track) => myPeerConnection.addTrack(track, myStream));
+          const answer = await myPeerConnection.createAnswer();
+          await myPeerConnection.setLocalDescription(answer);
+          sendSignal("answer", answer);
+        } else if (content.event === "answer") {
+          await myPeerConnection.setRemoteDescription(content.data);
+        } else if (content.event === "candidate") {
+          if (content.data)
+            await myPeerConnection.addIceCandidate(content.data);
+        } else if (content.event === "status") {
+          updatePeerStatus(content.data);
+        }
+      });
+
+      socket.on("chat-message", (data) => {
+        const { from, message, timestamp } = JSON.parse(data);
+        appendChat(from, message, timestamp);
+      });
+
+      socket.on("peer-left", () => {
+        appendChat("시스템", "상대방이 방을 나갔습니다.");
+        statusText.innerText = "상대방이 연결을 종료했습니다.";
+        peerVideo.srcObject = null;
+      });
+
+      chatInput.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") sendChat();
+      });
+
+      async function initConnection() {
+        myPeerConnection = new RTCPeerConnection({
+          iceServers: [{ url: "stun:stun.l.google.com:19302" }],
+        });
+
+        myPeerConnection.onicecandidate = (event) => {
+          if (event.candidate) sendSignal("candidate", event.candidate);
+        };
+
+        myPeerConnection.addEventListener("addstream", (e) => {
+          peerVideo.srcObject = e.stream;
+        });
+      }
+
+      async function createOffer() {
+        await initConnection();
+        await getMedia();
+        myStream
+          .getTracks()
+          .forEach((track) => myPeerConnection.addTrack(track, myStream));
+        const offer = await myPeerConnection.createOffer();
+        await myPeerConnection.setLocalDescription(offer);
+        sendSignal("offer", offer);
+      }
+
+      async function getMedia() {
+        try {
+          myStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true,
+          });
+          myFace.srcObject = myStream;
+        } catch (e) {
+          console.error("Media Error:", e);
+        }
+      }
+
+      function sendSignal(event, data) {
+        socket.emit(
+          "rtc-message",
+          JSON.stringify({ roomId: room, event, data })
+        );
+      }
+
+      function sendChat() {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+
+        const now = Date.now();
+
+        socket.emit(
+          "chat-message",
+          JSON.stringify({
+            roomId: room,
+            from: nickname,
+            message: msg,
+            timestamp: now,
+          })
+        );
+
+        appendChat(nickname, msg, now);
+        chatInput.value = "";
+      }
+
+      function appendChat(who, msg, time = null) {
+        const p = document.createElement("p");
+        const now = time ? new Date(time) : new Date();
+        const hhmm = now.toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+        p.textContent = `[${hhmm}] ${who}: ${msg}`;
+        chatBox.appendChild(p);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function toggleCamera() {
+        if (!myStream) return;
+        const videoTrack = myStream.getVideoTracks()[0];
+        videoTrack.enabled = !videoTrack.enabled;
+        document.getElementById("toggle-camera").innerText = videoTrack.enabled
+          ? "카메라 끄기"
+          : "카메라 켜기";
+        notifyStatus();
+      }
+
+      function toggleMic() {
+        if (!myStream) return;
+        const audioTrack = myStream.getAudioTracks()[0];
+        audioTrack.enabled = !audioTrack.enabled;
+        document.getElementById("toggle-mic").innerText = audioTrack.enabled
+          ? "마이크 끄기"
+          : "마이크 켜기";
+        notifyStatus();
+      }
+
+      function notifyStatus() {
+        const status = {
+          camera: myStream.getVideoTracks()[0]?.enabled,
+          mic: myStream.getAudioTracks()[0]?.enabled,
+        };
+        sendSignal("status", status);
+      }
+
+      function updatePeerStatus(data) {
+        const cam = data.camera ? "켜짐" : "꺼짐";
+        const mic = data.mic ? "켜짐" : "꺼짐";
+        statusText.innerText = `상대방 카메라: ${cam} / 마이크: ${mic}`;
+      }
+
+      function leaveRoom() {
+        if (myPeerConnection) {
+          myPeerConnection.close();
+          myPeerConnection = null;
+        }
+        socket.disconnect();
+        location.href = "/";
+      }
+
+      createOffer();
+    </script>
+  </body>
+</html>
