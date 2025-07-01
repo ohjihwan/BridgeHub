@@ -10,6 +10,7 @@ const Header = ({
     onShowAttachments = () => {}, 
 	onShowParticipants = () => {}, 
     onBeforeBack = () => {}, 
+    onLeave = () => {}, 
     onlineUsers = [], 
     studyInfo = null, 
     currentUserInfo = null
@@ -57,8 +58,7 @@ const Header = ({
     const handleExitChat = () => {
         customConfirm('정말 스터디룸을 탈퇴하시겠습니까?', () => {
             setMenuOpen(false);
-            customAlert('스터디룸을 탈퇴했습니다.');
-            navigate('/home');
+            onLeave(); // chat.jsx의 handleLeave 함수 호출
         });
     };
 

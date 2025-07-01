@@ -240,15 +240,17 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             switch (existingMember.getStatus()) {
                 case PENDING:
                     // PENDING 상태면 기존 신청을 삭제하고 새로 신청
+                    log.info("기존 PENDING 신청 발견 - 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
                     studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
-                    log.info("기존 PENDING 신청 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
+                    log.info("기존 PENDING 신청 삭제 완료 후 재신청 진행: studyRoomId={}, memberId={}", studyRoomId, memberId);
                     break;
                 case APPROVED:
                     throw new RuntimeException("이미 참가 중인 스터디입니다.");
                 case REJECTED:
                     // REJECTED 상태면 기존 신청을 삭제하고 새로 신청
+                    log.info("기존 REJECTED 신청 발견 - 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
                     studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
-                    log.info("기존 REJECTED 신청 삭제 후 재신청: studyRoomId={}, memberId={}", studyRoomId, memberId);
+                    log.info("기존 REJECTED 신청 삭제 완료 후 재신청 진행: studyRoomId={}, memberId={}", studyRoomId, memberId);
                     break;
             }
         }
@@ -265,7 +267,8 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         member.setRole(StudyRoomMember.MemberRole.MEMBER);
         member.setStatus(StudyRoomMember.MemberStatus.PENDING); // APPROVED → PENDING으로 변경
         
-        studyRoomMemberDao.insertStudyRoomMember(member);
+        int insertResult = studyRoomMemberDao.insertStudyRoomMember(member);
+        log.info("새로운 참가 신청 생성 결과: studyRoomId={}, memberId={}, insertResult={}", studyRoomId, memberId, insertResult);
         
         // ★ PENDING 상태이므로 채팅방 자동 추가 제거 (승인 시에만 추가)
         
@@ -276,6 +279,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     public List<StudyRoomMemberDTO> getStudyRoomMembers(Integer studyRoomId) {
         List<StudyRoomMember> members = studyRoomMemberDao.selectStudyRoomMembers(studyRoomId);
         return members.stream()
+                .filter(member -> member.getStatus() == StudyRoomMember.MemberStatus.APPROVED) // 승인된 멤버만 조회
                 .map(this::convertToMemberDTO)
                 .collect(Collectors.toList());
     }
@@ -304,7 +308,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         
         studyRoomMemberDao.updateMemberStatus(member.getId(), memberStatus, bossId);
         
-        // 4. 승인 시 채팅방에도 추가
+        // 4. 승인 시 채팅방에도 추가, 거절 시 채팅방에서 제거
         if (memberStatus == StudyRoomMember.MemberStatus.APPROVED) {
             Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
             if (studyRoomOpt.isPresent()) {
@@ -319,6 +323,23 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                 chatRoomMemberDao.insertChatRoomMember(chatMember);
                 
                 log.info("스터디 승인 완료 및 채팅방 참가: studyRoomId={}, memberId={}, chatRoomId={}", 
+                        studyRoomId, memberId, studyRoom.getRoomId());
+            }
+        } else if (memberStatus == StudyRoomMember.MemberStatus.REJECTED) {
+            // 거절 또는 탈퇴 시 채팅방에서 제거
+            Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
+            if (studyRoomOpt.isPresent()) {
+                StudyRoom studyRoom = studyRoomOpt.get();
+                chatRoomMemberDao.deleteChatRoomMember(studyRoom.getRoomId(), memberId);
+                
+                // REJECTED 상태로 변경 시 스터디 인원수 차감
+                if (memberStatus == StudyRoomMember.MemberStatus.REJECTED) {
+                    studyRoomDao.decrementCurrentMembers(studyRoomId);
+                    log.info("스터디 거절로 인한 인원수 차감: studyRoomId={}, memberId={}", studyRoomId, memberId);
+                }
+                
+                log.info("스터디 {} 완료 및 채팅방 퇴장: studyRoomId={}, memberId={}, chatRoomId={}", 
+                        memberStatus == StudyRoomMember.MemberStatus.REJECTED ? "거절" : "탈퇴",
                         studyRoomId, memberId, studyRoom.getRoomId());
             }
         }
@@ -336,25 +357,29 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             throw new RuntimeException("스터디에 참가하지 않은 사용자입니다.");
         }
         
-        // 2. 방장은 탈퇴 불가
+        // 2. 방장 탈퇴 시 스터디 전체 삭제
         if (member.getRole() == StudyRoomMember.MemberRole.BOSS) {
-            throw new RuntimeException("방장은 스터디를 탈퇴할 수 없습니다.");
+            // 스터디룸 삭제 (채팅방도 함께 삭제됨)
+            studyRoomDao.deleteStudyRoom(studyRoomId);
+            log.info("방장 탈퇴로 인한 스터디 삭제: studyRoomId={}, memberId={}", studyRoomId, memberId);
+            return;
         }
         
-        // 3. 스터디에서 제거
-        studyRoomMemberDao.deleteStudyRoomMember(studyRoomId, memberId);
+        // 3. 일반 멤버 탈퇴 시 PENDING 상태로 변경 (재참가 가능) 및 인원수 차감
+        // updateMemberStatus 호출하지 않고 직접 처리 (중복 차감 방지)
+        studyRoomMemberDao.updateMemberStatus(member.getId(), StudyRoomMember.MemberStatus.PENDING, null);
+        studyRoomDao.decrementCurrentMembers(studyRoomId); // 탈퇴 시 인원수 차감
         
-        // 4. 채팅방에서도 제거
+        // 채팅방에서도 제거
         Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
         if (studyRoomOpt.isPresent()) {
             StudyRoom studyRoom = studyRoomOpt.get();
             chatRoomMemberDao.deleteChatRoomMember(studyRoom.getRoomId(), memberId);
-            
-            log.info("스터디 탈퇴 및 채팅방 퇴장: studyRoomId={}, memberId={}, chatRoomId={}", 
+            log.info("스터디 탈퇴로 인한 채팅방 퇴장: studyRoomId={}, memberId={}, chatRoomId={}", 
                     studyRoomId, memberId, studyRoom.getRoomId());
         }
         
-        log.info("스터디 탈퇴 완료: studyRoomId={}, memberId={}", studyRoomId, memberId);
+        log.info("스터디 탈퇴 완료 및 인원수 차감: studyRoomId={}, memberId={}", studyRoomId, memberId);
     }
     
     @Override
