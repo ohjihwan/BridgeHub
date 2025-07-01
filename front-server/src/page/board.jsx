@@ -95,7 +95,7 @@ function Board() {
 				if (result.success) {
 					setSelectedPost(result.data)
 					setShowDetail(true)
-					// 댓글도 함께 가져오기
+					document.body.style.overflow = 'hidden'
 					fetchComments(boardId)
 				}
 			}
@@ -363,7 +363,13 @@ function Board() {
 				{showDetail && selectedPost && (
 					<div className="board-view">
 						<div className="board-view__header">
-							<button type="button" className="board-view__close" onClick={() => setShowDetail(false)}></button>
+							<button type="button" className="board-view__close" 
+								onClick={() => {
+									setShowDetail(false)
+									document.body.style.overflow = 'auto'
+								}} aria-label="닫기"
+								>
+							</button>
 						</div>
 						<div className="board-view__contents">
 							<div className="board-view__top">
@@ -432,7 +438,7 @@ function Board() {
 								</div>
 
 								{/* 댓글 목록 */}
-								<div className="comment-list">
+								<div className="comment-write__list">
 									{comments.length > 0 ? (
 										comments.map((comment) => (
 											<div key={comment.commentId} className="comment-item">
@@ -460,7 +466,7 @@ function Board() {
 											</div>
 										))
 									) : (
-										<div className="comment-empty">
+										<div className="comment-write__empty">
 											첫 번째 댓글을 작성해보세요!
 										</div>
 									)}
