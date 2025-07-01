@@ -156,7 +156,7 @@ CREATE TABLE Report (
     report_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '신고 ID (PK)',
     reporter_id INT NOT NULL COMMENT '신고자 ID (FK)',
     reported_user_id INT COMMENT '신고 대상 회원 ID (FK)',
-    report_type ENUM('USER', 'MESSAGE', 'STUDYROOM', 'INAPPROPRIATE_CONTENT') NOT NULL COMMENT '신고 유형',
+    report_type ENUM('스팸/광고', '욕설/비방', '음란물', '폭력/위협', '사기/기만', '기타') NOT NULL COMMENT '신고 유형',
     message_id INT COMMENT '신고한 메시지 ID (FK)',
     room_id INT COMMENT '신고한 채팅방 ID (FK)',
     study_room_id INT COMMENT '스터디룸 ID (FK)',

@@ -7,10 +7,11 @@ import ResultModal from '@components/chat/ResultModal';
 import TodoList from '@components/chat/TodoListDeployment';
 import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
-import { chatAPI, userAPI } from '@dev/services/apiService';
+import { chatAPI, userAPI, reportAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
 import { customAlert, customConfirm, customPrompt } from '@/assets/js/common-ui';
 import JoinSystem from '@components/chat/JoinSystem'
+import ChatMember from '@components/chat/ChatMember';
 
 function Chat() {
 	const location = useLocation();
@@ -87,6 +88,9 @@ function Chat() {
 	// 파일 모아보기
 	const [showAttachments, setShowAttachments] = useState(false);
 	const [attachments, setAttachments] = useState([]);
+
+	// 참여 인원
+	const [showChatMember, setShowChatMember] = useState(false);
 
 	// 랜덤 기능 - 방장 여부 확인
 	const [isOwner, setIsOwner] = useState(false);
@@ -433,14 +437,45 @@ function Chat() {
 	};
 
 	// 신고하기 함수들
-	const handleReportSubmit = () => {
-		customConfirm('신고하시겠습니까?').then((confirm) => {
-			if (confirm) {
-				// 실제 신고 로직
-				customAlert('신고가 접수되었습니다.');
-				setShowReportLayer(false);
-			}
-		});
+	const handleReportSubmit = async () => {
+		if (!reportTarget) {
+			customAlert('신고할 메시지를 선택해주세요.');
+			return;
+		}
+
+		const formData = new FormData(document.querySelector('.layer__content form'));
+		const reportType = formData.get('reportType');
+		const description = formData.get('description');
+
+		if (!reportType || !description.trim()) {
+			customAlert('신고 유형과 내용을 모두 입력해주세요.');
+			return;
+		}
+
+		try {
+			const reportData = {
+				reportType: reportType,
+				reason: description.trim(),
+				reportedUserId: parseInt(reportTarget.senderId || reportTarget.userId),
+				messageId: parseInt(reportTarget.messageId || reportTarget._id),
+				roomId: parseInt(studyId),
+				studyRoomId: parseInt(studyId),
+				messageContent: reportTarget.message || reportTarget.text
+			};
+
+			console.log('🚨 신고 데이터:', reportData);
+			console.log('🚨 신고 데이터 JSON:', JSON.stringify(reportData, null, 2));
+
+			await reportAPI.createChatReport(reportData);
+			
+			customAlert('신고가 접수되었습니다.');
+			setShowReportLayer(false);
+			setReportTarget(null);
+		} catch (error) {
+			console.error('신고 접수 실패:', error);
+			console.error('에러 응답:', error.response?.data);
+			customAlert('신고 접수에 실패했습니다. 다시 시도해주세요.');
+		}
 	};
 
 	// 검색기능
@@ -1062,6 +1097,7 @@ function Chat() {
 				studyInfo={studyInfo || null}
 				currentUserInfo={currentUserInfo || null}
 				allParticipants={getAllParticipants()}
+				onShowParticipants={() => setShowChatMember(true)}
 			/>
 
 			{/* 참가 신청 알림 (방장만 표시) */}
@@ -1379,17 +1415,22 @@ function Chat() {
 					<button className="layer__submit" onClick={handleReportSubmit} >신고하기</button>
 				}>
 					<div className="report-layer">
-						<div className="field">
-							<select className="select" name="report-type">
-								<option value="신고1">신고1</option>
-								<option value="신고2">신고2</option>
-								<option value="신고3">신고3</option>
-								<option value="신고4">신고4</option>
-							</select>
-						</div>
-						<div className="field __textarea">
-							<textarea className="textarea" placeholder="신고 내용을 적어주세요." name="description" />
-						</div>
+						<form>
+							<div className="field">
+								<select className="select" name="reportType">
+									<option value="">신고 유형을 선택하세요</option>
+									<option value="스팸/광고">스팸/광고</option>
+									<option value="욕설/비방">욕설/비방</option>
+									<option value="음란물">음란물</option>
+									<option value="폭력/위협">폭력/위협</option>
+									<option value="사기/기만">사기/기만</option>
+									<option value="기타">기타</option>
+								</select>
+							</div>
+							<div className="field __textarea">
+								<textarea className="textarea" placeholder="신고 내용을 상세히 적어주세요." name="description" />
+							</div>
+						</form>
 					</div>
 				</Layer>
 			)}
@@ -1414,6 +1455,13 @@ function Chat() {
 						setWinner(null);
 						setSpinning(false);
 					}}
+				/>
+			)}
+
+			{showChatMember && (
+				<ChatMember
+					isOpen={showChatMember}
+					onClose={() => setShowChatMember(false)}
 				/>
 			)}
 

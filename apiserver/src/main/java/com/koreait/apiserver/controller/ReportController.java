@@ -71,28 +71,38 @@ public class ReportController {
 
     @PostMapping("/chat-log")
     public ResponseEntity<ApiResponse<Void>> reportFromChatLog(
-            @RequestBody @Valid ReportDTO reportDTO,
+            @RequestBody ReportDTO reportDTO,
             HttpServletRequest request) {
         
+        log.info("=== 채팅 로그 신고 요청 시작 ===");
+        log.info("요청 URL: {}", request.getRequestURL());
+        log.info("요청 메서드: {}", request.getMethod());
+        log.info("Content-Type: {}", request.getContentType());
+        
         try {
+            log.info("채팅 로그 신고 요청 받음: {}", reportDTO);
+            
             String authHeader = request.getHeader("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                log.error("인증 헤더 없음");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("AUTH_REQUIRED"));
             }
             
             String token = authHeader.substring(7);
             Integer reporterId = jwtService.extractMemberId(token);
+            log.info("신고자 ID 추출: {}", reporterId);
             reportDTO.setReporterId(reporterId);
             
             reportService.createReportFromChatLog(reportDTO);
             
+            log.info("채팅 로그 신고 생성 완료");
             return ResponseEntity.ok(ApiResponse.success());
             
         } catch (Exception e) {
             log.error("채팅 로그 신고 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("REPORT_CREATE_ERROR"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("REPORT_CREATE_ERROR: " + e.getMessage()));
         }
     }
 

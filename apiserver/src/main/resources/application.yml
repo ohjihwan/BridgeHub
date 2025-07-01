@@ -8,6 +8,14 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # MongoDB 설정 추가
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: thebridgehub
+      authentication-database: admin
+
   # JPA 설정
   jpa:
     hibernate:
