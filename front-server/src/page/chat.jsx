@@ -1361,7 +1361,7 @@ function Chat() {
 			<div className="msg-writing">
 				<div className="msg-writing__box">
 					<div className="msg-writing__services">
-						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => setShowVideo(true)}></button>
+						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={handleStartVideo}></button>
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
