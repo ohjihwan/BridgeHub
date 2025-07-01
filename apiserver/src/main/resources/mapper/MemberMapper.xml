@@ -118,46 +118,46 @@
     </update>
 
     <select id="countByGender" resultType="map">
-        SELECT gender, COUNT(*) as value FROM members GROUP BY gender
+        SELECT gender, COUNT(*) as count FROM members WHERE gender IS NOT NULL GROUP BY gender
     </select>
     <select id="countByEducation" resultType="map">
-        SELECT education, COUNT(*) as value FROM members GROUP BY education
+        SELECT education, COUNT(*) as count FROM members WHERE education IS NOT NULL GROUP BY education
     </select>
     <select id="countByTime" resultType="map">
-        SELECT time, COUNT(*) as value FROM members GROUP BY time
+        SELECT time, COUNT(*) as count FROM members WHERE time IS NOT NULL GROUP BY time
     </select>
     <select id="countByDepartment" resultType="map">
-        SELECT department, COUNT(*) as value FROM members GROUP BY department
+        SELECT department, COUNT(*) as count FROM members WHERE department IS NOT NULL GROUP BY department
     </select>
 
     <!-- 활동 통계용 쿼리들 -->
     <select id="getQuarterlySignups" resultType="map">
         SELECT
-            CONCAT('q', QUARTER(created_at)) as quarter,
-            COUNT(*) as value
+            DATE_FORMAT(created_at, '%Y-%m-%d') as quarter,
+            COUNT(*) as count
         FROM members
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
-        GROUP BY quarter
-        ORDER BY quarter
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at)
     </select>
 
     <select id="getQuarterlyVisitors" resultType="map">
         SELECT
-            CONCAT('q', QUARTER(created_at)) as quarter,
-            COUNT(*) as value
+            DATE_FORMAT(created_at, '%Y-%m-%d') as quarter,
+            COUNT(*) as count
         FROM members
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
-        GROUP BY quarter
-        ORDER BY quarter
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at)
     </select>
 
     <select id="getTopActiveUsers" resultType="map">
         SELECT 
             m.name,
-            COUNT(mr.id) as activity
+            COUNT(msg.message_id) as activity
         FROM members m
-        LEFT JOIN messages mr ON m.id = mr.member_id
-        WHERE mr.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        LEFT JOIN Message msg ON m.id = msg.sender_id 
+            AND msg.sent_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
         GROUP BY m.id, m.name
         ORDER BY activity DESC
         LIMIT 10
@@ -165,17 +165,50 @@
 
     <select id="getPopularRooms" resultType="map">
         SELECT 
-            sr.name,
+            sr.title as name,
             COUNT(srm.member_id) as count
-        FROM study_rooms sr
-        LEFT JOIN study_room_members srm ON sr.id = srm.study_room_id
-        GROUP BY sr.id, sr.name
+        FROM studyroom sr
+        LEFT JOIN study_room_members srm ON sr.study_room_id = srm.study_room_id
+            AND srm.status = 'APPROVED'
+        GROUP BY sr.study_room_id, sr.title
         ORDER BY count DESC
         LIMIT 10
     </select>
 
     <select id="getTotalVisitors" resultType="int">
         SELECT COUNT(*) FROM members
+    </select>
+
+    <!-- 실시간 접속자 통계용 쿼리들 (새로 추가) -->
+    <select id="getCurrentOnlineUsers" resultType="int">
+        SELECT COUNT(DISTINCT m.id) 
+        FROM members m
+        INNER JOIN study_room_members srm ON m.id = srm.member_id
+        INNER JOIN studyroom sr ON srm.study_room_id = sr.study_room_id
+        WHERE srm.status = 'APPROVED' 
+        AND sr.status = 'ACTIVE'
+        AND srm.updated_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+    </select>
+    
+    <select id="getActiveStudyRooms" resultType="map">
+        SELECT 
+            sr.study_room_id as roomId,
+            sr.title as roomTitle,
+            COUNT(DISTINCT srm.member_id) as currentUsers,
+            sr.capacity as maxCapacity
+        FROM studyroom sr
+        LEFT JOIN study_room_members srm ON sr.study_room_id = srm.study_room_id
+            AND srm.status = 'APPROVED'
+            AND srm.updated_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+        WHERE sr.status = 'ACTIVE'
+        GROUP BY sr.study_room_id, sr.title, sr.capacity
+        HAVING currentUsers > 0
+        ORDER BY currentUsers DESC
+        LIMIT 10
+    </select>
+    
+    <select id="getTotalRegisteredMembers" resultType="int">
+        SELECT COUNT(*) FROM members WHERE status = 'ACTIVE'
     </select>
 
 </mapper> 
