@@ -2,81 +2,424 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebRTC 채팅방</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
         padding: 20px;
+        color: #333;
       }
-      .video-wrapper {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 10px;
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
       }
-      .video-container {
+
+      .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         text-align: center;
       }
-      video {
-        background-color: black;
-        border-radius: 10px;
+
+      .header h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 15px;
       }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+
+      .btn-danger:hover {
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+      }
+
+      .btn.disabled {
+        background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn.disabled:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .video-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      }
+
+      .video-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 15px;
+      }
+
+      .video-container {
+        text-align: center;
+        position: relative;
+      }
+
+      .video-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .video-label.me::before {
+        content: "👤";
+      }
+
+      .video-label.peer::before {
+        content: "👥";
+      }
+
+      video {
+        width: 100%;
+        max-width: 480px;
+        height: 300px;
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        object-fit: cover;
+      }
+
+      .status-indicator {
+        margin-top: 10px;
+        padding: 8px 15px;
+        background: #f3f4f6;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #6b7280;
+        display: inline-block;
+      }
+
+      .chat-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .chat-header::before {
+        content: "💬";
+        font-size: 1.2rem;
+      }
+
       #chat-box {
         width: 100%;
-        max-width: 980px;
-        height: 200px;
-        border: 1px solid #ccc;
-        padding: 10px;
+        height: 250px;
+        border: 2px solid #e5e7eb;
+        border-radius: 15px;
+        padding: 20px;
         overflow-y: auto;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        background: #f9fafb;
+        font-size: 0.95rem;
+        line-height: 1.5;
       }
+
+      #chat-box::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #chat-box::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      #chat-box::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+
+      #chat-box::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      .chat-message {
+        margin-bottom: 12px;
+        padding: 10px 15px;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border-left: 4px solid #667eea;
+      }
+
+      .chat-message.system {
+        background: #fef3c7;
+        border-left-color: #f59e0b;
+        font-style: italic;
+      }
+
+      .chat-message.me {
+        background: #dbeafe;
+        border-left-color: #3b82f6;
+        margin-left: 20px;
+      }
+
+      .chat-input-container {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+      }
+
       #chat-input {
-        width: 80%;
-        padding: 8px;
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        font-family: inherit;
       }
-      #status-text {
-        margin-top: 5px;
-        font-size: 0.9em;
-        color: gray;
+
+      #chat-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .btn-send {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 15px 25px;
+        min-width: 80px;
+      }
+
+      .btn-send:hover {
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+      }
+
+      /* 반응형 디자인 */
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+
+        .video-wrapper {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        video {
+          height: 250px;
+        }
+
+        .controls {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          max-width: 200px;
+          justify-content: center;
+        }
+
+        #chat-box {
+          height: 200px;
+        }
+
+        .chat-input-container {
+          flex-direction: column;
+        }
+
+        .btn-send {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 10px;
+        }
+
+        .header, .video-section, .chat-section {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 1.2rem;
+        }
+
+        video {
+          height: 200px;
+        }
+      }
+
+      /* 애니메이션 */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .header, .video-section, .chat-section {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      .video-section {
+        animation-delay: 0.1s;
+      }
+
+      .chat-section {
+        animation-delay: 0.2s;
+      }
+
+      /* 연결 상태 표시 */
+      .connection-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .connection-status.connecting {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .connection-status.connected {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .connection-status.disconnected {
+        background: #fee2e2;
+        color: #991b1b;
       }
     </style>
   </head>
   <body>
-    <h1 id="title">P2P 연결 중...</h1>
-
-    <div style="margin-bottom: 10px">
-      <button id="toggle-camera" onclick="toggleCamera()">카메라 끄기</button>
-      <button id="toggle-mic" onclick="toggleMic()">마이크 끄기</button>
-      <button onclick="leaveRoom()">방 나가기</button>
-    </div>
-
-    <div class="video-wrapper">
-      <div class="video-container">
-        <div>나</div>
-        <video
-          id="myFace"
-          playsinline
-          autoplay
-          width="480"
-          height="360"
-        ></video>
+    <div class="container">
+      <div class="header">
+        <h1 id="title">🔄 P2P 연결 중...</h1>
+        <div class="controls">
+          <button id="toggle-camera" class="btn" onclick="toggleCamera()">
+            📹 카메라 끄기
+          </button>
+          <button id="toggle-mic" class="btn" onclick="toggleMic()">
+            🎤 마이크 끄기
+          </button>
+          <button class="btn btn-danger" onclick="leaveRoom()">
+            🚪 방 나가기
+          </button>
+        </div>
       </div>
-      <div class="video-container">
-        <div>상대</div>
-        <video
-          id="peerVideo"
-          playsinline
-          autoplay
-          width="480"
-          height="360"
-        ></video>
-        <div id="status-text">상대방 카메라/마이크 상태</div>
+
+      <div class="video-section">
+        <div class="video-wrapper">
+          <div class="video-container">
+            <div class="video-label me">나</div>
+            <video
+              id="myFace"
+              playsinline
+              autoplay
+              muted
+            ></video>
+          </div>
+          <div class="video-container">
+            <div class="video-label peer">상대방</div>
+            <video
+              id="peerVideo"
+              playsinline
+              autoplay
+            ></video>
+            <div class="status-indicator" id="status-text">
+              상대방 연결 대기 중...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-section">
+        <div class="chat-header">채팅</div>
+        <div id="chat-box"></div>
+        <div class="chat-input-container">
+          <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." />
+          <button class="btn btn-send" onclick="sendChat()">전송</button>
+        </div>
       </div>
     </div>
-
-    <h3>채팅</h3>
-    <div id="chat-box"></div>
-    <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." />
-    <button onclick="sendChat()">전송</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
     <script>
@@ -89,9 +432,7 @@
         location.href = "/";
       }
 
-      document.getElementById(
-        "title"
-      ).innerText = `방: ${room} | 닉네임: ${nickname}`;
+      document.getElementById("title").innerHTML = `🎥 방: ${room} | 👤 ${nickname}`;
 
       const myFace = document.getElementById("myFace");
       const peerVideo = document.getElementById("peerVideo");
@@ -134,12 +475,12 @@
 
       socket.on("chat-message", (data) => {
         const { from, message, timestamp } = JSON.parse(data);
-        appendChat(from, message, timestamp);
+        appendChat(from, message, timestamp, false);
       });
 
       socket.on("peer-left", () => {
-        appendChat("시스템", "상대방이 방을 나갔습니다.");
-        statusText.innerText = "상대방이 연결을 종료했습니다.";
+        appendChat("시스템", "상대방이 방을 나갔습니다.", null, true);
+        statusText.innerHTML = "❌ 상대방이 연결을 종료했습니다.";
         peerVideo.srcObject = null;
       });
 
@@ -158,6 +499,7 @@
 
         myPeerConnection.addEventListener("addstream", (e) => {
           peerVideo.srcObject = e.stream;
+          statusText.innerHTML = "✅ 상대방과 연결되었습니다.";
         });
       }
 
@@ -179,8 +521,10 @@
             video: true,
           });
           myFace.srcObject = myStream;
+          document.getElementById("title").innerHTML = `✅ 방: ${room} | 👤 ${nickname}`;
         } catch (e) {
           console.error("Media Error:", e);
+          document.getElementById("title").innerHTML = `❌ 미디어 오류 | 방: ${room}`;
         }
       }
 
@@ -196,7 +540,6 @@
         if (!msg) return;
 
         const now = Date.now();
-
         socket.emit(
           "chat-message",
           JSON.stringify({
@@ -206,21 +549,23 @@
             timestamp: now,
           })
         );
-
-        appendChat(nickname, msg, now);
+        appendChat(nickname, msg, now, false, true);
         chatInput.value = "";
       }
 
-      function appendChat(who, msg, time = null) {
-        const p = document.createElement("p");
+      function appendChat(who, msg, time = null, isSystem = false, isMe = false) {
+        const div = document.createElement("div");
         const now = time ? new Date(time) : new Date();
         const hhmm = now.toLocaleTimeString("ko-KR", {
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
         });
-        p.textContent = `[${hhmm}] ${who}: ${msg}`;
-        chatBox.appendChild(p);
+
+        div.className = `chat-message ${isSystem ? 'system' : ''} ${isMe ? 'me' : ''}`;
+        div.innerHTML = `<strong>[${hhmm}] ${who}:</strong> ${msg}`;
+        
+        chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
 
@@ -228,9 +573,9 @@
         if (!myStream) return;
         const videoTrack = myStream.getVideoTracks()[0];
         videoTrack.enabled = !videoTrack.enabled;
-        document.getElementById("toggle-camera").innerText = videoTrack.enabled
-          ? "카메라 끄기"
-          : "카메라 켜기";
+        const btn = document.getElementById("toggle-camera");
+        btn.innerHTML = videoTrack.enabled ? "📹 카메라 끄기" : "📹 카메라 켜기";
+        btn.className = videoTrack.enabled ? "btn" : "btn disabled";
         notifyStatus();
       }
 
@@ -238,9 +583,9 @@
         if (!myStream) return;
         const audioTrack = myStream.getAudioTracks()[0];
         audioTrack.enabled = !audioTrack.enabled;
-        document.getElementById("toggle-mic").innerText = audioTrack.enabled
-          ? "마이크 끄기"
-          : "마이크 켜기";
+        const btn = document.getElementById("toggle-mic");
+        btn.innerHTML = audioTrack.enabled ? "🎤 마이크 끄기" : "🎤 마이크 켜기";
+        btn.className = audioTrack.enabled ? "btn" : "btn disabled";
         notifyStatus();
       }
 
@@ -253,18 +598,20 @@
       }
 
       function updatePeerStatus(data) {
-        const cam = data.camera ? "켜짐" : "꺼짐";
-        const mic = data.mic ? "켜짐" : "꺼짐";
-        statusText.innerText = `상대방 카메라: ${cam} / 마이크: ${mic}`;
+        const cam = data.camera ? "📹 켜짐" : "📹 꺼짐";
+        const mic = data.mic ? "🎤 켜짐" : "🎤 꺼짐";
+        statusText.innerHTML = `상대방: ${cam} / ${mic}`;
       }
 
       function leaveRoom() {
-        if (myPeerConnection) {
-          myPeerConnection.close();
-          myPeerConnection = null;
+        if (confirm("정말 방을 나가시겠습니까?")) {
+          if (myPeerConnection) {
+            myPeerConnection.close();
+            myPeerConnection = null;
+          }
+          socket.disconnect();
+          location.href = "/";
         }
-        socket.disconnect();
-        location.href = "/";
       }
 
       createOffer();

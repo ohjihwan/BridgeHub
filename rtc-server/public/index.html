@@ -1,46 +1,276 @@
-<!-- ✅ public/index.html -->
 <!DOCTYPE html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebRTC 대기실</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
         padding: 20px;
+        color: #333;
       }
-      input,
-      button {
-        padding: 8px;
-        margin: 5px;
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding-top: 40px;
       }
-      .section {
-        margin-bottom: 30px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        max-width: 500px;
+
+      h1 {
+        text-align: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 40px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
       }
-      #room-list li {
-        margin-bottom: 5px;
+
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        font-family: inherit;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: inherit;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-primary {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .btn-secondary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 80px;
+      }
+
+      .btn-secondary:hover {
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+      }
+
+      .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "🏠";
+        font-size: 1.2rem;
+      }
+
+      .room-list {
+        list-style: none;
+      }
+
+      .room-item {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+      }
+
+      .room-item:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        transform: translateX(5px);
+      }
+
+      .room-name {
+        font-weight: 500;
+        color: #475569;
+        font-size: 1rem;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+      }
+
+      .empty-state::before {
+        content: "🔍";
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 15px;
+      }
+
+      .nickname-section::before {
+        content: "👤";
+        margin-right: 10px;
+      }
+
+      @media (max-width: 640px) {
+        .container {
+          padding-top: 20px;
+        }
+        
+        h1 {
+          font-size: 2rem;
+          margin-bottom: 30px;
+        }
+        
+        .card {
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+        
+        .room-item {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+        
+        .btn-secondary {
+          width: 100%;
+        }
+      }
+
+      /* 로딩 애니메이션 */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* 입력 애니메이션 */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .card {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      .card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+
+      .card:nth-child(3) {
+        animation-delay: 0.2s;
       }
     </style>
   </head>
   <body>
-    <h1>WebRTC 대기실</h1>
-
-    <div class="section">
-      <label for="nickname">닉네임:</label>
-      <input id="nickname" type="text" placeholder="닉네임 입력" />
-
-      <div style="margin-top: 10px">
-        <button onclick="createRoom()">방 만들기</button>
+    <div class="container">
+      <h1>🎥 WebRTC 대기실</h1>
+      
+      <div class="card">
+        <div class="section-title nickname-section">사용자 정보</div>
+        <div class="input-group">
+          <label for="nickname">닉네임</label>
+          <input id="nickname" type="text" placeholder="멋진 닉네임을 입력해주세요" />
+        </div>
+        <button class="btn btn-primary" onclick="createRoom()">
+          새 방 만들기
+        </button>
       </div>
-    </div>
 
-    <div class="section">
-      <h3>참여 가능한 방</h3>
-      <ul id="room-list"></ul>
+      <div class="card">
+        <div class="section-title">참여 가능한 방</div>
+        <ul id="room-list" class="room-list">
+          <li class="empty-state">
+            <div>아직 생성된 방이 없습니다</div>
+            <small>새 방을 만들어 화상통화를 시작해보세요!</small>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
@@ -54,31 +284,62 @@
 
       function createRoom() {
         const nickname = getNickname();
-        if (!nickname) return alert("닉네임을 입력하세요.");
+        if (!nickname) {
+          alert("닉네임을 입력해주세요! 😊");
+          document.getElementById("nickname").focus();
+          return;
+        }
+
         const roomId = "room-" + Date.now();
         socket.emit("create-room", roomId);
-        location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(
-          nickname
-        )}`;
+        location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
       }
 
       socket.on("room-list", (rooms) => {
+        if (rooms.length === 0) {
+          roomList.innerHTML = `
+            <li class="empty-state">
+              <div>아직 생성된 방이 없습니다</div>
+              <small>새 방을 만들어 화상통화를 시작해보세요!</small>
+            </li>
+          `;
+          return;
+        }
+
         roomList.innerHTML = "";
-        rooms.forEach((roomId) => {
+        rooms.forEach((roomId, index) => {
           const li = document.createElement("li");
+          li.className = "room-item";
+          li.style.animationDelay = `${index * 0.1}s`;
+          
+          const roomName = document.createElement("div");
+          roomName.className = "room-name";
+          roomName.textContent = roomId;
+          
           const btn = document.createElement("button");
-          btn.innerText = "입장";
+          btn.className = "btn btn-secondary";
+          btn.textContent = "입장하기";
           btn.onclick = () => {
             const nickname = getNickname();
-            if (!nickname) return alert("닉네임을 입력하세요.");
-            location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(
-              nickname
-            )}`;
+            if (!nickname) {
+              alert("닉네임을 입력해주세요! 😊");
+              document.getElementById("nickname").focus();
+              return;
+            }
+            location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
           };
-          li.innerHTML = `${roomId} `;
+
+          li.appendChild(roomName);
           li.appendChild(btn);
           roomList.appendChild(li);
         });
+      });
+
+      // 엔터키로 방 만들기
+      document.getElementById("nickname").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          createRoom();
+        }
       });
     </script>
   </body>
