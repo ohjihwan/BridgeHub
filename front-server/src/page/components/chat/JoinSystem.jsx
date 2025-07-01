@@ -7,6 +7,18 @@ const JoinSystem = ({ isOpen, onClose }) => {
     const [isCompleted, setIsCompleted] = useState(false);
     const [sliderWidth, setSliderWidth] = useState(300); // 동적 슬라이더 너비
     const sliderRef = useRef(null);
+	
+	// 모달 열릴 때 실행
+    useEffect(() => {
+		if (isOpen) {
+			setTimeout(() => {
+				const modalEl = document.querySelector('.join-system__modal');
+				if (modalEl) {
+					modalEl.classList.add('join-system__modal--active');
+				}
+			}, 10);
+		}
+	}, [isOpen]);
 
     // 슬라이더 너비 계산
     const updateSliderWidth = () => {
@@ -60,14 +72,11 @@ const JoinSystem = ({ isOpen, onClose }) => {
         setIsDragging(false);
         
         const maxDistance = sliderWidth - 60;
-        // 90% 이상 스와이프하면 승락 완료
         if (swipeDistance >= maxDistance * 0.9) {
             setSwipeDistance(maxDistance);
             setIsCompleted(true);
             
-            // 1초 후 승락 처리
             setTimeout(() => {
-                alert('승락!');
                 onClose();
             }, 500);
         } else {
@@ -103,7 +112,6 @@ const JoinSystem = ({ isOpen, onClose }) => {
             setIsCompleted(true);
             
             setTimeout(() => {
-                alert('승락!');
                 onClose();
             }, 500);
         } else {
@@ -153,14 +161,14 @@ const JoinSystem = ({ isOpen, onClose }) => {
     const progress = maxDistance > 0 ? swipeDistance / maxDistance : 0;
 
     return (
-        <div className="join-system" onClick={onClose}>
+        <div className="join-system">
             <div className="join-system__modal" onClick={(e) => e.stopPropagation()}>
                 <h2 className="join-system__title">
-                    김사과님이 참여를 요청했습니다
+                    <span className="join-system__name">김사과</span>님이<br/>참여를 요청했습니다
                 </h2>
                 
                 <p className="join-system__description">
-                    승락하려면 아래 슬라이더를 밀어주세요.
+                    함께하시려면<br/>아래 슬라이더를 밀어주세요.
                 </p>
 
                 {/* 아이폰 스타일 슬라이더 */}
@@ -173,13 +181,13 @@ const JoinSystem = ({ isOpen, onClose }) => {
                         className={`join-system__progress ${isCompleted ? 'join-system__progress--completed' : ''}`}
                         style={{ 
                             width: `${Math.max(60, swipeDistance + 60)}px`,
-                            backgroundColor: isCompleted ? '#4CAF50' : `rgba(76, 175, 80, ${progress * 0.3})`,
+                            backgroundColor: isCompleted ? '#007fff' : `rgba(0, 127, 255, ${progress * 0.3})`,
                             transition: isDragging ? 'none' : 'all 0.3s ease'
                         }}
                     />
 
                     <div className={`join-system__text ${isCompleted ? 'join-system__text--completed' : ''}`}>
-                        {isCompleted ? '승락 완료!' : '밀어서 승락하기'}
+                        {isCompleted ? '완료!' : '밀어서 함께하기'}
                     </div>
 
                     <div
@@ -197,14 +205,8 @@ const JoinSystem = ({ isOpen, onClose }) => {
                     </div>
                 </div>
 
-                <div className="join-system__percentage">
-                    {Math.round(progress * 100)}% 완료
-                </div>
-
 				<div className="join-system__buttons">
-					<button className="join-system__cancel" onClick={onClose}>
-						취소
-					</button>
+					<button className="join-system__cancel" onClick={onClose} aria-label="닫기"></button>
 				</div>
             </div>
         </div>

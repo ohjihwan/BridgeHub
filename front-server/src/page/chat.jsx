@@ -1273,6 +1273,11 @@ function Chat() {
 							</button>
 						</li>
 						<li>
+						<button type="button" onClick={() => setShowJoinSystem(true)}>
+							시스템 참여하기
+						</button>
+						</li>
+						<li>
 							<button type="button" className="msg-writing__action" onClick={() => {
 								const users = getActiveUsers();
 								if (users.length < 2) {
