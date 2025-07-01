@@ -2950,6 +2950,20 @@ legend,
 		padding:remx(5) remx(8);
 		text-align:center;
 	}
+
+	&__img {
+		overflow:hidden;
+		object-fit:cover;
+		width:100%;
+		height:100%;
+		border-radius:remx(20);
+		object-position:50% 50%;
+	}
+
+	&__name {
+		display:block;
+		font-size:remx(16);
+	}
 }
 // ─────────────────────────────
 // 📄 searchRoom.jsx page
