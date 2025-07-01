@@ -132,23 +132,23 @@
 
     <!-- 활동 통계용 쿼리들 -->
     <select id="getQuarterlySignups" resultType="map">
-        SELECT 
+        SELECT
             CONCAT('q', QUARTER(created_at)) as quarter,
             COUNT(*) as value
-        FROM members 
+        FROM members
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
         GROUP BY QUARTER(created_at)
-        ORDER BY quarter
+        ORDER BY QUARTER(created_at)
     </select>
 
     <select id="getQuarterlyVisitors" resultType="map">
-        SELECT 
+        SELECT
             CONCAT('q', QUARTER(created_at)) as quarter,
             COUNT(*) as value
-        FROM members 
+        FROM members
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 2 YEAR)
         GROUP BY QUARTER(created_at)
-        ORDER BY quarter
+        ORDER BY QUARTER(created_at)
     </select>
 
     <select id="getTopActiveUsers" resultType="map">

@@ -36,16 +36,12 @@ function MemberManage() {
   const loadMembers = async () => {
     setLoading(true);
     try {
-      const response = await fetchUsers({ 
-        page: paginationModel.page, 
-        size: paginationModel.pageSize 
-      });
-      
-      // 백엔드 응답 구조에 맞게 데이터 변환
-      const content = Array.isArray(response.data?.content) ? response.data.content : [];
+      const response = await fetch(`http://localhost:7100/api/admin/users?page=${paginationModel.page}&size=${paginationModel.pageSize}`);
+      const result = await response.json();
+      const content = Array.isArray(result.data?.content) ? result.data.content : [];
       const members = content.map(member => ({
         id: member.id,
-        email: member.userid,
+        email: member.email || member.userid || member.username,
         name: member.name,
         nickname: member.nickname,
         region: member.region,
@@ -57,7 +53,6 @@ function MemberManage() {
         phone: member.phone,
         gender: member.gender
       }));
-      
       setRows(members);
     } catch (err) {
       setError(err);

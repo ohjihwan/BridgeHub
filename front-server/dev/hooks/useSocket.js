@@ -213,11 +213,18 @@ export const useStudySocket = (studyId, userId) => {
             });
             console.log('🔍 수신된 메시지 fileId 확인:', messageData.fileId, typeof messageData.fileId);
             
-            // 시스템 메시지인지 확인
+            // 시스템 메시지인지 확인 (입장/퇴장 메시지)
             const isSystemMessage = messageData.senderId === '시스템' || 
                                     messageData.userId === '시스템' ||
                                     messageData.senderId === 'system' ||
                                     messageData.userId === 'system';
+            
+            console.log('🔍 시스템 메시지 확인:', {
+                senderId: messageData.senderId,
+                userId: messageData.userId,
+                isSystemMessage: isSystemMessage,
+                message: messageData.message
+            });
             
             // 파일 메시지인 경우 files 배열 생성
             let files = null;
