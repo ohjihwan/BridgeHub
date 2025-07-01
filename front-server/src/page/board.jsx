@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import Header from "@common/Header"
 import ListSearch from "@components/ListSearch"
+import { customAlert } from '@/assets/js/common-ui';
 
 function Board() {
     const [showSearch, setShowSearch] = useState(false)
@@ -129,13 +130,13 @@ function Board() {
     // 댓글 작성
     const submitComment = async () => {
         if (!newComment.trim()) {
-            alert("댓글을 입력해주세요.")
+            customAlert("댓글을 입력해주세요.")
             return
         }
 
         const token = localStorage.getItem("token")
         if (!token) {
-            alert("로그인이 필요합니다.")
+            customAlert("로그인이 필요합니다.")
             return
         }
 
@@ -207,7 +208,7 @@ function Board() {
         try {
             const token = localStorage.getItem("token")
             if (!token) {
-                alert("로그인이 필요합니다.")
+                customAlert("로그인이 필요합니다.")
                 return
             }
 
@@ -328,7 +329,7 @@ function Board() {
                                     </div>
                                     <div className="board-list__infos">
                                         <span className="board-list__likes">❤ {post.likeCount}</span>
-                                        <span className="board-list__comments">💬 {post.commentCount}</span>
+                                        <span className="board-list__comments">{post.commentCount}</span>
                                         {post.attachmentCount > 0 && (
                                             <span className="board-list__attachments">📎 {post.attachmentCount}</span>
                                         )}
@@ -411,21 +412,17 @@ function Board() {
                             </div>
 
                             {/* 댓글 섹션 */}
-                            <div className="board-view__comments">
+                            <div className="comment-write">
                                 
                                 {/* 댓글 작성 */}
-                                <div className="comment-write">
+                                <div className="comment-write__box">
                                     <textarea
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
-                                        placeholder="댓글을 입력하세요..."
+                                        placeholder="댓글을 입력하세요"
                                         className="comment-write__textarea"
                                     />
-                                    <button
-                                        onClick={submitComment}
-                                        disabled={commentLoading || !newComment.trim()}
-                                        className="comment-write__button"
-                                    >
+                                    <button type="button" onClick={submitComment} disabled={commentLoading || !newComment.trim()} className="comment-write__button">
                                         {commentLoading ? '작성 중...' : '댓글 작성'}
                                     </button>
                                 </div>

@@ -67,7 +67,7 @@ const AttachmentList = ({ isOpen, attachments, onClose }) => {
 
 	return ReactDOM.createPortal(
 		<div className={`attachment-list ${isVisible ? 'slide-right' : ''}`}>
-			<h3 className="attachment-list__title">첨부파일 모아보기</h3>
+			<h3 className="attachment-list__title">참여 인원</h3>
 			<ul>
 				{attachments.map((att, idx) => {
 					const ext = att.name.split('.').pop().toLowerCase() || '';

@@ -798,8 +798,21 @@ function Chat() {
 						messageId: latestMessage.messageId || latestMessage._id || `${senderId}-${Date.now()}`
 					};
 
-					// 히스토리 메시지 파싱 시 파일 메시지 변환
+					// 파일 메시지 변환 (소켓에서 받은 메시지)
 					if (
+						latestMessage.messageType === 'FILE' &&
+						latestMessage.fileId &&
+						latestMessage.fileName
+					) {
+						newMessage.files = [{
+							name: latestMessage.fileName,
+							fileId: latestMessage.fileId,
+							fileUrl: `/api/files/download/${latestMessage.fileId}`
+						}];
+						console.log('🔧 파일 메시지 변환 완료:', newMessage.files);
+					}
+					// 히스토리 메시지 파싱 시 파일 메시지 변환 (fallback)
+					else if (
 						latestMessage.messageType === 'FILE' &&
 						latestMessage.fileInfo &&
 						latestMessage.fileInfo.fileId &&
@@ -810,6 +823,7 @@ function Chat() {
 							fileId: latestMessage.fileInfo.fileId,
 							fileUrl: latestMessage.fileInfo.fileUrl || `/api/files/download/${latestMessage.fileInfo.fileId}`
 						}];
+						console.log('🔧 히스토리 파일 메시지 변환 완료:', newMessage.files);
 					}
 					
 					setMessages(prev => [...prev, newMessage]);
@@ -917,7 +931,7 @@ function Chat() {
 		try {
 			const token = localStorage.getItem('token');
 			if (!token) {
-				alert('로그인이 필요합니다.');
+				customAlert('로그인이 필요합니다.');
 				return;
 			}
 
@@ -951,23 +965,23 @@ function Chat() {
 				
 				console.log(`✅ 참가 신청 ${actionText} 완료:`, request.applicantName);
 			} else {
-				alert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
+				customAlert(result.message || `참가 신청 ${response === 'approved' ? '승인' : '거절'}에 실패했습니다.`);
 			}
 		} catch (error) {
 			console.error('참가 신청 처리 실패:', error);
-			alert('참가 신청 처리 중 오류가 발생했습니다.');
+			customAlert('참가 신청 처리 중 오류가 발생했습니다.');
 		}
 	};
 
 	// 메시지 파싱 보정 함수 추가
 	const parseMessages = (msgs) => {
 		return msgs.map(msg => {
-			// 이미 files 정보가 있으면 그대로
+			// 이미 files 정보가 있으면 그대로 사용
 			if (msg.files && msg.files.length > 0) return msg;
 			
-			// 파일 메시지인데 files 정보가 없는 경우 생성
+			// 파일 메시지인데 files 정보가 없는 경우에만 생성 (fallback)
 			if ((msg.messageType === 'FILE' || msg.fileId || msg.fileName) && !msg.files && msg.fileId) {
-				console.log('🔍 파일 메시지 files 배열 생성:', {
+				console.log('🔍 파일 메시지 files 배열 fallback 생성:', {
 					fileName: msg.fileName,
 					fileId: msg.fileId,
 					messageType: msg.messageType
@@ -1116,15 +1130,25 @@ function Chat() {
 
 				{/* 메시지 출력 영역 */}
 				{messages.map((msg, i) => {
-					console.log('채팅 메시지 구조:', msg);
+					console.log('📨 새 메시지 확인:', {
+						type: msg.type,
+						messageType: msg.messageType,
+						fileId: msg.fileId,
+						fileName: msg.fileName,
+						hasFiles: !!msg.files,
+						filesLength: msg.files?.length || 0,
+						text: msg.text,
+						senderId: msg.senderId
+					});
+					
 					if (msg.files && msg.files.length > 0) {
 						console.log('🔍 files 배열 확인:', msg.files);
 						console.log('🔍 files[0].fileId 확인:', msg.files[0].fileId, typeof msg.files[0].fileId);
 					}
 					
-					// 파일 메시지인데 files가 없는 경우 생성
+					// 파일 메시지인데 files가 없는 경우 fallback 생성
 					if ((msg.messageType === 'FILE' || msg.fileId || msg.fileName) && !msg.files && msg.fileId) {
-						console.log('🔍 파일 메시지 files 배열 생성:', {
+						console.log('🔍 파일 메시지 files 배열 fallback 생성:', {
 							fileName: msg.fileName,
 							fileId: msg.fileId,
 							messageType: msg.messageType
@@ -1134,7 +1158,14 @@ function Chat() {
 							fileId: msg.fileId
 						}];
 					}
-					if (msg.type === 'system') {
+					if (msg.senderId === '시스템') {
+						console.log('🔍 시스템 메시지 렌더링:', {
+							text: msg.text,
+							message: msg.message,
+							senderId: msg.senderId,
+							userId: msg.userId,
+							type: msg.type
+						});
 						return <div key={i} className="program-msg">{msg.text}</div>;
 					}
 
@@ -1270,6 +1301,11 @@ function Chat() {
 							<button type="button" className="msg-writing__action" onClick={() => fileInputRef.current.click()}>
 								파일 업로드
 							</button>
+						</li>
+						<li>
+						<button type="button" onClick={() => setShowJoinSystem(true)}>
+							시스템 참여하기
+						</button>
 						</li>
 						<li>
 							<button type="button" className="msg-writing__action" onClick={() => {
