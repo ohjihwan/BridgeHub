@@ -70,7 +70,6 @@ public interface MemberDao {
     Integer getTotalVisitors();
     
     // 실시간 접속자 통계용 (새로 추가)
-    Integer getCurrentOnlineUsers();
     List<Map<String, Object>> getActiveStudyRooms();
     Integer getTotalRegisteredMembers();
 } 

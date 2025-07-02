@@ -334,7 +334,6 @@ public class AdminController {
         activityStats.put("totalVisitors", 0);
         
         // 실시간 접속자 정보 추가
-        activityStats.put("currentOnlineUsers", 0);
         activityStats.put("totalRegisteredMembers", 0);
         activityStats.put("activeStudyRooms", List.of());
         
