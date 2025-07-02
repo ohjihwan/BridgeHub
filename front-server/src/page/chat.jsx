@@ -1199,7 +1199,7 @@ function Chat() {
 			if (socketService.socket.connected) {
 				console.log('🔌 소켓 연결 강제 종료 중...');
 				socketService.socket.disconnect();
-			}
+		}
 			
 			// 즉시 홈으로 이동 (replace로 히스토리 교체)
 			setTimeout(() => {
