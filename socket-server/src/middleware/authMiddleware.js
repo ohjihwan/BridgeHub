@@ -128,11 +128,18 @@ module.exports = (socket, next) => {
                 memberId: user.memberId 
             });
             
-            // 소켓에 사용자 정보 저장
+            // 소켓에 사용자 정보 저장 (문자열로 변환하여 저장)
             socket.user = user;
-            socket.userId = user.userId;
-            socket.memberId = user.memberId;
+            socket.userId = String(user.userId || user.memberId || user.username);
+            socket.memberId = String(user.memberId || user.userId || user.username);
             socket.username = user.username;
+            
+            console.log('소켓에 저장된 사용자 정보:', {
+                socketId: socket.id,
+                userId: socket.userId,
+                memberId: socket.memberId,
+                username: socket.username
+            });
             
             next();
         })

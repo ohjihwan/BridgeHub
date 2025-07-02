@@ -412,31 +412,78 @@ const handleForceReconnect = async (socket) => {
 // 강퇴된 멤버 처리
 const handleKickMember = async (roomId, memberId) => {
     try {
-        console.log(`강퇴 처리: roomId=${roomId}, memberId=${memberId}`);
+        console.log(`🚫 강퇴 처리 시작: roomId=${roomId}, memberId=${memberId}`);
         
-        // 강퇴된 멤버에게 강퇴 알림 전송
+        // 1단계: 강퇴된 멤버에게 강퇴 알림 전송 (즉시 처리)
+        console.log('1단계: 강퇴 알림 전송 시작');
         socketService.broadcastToUser(memberId, {
             type: 'kicked',
             roomId: roomId,
-            message: '채팅방에서 강퇴되었습니다.'
+            message: '채팅방에서 강퇴되었습니다.',
+            timestamp: new Date().toISOString()
         });
+        console.log('1단계: 강퇴 알림 전송 완료');
         
-        // 채팅방에서 강퇴된 멤버 제거
-        socketService.removeUserFromRoom(roomId, memberId);
-        
-        // 강퇴된 멤버의 소켓 연결 강제 종료
+        // 2단계: 강퇴된 멤버의 소켓 연결 즉시 강제 종료
+        console.log('2단계: 소켓 연결 강제 종료 시작');
         socketService.disconnectUser(memberId);
+        console.log('2단계: 소켓 연결 강제 종료 완료');
         
-        // 다른 멤버들에게 강퇴 알림 전송
+        // 3단계: 채팅방에서 강퇴된 멤버 제거
+        console.log('3단계: 채팅방에서 멤버 제거 시작');
+        socketService.removeUserFromRoom(roomId, memberId);
+        console.log('3단계: 채팅방에서 멤버 제거 완료');
+        
+        // 4단계: 다른 멤버들에게 강퇴 알림 전송
+        console.log('4단계: 다른 멤버들에게 강퇴 알림 전송 시작');
         socketService.broadcastMessage(roomId, {
             type: 'system',
             content: `사용자가 강퇴되었습니다.`,
-            kickedUserId: memberId
+            kickedUserId: memberId,
+            timestamp: new Date().toISOString()
         });
+        console.log('4단계: 다른 멤버들에게 강퇴 알림 전송 완료');
         
-        console.log(`사용자 ${memberId}가 채팅방 ${roomId}에서 강퇴되었습니다.`);
+        // 5단계: 최후의 방법 - 모든 소켓을 확인하여 해당 사용자 강제 종료
+        console.log('5단계: 최후의 방법 - 모든 소켓 확인 시작');
+        const io = socketService.getIO();
+        if (io) {
+            let forceDisconnectedCount = 0;
+            io.sockets.sockets.forEach((socket) => {
+                // 모든 가능한 ID 확인
+                const socketIds = [
+                    socket.userId,
+                    socket.memberId,
+                    socket.user?.userId,
+                    socket.user?.memberId
+                ].filter(id => id != null);
+                
+                // 어떤 방법으로든 매치되는지 확인
+                const isTargetUser = socketIds.some(id => {
+                    return id == memberId || String(id) === String(memberId);
+                });
+                
+                if (isTargetUser) {
+                    console.log(`🔨 최후의 방법으로 소켓 ${socket.id} 강제 종료`);
+                    try {
+                        socket.emit('kicked', {
+                            type: 'kicked',
+                            message: '채팅방에서 강퇴되었습니다.',
+                            timestamp: new Date().toISOString()
+                        });
+                        socket.disconnect(true);
+                        forceDisconnectedCount++;
+                    } catch (error) {
+                        console.error(`❌ 최후의 방법 실패: ${error.message}`);
+                    }
+                }
+            });
+            console.log(`5단계: 최후의 방법 완료 - ${forceDisconnectedCount}개 소켓 강제 종료`);
+        }
+        
+        console.log(`✅ 사용자 ${memberId}가 채팅방 ${roomId}에서 강퇴되었습니다.`);
     } catch (error) {
-        console.error('강퇴 처리 실패:', error);
+        console.error('❌ 강퇴 처리 실패:', error);
     }
 };
 

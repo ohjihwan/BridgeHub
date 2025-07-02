@@ -7,6 +7,9 @@ import com.koreait.apiserver.service.ChatRoomMemberService;
 import com.koreait.apiserver.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -84,19 +87,33 @@ public class ChatRoomController {
             // Integer bossId = jwtService.extractMemberId(token);
             
             // 1. 강퇴 처리
+            log.info("1단계: 강퇴 처리 시작");
             chatRoomMemberService.kickMember(roomId, memberId);
+            log.info("1단계: 강퇴 처리 완료");
             
             // 2. 소켓 서버로 강퇴 알림 전송
             try {
-                String socketServerUrl = "http://localhost:3001/api/socket/kick-member";
-                String requestBody = String.format("{\"roomId\":\"%d\",\"memberId\":\"%d\"}", roomId, memberId);
+                String socketServerUrl = "http://localhost:7500/api/socket/kick-member";
                 
-                restTemplate.postForObject(socketServerUrl, requestBody, String.class);
-                log.info("소켓 서버로 강퇴 알림 전송 완료: roomId={}, memberId={}", roomId, memberId);
+                // JSON 형식으로 올바르게 전송
+                String requestBody = String.format("{\"roomId\":%d,\"memberId\":%d}", roomId, memberId);
+                
+                log.info("2단계: 소켓 서버 호출 시작 - URL: {}, Body: {}", socketServerUrl, requestBody);
+                
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                
+                HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+                
+                ResponseEntity<String> response = restTemplate.postForEntity(socketServerUrl, entity, String.class);
+                log.info("2단계: 소켓 서버 호출 완료 - Status: {}, Response: {}", 
+                        response.getStatusCode(), response.getBody());
             } catch (Exception e) {
-                log.warn("소켓 서버 알림 전송 실패 (무시됨): roomId={}, memberId={}", roomId, memberId, e);
+                log.error("2단계: 소켓 서버 알림 전송 실패 - roomId={}, memberId={}, error={}", 
+                        roomId, memberId, e.getMessage(), e);
             }
             
+            log.info("채팅방 멤버 강퇴 완료: roomId={}, memberId={}", roomId, memberId);
             return ResponseEntity.ok(ApiResponse.success("멤버가 강퇴되었습니다."));
         } catch (Exception e) {
             log.error("채팅방 멤버 강퇴 실패: roomId={}, memberId={}", roomId, memberId, e);

@@ -134,11 +134,9 @@
     <!-- 방장 여부 확인 -->
     <select id="isBoss" resultType="boolean">
         SELECT COUNT(*) > 0
-        FROM study_room_members 
+        FROM studyroom 
         WHERE study_room_id = #{studyRoomId} 
-        AND member_id = #{memberId}
-        AND role = 'BOSS'
-        AND status = 'APPROVED'
+        AND boss_id = #{memberId}
     </select>
 
 </mapper> 
