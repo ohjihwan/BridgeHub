@@ -10,28 +10,28 @@ USE thebridgehub;
 -- =============================================
 INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, status, email_verified, description, created_at) VALUES
 -- 남성 회원들 (10명)
-('kim.minwoo@email.com', '010-1234-5678', '민우', '김민우', '$2a$10$encrypted_password', '대학교', '컴퓨터공학과', '남자', '서울특별시', '강남구', '오후', '/uploads/profile/profile1.jpg', 'ACTIVE', TRUE, '프로그래밍에 관심이 많은 대학생입니다.', '2024-01-15 10:30:00'),
-('lee.jihwan@email.com', '010-2345-6789', '지환', '이지환', '$2a$10$encrypted_password', '대학교', '전자공학과', '남자', '서울특별시', '서초구', '오전', '/uploads/profile/profile2.jpg', 'ACTIVE', TRUE, '전자공학을 전공하고 있는 학생입니다.', '2024-01-20 14:20:00'),
-('park.sungmin@email.com', '010-3456-7890', '성민', '박성민', '$2a$10$encrypted_password', '대학원', '기계공학과', '남자', '부산광역시', '해운대구', '저녁', '/uploads/profile/profile3.jpg', 'ACTIVE', TRUE, '기계공학 석사 과정입니다.', '2024-02-05 09:15:00'),
-('choi.donghyun@email.com', '010-4567-8901', '동현', '최동현', '$2a$10$encrypted_password', '고졸', '고등학교', '남자', '대구광역시', '수성구', '오후', '/uploads/profile/profile4.jpg', 'ACTIVE', TRUE, '고등학생입니다. 스터디에 참여하고 싶어요.', '2024-02-10 16:45:00'),
-('jung.woojin@email.com', '010-5678-9012', '우진', '정우진', '$2a$10$encrypted_password', '대학교', '경영학과', '남자', '인천광역시', '연수구', '오전', '/uploads/profile/profile5.jpg', 'ACTIVE', TRUE, '경영학을 공부하고 있습니다.', '2024-02-15 11:30:00'),
-('kang.minsu@email.com', '010-6789-0123', '민수', '강민수', '$2a$10$encrypted_password', '대학교', '통계학과', '남자', '광주광역시', '서구', '저녁', '/uploads/profile/profile6.jpg', 'ACTIVE', TRUE, '통계학을 전공하고 있습니다.', '2024-02-20 13:20:00'),
-('yoon.seungwoo@email.com', '010-7890-1234', '승우', '윤승우', '$2a$10$encrypted_password', '대학원', '심리학과', '남자', '대전광역시', '유성구', '오후', '/uploads/profile/profile7.jpg', 'ACTIVE', TRUE, '심리학 석사 과정입니다.', '2024-02-25 15:10:00'),
-('han.jongseok@email.com', '010-8901-2345', '종석', '한종석', '$2a$10$encrypted_password', '고졸', '고등학교', '남자', '울산광역시', '남구', '오전', '/uploads/profile/profile8.jpg', 'ACTIVE', TRUE, '고등학생입니다.', '2024-03-01 10:45:00'),
-('shin.taewon@email.com', '010-9012-3456', '태원', '신태원', '$2a$10$encrypted_password', '대학교', '건축학과', '남자', '세종특별자치시', '세종시', '저녁', '/uploads/profile/profile9.jpg', 'ACTIVE', TRUE, '건축학을 공부하고 있습니다.', '2024-03-05 14:30:00'),
-('oh.kyungmin@email.com', '010-0123-4567', '경민', '오경민', '$2a$10$encrypted_password', '대학교', '의학과', '남자', '경기도', '수원시', '오후', '/uploads/profile/profile10.jpg', 'ACTIVE', TRUE, '의학을 전공하고 있습니다.', '2024-03-10 12:15:00'),
+('kim.minwoo@email.com', '01012345678', '민우', '김민우', '$2a$10$encrypted_password', '대학교', '컴퓨터공학과', '남자', '서울특별시', '강남구', '오후', '/uploads/profile/profile1.jpg', 'ACTIVE', TRUE, '프로그래밍에 관심이 많은 대학생입니다.', '2024-01-15 10:30:00'),
+('lee.jihwan@email.com', '01023456789', '지환', '이지환', '$2a$10$encrypted_password', '대학교', '전자공학과', '남자', '서울특별시', '서초구', '오전', '/uploads/profile/profile2.jpg', 'ACTIVE', TRUE, '전자공학을 전공하고 있는 학생입니다.', '2024-01-20 14:20:00'),
+('park.sungmin@email.com', '01034567890', '성민', '박성민', '$2a$10$encrypted_password', '대학원', '기계공학과', '남자', '부산광역시', '해운대구', '저녁', '/uploads/profile/profile3.jpg', 'ACTIVE', TRUE, '기계공학 석사 과정입니다.', '2024-02-05 09:15:00'),
+('choi.donghyun@email.com', '01045678901', '동현', '최동현', '$2a$10$encrypted_password', '고졸', '고등학교', '남자', '대구광역시', '수성구', '오후', '/uploads/profile/profile4.jpg', 'ACTIVE', TRUE, '고등학생입니다. 스터디에 참여하고 싶어요.', '2024-02-10 16:45:00'),
+('jung.woojin@email.com', '01056789012', '우진', '정우진', '$2a$10$encrypted_password', '대학교', '경영학과', '남자', '인천광역시', '연수구', '오전', '/uploads/profile/profile5.jpg', 'ACTIVE', TRUE, '경영학을 공부하고 있습니다.', '2024-02-15 11:30:00'),
+('kang.minsu@email.com', '01067890123', '민수', '강민수', '$2a$10$encrypted_password', '대학교', '통계학과', '남자', '광주광역시', '서구', '저녁', '/uploads/profile/profile6.jpg', 'ACTIVE', TRUE, '통계학을 전공하고 있습니다.', '2024-02-20 13:20:00'),
+('yoon.seungwoo@email.com', '01078901234', '승우', '윤승우', '$2a$10$encrypted_password', '대학원', '심리학과', '남자', '대전광역시', '유성구', '오후', '/uploads/profile/profile7.jpg', 'ACTIVE', TRUE, '심리학 석사 과정입니다.', '2024-02-25 15:10:00'),
+('han.jongseok@email.com', '01089012345', '종석', '한종석', '$2a$10$encrypted_password', '고졸', '고등학교', '남자', '울산광역시', '남구', '오전', '/uploads/profile/profile8.jpg', 'ACTIVE', TRUE, '고등학생입니다.', '2024-03-01 10:45:00'),
+('shin.taewon@email.com', '01090123456', '태원', '신태원', '$2a$10$encrypted_password', '대학교', '건축학과', '남자', '세종특별자치시', '세종시', '저녁', '/uploads/profile/profile9.jpg', 'ACTIVE', TRUE, '건축학을 공부하고 있습니다.', '2024-03-05 14:30:00'),
+('oh.kyungmin@email.com', '01001234567', '경민', '오경민', '$2a$10$encrypted_password', '대학교', '의학과', '남자', '경기도', '수원시', '오후', '/uploads/profile/profile10.jpg', 'ACTIVE', TRUE, '의학을 전공하고 있습니다.', '2024-03-10 12:15:00'),
 
 -- 여성 회원들 (10명)
-('kim.yuna@email.com', '010-1111-2222', '유나', '김유나', '$2a$10$encrypted_password', '대학교', '영어영문학과', '여자', '서울특별시', '마포구', '오전', '/uploads/profile/profile11.jpg', 'ACTIVE', TRUE, '영어를 좋아하는 대학생입니다.', '2024-01-18 09:20:00'),
-('lee.soyeon@email.com', '010-2222-3333', '소연', '이소연', '$2a$10$encrypted_password', '대학교', '디자인학과', '여자', '서울특별시', '종로구', '오후', '/uploads/profile/profile12.jpg', 'ACTIVE', TRUE, '디자인을 전공하고 있습니다.', '2024-01-25 16:40:00'),
-('park.jiwon@email.com', '010-3333-4444', '지원', '박지원', '$2a$10$encrypted_password', '대학원', '생물학과', '여자', '부산광역시', '동래구', '저녁', '/uploads/profile/profile13.jpg', 'ACTIVE', TRUE, '생물학 석사 과정입니다.', '2024-02-08 11:25:00'),
-('choi.eunji@email.com', '010-4444-5555', '은지', '최은지', '$2a$10$encrypted_password', '고졸', '고등학교', '여자', '대구광역시', '중구', '오전', '/uploads/profile/profile14.jpg', 'ACTIVE', TRUE, '고등학생입니다.', '2024-02-12 13:50:00'),
-('jung.hyerin@email.com', '010-5555-6666', '혜린', '정혜린', '$2a$10$encrypted_password', '대학교', '국문학과', '여자', '인천광역시', '남동구', '오후', '/uploads/profile/profile15.jpg', 'ACTIVE', TRUE, '국문학을 공부하고 있습니다.', '2024-02-18 10:35:00'),
-('kang.seoyeon@email.com', '010-6666-7777', '서연', '강서연', '$2a$10$encrypted_password', '대학교', '수학과', '여자', '광주광역시', '북구', '저녁', '/uploads/profile/profile16.jpg', 'ACTIVE', TRUE, '수학을 전공하고 있습니다.', '2024-02-22 15:45:00'),
-('yoon.minji@email.com', '010-7777-8888', '민지', '윤민지', '$2a$10$encrypted_password', '대학원', '화학과', '여자', '대전광역시', '중구', '오전', '/uploads/profile/profile17.jpg', 'ACTIVE', TRUE, '화학 석사 과정입니다.', '2024-02-28 12:30:00'),
-('han.yerin@email.com', '010-8888-9999', '예린', '한예린', '$2a$10$encrypted_password', '고졸', '고등학교', '여자', '울산광역시', '북구', '오후', '/uploads/profile/profile18.jpg', 'ACTIVE', TRUE, '고등학생입니다.', '2024-03-03 14:20:00'),
-('shin.chaewon@email.com', '010-9999-0000', '채원', '신채원', '$2a$10$encrypted_password', '대학교', '음악학과', '여자', '세종특별자치시', '세종시', '저녁', '/uploads/profile/profile19.jpg', 'ACTIVE', TRUE, '음악을 전공하고 있습니다.', '2024-03-08 16:10:00'),
-('oh.sujin@email.com', '010-0000-1111', '수진', '오수진', '$2a$10$encrypted_password', '대학교', '간호학과', '여자', '경기도', '성남시', '오전', '/uploads/profile/profile20.jpg', 'ACTIVE', TRUE, '간호학을 공부하고 있습니다.', '2024-03-12 09:40:00');
+('kim.yuna@email.com', '01011112222', '유나', '김유나', '$2a$10$encrypted_password', '대학교', '영어영문학과', '여자', '서울특별시', '마포구', '오전', '/uploads/profile/profile11.jpg', 'ACTIVE', TRUE, '영어를 좋아하는 대학생입니다.', '2024-01-18 09:20:00'),
+('lee.soyeon@email.com', '01022223333', '소연', '이소연', '$2a$10$encrypted_password', '대학교', '디자인학과', '여자', '서울특별시', '종로구', '오후', '/uploads/profile/profile12.jpg', 'ACTIVE', TRUE, '디자인을 전공하고 있습니다.', '2024-01-25 16:40:00'),
+('park.jiwon@email.com', '01033334444', '지원', '박지원', '$2a$10$encrypted_password', '대학원', '생물학과', '여자', '부산광역시', '동래구', '저녁', '/uploads/profile/profile13.jpg', 'ACTIVE', TRUE, '생물학 석사 과정입니다.', '2024-02-08 11:25:00'),
+('choi.eunji@email.com', '01044445555', '은지', '최은지', '$2a$10$encrypted_password', '고졸', '고등학교', '여자', '대구광역시', '중구', '오전', '/uploads/profile/profile14.jpg', 'ACTIVE', TRUE, '고등학생입니다.', '2024-02-12 13:50:00'),
+('jung.hyerin@email.com', '01055556666', '혜린', '정혜린', '$2a$10$encrypted_password', '대학교', '국문학과', '여자', '인천광역시', '남동구', '오후', '/uploads/profile/profile15.jpg', 'ACTIVE', TRUE, '국문학을 공부하고 있습니다.', '2024-02-18 10:35:00'),
+('kang.seoyeon@email.com', '01066667777', '서연', '강서연', '$2a$10$encrypted_password', '대학교', '수학과', '여자', '광주광역시', '북구', '저녁', '/uploads/profile/profile16.jpg', 'ACTIVE', TRUE, '수학을 전공하고 있습니다.', '2024-02-22 15:45:00'),
+('yoon.minji@email.com', '01077778888', '민지', '윤민지', '$2a$10$encrypted_password', '대학원', '화학과', '여자', '대전광역시', '중구', '오전', '/uploads/profile/profile17.jpg', 'ACTIVE', TRUE, '화학 석사 과정입니다.', '2024-02-28 12:30:00'),
+('han.yerin@email.com', '01088889999', '예린', '한예린', '$2a$10$encrypted_password', '고졸', '고등학교', '여자', '울산광역시', '북구', '오후', '/uploads/profile/profile18.jpg', 'ACTIVE', TRUE, '고등학생입니다.', '2024-03-03 14:20:00'),
+('shin.chaewon@email.com', '01099990000', '채원', '신채원', '$2a$10$encrypted_password', '대학교', '음악학과', '여자', '세종특별자치시', '세종시', '저녁', '/uploads/profile/profile19.jpg', 'ACTIVE', TRUE, '음악을 전공하고 있습니다.', '2024-03-08 16:10:00'),
+('oh.sujin@email.com', '01000001111', '수진', '오수진', '$2a$10$encrypted_password', '대학교', '간호학과', '여자', '경기도', '성남시', '오전', '/uploads/profile/profile20.jpg', 'ACTIVE', TRUE, '간호학을 공부하고 있습니다.', '2024-03-12 09:40:00');
 
 -- 정지된 회원 2명 추가
 INSERT INTO members (userid, phone, nickname, name, password, education, department, gender, region, district, time, profile_image, status, email_verified, description, created_at) VALUES
