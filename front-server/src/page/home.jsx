@@ -190,7 +190,6 @@ const Home = () => {
 				<Header showSearch={true} onSearch={() => navigate('/search')} />
 
 				<div className="studyroom-actions">
-					{/* 소속된 방이 없는 경우 */}
 					{!hasStudyRoom && (
 						<div className="create-studyroom">
 							<button className="create-studyroom__button" onClick={openCreateStudy}>
@@ -202,7 +201,6 @@ const Home = () => {
 						</div>
 					)}
 
-					{/* 소속된 방이 있는 경우 */}
 					{studyRoom && (
 						<div className="reenter-studyroom">
 							<Link 
@@ -223,24 +221,10 @@ const Home = () => {
 							</Link>
 						</div>
 					)}
-
-					{/* ⚡ 앞으로 추가될 케이스 공간 확보 */}
-					{/* 예: 추후 여러 스터디 선택 화면 */}
-					{/* 
-					<div className="multi-studyroom"> 
-						...여러 방 선택 영역
-					</div> 
-					*/}
 				</div>
 
-				{/* 재사용성과 복잡도 때문에 분리 */}
 				<PreviewBoard onItemClick={handleItemClick} />
-				{/* 
-					<ul className="studyroom">이 Home.jsx에 남아있는 이유
-					1. 메인 리스트이자 상세 정보 트리거 UI이기 때문
-						- 이 리스트는 실제로 유저가 가장 많이 상호작용하는 UI.
-					2. 아직은 로직상 단순하고, 페이지에 종속적인 리스트이기 때문
-				*/}
+				
 				<div className="studyroom-area">
 					<div className="more-box">
 						<h2 className="more-box__title">JUST ADDED</h2>
