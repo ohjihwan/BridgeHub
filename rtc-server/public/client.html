@@ -168,6 +168,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
       }
       
       .video-slide.empty::before {
@@ -337,6 +338,21 @@
         background: #4752c4;
       }
       
+      /* 디버그 정보 */
+      .debug-info {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-family: monospace;
+        z-index: 1000;
+        max-width: 300px;
+      }
+      
       /* 모바일 최적화 */
       @media (max-width: 768px) {
         body {
@@ -375,10 +391,23 @@
           width: 90%;
           right: -90%;
         }
+        
+        .debug-info {
+          position: relative;
+          margin-bottom: 20px;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- 디버그 정보 -->
+    <div class="debug-info" id="debug-info">
+      <div>연결 상태: <span id="debug-connection">초기화 중</span></div>
+      <div>내 스트림: <span id="debug-my-stream">없음</span></div>
+      <div>상대 스트림: <span id="debug-remote-stream">없음</span></div>
+      <div>ICE 상태: <span id="debug-ice">없음</span></div>
+    </div>
+
     <div class="header">
       <h1 id="title">연결 중...</h1>
       <div class="timer-container" id="timer-container">
@@ -441,6 +470,7 @@
       let screenTrack = null;
       let cameraEnabled = true;
       let micEnabled = true;
+      let isInitiator = false; // 방을 만든 사람인지 확인
       
       // 스와이프 관련 변수
       let currentSlide = 0;
@@ -458,6 +488,18 @@
       const chatBox = document.getElementById("chat-box");
       const chatInput = document.getElementById("chat-input");
 
+      // 디버그 함수
+      function updateDebugInfo() {
+        document.getElementById('debug-connection').textContent = 
+          myPeerConnection ? myPeerConnection.connectionState : '없음';
+        document.getElementById('debug-my-stream').textContent = 
+          myStream ? `${myStream.getTracks().length}개 트랙` : '없음';
+        document.getElementById('debug-remote-stream').textContent = 
+          remoteStream ? `${remoteStream.getTracks().length}개 트랙` : '없음';
+        document.getElementById('debug-ice').textContent = 
+          myPeerConnection ? myPeerConnection.iceConnectionState : '없음';
+      }
+
       // 소켓 이벤트 설정
       socket.emit("join", { roomId: room, nickname });
 
@@ -470,29 +512,55 @@
         console.log("방 정보 수신:", roomInfo);
         meetingStartTime = roomInfo.createdAt;
         startTimer();
+        
+        // 첫 번째 참여자인지 확인
+        if (roomInfo.participantCount <= 1) {
+          isInitiator = true;
+          console.log("방 생성자로 설정됨");
+        }
       });
 
-      socket.on("user-joined", (data) => {
+      socket.on("user-joined", async (data) => {
         console.log("사용자 입장:", data.nickname);
         updateConnectionStatus("connected");
         appendChat("시스템", `${data.nickname}님이 입장했습니다.`);
+        
+        // 새 사용자가 들어오면 기존 사용자가 offer를 보냄
+        if (isInitiator && myPeerConnection && myStream) {
+          console.log("새 사용자에게 offer 전송");
+          await createAndSendOffer();
+        }
       });
 
       socket.on("user-left", (data) => {
         console.log("사용자 퇴장:", data.nickname);
         appendChat("시스템", `${data.nickname}님이 방을 나갔습니다.`);
+        
         // 원격 스트림 정리
         if (remoteStream) {
           remoteStream.getTracks().forEach(track => track.stop());
           remoteStream = null;
         }
+        
+        // 연결 재설정
+        if (myPeerConnection) {
+          myPeerConnection.close();
+          myPeerConnection = null;
+        }
+        
         updateVideoSlides();
+        updateDebugInfo();
       });
 
       socket.on("rtc-message", async (message) => {
         try {
           const content = JSON.parse(message);
           console.log("RTC 메시지 수신:", content.event);
+          
+          // 연결이 없으면 먼저 생성
+          if (!myPeerConnection) {
+            await initPeerConnection();
+          }
           
           if (content.event === "offer") {
             await handleOffer(content.data);
@@ -526,14 +594,12 @@
             audio: true
           });
           
-          console.log("미디어 스트림 획득 성공");
+          console.log("미디어 스트림 획득 성공:", myStream.getTracks().length, "개 트랙");
           updateVideoSlides();
+          updateDebugInfo();
           
           // WebRTC 연결 초기화
           await initPeerConnection();
-          
-          // Offer 생성 및 전송
-          await createAndSendOffer();
           
           updateConnectionStatus("connected");
           
@@ -547,7 +613,6 @@
             updateCameraButton();
             updateVideoSlides();
             await initPeerConnection();
-            await createAndSendOffer();
           } catch (audioError) {
             console.error("오디오도 실패:", audioError);
             updateConnectionStatus("error");
@@ -557,52 +622,84 @@
       }
 
       async function initPeerConnection() {
+        console.log("PeerConnection 초기화...");
+        
         myPeerConnection = new RTCPeerConnection({
           iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun1.l.google.com:19302" }
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" }
           ]
         });
 
         // ICE candidate 이벤트
         myPeerConnection.onicecandidate = (event) => {
           if (event.candidate) {
-            console.log("ICE candidate 전송");
+            console.log("ICE candidate 전송:", event.candidate.type);
             sendSignal("candidate", event.candidate);
+          } else {
+            console.log("ICE candidate 수집 완료");
           }
         };
 
-        // 원격 스트림 수신 이벤트
+        // 원격 스트림 수신 이벤트 - 가장 중요한 부분!
         myPeerConnection.ontrack = (event) => {
-          console.log("원격 스트림 수신:", event.streams[0]);
+          console.log("🎥 원격 스트림 수신!", event.streams[0]);
+          console.log("트랙 정보:", event.track.kind, event.track.enabled);
+          
           remoteStream = event.streams[0];
+          
+          // 즉시 UI 업데이트
           updateVideoSlides();
+          updateDebugInfo();
+          
+          // 스트림 상태 로깅
+          remoteStream.getTracks().forEach(track => {
+            console.log(`원격 트랙: ${track.kind}, 활성: ${track.enabled}, 상태: ${track.readyState}`);
+          });
         };
 
         // 연결 상태 변경 이벤트
         myPeerConnection.onconnectionstatechange = () => {
-          console.log("연결 상태:", myPeerConnection.connectionState);
+          console.log("연결 상태 변경:", myPeerConnection.connectionState);
+          updateDebugInfo();
+          
           if (myPeerConnection.connectionState === 'connected') {
             updateConnectionStatus("connected");
           } else if (myPeerConnection.connectionState === 'failed') {
             updateConnectionStatus("error");
+            console.log("연결 실패 - 재시도 필요");
           }
+        };
+
+        // ICE 연결 상태 변경
+        myPeerConnection.oniceconnectionstatechange = () => {
+          console.log("ICE 연결 상태:", myPeerConnection.iceConnectionState);
+          updateDebugInfo();
         };
 
         // 로컬 스트림 추가
         if (myStream) {
+          console.log("로컬 스트림 트랙 추가 중...");
           myStream.getTracks().forEach(track => {
-            console.log("트랙 추가:", track.kind);
+            console.log("트랙 추가:", track.kind, track.enabled);
             myPeerConnection.addTrack(track, myStream);
           });
         }
+
+        updateDebugInfo();
       }
 
       async function createAndSendOffer() {
         try {
-          const offer = await myPeerConnection.createOffer();
+          console.log("Offer 생성 중...");
+          const offer = await myPeerConnection.createOffer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true
+          });
+          
           await myPeerConnection.setLocalDescription(offer);
-          console.log("Offer 생성 및 전송");
+          console.log("Offer 생성 및 전송 완료");
           sendSignal("offer", offer);
         } catch (error) {
           console.error("Offer 생성 오류:", error);
@@ -611,13 +708,21 @@
 
       async function handleOffer(offer) {
         try {
-          console.log("Offer 수신 처리");
+          console.log("Offer 수신 처리 중...");
           await myPeerConnection.setRemoteDescription(offer);
+          
+          // 로컬 스트림이 있으면 추가
+          if (myStream) {
+            myStream.getTracks().forEach(track => {
+              console.log("Answer 생성 전 트랙 추가:", track.kind);
+              myPeerConnection.addTrack(track, myStream);
+            });
+          }
           
           const answer = await myPeerConnection.createAnswer();
           await myPeerConnection.setLocalDescription(answer);
           
-          console.log("Answer 생성 및 전송");
+          console.log("Answer 생성 및 전송 완료");
           sendSignal("answer", answer);
         } catch (error) {
           console.error("Offer 처리 오류:", error);
@@ -626,8 +731,9 @@
 
       async function handleAnswer(answer) {
         try {
-          console.log("Answer 수신 처리");
+          console.log("Answer 수신 처리 중...");
           await myPeerConnection.setRemoteDescription(answer);
+          console.log("Answer 처리 완료");
         } catch (error) {
           console.error("Answer 처리 오류:", error);
         }
@@ -635,9 +741,11 @@
 
       async function handleCandidate(candidate) {
         try {
-          if (candidate) {
-            console.log("ICE candidate 추가");
+          if (candidate && myPeerConnection.remoteDescription) {
+            console.log("ICE candidate 추가:", candidate.type);
             await myPeerConnection.addIceCandidate(candidate);
+          } else {
+            console.log("ICE candidate 대기 중 (remoteDescription 없음)");
           }
         } catch (error) {
           console.error("ICE candidate 처리 오류:", error);
@@ -645,11 +753,13 @@
       }
 
       function sendSignal(event, data) {
-        socket.emit("rtc-message", JSON.stringify({ 
+        const message = JSON.stringify({ 
           roomId: room, 
           event, 
           data 
-        }));
+        });
+        console.log("시그널 전송:", event);
+        socket.emit("rtc-message", message);
       }
 
       // UI 업데이트 함수들
@@ -681,10 +791,10 @@
         }
         
         // 빈 슬라이드 (연결 대기 중)
-        if (slides.length === 0) {
+        if (slides.length === 0 || !remoteStream) {
           slides.push({
             stream: null,
-            nickname: "연결 대기 중",
+            nickname: remoteStream ? "연결됨" : "상대방 대기 중",
             isEmpty: true
           });
         }
@@ -700,7 +810,15 @@
             video.autoplay = true;
             video.playsInline = true;
             if (slide.isMe) video.muted = true;
+            
+            // 스트림 연결
             video.srcObject = slide.stream;
+            
+            // 비디오 로드 이벤트
+            video.onloadedmetadata = () => {
+              console.log(`비디오 메타데이터 로드됨: ${slide.nickname}`);
+              video.play().catch(e => console.error("비디오 재생 오류:", e));
+            };
             
             const nicknameLabel = document.createElement('div');
             nicknameLabel.className = 'nickname-label';
@@ -709,7 +827,9 @@
             slideElement.appendChild(video);
             slideElement.appendChild(nicknameLabel);
           } else {
-            slideElement.textContent = slide.nickname;
+            const emptyText = document.createElement('div');
+            emptyText.textContent = slide.nickname;
+            slideElement.appendChild(emptyText);
           }
           
           swipeWrapper.appendChild(slideElement);
@@ -727,6 +847,8 @@
         }
         
         goToSlide(currentSlide);
+        
+        console.log(`비디오 슬라이드 업데이트: ${slides.length}개`);
       }
 
       function updateConnectionStatus(status) {
@@ -750,6 +872,7 @@
           cameraEnabled = !cameraEnabled;
           videoTrack.enabled = cameraEnabled;
           updateCameraButton();
+          console.log("카메라 상태:", cameraEnabled);
         }
       }
 
@@ -772,6 +895,7 @@
           micEnabled = !micEnabled;
           audioTrack.enabled = micEnabled;
           updateMicButton();
+          console.log("마이크 상태:", micEnabled);
         }
       }
 
@@ -1087,6 +1211,9 @@
         
         // 미디어 초기화
         await initializeMedia();
+        
+        // 디버그 정보 주기적 업데이트
+        setInterval(updateDebugInfo, 2000);
         
         console.log("초기화 완료");
       }
