@@ -109,6 +109,12 @@
         transform: translateY(0);
       }
       
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
       .create-room-container {
         text-align: center;
       }
@@ -200,6 +206,20 @@
         opacity: 0.5;
       }
       
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
       /* 반응형 디자인 */
       @media (max-width: 600px) {
         body {
@@ -243,26 +263,11 @@
           width: 100%;
         }
       }
-      
-      /* 로딩 애니메이션 */
-      .loading {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,255,255,.3);
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 1s ease-in-out infinite;
-      }
-      
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>WebRTC 대기실</h1>
+      <h1>📱 모바일 화면공유</h1>
       
       <div class="section">
         <div class="nickname-container">
@@ -300,13 +305,11 @@
         const roomId = "room-" + Date.now();
         socket.emit("create-room", roomId);
         
-        // 버튼에 로딩 표시
         const button = event.target;
         const originalText = button.textContent;
         button.innerHTML = '<span class="loading"></span> 방 생성 중...';
         button.disabled = true;
         
-        // ✅ emit 후 0.5초 뒤에 강제로 room-list 다시 요청
         setTimeout(() => {
           socket.emit("get-room-list");
           button.textContent = originalText;
@@ -337,12 +340,11 @@
           
           const roomName = document.createElement("div");
           roomName.className = "room-name";
-          roomName.textContent = room.id || room; // 새 서버는 객체, 기존은 문자열
+          roomName.textContent = room.id || room;
           
           const roomStatus = document.createElement("div");
           roomStatus.className = "room-status";
           
-          // 새로운 서버 정보가 있으면 표시, 없으면 기본값
           if (room.participantCount !== undefined) {
             const remainingHours = Math.floor((room.remainingTime || 0) / (60 * 60 * 1000));
             const remainingMinutes = Math.floor(((room.remainingTime || 0) % (60 * 60 * 1000)) / (60 * 1000));
@@ -379,15 +381,12 @@
         });
       });
 
-      // ✅ 서버에 직접 요청하는 커스텀 이벤트
       socket.emit("get-room-list");
       
-      // Enter 키로 방 생성
       document.getElementById("nickname").addEventListener("keyup", (e) => {
         if (e.key === "Enter") createRoom();
       });
 
-      // 새로운 에러 처리 이벤트들 추가
       socket.on("join-error", (error) => {
         alert("입장 오류: " + error);
       });
