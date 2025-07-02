@@ -59,7 +59,9 @@
     </update>
 
     <delete id="deleteReport">
-        DELETE FROM Report WHERE report_id = #{reportId}
+        UPDATE Report 
+        SET admin_comment = CONCAT(IFNULL(admin_comment, ''), ' [ADMIN_DELETED]')
+        WHERE report_id = #{reportId}
     </delete>
 
     <select id="countByStatus" resultType="int">
@@ -89,12 +91,13 @@
         LEFT JOIN members reporter ON r.reporter_id = reporter.id
         LEFT JOIN members reported ON r.reported_user_id = reported.id
         LEFT JOIN studyroom sr ON r.study_room_id = sr.study_room_id
+        WHERE (r.admin_comment IS NULL OR r.admin_comment NOT LIKE '%[ADMIN_DELETED]%')
         ORDER BY r.created_at DESC 
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <select id="getTotalCount" resultType="int">
-        SELECT COUNT(*) FROM Report
+        SELECT COUNT(*) FROM Report WHERE (admin_comment IS NULL OR admin_comment NOT LIKE '%[ADMIN_DELETED]%')
     </select>
 
     <select id="findRecentReports" resultType="com.koreait.apiserver.dto.ReportDTO">
@@ -119,12 +122,13 @@
         LEFT JOIN members reporter ON r.reporter_id = reporter.id
         LEFT JOIN members reported ON r.reported_user_id = reported.id
         LEFT JOIN studyroom sr ON r.study_room_id = sr.study_room_id
+        WHERE (r.admin_comment IS NULL OR r.admin_comment NOT LIKE '%[ADMIN_DELETED]%')
         ORDER BY r.created_at DESC 
         LIMIT #{limit}
     </select>
 
     <select id="countByReportType" resultType="map">
-        SELECT report_type, COUNT(*) as count FROM Report GROUP BY report_type
+        SELECT report_type, COUNT(*) as count FROM Report WHERE (admin_comment IS NULL OR admin_comment NOT LIKE '%[ADMIN_DELETED]%') GROUP BY report_type
     </select>
 
     <!-- 디버그용 간단한 Report 조회 -->

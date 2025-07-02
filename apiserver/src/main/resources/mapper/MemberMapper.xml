@@ -193,7 +193,7 @@
     </select>
     
     <select id="getTotalRegisteredMembers" resultType="int">
-        SELECT COUNT(*) FROM members WHERE status = 'ACTIVE'
+        SELECT COUNT(*) FROM members
     </select>
 
 </mapper> 

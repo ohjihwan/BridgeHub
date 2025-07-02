@@ -223,6 +223,25 @@ public class ReportServiceImpl implements ReportService {
         return stats;
     }
 
+    @Override
+    @Transactional
+    public void deleteReport(Integer reportId) {
+        try {
+            Optional<Report> reportOpt = reportDao.findById(reportId);
+            if (!reportOpt.isPresent()) {
+                throw new RuntimeException("신고를 찾을 수 없습니다.");
+            }
+
+            reportDao.deleteReport(reportId);
+            
+            log.info("신고 삭제 완료: reportId={}", reportId);
+            
+        } catch (Exception e) {
+            log.error("신고 삭제 실패: reportId={}", reportId, e);
+            throw new RuntimeException("신고 삭제에 실패했습니다.", e);
+        }
+    }
+
     /**
      * MyBatis에서 반환된 List<Map>을 Map<String, Integer>로 변환하는 헬퍼 메서드
      */

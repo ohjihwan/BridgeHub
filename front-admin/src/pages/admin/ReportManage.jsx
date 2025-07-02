@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../assets/scss/ReportManage.scss';
-import { fetchReports, resolveReport } from '../../services/api';
+import { fetchReports, resolveReport, deleteReport } from '../../services/api';
 
 function ReportManage() {
   const [reports, setReports] = useState([]);
@@ -135,18 +135,34 @@ function ReportManage() {
     }
   };
 
-  const handleDelete = (reportId) => {
-    if (window.confirm('정말로 삭제하시겠습니까?')) {
-      setReports(reports.filter(report => report.id !== reportId));
+  const handleDelete = async (reportId) => {
+    if (window.confirm('정말로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+      try {
+        await deleteReport(reportId);
+        // 목록 새로고침
+        loadReports();
+        alert('신고가 삭제되었습니다.');
+      } catch (err) {
+        alert('신고 삭제에 실패했습니다: ' + err.message);
+      }
     }
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedReports.length === 0) return;
     
-    if (window.confirm(`선택된 ${selectedReports.length}개의 신고를 정말로 삭제하시겠습니까?`)) {
-      setReports(reports.filter(report => !selectedReports.includes(report.id)));
-      setSelectedReports([]);
+    if (window.confirm(`선택된 ${selectedReports.length}개의 신고를 정말로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+      try {
+        for (const reportId of selectedReports) {
+          await deleteReport(reportId);
+        }
+        
+        setSelectedReports([]);
+        loadReports();
+        alert('선택된 신고들이 삭제되었습니다.');
+      } catch (err) {
+        alert('신고 삭제에 실패했습니다: ' + err.message);
+      }
     }
   };
 
