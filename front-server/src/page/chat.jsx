@@ -889,12 +889,22 @@ function Chat() {
 
 	// 스크롤 하단
 	useEffect(() => {
+		if (chatEndRef.current) {
+			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [messages]);
+	/* useEffect(() => {
 		if (!messages.length) return;
 		const lastMsg = messages[messages.length - 1];
 		if (lastMsg.type === 'me' && chatEndRef.current) {
 			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
 		}
-	}, [messages]);
+	}, [messages]); */
+	useEffect(() => {
+		if (isConnected && isJoined && chatEndRef.current) {
+			chatEndRef.current.scrollIntoView({ behavior: 'auto' });
+		}
+	}, [isConnected, isJoined]);
 
 	// 신고하기 버튼 활성화
 	useEffect(() => {
