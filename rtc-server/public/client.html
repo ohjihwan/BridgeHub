@@ -6,50 +6,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
       * {
+        margin:0;
+        padding:0;
         box-sizing: border-box;
       }
-      
+      html {font-size:16px;}
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         margin: 0;
-        padding: 16px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding-top:50px;
+        background: #fff;
         min-height: 100vh;
         color: #333333;
+        background-color:#333;
       }
       
       .header {
+        position:fixed;
+        left:0;
+        top:0;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        width:100%;
+        height:50px;
         margin-bottom: 24px;
         flex-wrap: wrap;
         gap: 16px;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
       
-      h1 {
-        color: #333333;
-        font-size: 1.5rem;
+      h1#title {
+        position:fixed;
+        left:0;
+        top:5px;
+        padding:0 16px;
+        color: #fff;
+        height:40px;
+        font-size: 14px;
         font-weight: 600;
         margin: 0;
-        flex: 1;
-        text-align: center;
+        width:calc(100% - 180px);
+        text-align:left;
+        word-break:keep-all;
+        display:-webkit-box;
+        -webkit-line-clamp:2;
+        -webkit-box-orient:vertical;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        overflow:hidden;
       }
       
       .timer-container {
+        position:fixed;
+        right:0;
+        top:0;
         background: rgba(102, 126, 234, 0.1);
         border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 12px;
-        padding: 12px 16px;
+        border-radius:0 0 0 12px;
+        height:50px;
+        padding: 3px 0;
         display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 180px;
+        justify-content:center;
+        width: 180px;
         color: #667eea;
+        text-wrap:nowrap;
       }
       
       .timer-icon {
@@ -80,46 +100,55 @@
       }
       
       .controls {
+        position:fixed;
+        left:50%;
+        bottom:24px;
+        transform:translateX(-50%);
+        z-index:100;
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
         gap: 8px;
-        margin-bottom: 24px;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
+        width:100%;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
       
       .controls button {
-        padding: 12px 16px;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        width:48px;
+        height:48px;
         border: 1px solid #e1e5e9;
-        border-radius: 8px;
-        font-size: 13px;
+        border-radius: 50%;
+        font-size: 24px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
         background: #ffffff;
         color: #333333;
-        min-width: 90px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      #toggle-camera{
+        padding-bottom:8px;
       }
       
       .controls button:hover {
         background: #f8f9fa;
-        border-color: #667eea;
+        border-color: #007fff;
         transform: translateY(-1px);
       }
       
       .controls button.active {
-        background: #667eea;
-        color: white;
-        border-color: #667eea;
+        background-color: #007fff;
+        color: #fff;
+        border-color: #007fff;
       }
       
       .controls button.danger {
         background: #dc3545;
-        color: white;
+        color: #fff;
         border-color: #dc3545;
       }
       
@@ -129,46 +158,56 @@
       
       /* 모바일 스와이프 컨테이너 */
       .mobile-container {
+        display:flex;
         position: relative;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+        height:calc(100vh - 150px);
       }
       
       .swipe-wrapper {
-        display: flex;
-        transition: transform 0.3s ease;
+        display: flex !important;
+        gap:10px !important;
+        flex-wrap:wrap;
+        transition: all 0.3s ease;
+        transform: translateX(0) !important;
         width: 100%;
+        padding-top:15px;
       }
+
+      .swipe-wrapper.layout-1 .video-slide {width:100%;}
+      .swipe-wrapper.layout-2 {flex-direction:column;}
+      .swipe-wrapper.layout-2 .video-slide {width:100%;}
+      .swipe-wrapper.layout-3 {justify-content:center;}
+      .swipe-wrapper.layout-5 {justify-content:center;}
+      .swipe-wrapper.layout-7 {justify-content:center;}
+      .swipe-wrapper.layout-9 {justify-content:center;}
       
       .video-slide {
-        min-width: 100%;
-        flex-shrink: 0;
+        overflow:hidden;
+        width:calc(50% - 5px);
         position: relative;
-        background: #000;
-        aspect-ratio: 16/9;
+        background: #222;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-radius:10px;;
       }
       
       .video-slide video {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        background: #1a1a1a;
       }
       
       .video-slide.empty {
-        background: #2a2a2a;
+        background: #222;
         color: #888;
         font-size: 1.2rem;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-direction: column;
+        border-radius:10px;;
       }
       
       .video-slide.empty::before {
@@ -180,19 +219,19 @@
       
       .nickname-label {
         position: absolute;
-        bottom: 12px;
-        left: 12px;
+        bottom: 6px;
+        left: 6px;
         background: rgba(0, 0, 0, 0.7);
         color: white;
-        padding: 6px 12px;
+        padding: 6px 6px;
         border-radius: 6px;
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
         z-index: 10;
       }
       
       .swipe-indicators {
-        display: flex;
+        display: none;
         justify-content: center;
         gap: 8px;
         padding: 16px;
@@ -214,12 +253,13 @@
       }
       
       .connection-status {
-        text-align: center;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: left;
+      }
+
+      [class^="status"] {
+        position:fixed;
+        right:17px;
+        top:23px;
       }
       
       .status-connecting {
@@ -335,26 +375,40 @@
       }
       
       .chat-input-wrapper button:hover {
-        background: #4752c4;
+        background: #007fff;
       }
       
       /* 디버그 정보 */
       .debug-info {
         position: fixed;
-        top: 10px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-family: monospace;
+        bottom:0;
+        left:0;
+        color: #fff;
+        font-size: 15px;
+        padding-right:7px;
         z-index: 1000;
-        max-width: 300px;
+        border-radius:0 10px 0 0;
+        background-color:rgba(0, 0, 0, 0.7);
+        
+		white-space:nowrap;
+		text-overflow:hidden;
+		text-overflow:ellipsis;
+      }
+
+      .debug-info div {
+        display:inline-block;
+        font-size:12px;
+      }
+
+      .debug-info div::after {
+        content:' / ';
+      }
+      .debug-info div:last-child::after {
+        display: none;
       }
       
       /* 모바일 최적화 */
-      @media (max-width: 768px) {
+     /*  @media (max-width: 768px) {
         body {
           padding: 12px;
         }
@@ -363,6 +417,7 @@
           flex-direction: column;
           text-align: center;
           padding: 16px;
+          background-color:#333;
         }
         
         h1 {
@@ -396,7 +451,7 @@
           position: relative;
           margin-bottom: 20px;
         }
-      }
+      } */
     </style>
   </head>
   <body>
@@ -417,11 +472,11 @@
     </div>
     
     <div class="controls">
-      <button id="toggle-camera" onclick="toggleCamera()">📹 카메라</button>
-      <button id="toggle-mic" onclick="toggleMic()">🎤 마이크</button>
-      <button id="screen-share-btn" onclick="toggleScreenShare()">🖥️ 화면공유</button>
-      <button onclick="toggleChat()">💬 채팅</button>
-      <button onclick="leaveRoom()" class="danger">🚪 나가기</button>
+      <button id="toggle-camera" onclick="toggleCamera()" class="active">📷</button>
+      <button id="toggle-mic" onclick="toggleMic()" class="active">🎤</button>
+      <button id="screen-share-btn" onclick="toggleScreenShare()">🖥️</button>
+      <button onclick="toggleChat()">💬</button>
+      <button onclick="leaveRoom()" class="danger">🚪</button>
     </div>
     
     <div class="connection-status" id="connection-status">
@@ -879,10 +934,10 @@
       function updateCameraButton() {
         const button = document.getElementById("toggle-camera");
         if (cameraEnabled) {
-          button.textContent = "📹 카메라";
+          button.textContent = "📷";
           button.classList.add("active");
         } else {
-          button.textContent = "📹 꺼짐";
+          button.textContent = "📷";
           button.classList.remove("active");
         }
       }
@@ -902,10 +957,10 @@
       function updateMicButton() {
         const button = document.getElementById("toggle-mic");
         if (micEnabled) {
-          button.textContent = "🎤 마이크";
+          button.textContent = "🎤";
           button.classList.add("active");
         } else {
-          button.textContent = "🎤 꺼짐";
+          button.textContent = "🎤";
           button.classList.remove("active");
         }
       }
@@ -994,7 +1049,7 @@
           isScreenSharing = false;
           
           const button = document.getElementById("screen-share-btn");
-          button.textContent = "🖥️ 화면공유";
+          button.textContent = "🖥️";
           button.classList.remove("active");
           
           updateVideoSlides();
@@ -1132,6 +1187,25 @@
       function toggleChat() {
         document.getElementById("chat-panel").classList.toggle("open");
       }
+
+      // 레이아웃 스크립트
+      function applyLayoutClass() {
+        const videoSlides = document.querySelectorAll('.video-slide');
+        const count = videoSlides.length;
+        const swipeWrapper = document.querySelector('.swipe-wrapper');
+        if (!swipeWrapper) return;
+        swipeWrapper.className = swipeWrapper.className
+          .split(' ')
+          .filter(c => !/^layout-\d+$/.test(c))
+          .join(' ');
+        swipeWrapper.classList.add('layout-' + count);
+      }
+      applyLayoutClass();
+      
+      setInterval(() => {
+        applyLayoutClass();
+      }, 3000);
+      // 지환 레이아웃 스크립트 끝
 
       // 타이머 함수들
       function startTimer() {
