@@ -3086,6 +3086,7 @@ legend,
 				height:remx(150);
 				background:url('@img/img-not-result.png') no-repeat 50% / 100% auto;
 				transform-origin:bottom center;
+				opacity:0.5;
 			}
 		}
 	}
@@ -3263,6 +3264,27 @@ legend,
 			margin-right:remx(3);
 			background:url('@ico/ico-comment.svg') no-repeat 50% / 100% auto;
 		}
+	}
+}
+
+.board-empty {
+	position:relative;
+	padding:remx(160) 0 0;
+	font-weight:bold;
+	font-size:remx(26);
+	text-align:center;
+
+	&::before {
+		content:'';
+		position:absolute;
+		top:remx(10);
+		left:50%;
+		transform:translateX(-50%);
+		width:remx(150);
+		height:remx(150);
+		background:url('@img/img-not-result.png') no-repeat 50% / 100% auto;
+		transform-origin:bottom center;
+		opacity:0.5;
 	}
 }
 
