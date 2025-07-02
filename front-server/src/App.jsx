@@ -8,7 +8,6 @@ import BoardList from '@page/board'
 import BoardWrite from '@components/BoardWrite'
 import List from '@page/list'
 import Search from '@page/Search'
-import Video from '@components/Video'
 import Board from '@page/Board';
 
 function App() {
@@ -48,7 +47,6 @@ function App() {
 					<Route path="/board" element={<BoardList />} />
 					<Route path="/board/write" element={<BoardWrite />} />
 					<Route path="search" element={<Search />} />
-					<Route path="/video/:roomId" element={<Video />} />
 					<Route path="/board" element={<Board />} />
 					<Route path="/board/:boardId" element={<Board />} />
 					<Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />

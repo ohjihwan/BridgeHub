@@ -1546,7 +1546,7 @@ function Chat() {
 			<div className="msg-writing">
 				<div className="msg-writing__box">
 					<div className="msg-writing__services">
-						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => window.open("http://192.168.162.197:7600", "_blank")}></button>
+						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => window.open("http://192.168.1.232:7600", "_blank")}></button>
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
