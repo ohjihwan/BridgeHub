@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Header from '@common/Header';
 import Layer from '@common/Layer';
@@ -879,17 +879,34 @@ function Chat() {
 	// 방장 여부 확인
 	useEffect(() => {
 		if (studyInfo && currentUserInfo) {
-			const bossId = String(studyInfo.bossId);
-			const userId = String(currentUserInfo.id);
+			// 타입을 문자열로 통일하여 비교
+			const bossId = String(studyInfo.bossId || studyInfo.boss_id);
+			const userId = String(currentUserInfo.id || currentUserInfo.userId);
 			const isBoss = bossId === userId;
 			setIsOwner(isBoss);
 			console.log('🏛️ 방장 여부 확인:', {
 				bossId,
 				userId,
-				isBoss
+				isBoss,
+				studyInfo: {
+					bossId: studyInfo.bossId,
+					boss_id: studyInfo.boss_id
+				},
+				currentUserInfo: {
+					id: currentUserInfo.id,
+					userId: currentUserInfo.userId
+				}
 			});
 		}
 	}, [studyInfo, currentUserInfo]);
+
+	// 방장일 때 대기중인 신청 확인 (방장 여부 확인 후 실행)
+	useEffect(() => {
+		if (isOwner && studyId && currentUserInfo) {
+			console.log('🔍 방장 확인됨 - 대기중인 멤버 조회 시작');
+			fetchPendingMembers();
+		}
+	}, [isOwner, studyId, currentUserInfo]);
 
 	// 참가 신청 알림 수신 (방장만)
 	useEffect(() => {
@@ -915,10 +932,20 @@ function Chat() {
 			
 			// 시스템 메시지로 표시
 			addSystemMessage(`${notification.applicantName}님이 스터디 참가를 신청했습니다.`, {});
+			
+			// 대기중인 멤버 목록 갱신
+			fetchPendingMembers();
 		};
 
 		console.log('✅ 참가 신청 알림 리스너 등록 중...');
 		socketService.socket.on('join-request-notification', handleJoinRequest);
+		
+		// 추가 이벤트 리스너들
+		socketService.socket.on('study-join-request', (data) => {
+			console.log('📥 study-join-request 이벤트 수신:', data);
+			setHasPendingRequests(true);
+			fetchPendingMembers();
+		});
 		
 		// 테스트용 모든 이벤트 로깅
 		socketService.socket.onAny((eventName, ...args) => {
@@ -933,12 +960,13 @@ function Chat() {
 			try {
 				if (socketService?.socket && typeof socketService.socket.off === 'function') {
 					socketService.socket.off('join-request-notification', handleJoinRequest);
+					socketService.socket.off('study-join-request');
 				}
 			} catch (error) {
 				console.error('리스너 해제 중 에러 (무시):', error);
 			}
 		};
-	}, [isConnected, isOwner]);
+	}, [isConnected, isOwner, socketService]);
 
 	// WebRTC
 	const handleStartVideo = () => {
@@ -1059,7 +1087,7 @@ function Chat() {
 	};
 
 	// 대기중인 멤버 조회 함수
-	const fetchPendingMembers = async () => {
+	const fetchPendingMembers = useCallback(async () => {
 		try {
 			const token = localStorage.getItem('token');
 			if (!token || !studyId) return;
@@ -1077,7 +1105,7 @@ function Chat() {
 		} catch (e) {
 			console.error('❌ 대기중인 멤버 조회 실패:', e);
 		}
-	};
+	}, [studyId]);
 
 	// 참가신청 수락 처리
 	const handleApprove = async (memberId) => {
@@ -1150,53 +1178,120 @@ function Chat() {
 		setCurrentPendingMember(null);
 	};
 
-	// 방장일 때 대기중인 신청 확인
+	// 강퇴 알림 처리를 위한 추가 리스너 (소켓 연결 상태와 관계없이)
 	useEffect(() => {
-		if (isOwner && studyId) {
-			fetchPendingMembers();
+		if (!socketService?.socket) {
+			console.log('⚠️ 소켓 서비스가 없어서 강퇴 리스너를 등록할 수 없습니다.');
+			return;
 		}
-	}, [isOwner, studyId]);
 
-	// 강퇴 및 스터디룸 삭제 알림 처리
-	useEffect(() => {
-		if (!socketService) return;
+		console.log('🎯 강퇴 이벤트 리스너 등록 시작:', {
+			socketConnected: socketService.socket.connected,
+			socketId: socketService.socket.id,
+			userId: currentUserId
+		});
+
+		const handleKickedEvent = (data) => {
+			console.log('🚫 강퇴 이벤트 직접 수신:', data);
+			customAlert('채팅방에서 강퇴되었습니다.');
+			
+			// 즉시 소켓 연결 종료
+			if (socketService.socket.connected) {
+				console.log('🔌 소켓 연결 강제 종료 중...');
+				socketService.socket.disconnect();
+			}
+			
+			// 즉시 홈으로 이동 (replace로 히스토리 교체)
+			setTimeout(() => {
+				console.log('🏠 홈으로 이동 중...');
+				navigate('/home', { replace: true });
+			}, 100);
+		};
+
+		const handleStudyDeletedEvent = (data) => {
+			console.log('🗑️ 스터디룸 삭제 이벤트 직접 수신:', data);
+			customAlert('스터디룸이 삭제되었습니다.');
+			
+			// 즉시 소켓 연결 종료
+			if (socketService.socket.connected) {
+				console.log('🔌 소켓 연결 강제 종료 중...');
+				socketService.socket.disconnect();
+			}
+			
+			// 즉시 홈으로 이동 (replace로 히스토리 교체)
+			setTimeout(() => {
+				console.log('🏠 홈으로 이동 중...');
+				navigate('/home', { replace: true });
+			}, 100);
+		};
 
 		const handleSystemMessage = (message) => {
-			console.log('시스템 메시지 수신:', message);
+			console.log('📨 시스템 메시지 수신:', message);
 			
 			if (message.type === 'kicked') {
-				customAlert('채팅방에서 강퇴되었습니다.');
-				navigate('/home'); // 홈페이지로 이동
+				console.log('🚫 시스템 메시지에서 강퇴 감지');
+				handleKickedEvent(message);
 			} else if (message.type === 'study-deleted') {
-				customAlert('스터디룸이 삭제되었습니다.');
-				navigate('/home'); // 홈페이지로 이동
+				console.log('🗑️ 시스템 메시지에서 스터디룸 삭제 감지');
+				handleStudyDeletedEvent(message);
 			}
 		};
 
-		const handleKicked = (data) => {
-			console.log('강퇴 알림 수신:', data);
-			customAlert('채팅방에서 강퇴되었습니다.');
-			navigate('/home'); // 홈페이지로 이동
-		};
+		// 모든 가능한 이벤트 이름으로 리스너 등록
+		const events = [
+			'kicked',
+			'study-deleted',
+			'system-message',
+			'user-kicked',
+			'kick-user',
+			'force-disconnect'
+		];
 
-		const handleStudyDeleted = (data) => {
-			console.log('스터디룸 삭제 알림 수신:', data);
-			customAlert('스터디룸이 삭제되었습니다.');
-			navigate('/home'); // 홈페이지로 이동
-		};
+		events.forEach(eventName => {
+			socketService.socket.on(eventName, (data) => {
+				console.log(`📥 이벤트 수신: ${eventName}`, data);
+				if (eventName === 'kicked' || eventName === 'user-kicked' || eventName === 'kick-user') {
+					handleKickedEvent(data);
+				} else if (eventName === 'study-deleted') {
+					handleStudyDeletedEvent(data);
+				} else if (eventName === 'system-message') {
+					handleSystemMessage(data);
+				} else if (eventName === 'force-disconnect') {
+					handleKickedEvent(data);
+				}
+			});
+		});
 
-		socketService.on('system-message', handleSystemMessage);
-		socketService.on('kicked', handleKicked);
-		socketService.on('study-deleted', handleStudyDeleted);
+		// message-received 이벤트에서도 강퇴/삭제 감지
+		socketService.socket.on('message-received', (data) => {
+			console.log('📨 message-received 이벤트 수신:', data);
+			if (data.type === 'kicked' || data.type === 'study-deleted') {
+				console.log('📨 message-received에서 강퇴/삭제 이벤트 감지:', data);
+				if (data.type === 'kicked') {
+					handleKickedEvent(data);
+				} else {
+					handleStudyDeletedEvent(data);
+				}
+			}
+		});
+
+		// 모든 이벤트를 로깅 (디버깅용)
+		socketService.socket.onAny((eventName, ...args) => {
+			console.log('🔍 모든 소켓 이벤트 수신:', eventName, args);
+		});
+
+		console.log('✅ 강퇴 이벤트 리스너 등록 완료');
 
 		return () => {
-			if (socketService) {
-				socketService.off('system-message', handleSystemMessage);
-				socketService.off('kicked', handleKicked);
-				socketService.off('study-deleted', handleStudyDeleted);
+			if (socketService?.socket) {
+				console.log('🧹 강퇴 이벤트 리스너 정리 중...');
+				events.forEach(eventName => {
+					socketService.socket.off(eventName);
+				});
+				socketService.socket.off('message-received');
 			}
 		};
-	}, [socketService, navigate]);
+	}, [socketService, navigate, currentUserId]);
 
 	return (
 		<>
@@ -1488,10 +1583,17 @@ function Chat() {
 								파일 업로드
 							</button>
 						</li>
+						{/* 신청받기 버튼 디버깅 */}
+						{console.log('🔍 신청받기 버튼 렌더링 조건:', {
+							isOwner,
+							hasPendingRequests,
+							pendingMembersLength: pendingMembers.length,
+							shouldShow: isOwner && hasPendingRequests
+						})}
 						{isOwner && hasPendingRequests && (
 							<li>
 								<button type="button" onClick={handleShowJoinRequests} className="msg-writing__action">
-									신청받기
+									신청받기 {pendingMembers.length > 0 && `(${pendingMembers.length})`}
 								</button>
 							</li>
 						)}
