@@ -23,7 +23,7 @@ const Header = ({
 
     const handleBackClick = () => {
         if (onBeforeBack) {
-            onBeforeBack();  // 소켓 해제 등 사전 처리 실행
+            navigate('/home');  
             return;
         }
         
