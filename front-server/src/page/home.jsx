@@ -7,6 +7,7 @@ import { useNavigate, Link } from "react-router-dom";
 import StudyRoomList from '@components/StudyRoomList';
 import { studyClient } from '@js/common-ui';
 import axios from 'axios';
+import { useSocket } from '../../dev/hooks/useSocket';
 
 const Home = () => {
 	const navigate = useNavigate();
@@ -17,6 +18,9 @@ const Home = () => {
 	const [isClosing, setIsClosing] = useState(false);
 	const [showDetail, setShowDetail] = useState(false);
 	const [showCreateStudy, setShowCreateStudy] = useState(false);
+	
+	// 소켓 연결
+	const { isConnected, socketService } = useSocket();
 
 	const handleItemClick = (room) => {
 		setSelectedRoom(room);
@@ -89,6 +93,77 @@ const Home = () => {
 	useEffect(() => {
 		fetchMyRoom();
 	}, []);
+	
+	// 실시간 스터디룸 업데이트 처리
+	useEffect(() => {
+		if (!isConnected || !socketService?.socket) {
+			console.log('⚠️ 소켓이 연결되지 않아 실시간 업데이트를 설정할 수 없습니다.');
+			return;
+		}
+
+		console.log('✅ 스터디룸 실시간 업데이트 리스너 등록');
+
+		// 스터디룸 업데이트 이벤트 리스너
+		const handleStudyRoomUpdate = (data) => {
+			console.log('📢 스터디룸 업데이트 이벤트 수신:', data);
+			
+			const { action, studyRoom } = data;
+			
+			if (action === 'created') {
+				// 새 스터디룸 생성 - 목록에 추가
+				setRooms(prevRooms => {
+					// 이미 존재하는지 확인
+					const exists = prevRooms.some(room => room.id === studyRoom.studyRoomId);
+					if (!exists) {
+						console.log('➕ 새 스터디룸 추가:', studyRoom.title);
+						return [studyRoom, ...prevRooms];
+					}
+					return prevRooms;
+				});
+			} else if (action === 'deleted') {
+				// 스터디룸 삭제 - 목록에서 제거
+				setRooms(prevRooms => {
+					const filtered = prevRooms.filter(room => room.id !== studyRoom.studyRoomId);
+					if (filtered.length !== prevRooms.length) {
+						console.log('➖ 스터디룸 삭제:', studyRoom.title);
+					}
+					return filtered;
+				});
+				
+				// 현재 선택된 스터디룸이 삭제된 경우 상세창 닫기
+				if (selectedRoom && selectedRoom.id === studyRoom.studyRoomId) {
+					setShowDetail(false);
+					setSelectedRoom(null);
+				}
+			} else if (action === 'updated') {
+				// 스터디룸 수정 - 목록에서 업데이트
+				setRooms(prevRooms => {
+					const updated = prevRooms.map(room => 
+						room.id === studyRoom.studyRoomId ? studyRoom : room
+					);
+					console.log('✏️ 스터디룸 수정:', studyRoom.title);
+					return updated;
+				});
+				
+				// 현재 선택된 스터디룸이 수정된 경우 상세창 업데이트
+				if (selectedRoom && selectedRoom.id === studyRoom.studyRoomId) {
+					setSelectedRoom(studyRoom);
+				}
+			}
+		};
+
+		// 이벤트 리스너 등록
+		socketService.socket.on('study-room-update', handleStudyRoomUpdate);
+
+		// 클린업 함수
+		return () => {
+			console.log('🧹 스터디룸 실시간 업데이트 리스너 해제');
+			if (socketService?.socket) {
+				socketService.socket.off('study-room-update', handleStudyRoomUpdate);
+			}
+		};
+	}, [isConnected, socketService, selectedRoom]);
+
 	useEffect(() => {
 		if (isClosing) {
 			const timer = setTimeout(() => {

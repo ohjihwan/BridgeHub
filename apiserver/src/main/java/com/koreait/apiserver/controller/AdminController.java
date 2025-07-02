@@ -277,9 +277,9 @@ public class AdminController {
         
         // 활동 시간대 기본 데이터
         Map<String, Integer> time = new HashMap<>();
-        time.put("06:00~12:00", 0);
-        time.put("12:00~18:00", 0);
-        time.put("18:00~24:00", 0);
+        time.put("오전", 0);
+        time.put("오후", 0);
+        time.put("저녁", 0);
         memberStats.put("time", time);
         
         // 전공 기본 데이터
@@ -334,7 +334,6 @@ public class AdminController {
         activityStats.put("totalVisitors", 0);
         
         // 실시간 접속자 정보 추가
-        activityStats.put("currentOnlineUsers", 0);
         activityStats.put("totalRegisteredMembers", 0);
         activityStats.put("activeStudyRooms", List.of());
         

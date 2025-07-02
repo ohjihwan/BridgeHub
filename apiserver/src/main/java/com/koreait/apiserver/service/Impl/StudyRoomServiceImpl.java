@@ -148,7 +148,41 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         log.info("스터디룸 생성 완료: studyRoomId={}, bossId={}, chatRoomId={}", 
                 studyRoom.getStudyRoomId(), studyRoomDTO.getBossId(), chatRoom.getRoomId());
         
-            // 트리거에 의해 study_room_members에 방장이 자동으로 추가됨
+        // 4. 소켓 서버로 스터디룸 생성 알림 전송
+        try {
+            String socketServerUrl = "http://localhost:7500/api/socket/study-room-update";
+            String requestBody = String.format(
+                "{\"action\":\"created\",\"studyRoom\":{\"studyRoomId\":%d,\"title\":\"%s\",\"description\":\"%s\",\"bossId\":%d,\"education\":\"%s\",\"department\":\"%s\",\"region\":\"%s\",\"district\":\"%s\",\"capacity\":%d,\"currentMembers\":%d,\"time\":\"%s\",\"thumbnail\":\"%s\",\"isPublic\":%s}}",
+                studyRoom.getStudyRoomId(),
+                studyRoom.getTitle().replace("\"", "\\\""),
+                studyRoom.getDescription() != null ? studyRoom.getDescription().replace("\"", "\\\"") : "",
+                studyRoom.getBossId(),
+                studyRoom.getEducation() != null ? studyRoom.getEducation().replace("\"", "\\\"") : "",
+                studyRoom.getDepartment() != null ? studyRoom.getDepartment().replace("\"", "\\\"") : "",
+                studyRoom.getRegion() != null ? studyRoom.getRegion().replace("\"", "\\\"") : "",
+                studyRoom.getDistrict() != null ? studyRoom.getDistrict().replace("\"", "\\\"") : "",
+                studyRoom.getCapacity(),
+                studyRoom.getCurrentMembers(),
+                studyRoom.getTime() != null ? studyRoom.getTime().replace("\"", "\\\"") : "",
+                studyRoom.getThumbnail() != null ? studyRoom.getThumbnail().replace("\"", "\\\"") : "",
+                studyRoom.getIsPublic()
+            );
+            
+            // HTTP 클라이언트로 직접 요청
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(socketServerUrl))
+                .header("Content-Type", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+            
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+            log.info("소켓 서버로 스터디룸 생성 알림 전송 완료: studyRoomId={}, response={}", studyRoom.getStudyRoomId(), response.statusCode());
+        } catch (Exception e) {
+            log.warn("소켓 서버 알림 전송 실패 (무시): {}", e.getMessage());
+        }
+        
+        // 트리거에 의해 study_room_members에 방장이 자동으로 추가됨
         return convertToDTO(studyRoom);
             
         } catch (Exception e) {
@@ -179,6 +213,41 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             studyRoom.setIsPublic(studyRoomDTO.getIsPublic());
             
             studyRoomDao.updateStudyRoom(studyRoom);
+            
+            // 소켓 서버로 스터디룸 수정 알림 전송
+            try {
+                String socketServerUrl = "http://localhost:7500/api/socket/study-room-update";
+                String requestBody = String.format(
+                    "{\"action\":\"updated\",\"studyRoom\":{\"studyRoomId\":%d,\"title\":\"%s\",\"description\":\"%s\",\"bossId\":%d,\"education\":\"%s\",\"department\":\"%s\",\"region\":\"%s\",\"district\":\"%s\",\"capacity\":%d,\"currentMembers\":%d,\"time\":\"%s\",\"thumbnail\":\"%s\",\"isPublic\":%s}}",
+                    studyRoom.getStudyRoomId(),
+                    studyRoom.getTitle().replace("\"", "\\\""),
+                    studyRoom.getDescription() != null ? studyRoom.getDescription().replace("\"", "\\\"") : "",
+                    studyRoom.getBossId(),
+                    studyRoom.getEducation() != null ? studyRoom.getEducation().replace("\"", "\\\"") : "",
+                    studyRoom.getDepartment() != null ? studyRoom.getDepartment().replace("\"", "\\\"") : "",
+                    studyRoom.getRegion() != null ? studyRoom.getRegion().replace("\"", "\\\"") : "",
+                    studyRoom.getDistrict() != null ? studyRoom.getDistrict().replace("\"", "\\\"") : "",
+                    studyRoom.getCapacity(),
+                    studyRoom.getCurrentMembers(),
+                    studyRoom.getTime() != null ? studyRoom.getTime().replace("\"", "\\\"") : "",
+                    studyRoom.getThumbnail() != null ? studyRoom.getThumbnail().replace("\"", "\\\"") : "",
+                    studyRoom.getIsPublic()
+                );
+                
+                // HTTP 클라이언트로 직접 요청
+                java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+                java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(socketServerUrl))
+                    .header("Content-Type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+                
+                java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+                log.info("소켓 서버로 스터디룸 수정 알림 전송 완료: studyRoomId={}, response={}", studyRoom.getStudyRoomId(), response.statusCode());
+            } catch (Exception e) {
+                log.warn("소켓 서버 알림 전송 실패 (무시): {}", e.getMessage());
+            }
+            
             return convertToDTO(studyRoom);
         }
         throw new RuntimeException("스터디룸을 찾을 수 없습니다.");
@@ -189,7 +258,36 @@ public class StudyRoomServiceImpl implements StudyRoomService {
     public void deleteStudyRoom(Integer studyRoomId) {
         Optional<StudyRoom> studyRoomOpt = studyRoomDao.findById(studyRoomId);
         if (studyRoomOpt.isPresent()) {
+            StudyRoom studyRoom = studyRoomOpt.get();
+            
+            // 삭제 전에 스터디룸 정보 저장 (알림용)
+            StudyRoomDTO studyRoomInfo = convertToDTO(studyRoom);
+            
+            // 스터디룸 삭제
             studyRoomDao.deleteStudyRoom(studyRoomId);
+            
+            // 소켓 서버로 스터디룸 삭제 알림 전송
+            try {
+                String socketServerUrl = "http://localhost:7500/api/socket/study-room-update";
+                String requestBody = String.format(
+                    "{\"action\":\"deleted\",\"studyRoom\":{\"studyRoomId\":%d,\"title\":\"%s\"}}",
+                    studyRoom.getStudyRoomId(),
+                    studyRoom.getTitle().replace("\"", "\\\"")
+                );
+                
+                // HTTP 클라이언트로 직접 요청
+                java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+                java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(socketServerUrl))
+                    .header("Content-Type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+                
+                java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+                log.info("소켓 서버로 스터디룸 삭제 알림 전송 완료: studyRoomId={}, response={}", studyRoom.getStudyRoomId(), response.statusCode());
+            } catch (Exception e) {
+                log.warn("소켓 서버 알림 전송 실패 (무시): {}", e.getMessage());
+            }
         } else {
             throw new RuntimeException("스터디룸을 찾을 수 없습니다.");
         }
@@ -386,9 +484,9 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                 // 3) 채팅방 삭제
                 chatRoomDao.deleteChatRoom(chatRoomId);
                 
-                // 4) 소켓 서버로 스터디룸 삭제 알림 전송
+                // 4. 소켓 서버로 스터디룸 삭제 알림 전송
                 try {
-                    String socketServerUrl = "http://localhost:3001/api/socket/delete-study";
+                    String socketServerUrl = "http://localhost:7500/api/socket/delete-study";
                     String requestBody = String.format("{\"studyId\":\"%d\",\"roomId\":\"%d\"}", studyRoomId, chatRoomId);
                     
                     // HTTP 클라이언트로 직접 요청

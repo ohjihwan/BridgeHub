@@ -516,10 +516,19 @@ class ChatHandler {
         socket.join(studyId);
         socket.currentRoom = studyId;
         socket.currentStudyId = studyId; // socketController와 호환성을 위해 추가
-        socket.userId = userId;
+        socket.userId = String(userId); // 문자열로 변환하여 저장
+        socket.memberId = String(userId); // memberId도 동일하게 설정
         socket.userDisplayName = userDisplayName; // 표시명 저장
         socket.userName = userInfo ? userInfo.name : `사용자${userId}`;
         socket.userNickname = userInfo ? userInfo.nickname : `사용자${userId}`;
+
+        console.log(`🔗 소켓 연결 정보 저장:`, {
+            socketId: socket.id,
+            userId: socket.userId,
+            memberId: socket.memberId,
+            userDisplayName: socket.userDisplayName,
+            currentStudyId: socket.currentStudyId
+        });
 
         // MongoDB에 채팅 세션 저장
         try {
@@ -610,12 +619,12 @@ class ChatHandler {
         // 스터디룸 상태 업데이트
         try {
             const participants = Array.from(currentRoom.participants.values());
-            await mongoService.updateStudyRoomStatus(studyId, {
+            await mongoService.updateStudyRoomStatus(String(studyId), {
                 studyTitle: study.title,
                 currentMembers: participants.map(p => ({
-                    userId: p.userId,
-                    userName: p.displayName || p.userId,
-                    userNickname: p.displayName || p.userId,
+                    userId: String(p.userId),
+                    userName: p.displayName || String(p.userId),
+                    userNickname: p.displayName || String(p.userId),
                     joinedAt: new Date(),
                     status: 'ACTIVE'
                 })),
@@ -624,6 +633,10 @@ class ChatHandler {
             console.log(`📊 스터디룸 상태 업데이트 완료: ${participants.length}명`);
         } catch (error) {
             console.error('❌ 스터디룸 상태 업데이트 실패:', error);
+            // 에러 상세 정보 출력
+            if (error.errorResponse) {
+                console.error('MongoDB 검증 에러 상세:', error.errorResponse);
+            }
         }
 
         // 참가한 사용자에게 성공 응답

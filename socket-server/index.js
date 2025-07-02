@@ -151,6 +151,28 @@ app.post('/api/socket/delete-study', async (req, res) => {
     }
 });
 
+// 스터디룸 업데이트 알림 API
+app.post('/api/socket/study-room-update', async (req, res) => {
+    try {
+        const { action, studyRoom } = req.body;
+        console.log(`스터디룸 업데이트 API 호출: action=${action}, studyRoomId=${studyRoom?.studyRoomId}`);
+        
+        // 소켓 서비스를 통해 모든 클라이언트에게 알림 전송
+        socketService.broadcastStudyRoomUpdate(action, studyRoom);
+        
+        res.json({ 
+            success: true, 
+            message: '스터디룸 업데이트 알림이 전송되었습니다.' 
+        });
+    } catch (error) {
+        console.error('스터디룸 업데이트 API 처리 실패:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
 // ChatHandler가 모든 소켓 이벤트를 처리합니다
 console.log('🚀 ChatHandler가 모든 소켓 이벤트를 처리합니다.');
 

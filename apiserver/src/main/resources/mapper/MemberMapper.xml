@@ -180,15 +180,6 @@
     </select>
 
     <!-- 실시간 접속자 통계용 쿼리들 (새로 추가) -->
-    <select id="getCurrentOnlineUsers" resultType="int">
-        SELECT COUNT(DISTINCT m.id) 
-        FROM members m
-        INNER JOIN study_room_members srm ON m.id = srm.member_id
-        INNER JOIN studyroom sr ON srm.study_room_id = sr.study_room_id
-        WHERE srm.status = 'APPROVED' 
-        AND sr.status = 'ACTIVE'
-        AND srm.updated_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
-    </select>
     
     <select id="getActiveStudyRooms" resultType="map">
         SELECT 
@@ -199,7 +190,6 @@
         FROM studyroom sr
         LEFT JOIN study_room_members srm ON sr.study_room_id = srm.study_room_id
             AND srm.status = 'APPROVED'
-            AND srm.updated_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)
         WHERE sr.status = 'ACTIVE'
         GROUP BY sr.study_room_id, sr.title, sr.capacity
         HAVING currentUsers > 0
