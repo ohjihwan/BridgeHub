@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API 서버 기본 URL
-const API_BASE_URL = 'http://localhost:7100/api';
+// API 서버 기본 URL - 사설 IP 사용
+const API_BASE_URL = 'http://192.168.1.241:7100/api';
 
 // Axios 인스턴스 생성
 const apiClient = axios.create({

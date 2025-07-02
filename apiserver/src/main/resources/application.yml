@@ -60,6 +60,7 @@ jwt:
 # 서버 설정
 server:
   port: 7100
+  address: 0.0.0.0  # 모든 IP에서 접근 가능하도록 설정
 
 # 파일 업로드 설정
 file:
