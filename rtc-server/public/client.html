@@ -12,11 +12,11 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         margin: 0;
         padding: 20px;
-        background: #2f3349;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         min-height: 100vh;
-        max-width: 1400px;
+        max-width: 80%;
         margin: 0 auto;
-        color: #ffffff;
+        color: #333333;
       }
       
       .header {
@@ -26,10 +26,14 @@
         margin-bottom: 32px;
         flex-wrap: wrap;
         gap: 16px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
       
       h1 {
-        color: #ffffff;
+        color: #333333;
         font-size: 1.875rem;
         font-weight: 600;
         letter-spacing: -0.025em;
@@ -84,28 +88,29 @@
         gap: 12px;
         margin-bottom: 32px;
         padding: 24px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
       
       .controls button {
         padding: 12px 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid #e1e5e9;
         border-radius: 8px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s ease;
-        background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
+        background: #ffffff;
+        color: #333333;
         min-width: 100px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
       
       .controls button:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: #3b82f6;
+        background: #f8f9fa;
+        border-color: #667eea;
+        transform: translateY(-1px);
       }
       
       .controls button:active {
@@ -121,11 +126,11 @@
       }
       
       .video-container {
-        background: #36393f;
+        background: #ffffff;
         border-radius: 12px;
         padding: 0;
         text-align: center;
-        border: 2px solid #40444b;
+        border: 2px solid #e1e5e9;
         transition: all 0.2s ease;
         position: relative;
         overflow: hidden;
@@ -133,10 +138,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
-      
+
       .video-container:hover {
-        border-color: #5865f2;
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
       }
       
       .video-container div, .nickname {
@@ -191,55 +199,30 @@
       /* 화면 공유 시 레이아웃 */
       body.sharing .video-wrapper {
         display: grid;
-        grid-template-columns: 1fr 400px;
+        grid-template-columns: 1fr 300px;
         grid-template-rows: auto;
         gap: 16px;
         align-items: start;
       }
 
-      body.sharing .video-container#my-container {
+      body.sharing .video-container.screen-sharing {
         grid-column: 1;
-        grid-row: 1;
-        min-height: 500px;
+        grid-row: 1 / -1;
+        min-height: 600px;
       }
 
-      body.sharing .video-container#my-container video {
-        min-height: 500px;
-      }
-
-      /* 나머지 참여자들을 오른쪽에 세로로 배치 */
-      body.sharing .video-container:not(#my-container) {
+      body.sharing .video-container:not(.screen-sharing) {
         grid-column: 2;
-        min-height: 150px;
+        min-height: 120px;
         margin-bottom: 8px;
-      }
-
-      body.sharing .video-container:not(#my-container) video {
-        min-height: 150px;
-      }
-
-      body.sharing .video-container:not(#my-container):nth-child(2) {
-        grid-row: 1;
-      }
-
-      body.sharing .video-container:not(#my-container):nth-child(3) {
-        grid-row: 2;
-      }
-
-      body.sharing .video-container:not(#my-container):nth-child(4) {
-        grid-row: 3;
-      }
-
-      body.sharing .video-container:not(#my-container):nth-child(5) {
-        grid-row: 4;
       }
       
       /* 채팅 패널 */
       #chat-panel {
         position: fixed;
         top: 0;
-        right: -380px;
-        width: 360px;
+        right: -300px;
+        width: 280px;
         height: 100%;
         background: #36393f;
         border-left: 1px solid #40444b;
@@ -421,8 +404,8 @@
         }
         
         #chat-panel {
-          width: 100%;
-          right: -100%;
+          width: 85%;
+          right: -85%;
         }
         
         body.sharing .video-container:not(#my-container) {
@@ -460,6 +443,91 @@
       .video-container:has(.nickname:contains("빈 자리")) .nickname {
         color: #72767d;
       }
+
+      /* 모바일 스와이프 컨테이너 */
+      .mobile-swipe-container {
+        display: none;
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .swipe-wrapper {
+        display: flex;
+        transition: transform 0.3s ease;
+        width: 100%;
+      }
+
+      .swipe-slide {
+        min-width: 100%;
+        flex-shrink: 0;
+      }
+
+      .swipe-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .swipe-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #cccccc;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .swipe-dot.active {
+        background: #667eea;
+        transform: scale(1.2);
+      }
+
+      /* 모바일에서 스와이프 컨테이너 활성화 */
+      @media (max-width: 768px) {
+        .video-wrapper {
+          display: none;
+        }
+        
+        .mobile-swipe-container {
+          display: block;
+          margin-bottom: 24px;
+        }
+        
+        .swipe-slide .video-container {
+          margin: 16px;
+          min-height: 400px;
+        }
+        
+        .swipe-slide video {
+          min-height: 400px;
+        }
+      }
+
+      .video-container.camera-off {
+        background: #2f3136;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .video-container.camera-off video {
+        display: none;
+      }
+
+      .video-container.camera-off::before {
+        content: attr(data-nickname);
+        font-size: 2rem;
+        color: #ffffff;
+        z-index: 10;
+      }
     </style>
   </head>
   <body>
@@ -472,35 +540,25 @@
     </div>
     
     <div class="controls">
-      <button id="toggle-camera" onclick="toggleCamera()">카메라 끄기</button>
-      <button id="toggle-mic" onclick="toggleMic()">음소거</button>
-      <button onclick="leaveRoom()">나가기</button>
-      <button id="share-screen" onclick="toggleScreenShare()">화면 공유</button>
-      <button onclick="toggleChat()">채팅</button>
+      <button id="toggle-camera" onclick="toggleCamera()">📹 카메라 켜기</button>
+      <button id="toggle-mic" onclick="toggleMic()">🎤 마이크 켜기</button>
+      <button onclick="toggleScreenShare()">🖥️ 화면 공유</button>
+      <button onclick="toggleChat()">💬 채팅</button>
+      <button onclick="leaveRoom()" style="background: #dc3545; border-color: #dc3545;">🚪 나가기</button>
     </div>
     
-    <div class="video-wrapper">
-      <div class="video-container has-video" id="my-container">
-        <div>나</div>
-        <video id="myFace" playsinline autoplay muted></video>
+    <div class="video-wrapper" id="video-wrapper">
+      <!-- 동적으로 참여자가 추가됩니다 -->
+    </div>
+
+    <!-- 모바일 스와이프 컨테이너 -->
+    <div class="mobile-swipe-container" id="mobile-swipe">
+      <div class="swipe-wrapper" id="swipe-wrapper">
+        <!-- 스와이프 슬라이드들이 동적으로 추가됩니다 -->
       </div>
-      <!-- 상대방 자리 -->
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
-      <div class="video-container empty"><div class="nickname">빈 자리</div>
-<video class="peerVideo" playsinline autoplay></video></div>
+      <div class="swipe-indicators" id="swipe-indicators">
+        <!-- 인디케이터들이 동적으로 추가됩니다 -->
+      </div>
     </div>
 
     <!-- 채팅 패널 -->
@@ -522,42 +580,148 @@
       const room = urlParams.get("room");
       const nickname = urlParams.get("name");
 
+      // 모바일 스와이프 기능 변수들을 스크립트 상단으로 이동
+      let currentSlide = 0;
+      let totalSlides = 0;
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+
       // 타이머 관련 변수
-      let meetingStartTime = Date.now();
+      let meetingStartTime;
       let meetingDuration = 2 * 60 * 60 * 1000; // 2시간 (밀리초)
       let timerInterval;
 
-      function assignPeerNickname(nickname) {
-        const labels = document.querySelectorAll(".nickname");
-        for (const label of labels) {
-          if (label.textContent === "빈 자리") {
-            label.textContent = nickname;
-            // 빈 자리 클래스 제거하고 has-video 클래스 추가
-            const container = label.closest('.video-container');
-            container.classList.remove('empty');
-            container.classList.add('has-video');
-            break;
+      // 방별 타이머 관리 함수들 추가
+      function getRoomTimerKey() {
+        return `webrtc_room_timer_${room}`;
+      }
+
+      function initializeTimer() {
+        const timerKey = getRoomTimerKey();
+        const savedStartTime = localStorage.getItem(timerKey);
+        
+        if (savedStartTime) {
+          // 기존에 저장된 시작 시간이 있으면 사용
+          meetingStartTime = parseInt(savedStartTime);
+          console.log("기존 타이머 복원:", new Date(meetingStartTime));
+        } else {
+          // 새로운 방이면 현재 시간으로 시작
+          meetingStartTime = Date.now();
+          localStorage.setItem(timerKey, meetingStartTime.toString());
+          console.log("새 타이머 시작:", new Date(meetingStartTime));
+        }
+      }
+
+      // 서버 기반 타이머 동기화 (기존 localStorage 방식과 병행)
+      function syncTimerWithServer(serverCreatedAt, serverRemainingTime) {
+        if (serverCreatedAt && serverRemainingTime) {
+          // 서버 시간이 더 정확하므로 서버 기준으로 동기화
+          meetingStartTime = serverCreatedAt;
+          console.log("서버와 타이머 동기화:", new Date(meetingStartTime));
+          
+          // localStorage도 업데이트
+          const timerKey = getRoomTimerKey();
+          localStorage.setItem(timerKey, meetingStartTime.toString());
+        }
+      }
+
+      function clearRoomTimer() {
+        const timerKey = getRoomTimerKey();
+        localStorage.removeItem(timerKey);
+        console.log("타이머 정리됨");
+      }
+
+      // 참여자 관리 객체
+      const participants = new Map();
+
+      function createVideoContainer(socketId, nickname, isMe = false) {
+        const container = document.createElement('div');
+        container.className = 'video-container has-video';
+        container.id = isMe ? 'my-container' : `container-${socketId}`;
+        container.setAttribute('data-nickname', nickname);
+        container.setAttribute('data-socket-id', socketId);
+        
+        const nicknameLabel = document.createElement('div');
+        nicknameLabel.className = 'nickname';
+        nicknameLabel.textContent = nickname;
+        
+        const video = document.createElement('video');
+        video.className = isMe ? 'myVideo' : 'peerVideo';
+        video.setAttribute('playsinline', '');
+        video.setAttribute('autoplay', '');
+        if (isMe) video.setAttribute('muted', '');
+        
+        container.appendChild(nicknameLabel);
+        container.appendChild(video);
+        
+        return container;
+      }
+
+      function addParticipant(socketId, nickname, isMe = false) {
+        if (participants.has(socketId)) return;
+        
+        const container = createVideoContainer(socketId, nickname, isMe);
+        document.getElementById('video-wrapper').appendChild(container);
+        
+        participants.set(socketId, {
+          nickname,
+          container,
+          isMe,
+          cameraOn: true,
+          isScreenSharing: false
+        });
+        
+        console.log(`참여자 추가: ${nickname} (${socketId})`);
+        updateMobileSwipe();
+      }
+
+      function removeParticipant(socketId) {
+        const participant = participants.get(socketId);
+        if (participant) {
+          participant.container.remove();
+          participants.delete(socketId);
+          console.log(`참여자 제거: ${participant.nickname}`);
+          updateMobileSwipe();
+        }
+      }
+
+      function updateParticipantCamera(socketId, cameraOn) {
+        const participant = participants.get(socketId);
+        if (participant) {
+          participant.cameraOn = cameraOn;
+          if (cameraOn) {
+            participant.container.classList.remove('camera-off');
+          } else {
+            participant.container.classList.add('camera-off');
           }
         }
       }
 
-      function removePeerNickname(nickname) {
-        const labels = document.querySelectorAll(".nickname");
-        for (const label of labels) {
-          if (label.textContent === nickname) {
-            label.textContent = "빈 자리";
-            // 해당 비디오도 초기화
-            const videoContainer = label.closest('.video-container');
-            const video = videoContainer.querySelector('video');
-            if (video) {
-              video.srcObject = null;
-            }
-            // has-video 클래스 제거하고 empty 클래스 추가
-            videoContainer.classList.remove('has-video');
-            videoContainer.classList.add('empty');
-            break;
-          }
+      function setScreenSharing(socketId, isSharing) {
+        // 모든 참여자의 화면 공유 상태 초기화
+        participants.forEach((participant, id) => {
+          participant.isScreenSharing = false;
+          participant.container.classList.remove('screen-sharing');
+        });
+        
+        if (isSharing && participants.has(socketId)) {
+          const participant = participants.get(socketId);
+          participant.isScreenSharing = true;
+          participant.container.classList.add('screen-sharing');
+          document.body.classList.add('sharing');
+        } else {
+          document.body.classList.remove('sharing');
         }
+      }
+
+      // 기존 함수들을 새로운 동적 시스템으로 교체
+      function assignPeerNickname(nickname) {
+        // 이 함수는 이제 사용하지 않음 - addParticipant로 대체
+      }
+
+      function removePeerNickname(nickname) {
+        // 이 함수는 이제 사용하지 않음 - removeParticipant로 대체
       }
 
       function formatTime(milliseconds) {
@@ -582,6 +746,9 @@
           timerDisplay.textContent = '회의 시간이 종료되었습니다';
           timerContainer.classList.add('timer-danger');
           clearInterval(timerInterval);
+          
+          // 타이머 정리
+          clearRoomTimer();
           
           // 3초 후 자동으로 방 나가기
           setTimeout(() => {
@@ -618,7 +785,14 @@
 
       document.getElementById("title").innerText = `방: ${room} | 닉네임: ${nickname}`;
 
-      const myFace = document.getElementById("myFace");
+      // 이 줄을 제거하거나 주석 처리
+      // const myFace = document.querySelector('#my-container video') || document.createElement('video');
+
+      // 대신 동적으로 찾는 함수 추가
+      function getMyVideo() {
+        return document.querySelector('#my-container video');
+      }
+
       const peerVideos = document.querySelectorAll(".peerVideo");
       const chatBox = document.getElementById("chat-box");
       const chatInput = document.getElementById("chat-input");
@@ -637,15 +811,65 @@
         location.href = "/";
       });
 
+      // 방 정보 수신 (타이머 동기화용)
+      socket.on("room-info", (roomInfo) => {
+        console.log("방 정보 수신:", roomInfo);
+        
+        // 서버 기반 타이머 동기화
+        syncTimerWithServer(roomInfo.createdAt, roomInfo.remainingTime);
+        
+        // 참여자 정보 표시 (선택적)
+        if (roomInfo.participants) {
+          console.log("현재 참여자:", roomInfo.participants);
+        }
+      });
+
+      // 채팅 히스토리 수신
+      socket.on("chat-history", (chatHistory) => {
+        console.log("채팅 히스토리 수신:", chatHistory.length + "개");
+        
+        // 기존 채팅에 히스토리 추가
+        chatHistory.forEach(chat => {
+          appendChat(chat.from, chat.message, chat.timestamp);
+        });
+        
+        // 구분선 추가
+        if (chatHistory.length > 0) {
+          const separator = document.createElement("div");
+          separator.style.cssText = `
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin: 10px 0;
+            border-top: 1px solid #444;
+            padding-top: 10px;
+          `;
+          separator.textContent = "--- 이전 대화 ---";
+          chatBox.appendChild(separator);
+        }
+      });
+
+      // 사용자 상태 업데이트 수신
+      socket.on("user-status-update", (data) => {
+        console.log("사용자 상태 업데이트:", data);
+        // 필요시 UI에 상태 표시 (예: 마이크/카메라 아이콘)
+      });
+
+      // 화면 공유 상태 업데이트
+      socket.on("screen-share-update", (data) => {
+        console.log("화면 공유 상태:", data);
+        // 화면 공유 중인 사용자 표시
+      });
+
       socket.on("user-joined", (data) => {
-        const { nickname: joinedNickname } = data;
-        assignPeerNickname(joinedNickname);
+        const { nickname: joinedNickname, socketId } = data;
+        addParticipant(socketId || 'unknown', joinedNickname);
         appendChat("시스템", `${joinedNickname}님이 입장했습니다.`);
       });
 
       socket.on("user-left", (data) => {
-        const { nickname: leftNickname } = data;
-        removePeerNickname(leftNickname);
+        const { nickname: leftNickname, socketId } = data;
+        removeParticipant(socketId || leftNickname);
         appendChat("시스템", `${leftNickname}님이 방을 나갔습니다.`);
       });
 
@@ -679,14 +903,50 @@
       });
 
       async function getMedia() {
-        try {
-          myStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-          myFace.srcObject = myStream;
-        } catch (e) {
-          console.error("Media Error:", e);
-          alert("카메라/마이크 접근 실패");
-        }
+  try {
+    console.log("카메라 접근 시도 중...");
+    
+    // 단계별로 시도
+    let constraints = { video: true, audio: true };
+    
+    try {
+      myStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (e) {
+      console.log("첫 번째 시도 실패, 비디오만 시도:", e);
+      myStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    }
+    
+    // 동적으로 내 비디오 요소 찾기
+    const myVideo = document.querySelector('#my-container video');
+    if (myVideo) {
+      myVideo.srcObject = myStream;
+      await myVideo.play();
+      console.log("카메라 연결 성공");
+      
+      // 카메라 버튼 상태 업데이트 (자동으로 켜진 상태)
+      const cameraButton = document.getElementById("toggle-camera");
+      if (cameraButton) {
+        cameraButton.innerText = "📹 카메라 끄기";
       }
+      
+      // 비디오가 재생되면 스와이프 업데이트
+      myVideo.onplaying = () => {
+        console.log("비디오 재생 시작됨");
+        setTimeout(() => {
+          if (window.innerWidth <= 768) {
+            updateMobileSwipe();
+          }
+        }, 500);
+      };
+    } else {
+      console.error("내 비디오 컨테이너를 찾을 수 없습니다");
+    }
+    
+  } catch (e) {
+    console.error("Media Error:", e);
+    alert("카메라 접근 실패: " + e.message + "\n브라우저 설정에서 카메라 권한을 확인해주세요.");
+  }
+}
 
       async function initConnection() {
         myPeerConnection = new RTCPeerConnection({
@@ -723,10 +983,32 @@
       }
 
       async function startConnection() {
-        await getMedia();       // ✅ 반드시 먼저 카메라 잡고
-        await createOffer();    // ✅ 그 다음 연결 시작
-        startTimer();           // ✅ 타이머 시작
+  try {
+    console.log("연결 시작...");
+    
+    // 내 참여자 추가
+    const mySocketId = socket.id || 'me';
+    addParticipant(mySocketId, nickname, true);
+    
+    // 잠시 기다린 후 미디어 시작 (DOM이 생성될 시간 확보)
+    setTimeout(async () => {
+      await getMedia();
+      await createOffer();
+    }, 100);
+    
+    initializeTimer();
+    startTimer();
+    
+    setTimeout(() => {
+      if (window.innerWidth <= 768) {
+        initMobileSwipe();
       }
+    }, 2000);
+    
+  } catch (error) {
+    console.error("연결 시작 오류:", error);
+  }
+}
 
       function sendSignal(event, data) {
         socket.emit("rtc-message", JSON.stringify({ roomId: room, event, data }));
@@ -752,9 +1034,40 @@
 
       function toggleCamera() {
         if (!myStream) return;
+        
         const videoTrack = myStream.getVideoTracks()[0];
+        if (!videoTrack) return;
+        
         videoTrack.enabled = !videoTrack.enabled;
-        document.getElementById("toggle-camera").innerText = videoTrack.enabled ? "카메라 끄기" : "카메라 켜기";
+        
+        const button = document.getElementById("toggle-camera");
+        button.innerText = videoTrack.enabled ? "📹 카메라 끄기" : "📹 카메라 켜기";
+        
+        // 내 카메라 상태 업데이트
+        const mySocketId = socket.id || 'me';
+        updateParticipantCamera(mySocketId, videoTrack.enabled);
+        
+        // DOM 업데이트
+        const myVideo = getMyVideo();
+        if (myVideo) {
+          if (videoTrack.enabled) {
+            myVideo.style.display = 'block';
+          } else {
+            myVideo.style.display = 'none';
+          }
+        }
+        
+        // 서버에 상태 전송
+        socket.emit("user-status", {
+          roomId: room,
+          status: {
+            camera: videoTrack.enabled,
+            mic: myStream.getAudioTracks()[0]?.enabled || false
+          }
+        });
+        
+        // 스와이프 업데이트
+        setTimeout(updateMobileSwipe, 100);
       }
 
       function toggleMic() {
@@ -762,6 +1075,15 @@
         const audioTrack = myStream.getAudioTracks()[0];
         audioTrack.enabled = !audioTrack.enabled;
         document.getElementById("toggle-mic").innerText = audioTrack.enabled ? "음소거" : "마이크 켜기";
+        
+        // 서버에 상태 전송
+        socket.emit("user-status", {
+          roomId: room,
+          status: {
+            camera: myStream.getVideoTracks()[0]?.enabled || false,
+            mic: audioTrack.enabled
+          }
+        });
       }
 
       function leaveRoom() {
@@ -773,42 +1095,112 @@
           myPeerConnection = null;
         }
         socket.disconnect();
+        
+        // 타이머는 정리하지 않음 (다른 사람이 아직 있을 수 있음)
+        // clearRoomTimer(); // 이 줄은 주석 처리
+        
         location.href = "/";
       }
 
       async function toggleScreenShare() {
-        if (!isScreenSharing) {
-          try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-            screenTrack = stream.getVideoTracks()[0];
-            const sender = myPeerConnection.getSenders().find(s => s.track.kind === "video");
-            if (sender) sender.replaceTrack(screenTrack);
-            myFace.srcObject = new MediaStream([screenTrack]);
-            screenTrack.onended = () => stopScreenShare();
-            isScreenSharing = true;
-            document.getElementById("share-screen").innerText = "공유 중지";
-            document.body.classList.add("sharing");
-          } catch (e) {
-            console.error("화면 공유 오류:", e);
-          }
-        } else {
-          stopScreenShare();
+  const mySocketId = socket.id || 'me';
+  const myVideo = document.querySelector('#my-container video');
+  
+  if (!myVideo) {
+    console.error("내 비디오 요소를 찾을 수 없습니다");
+    return;
+  }
+  
+  if (!isScreenSharing) {
+    try {
+      console.log("화면 공유 시작...");
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      screenTrack = stream.getVideoTracks()[0];
+      
+      // WebRTC 연결이 있으면 트랙 교체
+      if (myPeerConnection) {
+        const sender = myPeerConnection.getSenders().find(s => s.track && s.track.kind === "video");
+        if (sender) {
+          await sender.replaceTrack(screenTrack);
+          console.log("WebRTC 트랙 교체 완료");
         }
       }
+      
+      // DOM에 화면 공유 스트림 반영
+      const screenStream = new MediaStream([screenTrack]);
+      myVideo.srcObject = screenStream;
+      await myVideo.play();
+      
+      console.log("화면 공유 DOM 반영 완료");
+      
+      // 화면 공유 종료 이벤트 처리
+      screenTrack.onended = () => {
+        console.log("화면 공유가 종료되었습니다");
+        stopScreenShare();
+      };
+      
+      isScreenSharing = true;
+      setScreenSharing(mySocketId, true);
+      
+      // 서버에 상태 전송
+      socket.emit("screen-share-status", {
+        roomId: room,
+        isSharing: true
+      });
+      
+      // 스와이프 업데이트
+      setTimeout(updateMobileSwipe, 200);
+      
+    } catch (e) {
+      console.error("화면 공유 오류:", e);
+      alert("화면 공유 실패: " + e.message);
+    }
+  } else {
+    stopScreenShare();
+  }
+}
 
-      function stopScreenShare() {
-        if (!isScreenSharing) return;
-        const sender = myPeerConnection.getSenders().find(s => s.track.kind === "video");
-        if (sender && myStream) {
-          sender.replaceTrack(myStream.getVideoTracks()[0]);
-          myFace.srcObject = myStream;
-        }
-        screenTrack?.stop();
-        screenTrack = null;
-        isScreenSharing = false;
-        document.getElementById("share-screen").innerText = "화면 공유";
-        document.body.classList.remove("sharing");
-      }
+function stopScreenShare() {
+  if (!isScreenSharing) return;
+  
+  console.log("화면 공유 중지...");
+  const myVideo = document.querySelector('#my-container video');
+  
+  if (myPeerConnection && myStream) {
+    // WebRTC 트랙을 원래 카메라로 복원
+    const sender = myPeerConnection.getSenders().find(s => s.track && s.track.kind === "video");
+    if (sender && myStream.getVideoTracks()[0]) {
+      sender.replaceTrack(myStream.getVideoTracks()[0]);
+      console.log("WebRTC 트랙 복원 완료");
+    }
+  }
+  
+  // DOM에 원래 카메라 스트림 복원
+  if (myVideo && myStream) {
+    myVideo.srcObject = myStream;
+    myVideo.play();
+    console.log("카메라 스트림 DOM 복원 완료");
+  }
+  
+  // 화면 공유 트랙 정리
+  if (screenTrack) {
+    screenTrack.stop();
+    screenTrack = null;
+  }
+  
+  isScreenSharing = false;
+  const mySocketId = socket.id || 'me';
+  setScreenSharing(mySocketId, false);
+  
+  // 서버에 상태 전송
+  socket.emit("screen-share-status", {
+    roomId: room,
+    isSharing: false
+  });
+  
+  // 스와이프 업데이트
+  setTimeout(updateMobileSwipe, 200);
+}
 
       function toggleChat() {
         document.getElementById("chat-panel").classList.toggle("open");
@@ -816,6 +1208,275 @@
 
       // ✅ 연결 시작
       startConnection();
+
+      // 모바일 스와이프 기능
+      
+
+      // 병렬 처리 방지용 큐
+const assignQueue = [];
+let isAssigning = false;
+
+function processAssignQueue() {
+  if (isAssigning || assignQueue.length === 0) return;
+  
+  isAssigning = true;
+  const nickname = assignQueue.shift();
+  const labels = document.querySelectorAll(".nickname");
+  
+  for (const label of labels) {
+    if (label.textContent === "빈 자리") {
+      label.textContent = nickname;
+      const container = label.closest('.video-container');
+      container.classList.remove('empty');
+      container.classList.add('has-video');
+      
+      setTimeout(() => {
+        updateMobileSwipe();
+        isAssigning = false;
+        processAssignQueue();
+      }, 100);
+      return;
+    }
+  }
+  
+  // 빈 자리가 없으면 재시도
+  assignQueue.push(nickname);
+  setTimeout(() => {
+    isAssigning = false;
+    processAssignQueue();
+  }, 500);
+}
+
+// assignPeerNickname 함수를 큐 기반으로 변경
+function assignPeerNickname(nickname) {
+  assignQueue.push(nickname);
+  processAssignQueue();
+}
+
+// 슬라이드 index 증가형 생성
+function initMobileSwipe() {
+  const swipeWrapper = document.getElementById('swipe-wrapper');
+  const indicators = document.getElementById('swipe-indicators');
+  
+  if (!swipeWrapper || !indicators) return;
+  
+  swipeWrapper.innerHTML = '';
+  indicators.innerHTML = '';
+  
+  const allContainers = [
+    document.getElementById('my-container'),
+    ...Array.from(document.querySelectorAll('.video-container:not(#my-container)'))
+  ].filter(container => container && container.classList.contains('has-video'));
+  
+  totalSlides = allContainers.length;
+  if (totalSlides === 0) {
+    console.log("스와이프할 슬라이드가 없습니다");
+    return;
+  }
+  
+  allContainers.forEach((container, index) => {
+    const slide = document.createElement('div');
+    slide.className = 'swipe-slide';
+    
+    const clonedContainer = container.cloneNode(true);
+    const originalVideo = container.querySelector('video');
+    const clonedVideo = clonedContainer.querySelector('video');
+    
+    if (originalVideo && clonedVideo) {
+      clonedVideo.srcObject = originalVideo.srcObject;
+    }
+    
+    slide.appendChild(clonedContainer);
+    swipeWrapper.appendChild(slide);
+    
+    const dot = document.createElement('div');
+    dot.className = `swipe-dot ${index === 0 ? 'active' : ''}`;
+    dot.addEventListener('click', () => goToSlide(index));
+    indicators.appendChild(dot);
+  });
+  
+  currentSlide = 0;
+  goToSlide(0);
+  
+  const container = document.getElementById('mobile-swipe');
+  
+  container.removeEventListener('touchstart', handleTouchStart);
+  container.removeEventListener('touchmove', handleTouchMove);
+  container.removeEventListener('touchend', handleTouchEnd);
+  container.removeEventListener('mousedown', handleMouseStart);
+  container.removeEventListener('mousemove', handleMouseMove);
+  container.removeEventListener('mouseup', handleMouseEnd);
+  container.removeEventListener('mouseleave', handleMouseEnd);
+  
+  container.addEventListener('touchstart', handleTouchStart, { passive: false });
+  container.addEventListener('touchmove', handleTouchMove, { passive: false });
+  container.addEventListener('touchend', handleTouchEnd, { passive: false });
+  container.addEventListener('mousedown', handleMouseStart);
+  container.addEventListener('mousemove', handleMouseMove);
+  container.addEventListener('mouseup', handleMouseEnd);
+  container.addEventListener('mouseleave', handleMouseEnd);
+  
+  console.log(`스와이프 초기화 완료: ${totalSlides}개 슬라이드`);
+}
+
+      function handleTouchStart(e) {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+      }
+
+      function handleTouchMove(e) {
+        if (!isDragging) return;
+        e.preventDefault(); // 스크롤 방지
+        
+        currentX = e.touches[0].clientX;
+        const diffX = currentX - startX;
+        const wrapper = document.getElementById('swipe-wrapper');
+        
+        if (wrapper) {
+          const translateX = -currentSlide * 100 + (diffX / window.innerWidth) * 100;
+          wrapper.style.transform = `translateX(${translateX}%)`;
+        }
+      }
+
+      function handleTouchEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diffX = currentX - startX;
+        const threshold = window.innerWidth * 0.2; // 20% 이상 스와이프해야 넘어감
+        
+        if (Math.abs(diffX) > threshold) {
+          if (diffX > 0 && currentSlide > 0) {
+            currentSlide--;
+          } else if (diffX < 0 && currentSlide < totalSlides - 1) {
+            currentSlide++;
+          }
+        }
+        
+        goToSlide(currentSlide);
+      }
+
+      function handleMouseStart(e) {
+        startX = e.clientX;
+        isDragging = true;
+        e.preventDefault();
+      }
+
+      function handleMouseMove(e) {
+        if (!isDragging) return;
+        currentX = e.clientX;
+        const diffX = currentX - startX;
+        const wrapper = document.getElementById('swipe-wrapper');
+        wrapper.style.transform = `translateX(${-currentSlide * 100 + (diffX / window.innerWidth) * 100}%)`;
+      }
+
+      function handleMouseEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diffX = currentX - startX;
+        const threshold = window.innerWidth * 0.2;
+        
+        if (Math.abs(diffX) > threshold) {
+          if (diffX > 0 && currentSlide > 0) {
+            currentSlide--;
+          } else if (diffX < 0 && currentSlide < totalSlides - 1) {
+            currentSlide++;
+          }
+        }
+        
+        goToSlide(currentSlide);
+      }
+
+      function goToSlide(index) {
+        currentSlide = Math.max(0, Math.min(index, totalSlides - 1));
+        const wrapper = document.getElementById('swipe-wrapper');
+        wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        
+        // 인디케이터 업데이트
+        const dots = document.querySelectorAll('.swipe-dot');
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+      }
+
+      // 참여자가 변경될 때마다 스와이프 업데이트
+      function updateMobileSwipe() {
+        if (window.innerWidth <= 768) {
+          initMobileSwipe();
+        }
+      }
+
+      // 기존 assignPeerNickname 함수 수정하여 스와이프 업데이트 추가
+      const originalAssignPeerNickname = assignPeerNickname;
+      assignPeerNickname = function(nickname) {
+        originalAssignPeerNickname(nickname);
+        setTimeout(updateMobileSwipe, 100);
+      };
+
+      const originalRemovePeerNickname = removePeerNickname;
+      removePeerNickname = function(nickname) {
+        originalRemovePeerNickname(nickname);
+        setTimeout(updateMobileSwipe, 100);
+      };
+
+      // 윈도우 리사이즈 시 스와이프 업데이트
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if (window.innerWidth <= 768) {
+            initMobileSwipe();
+          }
+        }, 300);
+      });
+
+      // 초기 로드 시 스와이프 초기화 (여러 번 시도)
+      setTimeout(() => {
+        if (window.innerWidth <= 768) {
+          console.log("첫 번째 스와이프 초기화 시도");
+          initMobileSwipe();
+        }
+      }, 1000);
+
+      setTimeout(() => {
+        if (window.innerWidth <= 768) {
+          console.log("두 번째 스와이프 초기화 시도");
+          initMobileSwipe();
+        }
+      }, 2000);
+
+      setTimeout(() => {
+        if (window.innerWidth <= 768) {
+          console.log("세 번째 스와이프 초기화 시도");
+          initMobileSwipe();
+        }
+      }, 3000);
+
+// 새로운 에러 처리 이벤트들
+socket.on("room-expired", () => {
+  alert("방 시간이 만료되었습니다.");
+  leaveRoom();
+});
+
+socket.on("join-error", (error) => {
+  alert("입장 오류: " + error);
+  location.href = "/";
+});
+
+socket.on("room-force-closed", (data) => {
+  alert("방이 강제로 종료되었습니다: " + (data.reason || "관리자에 의해"));
+  leaveRoom();
+});
+
+// 연결 상태 체크 (핑-퐁)
+setInterval(() => {
+  socket.emit("ping");
+}, 30000); // 30초마다
+
+socket.on("pong", () => {
+  console.log("서버 연결 정상");
+});
     </script>
   </body>
 </html>

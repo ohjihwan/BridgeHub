@@ -12,9 +12,9 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         margin: 0;
         padding: 20px;
-        background: #2f3349;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
-        color: #ffffff;
+        color: #333333;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -31,23 +31,23 @@
         margin-bottom: 40px;
         color: #ffffff;
         font-size: 2.5rem;
-        font-weight: 300;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         letter-spacing: -0.025em;
       }
       
       .section {
         margin-bottom: 30px;
         padding: 32px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px);
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
       }
       
       .section h3 {
-        color: #ffffff;
+        color: #333333;
         margin-top: 0;
         margin-bottom: 24px;
         font-size: 1.25rem;
@@ -58,7 +58,7 @@
       label {
         display: block;
         margin-bottom: 8px;
-        color: #dcddde;
+        color: #555555;
         font-weight: 500;
         font-size: 14px;
       }
@@ -66,25 +66,23 @@
       input {
         padding: 16px;
         margin-bottom: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.2);
+        border: 2px solid #e1e5e9;
         border-radius: 12px;
         font-size: 16px;
         width: 100%;
         transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
-        backdrop-filter: blur(10px);
+        background: #ffffff;
+        color: #333333;
       }
       
       input::placeholder {
-        color: #b9bbbe;
+        color: #999999;
       }
       
       input:focus {
         outline: none;
-        border-color: #5865f2;
-        box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);
-        background: rgba(255, 255, 255, 0.15);
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
       }
       
       button {
@@ -95,17 +93,16 @@
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: #5865f2;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         width: 100%;
         margin-bottom: 12px;
       }
       
       button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5);
-        background: #4752c4;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
       }
       
       button:active {
@@ -129,21 +126,20 @@
       #room-list li {
         margin-bottom: 12px;
         padding: 20px;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
+        background: #ffffff;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid #e1e5e9;
         display: flex;
         justify-content: space-between;
         align-items: center;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
       
       #room-list li:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(88, 101, 242, 0.2);
-        border-color: #5865f2;
-        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        border-color: #667eea;
       }
       
       #room-list li button {
@@ -156,7 +152,7 @@
       }
       
       .room-name {
-        color: #ffffff;
+        color: #333333;
         font-weight: 500;
         flex: 1;
         font-size: 15px;
@@ -172,7 +168,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        color: #b9bbbe;
+        color: #666666;
         font-size: 13px;
       }
       
@@ -192,7 +188,7 @@
       .empty-state {
         text-align: center;
         padding: 40px 20px;
-        color: #72767d;
+        color: #888888;
         font-style: italic;
       }
       
@@ -333,7 +329,7 @@
           return;
         }
         
-        rooms.forEach((roomId) => {
+        rooms.forEach((room) => {
           const li = document.createElement("li");
           
           const roomInfo = document.createElement("div");
@@ -341,11 +337,23 @@
           
           const roomName = document.createElement("div");
           roomName.className = "room-name";
-          roomName.textContent = roomId;
+          roomName.textContent = room.id || room; // 새 서버는 객체, 기존은 문자열
           
           const roomStatus = document.createElement("div");
           roomStatus.className = "room-status";
-          roomStatus.innerHTML = '<div class="status-dot"></div> 활성';
+          
+          // 새로운 서버 정보가 있으면 표시, 없으면 기본값
+          if (room.participantCount !== undefined) {
+            const remainingHours = Math.floor((room.remainingTime || 0) / (60 * 60 * 1000));
+            const remainingMinutes = Math.floor(((room.remainingTime || 0) % (60 * 60 * 1000)) / (60 * 1000));
+            roomStatus.innerHTML = `
+              <div class="status-dot"></div> 
+              ${room.participantCount}/${room.maxParticipants}명 | 
+              ${remainingHours}h ${remainingMinutes}m 남음
+            `;
+          } else {
+            roomStatus.innerHTML = '<div class="status-dot"></div> 활성';
+          }
           
           const btn = document.createElement("button");
           btn.innerText = "입장";
@@ -357,6 +365,7 @@
             btn.disabled = true;
             
             setTimeout(() => {
+              const roomId = room.id || room;
               location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
             }, 300);
           };
@@ -376,6 +385,19 @@
       // Enter 키로 방 생성
       document.getElementById("nickname").addEventListener("keyup", (e) => {
         if (e.key === "Enter") createRoom();
+      });
+
+      // 새로운 에러 처리 이벤트들 추가
+      socket.on("join-error", (error) => {
+        alert("입장 오류: " + error);
+      });
+
+      socket.on("room-expired", (roomId) => {
+        alert("방 시간이 만료되었습니다.");
+      });
+
+      socket.on("room-force-closed", (data) => {
+        alert("방이 강제로 종료되었습니다: " + (data.reason || "관리자에 의해"));
       });
     </script>
   </body>
