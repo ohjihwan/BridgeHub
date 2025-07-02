@@ -161,6 +161,7 @@ export default function Statistics() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dataIntegrityWarnings, setDataIntegrityWarnings] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -178,6 +179,22 @@ export default function Statistics() {
         // 데이터베이스 값과 프론트엔드 기대값 매핑
         const mappedData = mapStatisticsData(actualData);
         console.log('매핑된 데이터:', mappedData);
+        
+        // 🔍 활동 시간대 상세 분석
+        if (mappedData.memberStats?.time) {
+          const timeTotal = Object.values(mappedData.memberStats.time).reduce((a, b) => a + b, 0);
+          const activityTotal = mappedData.activityStats?.totalRegisteredMembers || 0;
+          console.log('🕐 시간대 분석:', {
+            '시간대별_인원': mappedData.memberStats.time,
+            '시간대_총합': timeTotal,
+            '전체_회원수': activityTotal,
+            '차이': activityTotal - timeTotal
+          });
+        }
+        
+        // 데이터 무결성 체크
+        const warnings = checkDataIntegrity(mappedData);
+        setDataIntegrityWarnings(warnings);
         
         setStats(mappedData);
         
@@ -301,19 +318,29 @@ export default function Statistics() {
       
       // 시간대 데이터 매핑
       if (data.memberStats.time) {
+        // 먼저 원본 데이터를 콘솔에 출력하여 디버깅
+        console.log('시간대 원본 데이터:', data.memberStats.time);
+        
         memberStats.time = {};
         Object.entries(data.memberStats.time).forEach(([key, value]) => {
-          if (key === '오전' || key === '새벽') {
+          console.log(`시간대 매핑: ${key} = ${value}`);
+          
+          // 데이터베이스에서 오는 값을 표준 시간대로 매핑
+          if (key === '새벽' || key === '오전') {
             memberStats.time['오전'] = (memberStats.time['오전'] || 0) + value;
-          } else if (key === '오후' || key === '낮') {
+          } else if (key === '낮' || key === '오후') {
             memberStats.time['오후'] = (memberStats.time['오후'] || 0) + value;
-          } else if (key === '저녁' || key === '밤') {
+          } else if (key === '밤' || key === '저녁' || key === '야간') {
             memberStats.time['저녁'] = (memberStats.time['저녁'] || 0) + value;
           } else {
-            // 기존 시간대 형식이면 그대로 사용
-            memberStats.time[key] = value;
+            // 알 수 없는 시간대는 기타로 처리하거나 로그 출력
+            console.warn(`알 수 없는 시간대: ${key} = ${value}`);
+            // 일단 저녁으로 분류
+            memberStats.time['저녁'] = (memberStats.time['저녁'] || 0) + value;
           }
         });
+        
+        console.log('매핑된 시간대 데이터:', memberStats.time);
       }
       
       // 전공 데이터 매핑
@@ -346,6 +373,49 @@ export default function Statistics() {
     }
     
     return mappedData;
+  };
+
+  // 데이터 무결성 체크 함수 (새로 추가)
+  const checkDataIntegrity = (data) => {
+    const warnings = [];
+    
+    if (!data.memberStats || !data.activityStats) {
+      return warnings;
+    }
+    
+    // 총 회원 수 계산
+    const totalFromActivity = data.activityStats.totalRegisteredMembers || data.activityStats.totalVisitors || 0;
+    const totalFromGender = data.memberStats.gender ? Object.values(data.memberStats.gender).reduce((a, b) => a + b, 0) : 0;
+    const totalFromTime = data.memberStats.time ? Object.values(data.memberStats.time).reduce((a, b) => a + b, 0) : 0;
+    const totalFromEducation = data.memberStats.education ? Object.values(data.memberStats.education).reduce((a, b) => a + b, 0) : 0;
+    const totalFromMajor = data.memberStats.major ? Object.values(data.memberStats.major).reduce((a, b) => a + b, 0) : 0;
+    
+    console.log('데이터 무결성 체크:', {
+      totalFromActivity,
+      totalFromGender,
+      totalFromTime,
+      totalFromEducation,
+      totalFromMajor
+    });
+    
+    // 불일치 체크
+    if (totalFromActivity !== totalFromGender && totalFromGender > 0) {
+      warnings.push(`성별 통계 합계(${totalFromGender}명)와 총 회원 수(${totalFromActivity}명)가 일치하지 않습니다.`);
+    }
+    
+    if (totalFromActivity !== totalFromTime && totalFromTime > 0) {
+      warnings.push(`활동 시간대 통계 합계(${totalFromTime}명)와 총 회원 수(${totalFromActivity}명)가 일치하지 않습니다. 일부 회원이 활동 시간대를 설정하지 않았을 수 있습니다.`);
+    }
+    
+    if (totalFromActivity !== totalFromEducation && totalFromEducation > 0) {
+      warnings.push(`학력 통계 합계(${totalFromEducation}명)와 총 회원 수(${totalFromActivity}명)가 일치하지 않습니다.`);
+    }
+    
+    if (totalFromActivity !== totalFromMajor && totalFromMajor > 0) {
+      warnings.push(`전공 통계 합계(${totalFromMajor}명)와 총 회원 수(${totalFromActivity}명)가 일치하지 않습니다.`);
+    }
+    
+    return warnings;
   };
 
   if (loading) return (
@@ -406,7 +476,6 @@ export default function Statistics() {
     );
   }
 
-  // 차트 데이터 리스트 생성
   const chartDataList = Object.keys(stats.memberStats || {}).map(key => ({
     id: key,
     title: getChartTitle(key),
@@ -420,6 +489,8 @@ export default function Statistics() {
     <div style={{ padding: '20px', background: '#f4f7fa' }}>
       {/* 페이지 제목 */}
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#333', marginBottom: '20px' }}>통계</h1>
+
+
 
       {/* 상단: 작은 도넛 차트들 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px' }}>
@@ -437,7 +508,7 @@ export default function Statistics() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'start' }}>
         
         {/* 핵심 지표 요약 카드들 */}
-        <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '20px' }}>
+        <div style={{ gridColumn: 'span 3', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '20px' }}>
           {/* 총 회원 수 */}
           <Card>
             <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>총 회원 수</h4>
@@ -448,14 +519,7 @@ export default function Statistics() {
             <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>플랫폼 가입 회원</p>
           </Card>
           
-          {/* 현재 접속자 수 */}
-          <Card>
-            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>현재 접속자</h4>
-            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#10b981' }}>
-              {stats.activityStats?.currentOnlineUsers || 0}명
-            </p>
-            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>30분 내 활동</p>
-          </Card>
+
           
           {/* 총 가입자 수 */}
           <Card>
@@ -480,7 +544,23 @@ export default function Statistics() {
         {/* 선택된 차트 상세 */}
         {selectedChart && (
           <Card style={{ gridColumn: 'span 1' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#555' }}>{selectedChart.title} 상세</h3>
+            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#555' }}>{selectedChart.title} 상세</h3>
+            <div style={{ margin: '0 0 15px 0', padding: '10px', background: '#f8f9fa', borderRadius: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', color: '#666' }}>통계 포함 인원:</span>
+                <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
+                  {selectedChart.data.datasets[0].data.reduce((a, b) => a + b, 0)}명
+                </span>
+              </div>
+              {stats.activityStats && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
+                  <span style={{ fontSize: '14px', color: '#666' }}>총 회원 수:</span>
+                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#6a6cff' }}>
+                    {stats.activityStats.totalRegisteredMembers || stats.activityStats.totalVisitors || 0}명
+                  </span>
+                </div>
+              )}
+            </div>
             <div style={{ maxWidth: '300px', margin: '0 auto' }}>
               <Doughnut data={selectedChart.data} options={{ plugins: { legend: { position: 'right' } } }} />
             </div>
@@ -537,12 +617,6 @@ export default function Statistics() {
           }}>
             <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#555' }}>실시간 현황</h3>
             <div style={{ display: 'grid', gap: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#666' }}>🟢 현재 접속자</span>
-                <span style={{ fontWeight: 'bold', color: '#00C851', fontSize: '18px' }}>
-                  {stats.activityStats.currentOnlineUsers || 0}명
-                </span>
-              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#666' }}>👥 총 회원 수</span>
                 <span style={{ fontWeight: 'bold', color: '#2196F3', fontSize: '18px' }}>

@@ -409,10 +409,6 @@ public class MemberServiceImpl implements MemberService {
         
         // 실시간 접속자 통계 (새로 추가)
         try {
-            // 현재 온라인 사용자 수 (최근 30분 내 활동한 사용자)
-            Integer currentOnlineUsers = memberDao.getCurrentOnlineUsers();
-            stats.put("currentOnlineUsers", currentOnlineUsers != null ? currentOnlineUsers : 0);
-            
             // 활성 스터디룸 목록
             List<Map<String, Object>> activeStudyRooms = memberDao.getActiveStudyRooms();
             stats.put("activeStudyRooms", activeStudyRooms);
@@ -421,12 +417,11 @@ public class MemberServiceImpl implements MemberService {
             Integer totalRegisteredMembers = memberDao.getTotalRegisteredMembers();
             stats.put("totalRegisteredMembers", totalRegisteredMembers != null ? totalRegisteredMembers : 0);
             
-            log.info("실시간 통계 - 온라인: {}, 총 회원: {}, 활성 스터디룸: {}", 
-                    currentOnlineUsers, totalRegisteredMembers, activeStudyRooms.size());
+            log.info("실시간 통계 - 총 회원: {}, 활성 스터디룸: {}", 
+                    totalRegisteredMembers, activeStudyRooms.size());
             
         } catch (Exception e) {
             log.warn("실시간 접속자 통계 조회 실패, 기본값 사용", e);
-            stats.put("currentOnlineUsers", 0);
             stats.put("activeStudyRooms", List.of());
             stats.put("totalRegisteredMembers", 0);
         }
