@@ -54,7 +54,7 @@ function PreviewBoard() {
 								<p className="sub-txt">{post.content?.slice(0, 50) || '내용 미리보기 없음'}</p>
 								<ul className="room-info">
 									<li>❤ {post.likeCount}</li>
-									<li>💬 {post.commentCount}</li>
+									<li>{post.commentCount}</li>
 									<li>{new Date(post.createdAt).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}</li>
 								</ul>
 							</div>
