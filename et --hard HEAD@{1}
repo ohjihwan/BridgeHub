@@ -1,0 +1,12 @@
+[33md5345f91[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: commit: rtc 연동 끝
+[33m75cd366b[m HEAD@{1}: commit: Video 경로삭제
+[33m23f71850[m HEAD@{2}: commit: 소켓 분리
+[33m7b8d3b95[m HEAD@{3}: commit: rtc 와 소켓 완전 분리
+[33m7298df2e[m HEAD@{4}: commit: 커밋
+[33mfb125c32[m HEAD@{5}: commit: 커밋
+[33m12cd93e0[m HEAD@{6}: commit: rtc 경로추가
+[33m7354f216[m HEAD@{7}: commit: rtc
+[33mbf359c0e[m HEAD@{8}: commit: 알티씨
+[33m802addf0[m HEAD@{9}: commit: 메인최신화
+[33m5c77c760[m HEAD@{10}: commit (merge): Merge branch 'MVP2' of https://github.com/ohjihwan/BridgeHub
+[33m0d6f5384[m HEAD@{11}: clone: from https://github.com/ohjihwan/BridgeHub.git

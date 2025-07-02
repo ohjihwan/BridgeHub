@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebRTC 대기실</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .container {
+        max-width: 500px;
+        width: 100%;
+      }
+      
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        letter-spacing: -0.025em;
+      }
+      
+      .section {
+        margin-bottom: 30px;
+        padding: 32px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+      
+      .section h3 {
+        color: #333333;
+        margin-top: 0;
+        margin-bottom: 24px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        text-align: center;
+      }
+      
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555555;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      
+      input {
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 16px;
+        width: 100%;
+        transition: all 0.3s ease;
+        background: #ffffff;
+        color: #333333;
+      }
+      
+      input::placeholder {
+        color: #999999;
+      }
+      
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      
+      button {
+        padding: 16px 32px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+      
+      button:active {
+        transform: translateY(0);
+      }
+      
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .create-room-container {
+        text-align: center;
+      }
+      
+      .nickname-container {
+        text-align: center;
+      }
+      
+      #room-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      #room-list li {
+        margin-bottom: 12px;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e1e5e9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      
+      #room-list li:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        border-color: #667eea;
+      }
+      
+      #room-list li button {
+        margin: 0;
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 80px;
+        width: auto;
+        margin-bottom: 0;
+      }
+      
+      .room-name {
+        color: #333333;
+        font-weight: 500;
+        flex: 1;
+        font-size: 15px;
+      }
+      
+      .room-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .room-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #666666;
+        font-size: 13px;
+      }
+      
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #3ba55c;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #888888;
+        font-style: italic;
+      }
+      
+      .empty-state::before {
+        content: "🏠";
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+      
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* 반응형 디자인 */
+      @media (max-width: 600px) {
+        body {
+          padding: 15px;
+        }
+        
+        h1 {
+          font-size: 2rem;
+          margin-bottom: 30px;
+        }
+        
+        .section {
+          padding: 24px;
+          margin-bottom: 20px;
+        }
+        
+        input {
+          padding: 14px;
+          font-size: 16px;
+        }
+        
+        button {
+          padding: 14px 24px;
+          font-size: 15px;
+        }
+        
+        #room-list li {
+          flex-direction: column;
+          gap: 12px;
+          text-align: center;
+          padding: 16px;
+        }
+        
+        #room-list li button {
+          width: 100%;
+        }
+        
+        .room-info {
+          flex-direction: column;
+          gap: 8px;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📱 모바일 화면공유</h1>
+      
+      <div class="section">
+        <div class="nickname-container">
+          <label for="nickname">닉네임:</label>
+          <input id="nickname" type="text" placeholder="닉네임을 입력하세요" />
+          <div class="create-room-container">
+            <button onclick="createRoom()">새 방 만들기</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h3>🏠 참여 가능한 방</h3>
+        <ul id="room-list">
+          <li class="empty-state">
+            <div>아직 생성된 방이 없습니다</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const roomList = document.getElementById("room-list");
+
+      function getNickname() {
+        return document.getElementById("nickname").value.trim();
+      }
+
+      function createRoom() {
+        const nickname = getNickname();
+        if (!nickname) return alert("닉네임을 입력하세요.");
+        
+        const roomId = "room-" + Date.now();
+        socket.emit("create-room", roomId);
+        
+        const button = event.target;
+        const originalText = button.textContent;
+        button.innerHTML = '<span class="loading"></span> 방 생성 중...';
+        button.disabled = true;
+        
+        setTimeout(() => {
+          socket.emit("get-room-list");
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 500);
+        
+        setTimeout(() => {
+          location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
+        }, 600);
+      }
+
+      socket.on("room-list", (rooms) => {
+        roomList.innerHTML = "";
+        
+        if (rooms.length === 0) {
+          const emptyLi = document.createElement("li");
+          emptyLi.className = "empty-state";
+          emptyLi.innerHTML = "<div>아직 생성된 방이 없습니다</div>";
+          roomList.appendChild(emptyLi);
+          return;
+        }
+        
+        rooms.forEach((room) => {
+          const li = document.createElement("li");
+          
+          const roomInfo = document.createElement("div");
+          roomInfo.className = "room-info";
+          
+          const roomName = document.createElement("div");
+          roomName.className = "room-name";
+          roomName.textContent = room.id || room;
+          
+          const roomStatus = document.createElement("div");
+          roomStatus.className = "room-status";
+          
+          if (room.participantCount !== undefined) {
+            const remainingHours = Math.floor((room.remainingTime || 0) / (60 * 60 * 1000));
+            const remainingMinutes = Math.floor(((room.remainingTime || 0) % (60 * 60 * 1000)) / (60 * 1000));
+            roomStatus.innerHTML = `
+              <div class="status-dot"></div> 
+              ${room.participantCount}/${room.maxParticipants}명 | 
+              ${remainingHours}h ${remainingMinutes}m 남음
+            `;
+          } else {
+            roomStatus.innerHTML = '<div class="status-dot"></div> 활성';
+          }
+          
+          const btn = document.createElement("button");
+          btn.innerText = "입장";
+          btn.onclick = () => {
+            const nickname = getNickname();
+            if (!nickname) return alert("닉네임을 입력하세요.");
+            
+            btn.innerHTML = '<span class="loading"></span> 입장 중...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+              const roomId = room.id || room;
+              location.href = `/client.html?room=${roomId}&name=${encodeURIComponent(nickname)}`;
+            }, 300);
+          };
+          
+          roomInfo.appendChild(roomName);
+          roomInfo.appendChild(roomStatus);
+          
+          li.appendChild(roomInfo);
+          li.appendChild(btn);
+          roomList.appendChild(li);
+        });
+      });
+
+      socket.emit("get-room-list");
+      
+      document.getElementById("nickname").addEventListener("keyup", (e) => {
+        if (e.key === "Enter") createRoom();
+      });
+
+      socket.on("join-error", (error) => {
+        alert("입장 오류: " + error);
+      });
+
+      socket.on("room-expired", (roomId) => {
+        alert("방 시간이 만료되었습니다.");
+      });
+
+      socket.on("room-force-closed", (data) => {
+        alert("방이 강제로 종료되었습니다: " + (data.reason || "관리자에 의해"));
+      });
+    </script>
+  </body>
+</html>

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom"
 import Header from "@common/Header"
 import ListSearch from "@components/ListSearch"
 import { customAlert } from '@/assets/js/common-ui';
+import { useParams } from 'react-router-dom';
 
 function Board() {
 	const [showSearch, setShowSearch] = useState(false)
@@ -15,13 +16,15 @@ function Board() {
 	const [loading, setLoading] = useState(false)
 	const [selectedPost, setSelectedPost] = useState(null)
 	const [showDetail, setShowDetail] = useState(false)
+
+	const { boardId } = useParams();
+	const navigate = useNavigate()
 		
 	// 댓글 관련 state
 	const [comments, setComments] = useState([])
 	const [newComment, setNewComment] = useState("")
 	const [commentLoading, setCommentLoading] = useState(false)
 
-	const navigate = useNavigate()
 
 	// 게시글 목록 가져오기
 	const fetchPosts = async (page = 0, reset = false) => {
@@ -265,6 +268,12 @@ function Board() {
 			totalPagesDisplay: totalPages,
 		}
 	}, [currentPage, totalPages, posts.length, totalElements])
+	
+	useEffect(() => {
+		if (boardId) {
+			fetchPostDetail(boardId);
+		}
+	}, [boardId]);
 
 	// 초기 로드 및 필터 변경 시 게시글 가져오기
 	useEffect(() => {
@@ -309,7 +318,7 @@ function Board() {
 				onBeforeBack={() => {
 					navigate('/home')
 				}}
-				showSearch={true} 
+				showSearch={!boardId}
 				title="자유게시판" 
 				onSearch={() => setShowSearch(true)} 
 			/>
@@ -327,7 +336,10 @@ function Board() {
 						<>
 							{displayPosts.map((post, idx) => (
 								<div key={post.boardId} className={`board-list__item delay-${idx % 10}`}>
-									<div className="board-list__txts" onClick={() => fetchPostDetail(post.boardId)}>
+									<div className="board-list__txts" onClick={() => {
+										setSelectedPost(post);
+										setShowDetail(true);
+									}}>
 										<h3 className="board-list__title">{post.title}</h3>
 										<div className="board-list__txt">{post.contentPreview}</div>
 									</div>

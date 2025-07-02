@@ -5,7 +5,6 @@ import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
 import ResultModal from '@components/chat/ResultModal';
 import TodoList from '@components/chat/TodoListDeployment';
-import Video from '@components/Video';
 import { useStudySocket } from '@dev/hooks/useSocket';
 import { chatAPI, userAPI, reportAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
@@ -968,17 +967,6 @@ function Chat() {
 		};
 	}, [isConnected, isOwner, socketService]);
 
-	// WebRTC
-	const handleStartVideo = () => {
-		const finalRoomId = roomId || studyId || `room-${Date.now()}`
-	navigate(`/video/${finalRoomId}`, {
-		state: {
-		userNickname: currentUserInfo?.nickname || '참가자'
-		}
-	})
-	}
-
-
 	// 스크롤 하단
 	useEffect(() => {
 		if (!messages.length) return;
@@ -1324,24 +1312,7 @@ function Chat() {
 				allParticipants={getAllParticipants()}
 				onShowParticipants={() => setShowChatMember(true)}
 			/>
-				<button
-				onClick={handleStartVideo}
-				style={{
-				position: 'fixed',
-				bottom: '20px',
-				left: '20px',
-				zIndex: 9999,
-				backgroundColor: '#2196f3',
-				color: 'white',
-				border: 'none',
-				padding: '10px 16px',
-				borderRadius: '20px',
-				fontSize: '14px',
-				cursor: 'pointer'
-				}}
-			>
-				📷 화상 회의 시작
-			</button>
+
 
 			{/* 참가 신청 알림 (방장만 표시) - 중복 기능으로 주석처리 */}
 			{/*
@@ -1575,7 +1546,7 @@ function Chat() {
 			<div className="msg-writing">
 				<div className="msg-writing__box">
 					<div className="msg-writing__services">
-						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={handleStartVideo}></button>
+						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => window.open("http://192.168.162.197:7600", "_blank")}></button>
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
