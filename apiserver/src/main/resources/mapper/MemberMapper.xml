@@ -137,8 +137,8 @@
             COUNT(*) as count
         FROM members
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY DATE(created_at)
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY DATE_FORMAT(created_at, '%Y-%m-%d')
     </select>
 
     <select id="getQuarterlyVisitors" resultType="map">
@@ -147,8 +147,8 @@
             COUNT(*) as count
         FROM members
         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY DATE(created_at)
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY DATE_FORMAT(created_at, '%Y-%m-%d')
     </select>
 
     <select id="getTopActiveUsers" resultType="map">
@@ -183,17 +183,12 @@
     
     <select id="getActiveStudyRooms" resultType="map">
         SELECT 
-            sr.study_room_id as roomId,
-            sr.title as roomTitle,
-            COUNT(DISTINCT srm.member_id) as currentUsers,
-            sr.capacity as maxCapacity
-        FROM studyroom sr
-        LEFT JOIN study_room_members srm ON sr.study_room_id = srm.study_room_id
-            AND srm.status = 'APPROVED'
-        WHERE sr.status = 'ACTIVE'
-        GROUP BY sr.study_room_id, sr.title, sr.capacity
-        HAVING currentUsers > 0
-        ORDER BY currentUsers DESC
+            study_room_id as roomId,
+            title as roomTitle,
+            0 as currentUsers,
+            capacity as maxCapacity
+        FROM studyroom
+        ORDER BY study_room_id DESC
         LIMIT 10
     </select>
     

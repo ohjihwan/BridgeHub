@@ -1,5 +1,7 @@
 package com.koreait.apiserver.controller;
 
+import com.koreait.apiserver.dao.MemberDao;
+import com.koreait.apiserver.dao.ReportDao;
 import com.koreait.apiserver.dto.ApiResponse;
 import com.koreait.apiserver.dto.MemberDTO;
 import com.koreait.apiserver.dto.ReportDTO;
@@ -24,6 +26,8 @@ public class AdminController {
 
     private final ReportService reportService;
     private final MemberService memberService;
+    private final MemberDao memberDao;
+    private final ReportDao reportDao;
 
    
     /**
@@ -203,6 +207,18 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/statistics/activity")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getActivityStatisticsApi() {
+        try {
+            Map<String, Object> activityStats = buildActivityStatistics();
+            return ResponseEntity.ok(ApiResponse.success(activityStats));
+        } catch (Exception e) {
+            log.error("활동 통계 조회 실패", e);
+            Map<String, Object> fallbackActivityStats = createFallbackActivityStatistics();
+            return ResponseEntity.ok(ApiResponse.success(fallbackActivityStats));
+        }
+    }
+
     
     // 통계 데이터 생성 헬퍼 메서드들 (안전하게 수정)
     
@@ -361,6 +377,52 @@ public class AdminController {
         
         public String getAdminNote() { return adminNote; }
         public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
+    }
+
+    @GetMapping("/debug-studyrooms")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> debugStudyRooms() {
+        try {
+            Map<String, Object> debug = new HashMap<>();
+            
+            // 1. 활성 스터디룸 원본 데이터 조회만
+            List<Map<String, Object>> activeStudyRooms = memberDao.getActiveStudyRooms();
+            debug.put("activeStudyRoomsRaw", activeStudyRooms);
+            debug.put("activeStudyRoomsCount", activeStudyRooms.size());
+            
+            log.info("스터디룸 디버그 정보: {}", debug);
+            
+            return ResponseEntity.ok(ApiResponse.success("스터디룸 디버그 성공", debug));
+            
+        } catch (Exception e) {
+            log.error("스터디룸 디버그 실패", e);
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("스터디룸 디버그 실패: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/debug-reports")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> debugReports() {
+        try {
+            Map<String, Object> debug = new HashMap<>();
+            
+            // 1. 간단한 Report 데이터 조회
+            List<Map<String, Object>> simpleReports = reportDao.findSimpleReports();
+            debug.put("simpleReportsRaw", simpleReports);
+            debug.put("simpleReportsCount", simpleReports.size());
+            
+            // 2. 전체 Report 개수
+            int totalCount = reportDao.getTotalCount();
+            debug.put("totalReportsCount", totalCount);
+            
+            log.info("신고 디버그 정보: {}", debug);
+            
+            return ResponseEntity.ok(ApiResponse.success("신고 디버그 성공", debug));
+            
+        } catch (Exception e) {
+            log.error("신고 디버그 실패", e);
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("신고 디버그 실패: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/debug-members")

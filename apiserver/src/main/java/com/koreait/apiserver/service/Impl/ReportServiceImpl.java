@@ -172,10 +172,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportDTO> getReportsWithPaging(int page, int size) {
         int offset = page * size;
-        return reportDao.findAllWithPaging(offset, size)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return reportDao.findAllWithPaging(offset, size);
     }
 
     @Override
