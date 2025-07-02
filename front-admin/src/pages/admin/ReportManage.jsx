@@ -192,6 +192,96 @@ function ReportManage() {
     return <span className={`status-badge ${config.class}`}>{config.text}</span>;
   };
 
+  // 신고 처리 폼 컴포넌트
+  const ReportResolutionForm = ({ reportId, onResolve, onCancel }) => {
+    const [penaltyType, setPenaltyType] = useState('');
+    const [penalty, setPenalty] = useState('');
+    const [adminNote, setAdminNote] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!penaltyType || !penalty) {
+        alert('처리 유형과 처리 내용을 입력해주세요.');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        await onResolve(reportId, penaltyType, penalty, adminNote);
+        onCancel(); // 폼 닫기
+      } catch (error) {
+        console.error('신고 처리 실패:', error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="resolution-form">
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="penaltyType">처리 유형</label>
+            <select
+              id="penaltyType"
+              value={penaltyType}
+              onChange={(e) => setPenaltyType(e.target.value)}
+              className="form-select"
+              required
+            >
+              <option value="">처리 유형 선택</option>
+              <option value="경고">경고</option>
+              <option value="일시정지">일시정지</option>
+              <option value="영구정지">영구정지</option>
+              <option value="무혐의">무혐의</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="penalty">처리 내용</label>
+            <input
+              type="text"
+              id="penalty"
+              value={penalty}
+              onChange={(e) => setPenalty(e.target.value)}
+              className="form-input"
+              placeholder="처리 내용을 입력하세요"
+              required
+            />
+          </div>
+        </div>
+        <div className="form-group">
+          <label htmlFor="adminNote">관리자 코멘트</label>
+          <textarea
+            id="adminNote"
+            value={adminNote}
+            onChange={(e) => setAdminNote(e.target.value)}
+            className="form-textarea"
+            placeholder="관리자 코멘트를 입력하세요 (선택사항)"
+            rows="3"
+          />
+        </div>
+        <div className="form-actions">
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="action-button cancel-button"
+            disabled={isSubmitting}
+          >
+            취소
+          </button>
+          <button 
+            type="submit" 
+            className="action-button submit-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? '처리 중...' : '신고 처리'}
+          </button>
+        </div>
+      </form>
+    );
+  };
+
   if (error) {
     return (
       <div className="report-manage">
@@ -217,27 +307,33 @@ function ReportManage() {
       <div className="report-header">
         <h2>신고관리</h2>
         <div className="search-filters">
-          <input
-            type="text"
-            placeholder="신고자, 대상자, 사유로 검색"
-            value={searchTerm}
-            onChange={handleSearch}
-            className="search-input"
-          />
-          <select value={statusFilter} onChange={handleStatusFilter} className="filter-select">
-            <option value="all">전체 상태</option>
-            <option value="PENDING">대기중</option>
-            <option value="PROCESSING">처리중</option>
-            <option value="RESOLVED">처리완료</option>
-            <option value="REJECTED">거절됨</option>
-          </select>
-          <select value={typeFilter} onChange={handleTypeFilter} className="filter-select">
-            <option value="all">전체 유형</option>
-            <option value="USER">사용자</option>
-            <option value="MESSAGE">메시지</option>
-            <option value="STUDYROOM">스터디룸</option>
-            <option value="INAPPROPRIATE_CONTENT">부적절한 콘텐츠</option>
-          </select>
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="신고자, 대상자, 사유로 검색"
+              value={searchTerm}
+              onChange={handleSearch}
+              className="search-input"
+            />
+          </div>
+          <div className="filter-box">
+            <select value={statusFilter} onChange={handleStatusFilter} className="status-filter">
+              <option value="all">전체 상태</option>
+              <option value="PENDING">대기중</option>
+              <option value="PROCESSING">처리중</option>
+              <option value="RESOLVED">처리완료</option>
+              <option value="REJECTED">거절됨</option>
+            </select>
+          </div>
+          <div className="filter-box">
+            <select value={typeFilter} onChange={handleTypeFilter} className="type-filter">
+              <option value="all">전체 유형</option>
+              <option value="USER">사용자</option>
+              <option value="MESSAGE">메시지</option>
+              <option value="STUDYROOM">스터디룸</option>
+              <option value="INAPPROPRIATE_CONTENT">부적절한 콘텐츠</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -347,61 +443,196 @@ function ReportManage() {
         <div className="modal-overlay" onClick={handleCloseDetail}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>신고 상세 정보</h3>
-              <button onClick={handleCloseDetail} className="close-button">&times;</button>
+              <div className="header-content">
+                <h3>신고 상세 정보</h3>
+                <div className="report-id-badge">#{selectedReport.id}</div>
+              </div>
+              <button onClick={handleCloseDetail} className="close-button">✕</button>
             </div>
+            
             <div className="modal-body">
-              <div className="detail-section">
-                <h4>기본 정보</h4>
-                <p><strong>신고 ID:</strong> #{selectedReport.id}</p>
-                <p><strong>신고자:</strong> {selectedReport.reporter}</p>
-                <p><strong>대상자:</strong> {selectedReport.target}</p>
-                <p><strong>신고 유형:</strong> {selectedReport.reportType}</p>
-                <p><strong>신고 사유:</strong> {selectedReport.reason}</p>
-                <p><strong>신고일:</strong> {selectedReport.date}</p>
-                <p><strong>상태:</strong> {getStatusBadge(selectedReport.status)}</p>
+              {/* 상태 표시줄 */}
+              <div className="status-timeline">
+                <div className="timeline-item">
+                  <div className="timeline-dot active"></div>
+                  <span>신고 접수</span>
+                </div>
+                <div className="timeline-line"></div>
+                <div className="timeline-item">
+                  <div className={`timeline-dot ${selectedReport.status !== 'PENDING' ? 'active' : ''}`}></div>
+                  <span>검토 중</span>
+                </div>
+                <div className="timeline-line"></div>
+                <div className="timeline-item">
+                  <div className={`timeline-dot ${selectedReport.status === 'RESOLVED' ? 'active' : ''}`}></div>
+                  <span>처리 완료</span>
+                </div>
               </div>
-              
+
+              {/* 신고 개요 카드 */}
+              <div className="info-card overview-card">
+                <div className="card-header">
+                  <h4>신고 개요</h4>
+                  <div className="status-badge-large">
+                    {getStatusBadge(selectedReport.status)}
+                  </div>
+                </div>
+                <div className="card-content">
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <div className="info-label">신고 유형</div>
+                      <div className="info-value type-badge">{selectedReport.reportType}</div>
+                    </div>
+                    <div className="info-item">
+                      <div className="info-label">신고일시</div>
+                      <div className="info-value">{selectedReport.date}</div>
+                    </div>
+                    <div className="info-item full-width">
+                      <div className="info-label">신고 사유</div>
+                      <div className="info-value reason-text">{selectedReport.reason}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 관련 사용자 정보 카드 */}
+              <div className="info-card users-card">
+                <div className="card-header">
+                  <h4>관련 사용자</h4>
+                </div>
+                <div className="card-content">
+                  <div className="users-grid">
+                    <div className="user-item reporter">
+                      <div className="user-avatar">신고자</div>
+                      <div className="user-info">
+                        <div className="user-role">신고자</div>
+                        <div className="user-name">{selectedReport.reporter}</div>
+                        <div className="user-id">ID: {selectedReport.reporterId}</div>
+                      </div>
+                    </div>
+                    <div className="arrow">→</div>
+                    <div className="user-item target">
+                      <div className="user-avatar">대상자</div>
+                      <div className="user-info">
+                        <div className="user-role">신고 대상</div>
+                        <div className="user-name">{selectedReport.target}</div>
+                        <div className="user-id">ID: {selectedReport.targetId}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 채팅방 정보 카드 (있을 경우) */}
               {selectedReport.chatRoomName && (
-                <div className="detail-section">
-                  <h4>채팅방 정보</h4>
-                  <p><strong>채팅방:</strong> {selectedReport.chatRoomName}</p>
+                <div className="info-card chat-card">
+                  <div className="card-header">
+                    <h4>채팅방 정보</h4>
+                  </div>
+                  <div className="card-content">
+                    <div className="chat-info">
+                      <div className="chat-room-name">{selectedReport.chatRoomName}</div>
+                    </div>
+                  </div>
                 </div>
               )}
-              
+
+              {/* 신고된 메시지 카드 (있을 경우) */}
               {selectedReport.messageContent && (
-                <div className="detail-section">
-                  <h4>메시지 내용</h4>
-                  <p>{selectedReport.messageContent}</p>
+                <div className="info-card message-card">
+                  <div className="card-header">
+                    <h4>신고된 메시지</h4>
+                  </div>
+                  <div className="card-content">
+                    <div className="message-bubble">
+                      <div className="message-content">
+                        {selectedReport.messageContent}
+                      </div>
+                      <div className="message-meta">
+                        <span className="message-author">{selectedReport.target}</span>
+                        <span className="message-time">{selectedReport.date}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
-              
-              <div className="detail-section">
-                <h4>신고 내용</h4>
-                <p>{selectedReport.reportContent}</p>
+
+              {/* 신고 상세 내용 카드 */}
+              <div className="info-card report-content-card">
+                <div className="card-header">
+                  <h4>신고 상세 내용</h4>
+                </div>
+                <div className="card-content">
+                  <div className="report-description">
+                    {selectedReport.reportContent}
+                  </div>
+                </div>
               </div>
-              
+
+              {/* 처리 결과 카드 (처리 완료된 경우) */}
               {selectedReport.status === 'RESOLVED' && (
-                <div className="detail-section">
-                  <h4>처리 결과</h4>
-                  <p><strong>처리 유형:</strong> {selectedReport.penaltyType}</p>
-                  <p><strong>처리 내용:</strong> {selectedReport.penalty}</p>
-                  <p><strong>관리자 코멘트:</strong> {selectedReport.adminNote}</p>
+                <div className="info-card resolution-card">
+                  <div className="card-header">
+                    <h4>처리 결과</h4>
+                  </div>
+                  <div className="card-content">
+                    <div className="resolution-grid">
+                      <div className="resolution-item">
+                        <div className="info-label">처리 유형</div>
+                        <div className="info-value penalty-type">{selectedReport.penaltyType}</div>
+                      </div>
+                      <div className="resolution-item">
+                        <div className="info-label">처리 내용</div>
+                        <div className="info-value penalty-detail">{selectedReport.penalty}</div>
+                      </div>
+                      <div className="resolution-item full-width">
+                        <div className="info-label">관리자 코멘트</div>
+                        <div className="info-value admin-comment">
+                          {selectedReport.adminNote || '코멘트가 없습니다.'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 신고 처리 폼 (대기 중인 경우) */}
+              {selectedReport.status === 'PENDING' && (
+                <div className="info-card action-card">
+                  <div className="card-header">
+                    <h4>신고 처리</h4>
+                  </div>
+                  <div className="card-content">
+                    <ReportResolutionForm 
+                      reportId={selectedReport.id}
+                      onResolve={handleResolve}
+                      onCancel={handleCloseDetail}
+                    />
+                  </div>
                 </div>
               )}
             </div>
+
             <div className="modal-footer">
-              {selectedReport.status === 'PENDING' && (
+              <div className="footer-actions">
+                {selectedReport.status === 'PENDING' && (
+                  <button 
+                    onClick={() => handleResolve(selectedReport.id)}
+                    className="action-button resolve-button"
+                  >
+                    신고 처리
+                  </button>
+                )}
                 <button 
-                  onClick={() => handleResolve(selectedReport.id)}
-                  className="resolve-button"
+                  onClick={() => handleDelete(selectedReport.id)}
+                  className="action-button delete-button"
                 >
-                  신고 처리
+                  삭제
                 </button>
-              )}
-              <button onClick={handleCloseDetail} className="close-button">
-                닫기
-              </button>
+                <button onClick={handleCloseDetail} className="action-button close-button">
+                  닫기
+                </button>
+              </div>
             </div>
           </div>
         </div>
