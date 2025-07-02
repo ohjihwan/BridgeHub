@@ -31,7 +31,7 @@ function ReportManage() {
       });
       
       // 백엔드 응답 구조에 맞게 데이터 변환
-      const content = Array.isArray(response.data?.content) ? response.data.content : [];
+      const content = Array.isArray(response.data?.data?.content) ? response.data.data.content : [];
       const reportsData = content.map(report => ({
         id: report.reportId,
         reporterId: report.reporterId,

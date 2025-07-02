@@ -45,10 +45,13 @@ public interface ReportDao {
     int countByStatus(String status);
     
     // 관리자 기능 추가
-    List<Report> findAllWithPaging(@Param("offset") int offset, @Param("size") int size);
+    List<ReportDTO> findAllWithPaging(@Param("offset") int offset, @Param("size") int size);
     int getTotalCount();
     
     // 통계용
     List<ReportDTO> findRecentReports(int limit);
     List<Map<String, Object>> countByReportType();
+    
+    // 디버그용
+    List<Map<String, Object>> findSimpleReports();
 } 
