@@ -2053,8 +2053,18 @@ legend,
 	display:flex;
 	align-items:flex-end;
 	position:relative;
-	padding-top:1rem;
+	padding-top:remx(60);
 	margin-left:2.4rem;
+
+	/* &__profile {
+		overflow:hidden;
+		position:absolute;
+		left:0;
+		top:remx(15);
+		width:remx(40);
+		height:remx(40);
+		border-radius:50%;
+	} */
 
 	&__text {
 		display:inline-block;
