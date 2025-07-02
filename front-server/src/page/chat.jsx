@@ -224,15 +224,6 @@ function Chat() {
 		}]);
 	};
 
-	const handleStartVideo = () => {
-		const finalRoomId = roomId || studyId || `room-${Date.now()}`
-	navigate(`/video/${finalRoomId}`, {
-		state: {
-		userNickname: currentUserInfo?.nickname || '익명'
-		}
-	})
-	}
-
 	// 파일 업로드 (백엔드 먼저, UI 나중)
 	const handleFileUpload = async (e) => {
 		const file = e.target.files[0];
@@ -1029,8 +1020,6 @@ function Chat() {
 		}
 	};
 
-<<<<<<< HEAD
-=======
 	// 탈퇴하기 기능 (방장/일반 유저 분기)
 	const handleLeave = async () => {
 		try {
@@ -1197,7 +1186,6 @@ function Chat() {
 		};
 	}, [socketService, navigate]);
 
->>>>>>> ca0cb047cfd8e92141c823bf422b73ed69f13c09
 	return (
 		<>
 			<Header
@@ -1229,21 +1217,6 @@ function Chat() {
 				allParticipants={getAllParticipants()}
 				onShowParticipants={() => setShowChatMember(true)}
 			/>
-			<button
-			onClick={handleStartVideo}
-			style={{
-			position: 'fixed',
-			bottom: '20px',
-			left: '20px',
-			zIndex: 9999,
-			backgroundColor: '#2196f3',
-			color: 'white',
-			border: 'none',
-			padding: '10px 16px',
-			borderRadius: '20px',
-			fontSize: '14px',
-			cursor: 'pointer'
-			}}>📷 화상 회의 시작</button>
 
 
 			{/* 참가 신청 알림 (방장만 표시) - 중복 기능으로 주석처리 */}
@@ -1478,7 +1451,7 @@ function Chat() {
 			<div className="msg-writing">
 				<div className="msg-writing__box">
 					<div className="msg-writing__services">
-						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={handleStartVideo}></button>
+						<button type="button" className="msg-writing__toggle" title="영상 기능 버튼" onClick={() => window.open("http://192.168.162.197:7600", "_blank")}></button>
 					</div>
 					<ul className="msg-writing__actions">
 						<li>
