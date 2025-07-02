@@ -1982,9 +1982,8 @@ legend,
 .chatroom-history {
 	overflow-x:hidden;
 	overflow-y:auto;
-	height:calc(100vh - (remx(50) + remx(75)));
-	margin-top:remx(50);
-	padding:remx(30) 0 remx(50);
+	height:calc(100vh);
+	padding:remx(50) 0 remx(120);
 }
 
 .program-msg {
