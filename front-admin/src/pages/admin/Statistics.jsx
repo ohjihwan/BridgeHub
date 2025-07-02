@@ -221,7 +221,7 @@ export default function Statistics() {
     } else if (key === 'education') {
       return ['고졸', '대학교', '대학원'];
     } else if (key === 'time') {
-      return ['06:00~12:00', '12:00~18:00', '18:00~24:00'];
+      return ['오전', '오후', '저녁'];
     } else if (key === 'major') {
       return ['인문•사회', '상경', '자연', '공학', '예체능', '의학', '법학', '융합'];
     }
@@ -304,11 +304,11 @@ export default function Statistics() {
         memberStats.time = {};
         Object.entries(data.memberStats.time).forEach(([key, value]) => {
           if (key === '오전' || key === '새벽') {
-            memberStats.time['06:00~12:00'] = (memberStats.time['06:00~12:00'] || 0) + value;
+            memberStats.time['오전'] = (memberStats.time['오전'] || 0) + value;
           } else if (key === '오후' || key === '낮') {
-            memberStats.time['12:00~18:00'] = (memberStats.time['12:00~18:00'] || 0) + value;
+            memberStats.time['오후'] = (memberStats.time['오후'] || 0) + value;
           } else if (key === '저녁' || key === '밤') {
-            memberStats.time['18:00~24:00'] = (memberStats.time['18:00~24:00'] || 0) + value;
+            memberStats.time['저녁'] = (memberStats.time['저녁'] || 0) + value;
           } else {
             // 기존 시간대 형식이면 그대로 사용
             memberStats.time[key] = value;

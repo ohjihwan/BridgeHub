@@ -277,9 +277,9 @@ public class AdminController {
         
         // 활동 시간대 기본 데이터
         Map<String, Integer> time = new HashMap<>();
-        time.put("06:00~12:00", 0);
-        time.put("12:00~18:00", 0);
-        time.put("18:00~24:00", 0);
+        time.put("오전", 0);
+        time.put("오후", 0);
+        time.put("저녁", 0);
         memberStats.put("time", time);
         
         // 전공 기본 데이터
