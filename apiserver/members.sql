@@ -416,6 +416,10 @@ INSERT INTO board_categories (category_name, description, sort_order) VALUES
 ('정보공유', '유용한 정보를 공유하는 공간', 3),
 ('공지사항', '중요한 공지사항', 0);
 
+-- 신고 테스트 데이터
+INSERT INTO Report (reporter_id, reported_user_id, report_type, room_id, study_room_id, reason, created_at, status) VALUES
+(1, 2, '욕설/비방', 2, 2, '욕설', '2025-07-02 12:42:06', 'PENDING');
+
 
 
 -- =============================================
