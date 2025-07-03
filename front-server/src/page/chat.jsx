@@ -140,7 +140,7 @@ function Chat() {
 		setTodoSettingInputs(newInputs);
 	};
 
-	const handleTodoConfirm = () => {
+	const handleGameConfirm = () => {
 		const newTodos = todoSettingInputs
 			.filter(title => title.trim() !== '')
 			.map(title => ({
@@ -907,6 +907,27 @@ function Chat() {
 		}
 	}, [isOwner, studyId, currentUserInfo]);
 
+	const handleSpin = () => {
+		const candidates = todoSettingInputs.filter(input => input.trim() !== '');
+		if (spinning) return;
+	
+		if (candidates.length <= 1) {
+			customAlert('두 개 이상의 업무를 입력해야 게임을 실행할 수 있습니다');
+			return;
+		}
+	
+		setSpinning(true);
+		setShowResult(true);
+	
+		const randomIndex = Math.floor(Math.random() * candidates.length);
+		const selected = candidates[randomIndex];
+	
+		setTimeout(() => {
+			setWinner(selected);
+			setSpinning(false);
+		}, 3000);
+	};
+
 	// 참가 신청 알림 수신 (방장만)
 	useEffect(() => {
 		console.log('🎯 참가 신청 알림 리스너 설정:', {
@@ -1569,16 +1590,7 @@ function Chat() {
 							</li>
 						)}
 						<li>
-							<button type="button" className="msg-writing__action" onClick={() => {
-								const users = getActiveUsers();
-								if (users.length < 2) {
-									customAlert('랜덤게임은 최소 2명 이상이 필요합니다.');
-									return;
-								}
-								setShowRoulette(true);
-							}}>
-								랜덤게임
-							</button>
+							<button type="button" className="msg-writing__action" onClick={() => { setShowRoulette(true) }}>랜덤게임</button>
 						</li>
 						<li>
 							<button type="button" className="msg-writing__action" onClick={() => {
@@ -1603,23 +1615,23 @@ function Chat() {
 				</div>
 			</div>
 
-			<Layer isOpen={showRoulette} onClose={() => setShowRoulette(false)} header="랜덤 뽑기">
-				<Roulette 
-					users={getActiveUsers()} 
-					isOwner={isOwner}
-					onSpinStart={() => {
-						setSpinning(true); // 모달 띄우고
-						setShowResult(true); // "룰렛 돌리는 중..." 보여주기
-					}}
-					onWinnerSelected={(user) => {
-						setSpinning(false); // 돌리기 종료
-						setWinner(user); // 결과 저장
-						addSystemMessage(`"${user}"님이 당첨되셨습니다!`, { user });
-					}}
-				/>
+			<Layer isOpen={showRoulette} onClose={() => setShowRoulette(false)} header="랜덤 뽑기" footer={ <button type="button" className="todo-setting__submit" onClick={handleSpin}>목표 전달</button> }>
+				<div className="todo-setting">
+					{todoSettingInputs.map((input, idx) => (
+						<div key={idx} className="todo-setting__unit">
+							<div className="field">
+								<input className="text" type="text" value={input} onChange={(e) => handleInputChange(e, idx)} placeholder={`업무 ${idx + 1}`}/>
+							</div>
+							<button type="button" className="todo-setting__delete" aria-label="삭제하기" onClick={() => handleTodoSettingDelete(idx)}></button>
+						</div>
+					))}
+					{todoSettingInputs.length < 10 && (
+						<button type="button" className="todo-setting__add" onClick={handleTodoSettingAddInput} aria-label="목표 추가"></button>
+					)}
+				</div>
 			</Layer>
 
-			<Layer isOpen={showTodoSetting} onClose={() => setShowTodoSetting(false)} header="목표 설정" footer={ <button type="button" className="todo-setting__submit" onClick={handleTodoConfirm}>목표 전달</button> }>
+			<Layer isOpen={showTodoSetting} onClose={() => setShowTodoSetting(false)} header="목표 설정" footer={ <button type="button" className="todo-setting__submit" onClick={handleGameConfirm}>목표 전달</button> }>
 				<div className="todo-setting">
 					{todoSettingInputs.map((input, idx) => (
 						<div key={idx} className="todo-setting__unit">
