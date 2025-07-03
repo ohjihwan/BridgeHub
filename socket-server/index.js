@@ -28,12 +28,14 @@ const {
 
 // 환경 변수 설정
 const PORT = process.env.PORT || 7500;
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:7100/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://192.168.162.197:7100/api';
 const CORS_ORIGINS = process.env.CORS_ORIGINS?.split(',') || [
     "http://localhost:7000", 
     "http://localhost:7700",
     "http://127.0.0.1:5500",
-    "http://localhost:5500"
+    "http://localhost:5500",
+    "http://192.168.162.197:7000",
+    "http://192.168.162.197:7100"
 ];
 
 const app = express();

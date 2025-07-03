@@ -150,7 +150,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
         
         // 4. 소켓 서버로 스터디룸 생성 알림 전송
         try {
-            String socketServerUrl = "http://localhost:7500/api/socket/study-room-update";
+            String socketServerUrl = "http://192.168.162.197:7500/api/socket/study-room-update";
             String requestBody = String.format(
                 "{\"action\":\"created\",\"studyRoom\":{\"studyRoomId\":%d,\"title\":\"%s\",\"description\":\"%s\",\"bossId\":%d,\"education\":\"%s\",\"department\":\"%s\",\"region\":\"%s\",\"district\":\"%s\",\"capacity\":%d,\"currentMembers\":%d,\"time\":\"%s\",\"thumbnail\":\"%s\",\"isPublic\":%s}}",
                 studyRoom.getStudyRoomId(),
@@ -216,7 +216,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             
             // 소켓 서버로 스터디룸 수정 알림 전송
             try {
-                String socketServerUrl = "http://localhost:7500/api/socket/study-room-update";
+                String socketServerUrl = "http://192.168.162.197:7500/api/socket/study-room-update";
                 String requestBody = String.format(
                     "{\"action\":\"updated\",\"studyRoom\":{\"studyRoomId\":%d,\"title\":\"%s\",\"description\":\"%s\",\"bossId\":%d,\"education\":\"%s\",\"department\":\"%s\",\"region\":\"%s\",\"district\":\"%s\",\"capacity\":%d,\"currentMembers\":%d,\"time\":\"%s\",\"thumbnail\":\"%s\",\"isPublic\":%s}}",
                     studyRoom.getStudyRoomId(),
@@ -268,7 +268,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
             
             // 소켓 서버로 스터디룸 삭제 알림 전송
             try {
-                String socketServerUrl = "http://localhost:7500/api/socket/study-room-update";
+                String socketServerUrl = "http://192.168.162.197:7500/api/socket/study-room-update";
                 String requestBody = String.format(
                     "{\"action\":\"deleted\",\"studyRoom\":{\"studyRoomId\":%d,\"title\":\"%s\"}}",
                     studyRoom.getStudyRoomId(),
@@ -486,7 +486,7 @@ public class StudyRoomServiceImpl implements StudyRoomService {
                 
                 // 4. 소켓 서버로 스터디룸 삭제 알림 전송
                 try {
-                    String socketServerUrl = "http://localhost:7500/api/socket/delete-study";
+                    String socketServerUrl = "http://192.168.162.197:7500/api/socket/delete-study";
                     String requestBody = String.format("{\"studyId\":\"%d\",\"roomId\":\"%d\"}", studyRoomId, chatRoomId);
                     
                     // HTTP 클라이언트로 직접 요청

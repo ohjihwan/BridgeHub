@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
    
    // 환경에 따른 API 서버 URL 설정
    const API_TARGET = env.VITE_API_TARGET || 
-      (mode === 'production' ? 'http://www.bridgehub.asia' : 'http://localhost:7100');
+      (mode === 'development' ,'http://192.168.162.197:7100');
 
    console.log(`Vite Config - Mode: ${mode}, API Target: ${API_TARGET}`);
 
@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       server: {
          host: '0.0.0.0',
-         allowedHosts: ["www.bridgehub.asia", "localhost",'0.0.0.0'],
+         allowedHosts: ['0.0.0.0'],
          port: 7000,
          proxy: {
             '/api': {

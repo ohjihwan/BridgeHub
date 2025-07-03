@@ -93,7 +93,7 @@ public class ChatRoomController {
             
             // 2. 소켓 서버로 강퇴 알림 전송
             try {
-                String socketServerUrl = "http://localhost:7500/api/socket/kick-member";
+                String socketServerUrl = "http://192.168.162.197:7500/api/socket/kick-member";
                 
                 // JSON 형식으로 올바르게 전송
                 String requestBody = String.format("{\"roomId\":%d,\"memberId\":%d}", roomId, memberId);

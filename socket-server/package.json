@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix",
     "clean": "rm -rf node_modules package-lock.json",
     "install:clean": "npm run clean && npm install",
-    "health": "curl http://localhost:7500/health",
+    "health": "curl http://192.168.162.197:7500/health",
     "logs": "tail -f socket-server.log"
   },
   "dependencies": {

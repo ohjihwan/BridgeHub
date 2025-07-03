@@ -174,7 +174,7 @@ public class FileServiceImpl implements FileService {
         FileDTO fileDTO = convertToDTO(fileEntity);
         
         // 웹에서 접근 가능한 URL 생성
-        String fileUrl = "http://localhost:7100/uploads/" + relativePath;
+        String fileUrl = "http://192.168.162.197:7100/uploads/" + relativePath;
         fileDTO.setFileUrl(fileUrl);
         fileDTO.setDownloadUrl("/api/files/download/" + fileEntity.getFileId());
         fileDTO.setThumbnailUrl("/api/files/thumbnail/" + fileEntity.getFileId());

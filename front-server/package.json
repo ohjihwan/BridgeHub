@@ -6,11 +6,11 @@
   "scripts": {
     "start": "vite --host 0.0.0.0 --port 7000",
     "dev": "vite --host 0.0.0.0 --port 7000",
-    "dev:local": "VITE_API_TARGET=http://localhost:7100 vite --host 0.0.0.0 --port 7000",
-    "dev:prod": "VITE_API_TARGET=http://www.bridgehub.asia vite --host 0.0.0.0 --port 7000",
+    "dev:local": "VITE_API_TARGET=http://192.168.162.197:7100 vite --host 0.0.0.0 --port 7000",
+    "dev:prod": "VITE_API_TARGET=http://192.168.162.197:7100 vite --host 0.0.0.0 --port 7000",
     "build": "vite build",
-    "build:local": "VITE_API_TARGET=http://localhost:7100 vite build",
-    "build:prod": "VITE_API_TARGET=http://www.bridgehub.asia vite build",
+    "build:local": "VITE_API_TARGET=http://192.168.162.197:7100 vite build",
+    "build:prod": "VITE_API_TARGET=http://192.168.162.197:7100 vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "clean": "rimraf node_modules/.vite"
