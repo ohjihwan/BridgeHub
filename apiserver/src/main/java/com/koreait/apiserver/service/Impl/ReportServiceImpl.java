@@ -183,24 +183,37 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportDTO resolveReport(Integer reportId, String penaltyType, String penalty, String adminNote) {
+        return resolveReport(reportId, penaltyType, penalty, adminNote, "RESOLVED");
+    }
+
+    @Override
+    @Transactional
+    public ReportDTO resolveReport(Integer reportId, String penaltyType, String penalty, String adminNote, String status) {
         try {
+            log.info("=== 신고 처리 시작 ===");
+            log.info("입력 파라미터: reportId={}, penaltyType={}, penalty={}, adminNote={}, status={}", 
+                    reportId, penaltyType, penalty, adminNote, status);
+            
             Optional<Report> reportOpt = reportDao.findById(reportId);
             if (!reportOpt.isPresent()) {
                 throw new RuntimeException("신고를 찾을 수 없습니다.");
             }
 
-            // 신고 상태를 RESOLVED로 변경하고 관리자 처리 정보 저장
-            String adminComment = String.format("제재항목: %s, 제재내용: %s, 관리자메모: %s", 
-                    penaltyType != null ? penaltyType : "없음",
-                    penalty != null ? penalty : "없음", 
-                    adminNote != null ? adminNote : "없음");
+            Report beforeUpdate = reportOpt.get();
+            log.info("업데이트 전 신고 상태: status={}, adminComment={}", beforeUpdate.getStatus(), beforeUpdate.getAdminComment());
 
-            reportDao.updateReportStatus(reportId, "RESOLVED", adminComment);
+            // 관리자 코멘트는 사용자가 입력한 내용만 저장
+            String adminComment = adminNote != null ? adminNote : "";
+            String finalStatus = status != null ? status : "RESOLVED";
+
+            log.info("실제 DB 업데이트할 값: status={}, adminComment={}", finalStatus, adminComment);
+            reportDao.updateReportStatus(reportId, finalStatus, adminComment);
             
             Report resolvedReport = reportDao.findById(reportId).orElseThrow();
+            log.info("업데이트 후 신고 상태: status={}, adminComment={}", resolvedReport.getStatus(), resolvedReport.getAdminComment());
             
-            log.info("신고 처리 완료: reportId={}, penaltyType={}, penalty={}", 
-                    reportId, penaltyType, penalty);
+            log.info("신고 처리 완료: reportId={}, penaltyType={}, penalty={}, status={}", 
+                    reportId, penaltyType, penalty, finalStatus);
             
             return convertToDTO(resolvedReport);
             

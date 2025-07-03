@@ -67,11 +67,15 @@ public class AdminController {
             @PathVariable Integer reportId,
             @RequestBody ResolveReportRequest request) {
         try {
+            // status가 있으면 상태 업데이트, 없으면 기본값 RESOLVED
+            String status = request.getStatus() != null ? request.getStatus() : "RESOLVED";
+            
             ReportDTO resolvedReport = reportService.resolveReport(
                 reportId, 
                 request.getPenaltyType(), 
                 request.getPenalty(), 
-                request.getAdminNote()
+                request.getAdminNote(),
+                status
             );
             return ResponseEntity.ok(ApiResponse.success(resolvedReport));
         } catch (Exception e) {
@@ -402,6 +406,7 @@ public class AdminController {
         private String penaltyType;
         private String penalty;
         private String adminNote;
+        private String status;
 
         // 기본 생성자
         public ResolveReportRequest() {}
@@ -415,6 +420,9 @@ public class AdminController {
         
         public String getAdminNote() { return adminNote; }
         public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
+
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
     }
 
     @GetMapping("/debug-studyrooms")

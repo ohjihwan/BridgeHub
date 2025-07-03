@@ -21,6 +21,8 @@ public class Report {
     private LocalDateTime createdAt;
     private String status = "PENDING";  // PENDING, PROCESSING, RESOLVED, REJECTED
     private String adminComment;
+    private String penaltyType;     // 처리 유형 (경고, 일시정지, 영구정지, 무혐의, 기타)
+    private String penalty;         // 처리 내용
     
     // 로그 시스템 관련 필드
     private Integer logFileId;      // 신고 관련 로그 파일 ID
