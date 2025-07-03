@@ -25,4 +25,7 @@ public interface ReportService {
     
     // 통계용
     Map<String, Object> getReportStatistics();
+    
+    // 신고 삭제
+    void deleteReport(Integer reportId);
 } 

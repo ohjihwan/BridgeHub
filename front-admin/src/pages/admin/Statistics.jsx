@@ -521,14 +521,16 @@ export default function Statistics() {
           
 
           
-          {/* 총 가입자 수 */}
+          {/* 신고 수 */}
           <Card>
-            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>총 가입자 수</h4>
-            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#6a6cff' }}>
-              {stats.activityStats?.totalRegisteredMembers || stats.activityStats?.totalVisitors || 
-               (stats.memberStats ? Object.values(stats.memberStats.gender || {}).reduce((a, b) => a + b, 0) : 0)}명
+            <h4 style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#666' }}>신고 수</h4>
+            <p style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 'bold', color: '#e53e3e' }}>
+              {stats.reportStats?.reportTypes ? 
+                Object.values(stats.reportStats.reportTypes).reduce((total, value) => {
+                  return total + (typeof value === 'number' ? value : 0);
+                }, 0) : 0}건
             </p>
-            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>전체 등록 회원</p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>전체 신고 건수</p>
           </Card>
           
           {/* 활성 스터디룸 */}
@@ -552,14 +554,6 @@ export default function Statistics() {
                   {selectedChart.data.datasets[0].data.reduce((a, b) => a + b, 0)}명
                 </span>
               </div>
-              {stats.activityStats && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
-                  <span style={{ fontSize: '14px', color: '#666' }}>총 회원 수:</span>
-                  <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#6a6cff' }}>
-                    {stats.activityStats.totalRegisteredMembers || stats.activityStats.totalVisitors || 0}명
-                  </span>
-                </div>
-              )}
             </div>
             <div style={{ maxWidth: '300px', margin: '0 auto' }}>
               <Doughnut data={selectedChart.data} options={{ plugins: { legend: { position: 'right' } } }} />
@@ -580,8 +574,9 @@ export default function Statistics() {
           </Card>
         )}
         
-        {/* 하단 위젯들 */}
-        {stats.activityStats?.topActiveUsers && (
+        {/* 하단 위젯들 - 모두 숨김 처리 */}
+        {/* 활동 TOP 10 - 숨김 처리 */}
+        {/* {stats.activityStats?.topActiveUsers && (
           <ListCard 
             title="활동 TOP 10"
             items={stats.activityStats.topActiveUsers}
@@ -592,9 +587,10 @@ export default function Statistics() {
               </div>
             )}
           />
-        )}
+        )} */}
         
-        {stats.activityStats?.popularRooms && (
+        {/* 인기 채팅방 TOP 10 - 숨김 처리 */}
+        {/* {stats.activityStats?.popularRooms && (
           <ListCard
             title="인기 채팅방 TOP 10"
             items={stats.activityStats.popularRooms}
@@ -605,10 +601,10 @@ export default function Statistics() {
               </div>
             )}
           />
-        )}
+        )} */}
         
-        {/* 실시간 접속자 정보 (새로 추가) */}
-        {stats.activityStats && (
+        {/* 실시간 접속자 정보 - 숨김 처리 */}
+        {/* {stats.activityStats && (
           <div style={{ 
             background: '#fff', 
             padding: '20px', 
@@ -633,10 +629,10 @@ export default function Statistics() {
               )}
             </div>
           </div>
-        )}
+        )} */}
         
-        {/* 활성 스터디룸 목록 */}
-        {stats.activityStats?.activeStudyRooms && stats.activityStats.activeStudyRooms.length > 0 && (
+        {/* 활성 스터디룸 목록 - 숨김 처리 */}
+        {/* {stats.activityStats?.activeStudyRooms && stats.activityStats.activeStudyRooms.length > 0 && (
           <ListCard 
             title="현재 활성 스터디룸"
             items={stats.activityStats.activeStudyRooms}
@@ -658,9 +654,10 @@ export default function Statistics() {
               </div>
             )}
           />
-        )}
+        )} */}
         
-        {stats.reportStats?.recentReports && (
+        {/* 최근 신고 TOP 10 - 숨김 처리 */}
+        {/* {stats.reportStats?.recentReports && (
           <ListCard
             title="최근 신고 TOP 10"
             items={stats.reportStats.recentReports}
@@ -671,7 +668,7 @@ export default function Statistics() {
               </div>
             )}
           />
-        )}
+        )} */}
       </div>
 
       {/* 반응형 스타일 */}

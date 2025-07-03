@@ -1090,7 +1090,6 @@ legend,
 		padding:0 $padding-x;
 
 		.swiper-slide {
-			height:remx(152);
 			border:1px solid $line2;
 			border-radius:remx(20);
 
@@ -1120,7 +1119,6 @@ legend,
 				.txts {
 					flex:1;
 					overflow:hidden;
-					padding:0 remx(13);
 					text-align:left;
 
 					.main-txt {
@@ -1137,6 +1135,7 @@ legend,
 					}
 
 					.sub-txt {
+						height:remx(40);
 						margin:remx(5) 0;
 						color:$font3;
 						font-size:remx(11);
@@ -1145,6 +1144,52 @@ legend,
 						-webkit-box-orient:vertical;
 						overflow:hidden;
 						text-overflow:ellipsis;
+					}
+				}
+			}
+			
+			.room-info {
+				display:flex;
+				align-items:center;
+				font-size:remx(11);
+				color:$navy;
+				text-wrap:nowrap;
+
+				::before {
+					display:none;
+				}
+
+				li {
+					position:relative;
+					padding-left:remx(8);
+
+					&:first-child {
+						padding-left:0;
+						margin-right:remx(6);
+						color:$red;
+					}
+
+					&:nth-child(2) {
+						display:flex;
+						align-items:center;
+						padding-left:remx(20);
+						color:#71d5db;
+
+						&::before {
+							content:'';
+							display:inline-block;
+							width:remx(13);
+							height:remx(13);
+							margin-right:remx(3);
+							transform:translateY(remx(-7));
+							background:url('@ico/ico-comment.svg') no-repeat 50% / 100% auto;
+						}
+					}
+
+					&:last-child {
+						display:flex;
+						align-items:center;
+						color:$font3;
 					}
 				}
 			}
@@ -1937,9 +1982,8 @@ legend,
 .chatroom-history {
 	overflow-x:hidden;
 	overflow-y:auto;
-	height:calc(100vh - (remx(50) + remx(75)));
-	margin-top:remx(50);
-	padding:remx(30) 0 remx(50);
+	height:calc(100vh);
+	padding:remx(50) 0 remx(120);
 }
 
 .program-msg {
@@ -2009,8 +2053,18 @@ legend,
 	display:flex;
 	align-items:flex-end;
 	position:relative;
-	padding-top:1rem;
+	padding-top:remx(60);
 	margin-left:2.4rem;
+
+	/* &__profile {
+		overflow:hidden;
+		position:absolute;
+		left:0;
+		top:remx(15);
+		width:remx(40);
+		height:remx(40);
+		border-radius:50%;
+	} */
 
 	&__text {
 		display:inline-block;
@@ -3013,6 +3067,7 @@ legend,
 		overflow:scroll;
 		width:100%;
 		max-height:remx(235);
+		padding:0 remx(12);
 		background-color: $bg-root;
 	}
 

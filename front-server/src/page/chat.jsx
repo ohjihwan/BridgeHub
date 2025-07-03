@@ -4,9 +4,8 @@ import Header from '@common/Header';
 import Layer from '@common/Layer';
 import Roulette from '@components/chat/Roulette';
 import ResultModal from '@components/chat/ResultModal';
-import TodoList from '@components/chat/TodoListDeployment';
 import { useStudySocket } from '@dev/hooks/useSocket';
-import { chatAPI, userAPI, reportAPI } from '@dev/services/apiService';
+import { userAPI, reportAPI } from '@dev/services/apiService';
 import AttachmentList from '@components/chat/AttachmentList';
 import { customAlert, customConfirm, customPrompt } from '@/assets/js/common-ui';
 import JoinSystem from '@components/chat/JoinSystem'
@@ -76,9 +75,7 @@ function Chat() {
 
 	const [message, setMessage] = useState('');
 	const [messages, setMessages] = useState([]);
-	const [isTyping, setIsTyping] = useState(false);
 	const textareaRef = useRef(null);
-	const [chatHistory, setChatHistory] = useState([]);
 	const [showRoulette, setShowRoulette] = useState(false);
 
 	// 파일 업로드
@@ -98,20 +95,13 @@ function Chat() {
 	const [winner, setWinner] = useState(null); // 당첨자
 
 	// 목표 분담
-	const [showTodo, setShowTodo] = useState(false);
-	const [todoList, setTodoList] = useState([]);
-	const [showTodoSetting, setShowTodoSetting] = useState(false);
-	const [todoSettingInputs, setTodoSettingInputs] = useState(['', '']);
-	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [searchResults, setSearchResults] = useState([]); // 검색된 요소 배열
 	const [currentIndex, setCurrentIndex] = useState(0); // 현재 몇 번째 결과인지
 
 	// 참가 신청 알림 관련
-	const [joinRequests, setJoinRequests] = useState([]); // 참가 신청 목록
 	const [showNavigator, setShowNavigator] = useState(false); // 말풍선 표시 여부
 
-	// WebRTC
-	const [showVideo, setShowVideo] = useState(false);
+	// WebRTC 7600 으로 이동
 
 	// 신고하기 기능 추가
 	const [showReportLayer, setShowReportLayer] = useState(false);
@@ -126,76 +116,6 @@ function Chat() {
 	const [pendingMembers, setPendingMembers] = useState([]);
 	const [currentPendingMember, setCurrentPendingMember] = useState(null);
 	const [hasPendingRequests, setHasPendingRequests] = useState(false);
-
-	// Todo 관련 함수들
-	const handleTodoSettingAddInput = () => {
-		if (todoSettingInputs.length < 10) {
-			setTodoSettingInputs([...todoSettingInputs, '']);
-		}
-	};
-
-	const handleInputChange = (e, idx) => {
-		const newInputs = [...todoSettingInputs];
-		newInputs[idx] = e.target.value;
-		setTodoSettingInputs(newInputs);
-	};
-
-	const handleTodoConfirm = () => {
-		const newTodos = todoSettingInputs
-			.filter(title => title.trim() !== '')
-			.map(title => ({
-				title,
-				users: []
-			}));
-
-		if (newTodos.length < 2) {
-			customAlert('최소 2가지 업무가 필요합니다.');
-			return;
-		}
-
-		setTodoList(newTodos);
-		setShowTodo(true);
-		setShowTodoSetting(false);
-	};
-
-	const handleTodoSettingDelete = (idx) => {
-		const newInputs = [...todoSettingInputs];
-		newInputs.splice(idx, 1);
-		setTodoSettingInputs(newInputs);
-	};
-
-	const handleRemoveTodoList = () => {
-		customConfirm('정말 제거하시겠습니까?').then((confirmDelete) => {
-			if (confirmDelete) {
-				setTodoList([]);
-				setShowTodo(false);
-			}
-		});
-	};
-
-	const handleAssignUser = (index) => {
-		const userName = currentUserInfo?.nickname || '나';
-		const newTodos = [...todoList];
-
-		if (selectedIndex === index) {
-			// 선택 해제
-			newTodos[index].users = newTodos[index].users.filter(user => user !== userName);
-			setSelectedIndex(null);
-			console.log("목표 선택이 취소되었습니다.");
-		} else {
-			// 다른 목표 내 이름 제거
-			newTodos.forEach(todo => {
-				todo.users = todo.users.filter(user => user !== userName);
-			});
-
-			// 새로 선택한 목표에 내 이름 추가
-			newTodos[index].users.push(userName);
-			setSelectedIndex(index);
-			console.log(`목표 ${index}번이 선택되었습니다.`);
-		}
-
-		setTodoList(newTodos);
-	};
 
 	// 시간 포맷 도우미
 	const getFormattedTime = () => {
@@ -969,12 +889,22 @@ function Chat() {
 
 	// 스크롤 하단
 	useEffect(() => {
+		if (chatEndRef.current) {
+			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [messages]);
+	/* useEffect(() => {
 		if (!messages.length) return;
 		const lastMsg = messages[messages.length - 1];
 		if (lastMsg.type === 'me' && chatEndRef.current) {
 			chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
 		}
-	}, [messages]);
+	}, [messages]); */
+	useEffect(() => {
+		if (isConnected && isJoined && chatEndRef.current) {
+			chatEndRef.current.scrollIntoView({ behavior: 'auto' });
+		}
+	}, [isConnected, isJoined]);
 
 	// 신고하기 버튼 활성화
 	useEffect(() => {
@@ -1514,17 +1444,8 @@ function Chat() {
 						);
 					}
 
-					if (msg.type === 'todo') {
-						return <TodoList key={i} todos={msg.todos} />;
-					}
-
 					return null;
 				})}
-
-				{/* 할 일 공유 토글 영역 - map 바깥에 별도로! */}
-				{showTodo && (
-					<TodoList todos={todoList} selectedIndex={selectedIndex} onAssignUser={handleAssignUser} />
-				)}
 
 				{/* 입력 중 표시 */}
 				{typingUsers && typingUsers.length > 0 && (
@@ -1586,18 +1507,6 @@ function Chat() {
 								랜덤게임
 							</button>
 						</li>
-						<li>
-							<button type="button" className="msg-writing__action" onClick={() => {
-								if (showTodo) {
-										handleRemoveTodoList();
-									} else {
-										setShowTodoSetting(true);
-									}
-								}}
-							>
-							{showTodo ? '목표 취소' : '목표 생성'}
-							</button>
-						</li>
 					</ul>
 				</div>
 				<input type="file" style={{ display: 'none' }} ref={fileInputRef} onChange={handleFileUpload} />
@@ -1623,22 +1532,6 @@ function Chat() {
 						addSystemMessage(`"${user}"님이 당첨되셨습니다!`, { user });
 					}}
 				/>
-			</Layer>
-
-			<Layer isOpen={showTodoSetting} onClose={() => setShowTodoSetting(false)} header="목표 설정" footer={ <button type="button" className="todo-setting__submit" onClick={handleTodoConfirm}>목표 전달</button> }>
-				<div className="todo-setting">
-					{todoSettingInputs.map((input, idx) => (
-						<div key={idx} className="todo-setting__unit">
-							<div className="field">
-								<input className="text" type="text" value={input} onChange={(e) => handleInputChange(e, idx)} placeholder={`업무 ${idx + 1}`}/>
-							</div>
-							<button type="button" className="todo-setting__delete" aria-label="삭제하기" onClick={() => handleTodoSettingDelete(idx)}></button>
-						</div>
-					))}
-					{todoSettingInputs.length < 10 && (
-						<button type="button" className="todo-setting__add" onClick={handleTodoSettingAddInput} aria-label="목표 추가"></button>
-					)}
-				</div>
 			</Layer>
 
 			{showReportLayer && (

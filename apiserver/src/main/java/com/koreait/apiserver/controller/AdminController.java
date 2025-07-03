@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 // @PreAuthorize("hasRole('ADMIN')")  // 임시 비활성화, 필요시 활성화
 public class AdminController {
@@ -76,6 +78,42 @@ public class AdminController {
             log.error("신고 처리 실패: reportId={}", reportId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("REPORT_RESOLVE_ERROR"));
+        }
+    }
+
+    /**
+     * 테스트용 DELETE 엔드포인트
+     */
+    @DeleteMapping("/test/{id}")
+    public ResponseEntity<ApiResponse<String>> testDelete(@PathVariable Integer id) {
+        log.info("=== 테스트 DELETE 요청 받음: id={} ===", id);
+        return ResponseEntity.ok(ApiResponse.success("테스트 DELETE 성공: " + id));
+    }
+
+    /**
+     * 신고 삭제 (관리자)
+     */
+    @DeleteMapping("/reports/{reportId}")
+    public ResponseEntity<ApiResponse<String>> deleteReport(@PathVariable Integer reportId) {
+        log.info("=== 신고 삭제 요청 받음: reportId={} ===", reportId);
+        
+        try {
+            if (reportId == null) {
+                log.error("reportId가 null입니다.");
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("INVALID_REPORT_ID"));
+            }
+            
+            log.info("reportService.deleteReport 호출 전");
+            reportService.deleteReport(reportId);
+            log.info("reportService.deleteReport 호출 후 - 성공");
+            
+            return ResponseEntity.ok(ApiResponse.success("신고가 성공적으로 삭제되었습니다."));
+            
+        } catch (Exception e) {
+            log.error("=== 신고 삭제 실패: reportId={} ===", reportId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("REPORT_DELETE_ERROR: " + e.getMessage()));
         }
     }
 

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import thumbnailList from '@json/Thumbnail';
 import { customAlert } from '@/assets/js/common-ui';
 import studyService from '@dev/services/studyService';
+import regionData from '@json/region';
+import subjects from '@json/subject';
 
 const CreateStudy = ({ onClose }) => {
 	const navigate = useNavigate();
@@ -50,11 +52,17 @@ const CreateStudy = ({ onClose }) => {
 	const [title, setTitle] = useState('');
 	const [department, setDepartment] = useState('');
 	const [major, setMajor] = useState('');
-	const [city, setCity] = useState('');
-	const [district, setDistrict] = useState('');
+	const [city, setCity] = useState('지역무관');
+	const [district, setDistrict] = useState('지역무관');
 	const [capacity, setCapacity] = useState('');
 	const [time, setTime] = useState('');
 	const [description, setDescription] = useState('');
+	const handleCityChange = (e) => {
+		const selectedCity = e.target.value;
+		setCity(selectedCity);
+		setErrors(prev => ({ ...prev, city: false, district: false }));
+		setDistrict('지역무관'); // 구 초기화
+	};
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
@@ -127,38 +135,42 @@ const CreateStudy = ({ onClose }) => {
 							<div className={`field ${errors.department ? '--field__error' : ''}`}>
 								<select className="select" name="department1" value={department} onChange={(e) => setDepartment(e.target.value)} onFocus={() => setErrors((prev) => ({ ...prev, department: false }))} >
 									<option value="">학력</option>
-									<option value="고졸">고졸</option>
-									<option value="대학교">대학교</option>
-									<option value="대학원">대학원</option>
+									{subjects["학력"].map((v) => (
+										<option key={v} value={v}>{v}</option>
+									))}
 								</select>
 							</div>
 							<div className={`field ${errors.major ? '--field__error' : ''}`}>
 								<select className="select" value={major} onChange={(e) => setMajor(e.target.value)} onFocus={() => setErrors(prev => ({ ...prev, major: false }))}>
-									<option value="">학과/학부 선택</option>
-									<option value="컴퓨터공학과">컴퓨터공학과</option>
-									<option value="소프트웨어학과">소프트웨어학과</option>
-									<option value="정보통신공학과">정보통신공학과</option>
+									<option value="">계열 선택</option>
+									{subjects["계열"].map((v) => (
+										<option key={v} value={v}>{v}</option>
+									))}
 								</select>
 							</div>
 						</div>
 
 						<div className="half-field">
 							<div className={`field ${errors.city ? '--field__error' : ''}`}>
-								<select className="select" name="education1" value={city} onChange={(e) => setCity(e.target.value)} onFocus={() => setErrors(prev => ({ ...prev, city: false }))}>
-									<option value="">시/도</option>
-									<option value="서울">서울</option>
-									<option value="대구">대구</option>
-									<option value="부산">부산</option>
+								<select className="select" name="education1" value={city} onChange={handleCityChange} onFocus={() => setErrors(prev => ({ ...prev, city: false }))}>
+									<option value="지역무관">지역무관</option>
+									{Object.keys(regionData).map((region) => (
+										<option key={region} value={region}>
+											{region}
+										</option>
+									))}
 								</select>
 							</div>
-							<div className={`field ${errors.district ? '--field__error' : ''}`}>
-								<select className="select" name="education2" value={district} onChange={(e) => setDistrict(e.target.value)} onFocus={() => setErrors(prev => ({ ...prev, district: false }))}>
-									<option value="">구/군</option>
-									<option value="강남구">강남구</option>
-									<option value="서초구">서초구</option>
-									<option value="종로구">종로구</option>
-								</select>
-							</div>
+							{city !== '지역무관' && (
+								<div className={`field ${errors.district ? '--field__error' : ''}`}>
+									<select className="select" name="education2" value={district} onChange={(e) => setDistrict(e.target.value)} onFocus={() => setErrors(prev => ({ ...prev, district: false }))}>
+										<option value="지역무관">구/군 선택</option>
+										{regionData[city]?.map((d) => (
+											<option key={d} value={d}>{d}</option>
+										))}
+									</select>
+								</div>
+							)}
 						</div>
 
 						<div className="half-field">
