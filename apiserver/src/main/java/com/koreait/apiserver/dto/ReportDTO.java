@@ -16,6 +16,8 @@ public class ReportDTO {
     private LocalDateTime createdAt;
     private String status = "PENDING";  // PENDING, PROCESSING, RESOLVED, REJECTED
     private String adminComment;
+    private String penaltyType;     // 처리 유형
+    private String penalty;         // 처리 내용
     
     // 추가 정보 (JOIN 결과)
     private String reporterName;

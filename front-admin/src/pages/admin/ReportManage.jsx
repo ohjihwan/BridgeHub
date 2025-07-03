@@ -12,6 +12,7 @@ function ReportManage() {
   const [showDetail, setShowDetail] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
@@ -32,26 +33,67 @@ function ReportManage() {
       
       // 백엔드 응답 구조에 맞게 데이터 변환
       const content = Array.isArray(response.data?.data?.content) ? response.data.data.content : [];
-      const reportsData = content.map(report => ({
-        id: report.reportId,
-        reporterId: report.reporterId,
-        reporter: report.reporterName || `사용자${report.reporterId}`,
-        targetId: report.reportedUserId,
-        target: report.reportedUserName || `사용자${report.reportedUserId}`,
-        reportType: report.reportType,
-        reason: report.reason,
-        date: report.createdAt ? new Date(report.createdAt).toLocaleString() : '',
-        status: report.status,
-        description: report.reason,
-        chatRoomName: report.roomName || '',
-        messageContent: report.messageContent || '',
-        reportContent: report.reason,
-        penalty: report.penalty || '',
-        penaltyType: report.penaltyType || '',
-        adminNote: report.adminComment || ''
-      }));
+      const reportsData = content.map(report => {
+        // 관리자 코멘트에서 지저분한 구조화된 내용 제거
+        let cleanAdminNote = report.adminComment || '';
+        
+        // "제재항목: xxx, 제재내용: xxx, 관리자메모: xxx" 형태에서 관리자메모 부분만 추출
+        if (cleanAdminNote.includes('관리자메모:')) {
+          const parts = cleanAdminNote.split('관리자메모:');
+          if (parts.length > 1) {
+            cleanAdminNote = parts[1].trim();
+            // "없음"이면 빈 문자열로 처리
+            if (cleanAdminNote === '없음') {
+              cleanAdminNote = '';
+            }
+          }
+        }
+        
+        return {
+          id: report.reportId,
+          reporterId: report.reporterId,
+          reporter: report.reporterName || `사용자${report.reporterId}`,
+          targetId: report.reportedUserId,
+          target: report.reportedUserName || `사용자${report.reportedUserId}`,
+          reportType: report.reportType,
+          reason: report.reason,
+          date: report.createdAt ? new Date(report.createdAt).toLocaleString() : '',
+          status: report.status,
+          description: report.reason,
+          chatRoomName: report.roomName || '',
+          messageContent: report.messageContent || '',
+          reportContent: report.reason,
+          penalty: report.penalty || '',
+          penaltyType: report.penaltyType || '',
+          adminNote: cleanAdminNote
+        };
+      });
       
       setReports(reportsData);
+      console.log('전체 신고 목록 업데이트 완료:', reportsData.length, '개');
+      
+      // 현재 선택된 신고가 있다면 업데이트된 데이터로 갱신
+      if (selectedReport) {
+        console.log('현재 선택된 신고 ID:', selectedReport.id);
+        const updatedSelectedReport = reportsData.find(report => report.id === selectedReport.id);
+        if (updatedSelectedReport) {
+          console.log('선택된 신고 업데이트 전:', { 
+            id: selectedReport.id, 
+            status: selectedReport.status, 
+            adminNote: selectedReport.adminNote 
+          });
+          console.log('선택된 신고 업데이트 후:', { 
+            id: updatedSelectedReport.id, 
+            status: updatedSelectedReport.status, 
+            adminNote: updatedSelectedReport.adminNote 
+          });
+          setSelectedReport(updatedSelectedReport);
+        } else {
+          console.log('업데이트된 데이터에서 선택된 신고를 찾을 수 없음');
+        }
+      } else {
+        console.log('현재 선택된 신고가 없음');
+      }
     } catch (err) {
       setError(err);
     } finally {
@@ -95,20 +137,30 @@ function ReportManage() {
   const handleCloseDetail = () => {
     setShowDetail(false);
     setSelectedReport(null);
+    setIsEditing(false);
   };
 
-  const handleResolve = async (reportId, penaltyType = '', penalty = '', adminNote = '') => {
+  const handleResolve = async (reportId, penaltyType = '', penalty = '', adminNote = '', status = 'RESOLVED') => {
     try {
-      await resolveReport(reportId, {
+      console.log('handleResolve 시작 - 전송할 데이터:', { reportId, penaltyType, penalty, adminNote, status });
+      
+      const response = await resolveReport(reportId, {
         penaltyType,
         penalty,
-        adminNote
+        adminNote,
+        status
       });
       
+      console.log('백엔드 응답:', response);
+      
       // 목록 새로고침
-      loadReports();
+      console.log('목록 새로고침 시작');
+      await loadReports();
+      console.log('목록 새로고침 완료');
+      
       alert('신고가 처리되었습니다.');
     } catch (err) {
+      console.error('handleResolve 에러:', err);
       alert('신고 처리에 실패했습니다: ' + err.message);
     }
   };
@@ -193,22 +245,84 @@ function ReportManage() {
   };
 
   // 신고 처리 폼 컴포넌트
-  const ReportResolutionForm = ({ reportId, onResolve, onCancel }) => {
-    const [penaltyType, setPenaltyType] = useState('');
-    const [penalty, setPenalty] = useState('');
-    const [adminNote, setAdminNote] = useState('');
+  const ReportResolutionForm = ({ reportId, onResolve, onCancel, initialData = {}, isEdit = false }) => {
+    const [penaltyType, setPenaltyType] = useState(initialData.penaltyType || '');
+    const [penalty, setPenalty] = useState(initialData.penalty || '');
+    const [adminNote, setAdminNote] = useState(initialData.adminNote || '');
+    const [status, setStatus] = useState(initialData.status || 'RESOLVED');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // initialData가 변경될 때 상태 업데이트
+    useEffect(() => {
+      console.log('ReportResolutionForm useEffect 실행 - initialData:', initialData);
+      console.log('상태 업데이트 전:', { penaltyType, penalty, adminNote, status });
+      
+      setPenaltyType(initialData.penaltyType || '');
+      setPenalty(initialData.penalty || '');
+      setAdminNote(initialData.adminNote || '');
+      setStatus(initialData.status || 'RESOLVED');
+      
+      console.log('상태 업데이트 후:', { 
+        penaltyType: initialData.penaltyType || '', 
+        penalty: initialData.penalty || '', 
+        adminNote: initialData.adminNote || '', 
+        status: initialData.status || 'RESOLVED' 
+      });
+    }, [initialData.penaltyType, initialData.penalty, initialData.adminNote, initialData.status]);
+
+
+
+    // 처리 유형별 처리 내용 옵션
+    const penaltyOptions = {
+      '경고': [
+        '1차 경고',
+        '2차 경고',
+        '3차 경고',
+        '최종 경고'
+      ],
+      '일시정지': [
+        '1일 정지',
+        '3일 정지',
+        '7일 정지',
+        '15일 정지',
+        '30일 정지'
+      ],
+      '영구정지': [
+        '영구 계정 정지',
+        '영구 서비스 이용 제한'
+      ],
+      '무혐의': [
+        '허위 신고',
+        '증거 불충분',
+        '규정 위반 없음'
+      ],
+      '기타': [
+        '주의 조치',
+        '콘텐츠 삭제',
+        '기능 제한',
+        '직접 입력'
+      ]
+    };
 
     const handleSubmit = async (e) => {
       e.preventDefault();
-      if (!penaltyType || !penalty) {
-        alert('처리 유형과 처리 내용을 입력해주세요.');
+      
+      // 새로 처리하는 경우에만 처리유형과 처리내용 검증
+      if (!isEdit && (!penaltyType || !penalty)) {
+        alert('처리 유형과 처리 내용을 선택해주세요.');
         return;
       }
 
       setIsSubmitting(true);
       try {
-        await onResolve(reportId, penaltyType, penalty, adminNote);
+        // 수정 모드에서는 상태와 관리자 코멘트 전달, 새 처리에서는 처리유형과 처리내용도 전달
+        if (isEdit) {
+          console.log('수정 모드 - 전송 데이터:', { reportId, adminNote, status });
+          await onResolve(reportId, '', '', adminNote, status);
+        } else {
+          console.log('새 처리 모드 - 전송 데이터:', { reportId, penaltyType, penalty, adminNote });
+          await onResolve(reportId, penaltyType, penalty, adminNote);
+        }
         onCancel(); // 폼 닫기
       } catch (error) {
         console.error('신고 처리 실패:', error);
@@ -217,68 +331,151 @@ function ReportManage() {
       }
     };
 
-    return (
-      <form onSubmit={handleSubmit} className="resolution-form">
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="penaltyType">처리 유형</label>
-            <select
-              id="penaltyType"
-              value={penaltyType}
-              onChange={(e) => setPenaltyType(e.target.value)}
-              className="form-select"
-              required
+    // 처리 유형 변경 시 처리 내용 초기화
+    const handlePenaltyTypeChange = (e) => {
+      setPenaltyType(e.target.value);
+      setPenalty(''); // 처리 내용을 빈 값으로 초기화
+    };
+
+          return (
+        <div className="resolution-form-container">
+                  <div className="form-header">
+          <h4>{isEdit ? '처리 상태 및 코멘트 수정' : '신고 처리'}</h4>
+          <p className="form-description">
+            {isEdit 
+              ? '처리 상태를 변경하고 관리자 코멘트를 수정할 수 있습니다.' 
+              : '신고 내용을 검토하고 적절한 처리 조치를 선택해주세요.'
+            }
+          </p>
+        </div>
+        
+                <form onSubmit={handleSubmit} className="resolution-form">
+          {!isEdit && (
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="penaltyType">
+                  <span className="label-text">처리 유형</span>
+                  <span className="required">*</span>
+                </label>
+                <select
+                  id="penaltyType"
+                  value={penaltyType}
+                  onChange={handlePenaltyTypeChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="">처리 유형을 선택하세요</option>
+                  <option value="경고">⚠️ 경고</option>
+                  <option value="일시정지">🔒 일시정지</option>
+                  <option value="영구정지">🚫 영구정지</option>
+                  <option value="무혐의">✅ 무혐의</option>
+                  <option value="기타">⚙️ 기타</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="penalty">
+                  <span className="label-text">처리 내용</span>
+                  <span className="required">*</span>
+                </label>
+                <select
+                  id="penalty"
+                  key={penaltyType} // 처리유형이 변경될 때마다 컴포넌트 재생성
+                  value={penalty}
+                  onChange={(e) => setPenalty(e.target.value)}
+                  className="form-select"
+                  required
+                  disabled={!penaltyType}
+                >
+                  <option value="">처리 내용을 선택하세요</option>
+                  {penaltyType && penaltyOptions[penaltyType] && 
+                    penaltyOptions[penaltyType].map((option, index) => (
+                      <option key={index} value={option}>{option}</option>
+                    ))
+                  }
+                </select>
+                {penalty === '직접 입력' && (
+                  <input
+                    type="text"
+                    className="form-input custom-penalty-input"
+                    placeholder="처리 내용을 직접 입력하세요"
+                    value={penalty}
+                    onChange={(e) => setPenalty(e.target.value)}
+                    required
+                  />
+                )}
+              </div>
+            </div>
+                      )}
+           
+           {isEdit && (
+             <div className="form-group" id="status-form-group">
+               <label htmlFor="status">
+                 <span className="label-text">처리 상태</span>
+                 <span className="required">*</span>
+               </label>
+               <select
+                 id="status"
+                 value={status}
+                 onChange={(e) => {
+                   console.log('처리상태 변경:', e.target.value);
+                   setStatus(e.target.value);
+                 }}
+                 className="form-select status-select"
+                 required
+               >
+                 <option value="PENDING">⏳ 대기중</option>
+                 <option value="PROCESSING">🔄 처리중</option>
+                 <option value="RESOLVED">✅ 처리완료</option>
+                 <option value="REJECTED">❌ 거절됨</option>
+               </select>
+             </div>
+           )}
+           
+           <div className="form-group">
+             <label htmlFor="adminNote">
+               <span className="label-text">관리자 코멘트</span>
+               <span className="optional">(선택사항)</span>
+             </label>
+             <textarea
+               id="adminNote"
+               value={adminNote}
+               onChange={(e) => setAdminNote(e.target.value)}
+               className="form-textarea"
+               placeholder="관리자 코멘트를 자유롭게 작성하세요."
+               rows="4"
+             />
+             <div className="textarea-help">
+               <small>필요에 따라 처리 사유나 추가 설명을 작성할 수 있습니다.</small>
+             </div>
+           </div>
+          
+          <div className="form-actions">
+            <button 
+              type="button" 
+              onClick={onCancel} 
+              className="action-button cancel-button"
+              disabled={isSubmitting}
             >
-              <option value="">처리 유형 선택</option>
-              <option value="경고">경고</option>
-              <option value="일시정지">일시정지</option>
-              <option value="영구정지">영구정지</option>
-              <option value="무혐의">무혐의</option>
-              <option value="기타">기타</option>
-            </select>
+              취소
+            </button>
+                           <button 
+                 type="submit" 
+                 className="action-button submit-button"
+                 disabled={isSubmitting}
+               >
+                 {isSubmitting ? (
+                   <>
+                     <span className="spinner"></span>
+                     {isEdit ? '수정 중...' : '처리 중...'}
+                   </>
+                 ) : (
+                   isEdit ? '수정 완료' : '신고 처리'
+                 )}
+               </button>
           </div>
-          <div className="form-group">
-            <label htmlFor="penalty">처리 내용</label>
-            <input
-              type="text"
-              id="penalty"
-              value={penalty}
-              onChange={(e) => setPenalty(e.target.value)}
-              className="form-input"
-              placeholder="처리 내용을 입력하세요"
-              required
-            />
-          </div>
-        </div>
-        <div className="form-group">
-          <label htmlFor="adminNote">관리자 코멘트</label>
-          <textarea
-            id="adminNote"
-            value={adminNote}
-            onChange={(e) => setAdminNote(e.target.value)}
-            className="form-textarea"
-            placeholder="관리자 코멘트를 입력하세요 (선택사항)"
-            rows="3"
-          />
-        </div>
-        <div className="form-actions">
-          <button 
-            type="button" 
-            onClick={onCancel} 
-            className="action-button cancel-button"
-            disabled={isSubmitting}
-          >
-            취소
-          </button>
-          <button 
-            type="submit" 
-            className="action-button submit-button"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? '처리 중...' : '신고 처리'}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     );
   };
 
@@ -569,21 +766,30 @@ function ReportManage() {
                 </div>
               </div>
 
-              {/* 처리 결과 카드 (처리 완료된 경우) */}
-              {selectedReport.status === 'RESOLVED' && (
+              {/* 처리 결과 카드 (모든 상태에서 수정 가능) */}
+              {!isEditing && (
                 <div className="info-card resolution-card">
                   <div className="card-header">
-                    <h4>처리 결과</h4>
+                    <h4>처리 상태 관리</h4>
+                    <button 
+                      onClick={() => setIsEditing(true)}
+                      className="edit-button"
+                      title="처리 상태 및 코멘트 수정"
+                    >
+                      ✏️ 수정
+                    </button>
                   </div>
                   <div className="card-content">
                     <div className="resolution-grid">
                       <div className="resolution-item">
-                        <div className="info-label">처리 유형</div>
-                        <div className="info-value penalty-type">{selectedReport.penaltyType}</div>
+                        <div className="info-label">현재 처리 상태</div>
+                        <div className="info-value">
+                          {getStatusBadge(selectedReport.status)}
+                        </div>
                       </div>
                       <div className="resolution-item">
-                        <div className="info-label">처리 내용</div>
-                        <div className="info-value penalty-detail">{selectedReport.penalty}</div>
+                        <div className="info-label">처리 일시</div>
+                        <div className="info-value">{selectedReport.date}</div>
                       </div>
                       <div className="resolution-item full-width">
                         <div className="info-label">관리자 코멘트</div>
@@ -596,6 +802,38 @@ function ReportManage() {
                 </div>
               )}
 
+              {/* 처리 상태 수정 폼 (모든 상태에서 수정 가능) */}
+              {isEditing && (
+                <div className="info-card action-card">
+                  <div className="card-header">
+                    <h4>처리 상태 및 코멘트 수정</h4>
+                    <button 
+                      onClick={() => setIsEditing(false)}
+                      className="cancel-edit-button"
+                      title="수정 취소"
+                    >
+                      ❌ 취소
+                    </button>
+                  </div>
+                  <div className="card-content">
+                    <ReportResolutionForm 
+                      key={`edit-${selectedReport.id}-${selectedReport.status}-${selectedReport.adminNote}`}
+                      reportId={selectedReport.id}
+                      initialData={{
+                        adminNote: selectedReport.adminNote,
+                        status: selectedReport.status
+                      }}
+                      onResolve={(reportId, penaltyType, penalty, adminNote, status) => {
+                        handleResolve(reportId, penaltyType, penalty, adminNote, status);
+                        setIsEditing(false);
+                      }}
+                      onCancel={() => setIsEditing(false)}
+                      isEdit={true}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* 신고 처리 폼 (대기 중인 경우) */}
               {selectedReport.status === 'PENDING' && (
                 <div className="info-card action-card">
@@ -604,6 +842,7 @@ function ReportManage() {
                   </div>
                   <div className="card-content">
                     <ReportResolutionForm 
+                      key={`new-${selectedReport.id}`}
                       reportId={selectedReport.id}
                       onResolve={handleResolve}
                       onCancel={handleCloseDetail}
