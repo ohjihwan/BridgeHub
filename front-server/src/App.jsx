@@ -11,7 +11,7 @@ import Search from '@page/Search'
 import Board from '@page/Board';
 
 function App() {
-	const [showIntro, setShowIntro] = useState(false);
+	const [showIntro, setShowIntro] = useState(true);
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
