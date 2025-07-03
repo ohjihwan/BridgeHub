@@ -8,7 +8,7 @@ const server = http.createServer(app)
 const io = new Server(server, { cors: { origin: "*" } })
 
 const PORT = 7600
-const maxClientsPerRoom = 10
+const maxClientsPerRoom = 4 // 4명으로 제한
 const roomMaxDuration = 2 * 60 * 60 * 1000 // 2시간
 
 // 방 정보 상세 관리
@@ -27,6 +27,7 @@ class Room {
 
   addParticipant(socketId, nickname) {
     this.participants.set(socketId, {
+      socketId,
       nickname,
       joinedAt: Date.now(),
       isOnline: true,
@@ -43,6 +44,7 @@ class Room {
 
   getParticipantList() {
     return Array.from(this.participants.values()).map((p) => ({
+      socketId: p.socketId,
       nickname: p.nickname,
       joinedAt: p.joinedAt,
       isOnline: p.isOnline,
@@ -116,7 +118,7 @@ io.on("connection", (socket) => {
     io.emit("room-list", getRoomList())
   })
 
-  // 방 입장
+  // 방 입장 - 다중 사용자 지원 강화
   socket.on("join", ({ roomId, nickname }) => {
     try {
       let room = rooms.get(roomId)
@@ -134,7 +136,7 @@ io.on("connection", (socket) => {
         return
       }
 
-      // 인원 제한 체크
+      // 인원 제한 체크 (4명으로 제한)
       if (room.getParticipantCount() >= maxClientsPerRoom) {
         socket.emit("room-full", roomId)
         return
@@ -148,10 +150,20 @@ io.on("connection", (socket) => {
       room.addParticipant(socket.id, nickname)
       socket.join(roomId)
 
-      console.log(`🟢 ${nickname} 입장: ${roomId} (${room.getParticipantCount()}/${maxClientsPerRoom})`)
+      console.log(`🟢 ${nickname}(${socket.id}) 입장: ${roomId} (${room.getParticipantCount()}/${maxClientsPerRoom})`)
 
-      // 입장 알림
-      socket.to(roomId).emit("user-joined", { nickname })
+      // 기존 참여자들에게 새 사용자 입장 알림 (소켓 ID 포함)
+      const joinData = {
+        nickname,
+        socketId: socket.id,
+      }
+      console.log(`📢 입장 알림 전송:`, joinData)
+      socket.to(roomId).emit("user-joined", joinData)
+
+      // 새 사용자에게 현재 참여자 목록 전송 (나를 제외한)
+      const currentParticipants = room.getParticipantList().filter((p) => p.socketId !== socket.id)
+      console.log(`👥 현재 참여자 목록 전송:`, currentParticipants)
+      socket.emit("current-participants", currentParticipants)
 
       // 방 정보 전송 (타이머 동기화용)
       socket.emit("room-info", {
@@ -176,6 +188,15 @@ io.on("connection", (socket) => {
     }
   })
 
+  // 미디어 준비 완료 알림
+  socket.on("media-ready", ({ roomId }) => {
+    console.log(`📹 미디어 준비 완료: ${socket.nickname}(${socket.id})`)
+    socket.to(roomId).emit("user-media-ready", {
+      nickname: socket.nickname,
+      socketId: socket.id,
+    })
+  })
+
   // 방 목록 요청
   socket.on("get-room-list", () => {
     socket.emit("room-list", getRoomList())
@@ -196,12 +217,25 @@ io.on("connection", (socket) => {
     }
   })
 
-  // WebRTC 시그널링
+  // WebRTC 시그널링 - 1:1 메시지 전달 지원
   socket.on("rtc-message", (data) => {
     try {
-      const parsed = JSON.parse(data)
-      const room = parsed.roomId
-      socket.to(room).emit("rtc-message", data)
+      const { from, to, type, payload } = data
+
+      console.log(`📡 RTC 시그널링: ${type} from ${from} to ${to}`)
+
+      // 특정 사용자에게만 전달
+      if (to) {
+        socket.to(to).emit("rtc-message", {
+          from: socket.id,
+          to,
+          type,
+          payload,
+        })
+      } else {
+        // 구버전 호환성을 위해 방 전체에 브로드캐스트
+        socket.to(socket.roomId).emit("rtc-message", data)
+      }
     } catch (error) {
       console.error(`❌ RTC 메시지 오류: ${error.message}`)
     }
@@ -237,6 +271,7 @@ io.on("connection", (socket) => {
   socket.on("user-status", ({ roomId, status }) => {
     socket.to(roomId).emit("user-status-update", {
       nickname: socket.nickname,
+      socketId: socket.id,
       status,
     })
   })
@@ -245,6 +280,7 @@ io.on("connection", (socket) => {
   socket.on("screen-share-status", ({ roomId, isSharing }) => {
     socket.to(roomId).emit("screen-share-update", {
       nickname: socket.nickname,
+      socketId: socket.id,
       isSharing,
     })
   })
@@ -259,13 +295,14 @@ io.on("connection", (socket) => {
         room.removeParticipant(socket.id)
 
         console.log(
-          `🔴 ${socket.nickname || "Unknown"} 퇴장: ${roomId} (${room.getParticipantCount()}/${maxClientsPerRoom})`,
+          `🔴 ${socket.nickname || "Unknown"}(${socket.id}) 퇴장: ${roomId} (${room.getParticipantCount()}/${maxClientsPerRoom})`,
         )
 
-        // 퇴장 알림
+        // 퇴장 알림 (소켓 ID 포함)
         if (socket.nickname) {
           socket.to(roomId).emit("user-left", {
             nickname: socket.nickname,
+            socketId: socket.id,
           })
         }
 
@@ -298,6 +335,7 @@ app.get("/api/status", (req, res) => {
     activeRooms: rooms.size,
     totalParticipants: Array.from(rooms.values()).reduce((sum, room) => sum + room.getParticipantCount(), 0),
     uptime: process.uptime(),
+    maxParticipants: maxClientsPerRoom,
     rooms: getRoomList(),
   })
 })
