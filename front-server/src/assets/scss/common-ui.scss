@@ -516,6 +516,12 @@ legend,
 	border:1px solid $line2;
 	border-radius:$form-radius;
 	
+	.selected-thumbnail-preview {
+		width:100%;
+		height:100%;
+		object-fit: cover;
+		object-position: 50% 50%;
+	}
 	
 	.field__imgselect__button {
 		position:absolute;
@@ -1937,9 +1943,9 @@ legend,
 .chatroom-history {
 	overflow-x:hidden;
 	overflow-y:auto;
-	height:calc(100vh - (remx(50) + remx(75)));
-	margin-top:remx(50);
-	padding:remx(30) 0 remx(50);
+	height:100vh;
+	padding:remx(50) 0 remx(120);
+	box-sizing:border-box;
 }
 
 .program-msg {
