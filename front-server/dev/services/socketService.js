@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
-// 소켓 서버 URL
-const SOCKET_SERVER_URL = 'http://localhost:7500';
+// 소켓 서버 URL - 사설 IP 사용
+const SOCKET_SERVER_URL = 'http://192.168.1.241:7500';
 
 class SocketService {
     constructor() {

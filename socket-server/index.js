@@ -33,14 +33,30 @@ const CORS_ORIGINS = process.env.CORS_ORIGINS?.split(',') || [
     "http://localhost:7000", 
     "http://localhost:7700",
     "http://127.0.0.1:5500",
-    "http://localhost:5500"
+    "http://localhost:5500",
+    "http://www.bridgehub.asia",
+    "https://www.bridgehub.asia"
 ];
+
+// 개발 환경에서는 모든 origin 허용하는 함수
+const corsOriginCheck = (origin, callback) => {
+    // 개발 환경에서는 모든 origin 허용
+    if (process.env.NODE_ENV === 'development' || !origin) {
+        return callback(null, true);
+    }
+    // 프로덕션에서는 허용된 origin만 체크
+    if (CORS_ORIGINS.includes(origin)) {
+        callback(null, true);
+    } else {
+        callback(new Error('CORS 정책에 의해 차단되었습니다.'));
+    }
+};
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: CORS_ORIGINS,
+        origin: corsOriginCheck,
         methods: ['GET', 'POST'],
         credentials: true,
         allowedHeaders: ["*"]
@@ -103,7 +119,7 @@ app.get('/health', async (req, res) => {
 
 // 미들웨어 설정
 app.use(cors({
-    origin: CORS_ORIGINS,
+    origin: corsOriginCheck,
     credentials: true
 }));
 app.use(express.json());
@@ -214,7 +230,7 @@ async function startServer() {
         // MongoDB 서비스 초기화
         await mongoService.initialize();
         
-        server.listen(PORT,() => {
+        server.listen(PORT, '0.0.0.0', () => {
             console.log(`🚀 소켓 서버가 포트 ${PORT}에서 실행 중입니다.`);
             console.log(`📡 API 서버 URL: ${API_BASE_URL}`);
             console.log(`🌐 CORS Origins: ${CORS_ORIGINS.join(', ')}`);
