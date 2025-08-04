@@ -184,4 +184,20 @@ export const resolveReport = async (reportId, resolveData) => {
   }
 };
 
+// 신고 삭제
+export const deleteReport = async (reportId) => {
+  try {
+    const response = await apiClient.delete(`/admin/reports/${reportId}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('신고 삭제 실패:', error);
+    throw error;
+  }
+};
+
 export default apiClient;

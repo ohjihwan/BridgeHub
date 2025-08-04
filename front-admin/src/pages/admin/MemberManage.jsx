@@ -3,8 +3,7 @@ import '../../assets/scss/MemberManage.scss';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import BlockIcon from '@mui/icons-material/Block';
-import { fetchUsers, updateUserStatus, deleteUser } from '../../services/api';
+import { fetchUsers, deleteUser } from '../../services/api';
 
 // DataGrid 한글 메시지 직접 지정
 const localeText = {
@@ -78,30 +77,6 @@ function MemberManage() {
     }
   };
 
-  const handleBan = async (id) => {
-    if (window.confirm('정말로 이 회원을 정지하시겠습니까?')) {
-      try {
-        await updateUserStatus(id, 'BANNED');
-        // 목록 새로고침
-        loadMembers();
-        alert('회원이 정지되었습니다.');
-      } catch (err) {
-        alert('회원 정지에 실패했습니다: ' + err.message);
-      }
-    }
-  };
-
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      await updateUserStatus(id, newStatus);
-      // 목록 새로고침
-      loadMembers();
-      alert(`회원 상태가 ${newStatus === 'ACTIVE' ? '활성화' : '정지'}되었습니다.`);
-    } catch (err) {
-      alert('상태 변경에 실패했습니다: ' + err.message);
-    }
-  };
-
   // minWidth 없이 flex만 남겨서, 화면이 줄어들 때 flex 비율대로 계속 줄어듦
   const columns = [
     { field: 'id', headerName: '회원ID', flex: 0.7, minWidth: 50, renderCell: (params) => `#${params.value}` },
@@ -127,20 +102,6 @@ function MemberManage() {
     { field: 'timezone', headerName: '선호 시간대', flex: 1, minWidth: 80 },
     { field: 'signupDate', headerName: '가입일', flex: 1, minWidth: 80 },
     {
-      field: 'status',
-      headerName: '상태',
-      flex: 1,
-      minWidth: 80,
-      renderCell: (params) => (
-        <span style={{ 
-          color: params.value === 'ACTIVE' ? '#4CAF50' : '#F44336',
-          fontWeight: 'bold'
-        }}>
-          {params.value === 'ACTIVE' ? '활성' : '정지'}
-        </span>
-      ),
-    },
-    {
       field: 'action',
       headerName: '관리',
       flex: 0.7,
@@ -149,36 +110,14 @@ function MemberManage() {
       filterable: false,
       renderCell: (params) => (
         <div style={{ display: 'flex', gap: '5px' }}>
-          {params.row.status === 'ACTIVE' ? (
-            <>
-              <IconButton 
-                color="warning" 
-                size="small"
-                onClick={() => handleBan(params.row.id)}
-                title="회원 정지"
-              >
-                <BlockIcon />
-              </IconButton>
-              <IconButton 
-                color="error" 
-                size="small"
-                onClick={() => handleDelete(params.row.id)}
-                title="회원 삭제"
-              >
-                <DeleteIcon />
-              </IconButton>
-            </>
-          ) : (
-            <IconButton 
-              color="success" 
-              size="small"
-              onClick={() => handleStatusChange(params.row.id, 'ACTIVE')}
-              title="회원 활성화"
-              style={{ color: '#4CAF50' }}
-            >
-              <span style={{ fontSize: '16px' }}>✓</span>
-            </IconButton>
-          )}
+          <IconButton 
+            color="error" 
+            size="small"
+            onClick={() => handleDelete(params.row.id)}
+            title="회원 삭제"
+          >
+            <DeleteIcon />
+          </IconButton>
         </div>
       ),
     },

@@ -22,7 +22,11 @@ public interface ReportService {
     List<ReportDTO> getReportsWithPaging(int page, int size);
     int getTotalReportsCount();
     ReportDTO resolveReport(Integer reportId, String penaltyType, String penalty, String adminNote);
+    ReportDTO resolveReport(Integer reportId, String penaltyType, String penalty, String adminNote, String status);
     
     // 통계용
     Map<String, Object> getReportStatistics();
+    
+    // 신고 삭제
+    void deleteReport(Integer reportId);
 } 

@@ -59,7 +59,9 @@
     </update>
 
     <delete id="deleteReport">
-        DELETE FROM Report WHERE report_id = #{reportId}
+        UPDATE Report 
+        SET admin_comment = CONCAT(IFNULL(admin_comment, ''), ' [ADMIN_DELETED]')
+        WHERE report_id = #{reportId}
     </delete>
 
     <select id="countByStatus" resultType="int">
@@ -67,64 +69,37 @@
     </select>
 
     <!-- 관리자 기능 추가 -->
-    <select id="findAllWithPaging" resultType="com.koreait.apiserver.dto.ReportDTO">
-        SELECT 
-            r.report_id as reportId,
-            r.reporter_id as reporterId,
-            r.reported_user_id as reportedUserId,
-            r.report_type as reportType,
-            r.message_id as messageId,
-            r.room_id as roomId,
-            r.study_room_id as studyRoomId,
-            r.reason,
-            r.created_at as createdAt,
-            r.status,
-            r.admin_comment as adminComment,
-            reporter.nickname as reporterName,
-            reported.nickname as reportedUserName,
-            sr.title as studyRoomTitle,
-            null as messageContent,
-            null as roomName
-        FROM Report r
-        LEFT JOIN members reporter ON r.reporter_id = reporter.id
-        LEFT JOIN members reported ON r.reported_user_id = reported.id
-        LEFT JOIN studyroom sr ON r.study_room_id = sr.study_room_id
-        ORDER BY r.created_at DESC 
+    <select id="findAllWithPaging" resultMap="ReportResultMap">
+        SELECT * FROM Report 
+        ORDER BY created_at DESC 
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <select id="getTotalCount" resultType="int">
-        SELECT COUNT(*) FROM Report
+        SELECT COUNT(*) FROM Report WHERE (admin_comment IS NULL OR admin_comment NOT LIKE '%[ADMIN_DELETED]%')
     </select>
 
     <select id="findRecentReports" resultType="com.koreait.apiserver.dto.ReportDTO">
-        SELECT 
-            r.report_id as reportId,
-            r.reporter_id as reporterId,
-            r.reported_user_id as reportedUserId,
-            r.report_type as reportType,
-            r.message_id as messageId,
-            r.room_id as roomId,
-            r.study_room_id as studyRoomId,
-            r.reason,
-            r.created_at as createdAt,
-            r.status,
-            r.admin_comment as adminComment,
-            reporter.nickname as reporterName,
-            reported.nickname as reportedUserName,
-            sr.title as studyRoomTitle,
-            null as messageContent,
-            null as roomName
-        FROM Report r
-        LEFT JOIN members reporter ON r.reporter_id = reporter.id
-        LEFT JOIN members reported ON r.reported_user_id = reported.id
-        LEFT JOIN studyroom sr ON r.study_room_id = sr.study_room_id
-        ORDER BY r.created_at DESC 
-        LIMIT #{limit}
+        SELECT * FROM Report ORDER BY created_at DESC LIMIT #{limit}
     </select>
 
     <select id="countByReportType" resultType="map">
-        SELECT report_type, COUNT(*) as count FROM Report GROUP BY report_type
+        SELECT report_type, COUNT(*) as count FROM Report WHERE (admin_comment IS NULL OR admin_comment NOT LIKE '%[ADMIN_DELETED]%') GROUP BY report_type
+    </select>
+
+    <!-- 디버그용 간단한 Report 조회 -->
+    <select id="findSimpleReports" resultType="map">
+        SELECT 
+            report_id,
+            reporter_id,
+            reported_user_id,
+            report_type,
+            reason,
+            status,
+            created_at
+        FROM Report 
+        ORDER BY created_at DESC 
+        LIMIT 5
     </select>
 
     <!-- 디버그용 간단한 Report 조회 -->
